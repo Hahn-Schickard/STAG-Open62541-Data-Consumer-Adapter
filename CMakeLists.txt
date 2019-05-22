@@ -11,20 +11,22 @@ set(CMAKE_POSITION_INDEPENDENT_CODE on)l
 
 enable_testing()
 
-find_package(Threads REQUIRED)
+configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
+execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
 
-include(ExternalProject)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-ExternalProject_Add(googletest
-    GIT_REPOSITORY    https://github.com/google/googletest.git
-    GIT_TAG           master
-    SOURCE_DIR        "${PROJECT_SOURCE_DIR}/tests/googletest-src"
-    BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND     ""
-    INSTALL_COMMAND   ""
-    TEST_COMMAND      ""
-)
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/tests/googletest-src"
+                 "${CMAKE_BINARY_DIR}/googletest-build")
+
+if(CMAKE_VERSION VERSION_LESS 2.8.11)
+    include_directories("${gtest_SOURCE_DIR}/include"
+                        "${gmock_SOURCE_DIR}/include")
+endif()
+
 
 include_directories("${PROJECT_SOURCE_DIR}/includes/NodeInformation")
 include_directories("${PROJECT_SOURCE_DIR}/includes/utilities")
