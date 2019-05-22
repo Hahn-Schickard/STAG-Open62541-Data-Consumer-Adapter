@@ -18,11 +18,11 @@ void convertToUpperCase(char *input)
     }
 }
 
-void copyCharArray(char from[], char to[])
+void copyCharArray(const char from[], char to[])
 {
     unsigned int stringLenght = strlen(from);
     strncpy(to, from, stringLenght);
-    from[stringLenght] = '\0';
+    to[stringLenght] = '\0';
 }
 
 #endif //C_STRING_FORMATER_UTILITY_HPP
