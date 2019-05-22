@@ -7,7 +7,7 @@ project(${THIS} ${PROJECT_FLAGS})
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_POSITION_INDEPENDENT_CODE on)
+set(CMAKE_POSITION_INDEPENDENT_CODE on)l
 
 enable_testing()
 
@@ -26,10 +26,10 @@ ExternalProject_Add(googletest
     TEST_COMMAND      ""
 )
 
-include_directories("${PROJECT_SOURCE_DIR}/includes")
+include_directories("${PROJECT_SOURCE_DIR}/includes/NodeInformation")
 include_directories("${PROJECT_SOURCE_DIR}/includes/utilities")
 
-file(GLOB C_Includes "${PROJECT_SOURCE_DIR}/includes/*.h")
+file(GLOB C_Includes "${PROJECT_SOURCE_DIR}/includes/NodeInformation/*.h")
 file(GLOB CXX_Includes  "${PROJECT_SOURCE_DIR}/includes/*.hpp"
                         "${PROJECT_SOURCE_DIR}/includes/utilities/*.hpp")
 
