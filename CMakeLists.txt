@@ -7,7 +7,7 @@ project(${THIS} ${PROJECT_FLAGS})
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_POSITION_INDEPENDENT_CODE on)l
+set(CMAKE_POSITION_INDEPENDENT_CODE on)
 
 enable_testing()
 
@@ -35,5 +35,5 @@ file(GLOB C_Includes "${PROJECT_SOURCE_DIR}/includes/NodeInformation/*.h")
 file(GLOB CXX_Includes  "${PROJECT_SOURCE_DIR}/includes/*.hpp"
                         "${PROJECT_SOURCE_DIR}/includes/utilities/*.hpp")
 
-add_subdirectory(sources)
-add_subdirectory(tests/unit_tests)
+#add_subdirectory(sources)
+add_subdirectory(tests/unit_tests/NodeInformation)
