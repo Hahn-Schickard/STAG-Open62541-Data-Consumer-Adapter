@@ -8,7 +8,6 @@ add_executable(${THIS} ${Test_Cases})
 
 target_link_libraries(${THIS} PUBLIC
     gtest_main
-    Node_Descriptor_Builder
 )
 
 add_test(
