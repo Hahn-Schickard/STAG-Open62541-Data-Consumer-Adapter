@@ -25,7 +25,8 @@ enum DataType
     SignedLong,
     Double,
     Boolean,
-    String
+    String,
+    Unknown
 };
 
 enum NodeClassType
