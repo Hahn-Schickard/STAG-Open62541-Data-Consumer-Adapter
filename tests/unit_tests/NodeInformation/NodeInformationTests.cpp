@@ -142,6 +142,15 @@ BaseNodeDescription setUpBaseNodeDescriptor(const char *nodeClassType, const cha
     return baseNodeDescritpor;
 }
 
+VariableNodeDescription setUpVariableNodeDescriptor(const char *dataType, const char *dataValue)
+{
+    VariableNodeDescription nodeDescriptor = {
+        .dataType = identifyDataType(dataType),
+        .dataValue = identifyDataValue(identifyDataType(dataType),
+                                       dataValue)};
+    return nodeDescriptor;
+}
+
 TEST(NodeInformationTests, BaseNodeDescriptorContentFormatTest)
 {
     for (int i = 0; i < MAX_BASE_NODE_DESCRITPOR_TEST_COUNT; i++)
@@ -168,6 +177,14 @@ TEST(NodeInformationTests, BaseNodeDescriptorContentFormatTest)
 
 TEST(NodeInformationTests, VariableNodeDescriptorContetFormatTest)
 {
+    for (int i = 0; i < MAX_VARIABLE_NODE_DESCRIPTOR_TEST_COUNT; i++)
+    {
+        VariableNodeDescription variableNodeDescriptor = setUpVariableNodeDescriptor(
+            variableNodeDescriptorInformation[i][0],
+            variableNodeDescriptorInformation[i][1]);
+
+        EXPECT_EQ(identifyDataType(variableNodeDescriptorInformation[i][0]), variableNodeDescriptor.dataType);
+    }
 }
 
 TEST(NodeInformationTests, NodeDescriptorContetFormatTest)
