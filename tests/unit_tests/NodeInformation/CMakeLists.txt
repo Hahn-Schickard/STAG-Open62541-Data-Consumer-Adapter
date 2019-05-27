@@ -6,11 +6,17 @@ file(GLOB Test_Cases "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 
 add_executable(${THIS} ${Test_Cases})
 
-target_include_directories(${THIS} PRIVATE ${CEREAL_INCLUDES})
+target_include_directories(${THIS} PUBLIC 
+    ${JSON_INCLUDES}
+)
 
 target_link_libraries(${THIS} PUBLIC
     gtest_main
 )
+
+add_custom_command(TARGET ${THIS} POST_BUILD 
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_CURRENT_LIST_DIR}/config $<TARGET_FILE_DIR:${THIS}>)
 
 add_test(
     NAME ${THIS}

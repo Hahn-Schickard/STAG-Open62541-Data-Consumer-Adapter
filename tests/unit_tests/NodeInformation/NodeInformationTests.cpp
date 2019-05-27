@@ -1,8 +1,9 @@
 #include "NodeInformation.h"
 #include "CStringFormater.hpp"
-
-#include <cereal/archives/json.hpp>
+#include <fstream>
 #include <gtest/gtest.h>
+#include <iostream>
+#include <nlohmann/json.hpp>
 
 #define MAX_BASE_NODE_DESCRITPOR_TEST_COUNT 3
 #define MAX_VARIABLE_NODE_DESCRIPTOR_TEST_COUNT 1
@@ -12,6 +13,7 @@
 using ::testing::TestWithParam;
 using ::testing::Values;
 using ::testing::ValuesIn;
+using json = nlohmann::json;
 
 const char
     *baseNodeDescriptorInformation[MAX_BASE_NODE_DESCRITPOR_TEST_COUNT]
@@ -33,6 +35,13 @@ const char
     *variableNodeDescriptorInformation[MAX_VARIABLE_NODE_DESCRIPTOR_TEST_COUNT]
                                       [VARIABLE_NODE_DESCRIPTOR_FIELD_COUNT] = {
                                           {"Boolean", "true"}};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(NodeClassType, {
+                                                {VARIABLE_NODE, "variable"},
+                                                {METHOD_NODE, "method"},
+                                                {OBJECT_NODE, "object"},
+                                                {UNRECOGNIZED_NODE, nullptr},
+                                            })
 
 bool identifyBoolean(const char *booleanValue) {
   char *processedValue = convertToUpperCase(booleanValue);
@@ -176,6 +185,29 @@ setUpBaseNodeDescriptor(const char *nodeClassType, const char *writableFlag,
   return baseNodeDescritpor;
 }
 
+BaseNodeDescription setUpBaseNodeDescriptor(std::ifstream &fileStream) {
+
+  json jsonDescriptor;
+  fileStream >> jsonDescriptor;
+  BaseNodeDescription baseNodeDescritpor;
+
+  baseNodeDescritpor.nodeClass =
+      jsonDescriptor["nodeClass"].get<NodeClassType>(),
+  baseNodeDescritpor.writableFlag = jsonDescriptor["writableFlag"].get<bool>(),
+  copyCharArray(jsonDescriptor["locale"].get<std::string>().c_str(),
+                baseNodeDescritpor.locale);
+  copyCharArray(jsonDescriptor["uniqueId"].get<std::string>().c_str(),
+                baseNodeDescritpor.uniqueId);
+  copyCharArray(jsonDescriptor["displayName"].get<std::string>().c_str(),
+                baseNodeDescritpor.displayName);
+  copyCharArray(jsonDescriptor["browseName"].get<std::string>().c_str(),
+                baseNodeDescritpor.browseName);
+  copyCharArray(jsonDescriptor["jsonDescriptor"].get<std::string>().c_str(),
+                baseNodeDescritpor.description);
+
+  return baseNodeDescritpor;
+}
+
 VariableNodeDescription setUpVariableNodeDescriptor(const char *dataType,
                                                     const char *dataValue) {
   VariableNodeDescription nodeDescriptor = {
@@ -208,6 +240,37 @@ TEST(NodeInformationTests, BaseNodeDescriptorContentFormatTest) {
                                 baseNodeDescriptorInformation[i][4],
                                 baseNodeDescriptorInformation[i][5],
                                 baseNodeDescriptorInformation[i][6]);
+
+    EXPECT_EQ(identifyNodeClassType(baseNodeDescriptorInformation[i][0]),
+              baseNodeDescriptor.nodeClass);
+    EXPECT_EQ(identifyBoolean(baseNodeDescriptorInformation[i][1]),
+              baseNodeDescriptor.writableFlag);
+
+    EXPECT_STREQ(baseNodeDescriptorInformation[i][2],
+                 baseNodeDescriptor.locale);
+    EXPECT_STREQ(baseNodeDescriptorInformation[i][3],
+                 baseNodeDescriptor.uniqueId);
+    EXPECT_STREQ(baseNodeDescriptorInformation[i][4],
+                 baseNodeDescriptor.displayName);
+    EXPECT_STREQ(baseNodeDescriptorInformation[i][5],
+                 baseNodeDescriptor.browseName);
+    EXPECT_STREQ(baseNodeDescriptorInformation[i][6],
+                 baseNodeDescriptor.description);
+  }
+}
+
+TEST(NodeInformationTests, BaseNodeDescriptorJsonFileTEst) {
+  std::ifstream jsonFile;
+  jsonFile.open("BaseNodeDescriptor.json", std::ifstream::in);
+
+  if (!jsonFile) {
+    // Print an error and exit
+    std::cerr << "File not found!" << std::endl;
+    exit(1);
+  }
+
+  for (int i = 0; i < MAX_BASE_NODE_DESCRITPOR_TEST_COUNT; i++) {
+    BaseNodeDescription baseNodeDescriptor = setUpBaseNodeDescriptor(jsonFile);
 
     EXPECT_EQ(identifyNodeClassType(baseNodeDescriptorInformation[i][0]),
               baseNodeDescriptor.nodeClass);
