@@ -14,7 +14,8 @@ void convertToUpperCase(char *input)
     while (*input != '\0')
     {
         if (islower(*input))
-            *input = toupper(*input);
+            *input = toupper((unsigned char)*input);
+            input++;
     }
 }
 
