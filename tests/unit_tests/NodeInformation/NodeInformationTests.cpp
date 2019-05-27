@@ -132,7 +132,7 @@ BaseNodeDescription setUpBaseNodeDescriptor(const char *nodeClassType, const cha
 {
     BaseNodeDescription baseNodeDescritpor;
     baseNodeDescritpor.nodeClass = identifyNodeClassType(nodeClassType);
-    baseNodeDescritpor.writableFlag = identifyWritableFlag(writableFlag);
+    baseNodeDescritpor.writableFlag = identifyBoolean(writableFlag);
     copyCharArray(locale, baseNodeDescritpor.locale);
     copyCharArray(uniqueId, baseNodeDescritpor.uniqueId);
     copyCharArray(displayName, baseNodeDescritpor.displayName);
