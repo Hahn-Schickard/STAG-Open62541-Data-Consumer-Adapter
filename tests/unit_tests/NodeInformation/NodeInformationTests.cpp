@@ -1,12 +1,17 @@
 #include "NodeInformation.h"
 #include "CStringFormater.hpp"
 
+#include <cereal/archives/json.hpp>
 #include <gtest/gtest.h>
 
 #define MAX_BASE_NODE_DESCRITPOR_TEST_COUNT 3
 #define MAX_VARIABLE_NODE_DESCRIPTOR_TEST_COUNT 1
 #define BASE_NODE_DESCRIPTOR_FIELD_COUNT 7
 #define VARIABLE_NODE_DESCRIPTOR_FIELD_COUNT 2
+
+using ::testing::TestWithParam;
+using ::testing::Values;
+using ::testing::ValuesIn;
 
 const char
     *baseNodeDescriptorInformation[MAX_BASE_NODE_DESCRITPOR_TEST_COUNT]
@@ -179,6 +184,20 @@ VariableNodeDescription setUpVariableNodeDescriptor(const char *dataType,
   return nodeDescriptor;
 }
 
+// class BaseNodeDescriptorTest : public TestWithParam<const char *> {
+// protected:
+//   BaseNodeDescription baseNodeDescriptor;
+
+// public:
+//   void SetUp() override {
+//     baseNodeDescriptor = setUpBaseNodeDescriptor(
+//         (const char *)GetParam(), (const char *)GetParam(),
+//         (const char *)GetParam(), (const char *)GetParam(),
+//         (const char *)GetParam(), (const char *)GetParam(),
+//         (const char *)GetParam());
+//   }
+// };
+
 TEST(NodeInformationTests, BaseNodeDescriptorContentFormatTest) {
   for (int i = 0; i < MAX_BASE_NODE_DESCRITPOR_TEST_COUNT; i++) {
     BaseNodeDescription baseNodeDescriptor =
@@ -208,6 +227,11 @@ TEST(NodeInformationTests, BaseNodeDescriptorContentFormatTest) {
   }
 }
 
+// TEST_P(BaseNodeDescriptorTest, ReturnsCorrectNodeClass) {
+//   EXPECT_EQ(identifyNodeClassType((const char *)GetParam()),
+//             baseNodeDescriptor.nodeClass);
+// }
+
 TEST(NodeInformationTests, VariableNodeDescriptorContetFormatTest) {
   for (int i = 0; i < MAX_VARIABLE_NODE_DESCRIPTOR_TEST_COUNT; i++) {
     VariableNodeDescription variableNodeDescriptor =
@@ -220,6 +244,12 @@ TEST(NodeInformationTests, VariableNodeDescriptorContetFormatTest) {
 }
 
 TEST(NodeInformationTests, NodeDescriptorContetFormatTest) {}
+
+// std::ifstream inputValuesFromFile("input.txt");
+// INSTANTIATE_TEST_CASE_P(
+//     FromFileStream, BaseNodeDescriptorTest,
+//     ValuesIn(std::istream_iterator<const char *>(inputValuesFromFile),
+//              std::istream_iterator<const char *>()));
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

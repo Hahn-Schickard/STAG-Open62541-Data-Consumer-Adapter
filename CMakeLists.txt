@@ -11,7 +11,16 @@ set(CMAKE_POSITION_INDEPENDENT_CODE on)
 
 enable_testing()
 
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+configure_file(CerealDepenency.txt cereal-download/CMakeLists.txt)
+execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" "-DJUST_INSTALL_CEREAL=ON" .
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/cereal-download" )
+execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/cereal-download" )    
+set(CEREAL_INCLUDES "${CMAKE_CURRENT_LIST_DIR}/libs/cereal-src/include/")
+include_directories("${CMAKE_CURRENT_LIST_DIR}/libs/cereal-src/include/cereal"
+                    "${CMAKE_CURRENT_LIST_DIR}/libs/cereal-src/include/cereal/archives")
+
+configure_file(GoogleTestDependency.txt googletest-download/CMakeLists.txt)
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .

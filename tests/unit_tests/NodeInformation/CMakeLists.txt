@@ -6,6 +6,8 @@ file(GLOB Test_Cases "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 
 add_executable(${THIS} ${Test_Cases})
 
+target_include_directories(${THIS} PRIVATE ${CEREAL_INCLUDES})
+
 target_link_libraries(${THIS} PUBLIC
     gtest_main
 )
