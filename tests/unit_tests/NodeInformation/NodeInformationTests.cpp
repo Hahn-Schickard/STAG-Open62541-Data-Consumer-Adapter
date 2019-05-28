@@ -43,7 +43,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(NodeClassType, {
                                                 {UNRECOGNIZED_NODE, nullptr},
                                             })
 
-bool identifyBoolean(const char *booleanValue) {
+bool identifyBoolean(const char *booleanValue)
+{
   char *processedValue = convertToUpperCase(booleanValue);
   bool booleanFlag =
       (strcmp("TRUE", processedValue) || strcmp("Y", processedValue)) ? true
@@ -52,117 +53,147 @@ bool identifyBoolean(const char *booleanValue) {
   return booleanFlag;
 }
 
-NodeClassType identifyNodeClassType(const char *nodeClassTypeString) {
+NodeClassType identifyNodeClassType(const char *nodeClassTypeString)
+{
   char *processedValue = convertToUpperCase(nodeClassTypeString);
-  switch (hash(processedValue)) {
-  case hash("VARIABLE_NODE"): {
+  switch (hash(processedValue))
+  {
+  case hash("VARIABLE_NODE"):
+  {
     free(processedValue);
     return NodeClassType::VARIABLE_NODE;
   }
-  case hash("METHOD_NODE"): {
+  case hash("METHOD_NODE"):
+  {
     free(processedValue);
     return NodeClassType::METHOD_NODE;
   }
-  case hash("OBJECT_NODE"): {
+  case hash("OBJECT_NODE"):
+  {
     free(processedValue);
     return NodeClassType::OBJECT_NODE;
   }
   case hash("UNRECOGNIZED_NODE"):
-  default: {
+  default:
+  {
     free(processedValue);
     return NodeClassType::UNRECOGNIZED_NODE;
   }
   }
 }
 
-DataType identifyDataType(const char *dataTypeString) {
+DataType identifyDataType(const char *dataTypeString)
+{
   char *processedValue = convertToUpperCase(dataTypeString);
-  switch (hash(processedValue)) {
-  case hash("UNSIGNEDSHORT"): {
+  switch (hash(processedValue))
+  {
+  case hash("UNSIGNEDSHORT"):
+  {
     free(processedValue);
     return DataType::UnsignedShort;
   }
-  case hash("UNSIGNEDINTEGER"): {
+  case hash("UNSIGNEDINTEGER"):
+  {
     free(processedValue);
     return DataType::UnsignedInteger;
   }
-  case hash("UNSIGNEDLONG"): {
+  case hash("UNSIGNEDLONG"):
+  {
     free(processedValue);
     return DataType::UnsignedLong;
   }
-  case hash("SIGNEDSHORT"): {
+  case hash("SIGNEDSHORT"):
+  {
     free(processedValue);
     return DataType::SignedShort;
   }
-  case hash("SIGNEDINTEGER"): {
+  case hash("SIGNEDINTEGER"):
+  {
     free(processedValue);
     return DataType::SignedInteger;
   }
-  case hash("SIGNEDLONG"): {
+  case hash("SIGNEDLONG"):
+  {
     free(processedValue);
     return DataType::SignedLong;
   }
-  case hash("DOUBLE"): {
+  case hash("DOUBLE"):
+  {
     free(processedValue);
     return DataType::Double;
   }
-  case hash("BOOLEAN"): {
+  case hash("BOOLEAN"):
+  {
     free(processedValue);
     return DataType::Boolean;
   }
-  case hash("STRING"): {
+  case hash("STRING"):
+  {
     free(processedValue);
     return DataType::String;
   }
   case hash("UNKNOWN"):
-  default: {
+  default:
+  {
     free(processedValue);
     return DataType::Unknown;
   }
   }
 }
 
-DataValue identifyDataValue(DataType dataType, const char *dataValueString) {
+DataValue identifyDataValue(DataType dataType, const char *dataValueString)
+{
   DataValue dataValue;
 
-  switch (dataType) {
-  case DataType::UnsignedShort: {
+  switch (dataType)
+  {
+  case DataType::UnsignedShort:
+  {
     dataValue.unsigned_short_value = (uint8_t)atoi(dataValueString);
     break;
   }
-  case DataType::UnsignedInteger: {
+  case DataType::UnsignedInteger:
+  {
     dataValue.unsigned_integer_value = (uint32_t)atoi(dataValueString);
     break;
   }
-  case DataType::UnsignedLong: {
+  case DataType::UnsignedLong:
+  {
     dataValue.unsigned_long_value = (uint64_t)atoi(dataValueString);
     break;
   }
-  case DataType::SignedShort: {
+  case DataType::SignedShort:
+  {
     dataValue.signed_short_value = (uint8_t)atoi(dataValueString);
     break;
   }
-  case DataType::SignedInteger: {
+  case DataType::SignedInteger:
+  {
     dataValue.signed_integer_value = (int32_t)atoi(dataValueString);
     break;
   }
-  case DataType::SignedLong: {
+  case DataType::SignedLong:
+  {
     dataValue.signed_long_value = (int64_t)atoi(dataValueString);
     break;
   }
-  case DataType::Double: {
+  case DataType::Double:
+  {
     dataValue.double_value = atof(dataValueString);
     break;
   }
-  case DataType::Boolean: {
+  case DataType::Boolean:
+  {
     dataValue.boolean_value = identifyBoolean(dataValueString);
     break;
   }
-  case DataType::String: {
+  case DataType::String:
+  {
     copyCharArray(dataValueString, dataValue.string_value);
     break;
   }
-  case DataType::Unknown: {
+  case DataType::Unknown:
+  {
     break;
   }
   }
@@ -172,7 +203,8 @@ BaseNodeDescription
 setUpBaseNodeDescriptor(const char *nodeClassType, const char *writableFlag,
                         const char *locale, const char *uniqueId,
                         const char *displayName, const char *browseName,
-                        const char *description) {
+                        const char *description)
+{
   BaseNodeDescription baseNodeDescritpor;
   baseNodeDescritpor.nodeClass = identifyNodeClassType(nodeClassType);
   baseNodeDescritpor.writableFlag = identifyBoolean(writableFlag);
@@ -185,31 +217,27 @@ setUpBaseNodeDescriptor(const char *nodeClassType, const char *writableFlag,
   return baseNodeDescritpor;
 }
 
-BaseNodeDescription setUpBaseNodeDescriptor(std::ifstream &fileStream) {
+BaseNodeDescription setUpBaseNodeDescriptor(std::ifstream &fileStream)
+{
 
   json jsonDescriptor;
   fileStream >> jsonDescriptor;
   BaseNodeDescription baseNodeDescritpor;
 
-  baseNodeDescritpor.nodeClass =
-      jsonDescriptor["nodeClass"].get<NodeClassType>(),
-  baseNodeDescritpor.writableFlag = jsonDescriptor["writableFlag"].get<bool>(),
-  copyCharArray(jsonDescriptor["locale"].get<std::string>().c_str(),
-                baseNodeDescritpor.locale);
-  copyCharArray(jsonDescriptor["uniqueId"].get<std::string>().c_str(),
-                baseNodeDescritpor.uniqueId);
-  copyCharArray(jsonDescriptor["displayName"].get<std::string>().c_str(),
-                baseNodeDescritpor.displayName);
-  copyCharArray(jsonDescriptor["browseName"].get<std::string>().c_str(),
-                baseNodeDescritpor.browseName);
-  copyCharArray(jsonDescriptor["jsonDescriptor"].get<std::string>().c_str(),
-                baseNodeDescritpor.description);
+  copyCharArray(jsonDescriptor["browseName"].get<std::string>().c_str(), baseNodeDescritpor.browseName);
+  copyCharArray(jsonDescriptor["description"].get<std::string>().c_str(), baseNodeDescritpor.description);
+  copyCharArray(jsonDescriptor["displayName"].get<std::string>().c_str(), baseNodeDescritpor.displayName);
+  copyCharArray(jsonDescriptor["locale"].get<std::string>().c_str(), baseNodeDescritpor.locale);
+  copyCharArray(jsonDescriptor["uniqueId"].get<std::string>().c_str(), baseNodeDescritpor.uniqueId);
+  baseNodeDescritpor.writableFlag = jsonDescriptor["writableFlag"].get<bool>();
+  baseNodeDescritpor.nodeClass = jsonDescriptor["nodeClass"].get<NodeClassType>();
 
   return baseNodeDescritpor;
 }
 
 VariableNodeDescription setUpVariableNodeDescriptor(const char *dataType,
-                                                    const char *dataValue) {
+                                                    const char *dataValue)
+{
   VariableNodeDescription nodeDescriptor = {
       .dataType = identifyDataType(dataType),
       .dataValue = identifyDataValue(identifyDataType(dataType), dataValue)};
@@ -230,8 +258,10 @@ VariableNodeDescription setUpVariableNodeDescriptor(const char *dataType,
 //   }
 // };
 
-TEST(NodeInformationTests, BaseNodeDescriptorContentFormatTest) {
-  for (int i = 0; i < MAX_BASE_NODE_DESCRITPOR_TEST_COUNT; i++) {
+TEST(NodeInformationTests, BaseNodeDescriptorContentFormatTest)
+{
+  for (int i = 0; i < MAX_BASE_NODE_DESCRITPOR_TEST_COUNT; i++)
+  {
     BaseNodeDescription baseNodeDescriptor =
         setUpBaseNodeDescriptor(baseNodeDescriptorInformation[i][0],
                                 baseNodeDescriptorInformation[i][1],
@@ -259,17 +289,20 @@ TEST(NodeInformationTests, BaseNodeDescriptorContentFormatTest) {
   }
 }
 
-TEST(NodeInformationTests, BaseNodeDescriptorJsonFileTEst) {
+TEST(NodeInformationTests, BaseNodeDescriptorJsonFileTEst)
+{
   std::ifstream jsonFile;
   jsonFile.open("BaseNodeDescriptor.json", std::ifstream::in);
 
-  if (!jsonFile) {
+  if (!jsonFile)
+  {
     // Print an error and exit
     std::cerr << "File not found!" << std::endl;
     exit(1);
   }
 
-  for (int i = 0; i < MAX_BASE_NODE_DESCRITPOR_TEST_COUNT; i++) {
+  for (int i = 0; i < MAX_BASE_NODE_DESCRITPOR_TEST_COUNT; i++)
+  {
     BaseNodeDescription baseNodeDescriptor = setUpBaseNodeDescriptor(jsonFile);
 
     EXPECT_EQ(identifyNodeClassType(baseNodeDescriptorInformation[i][0]),
@@ -295,8 +328,10 @@ TEST(NodeInformationTests, BaseNodeDescriptorJsonFileTEst) {
 //             baseNodeDescriptor.nodeClass);
 // }
 
-TEST(NodeInformationTests, VariableNodeDescriptorContetFormatTest) {
-  for (int i = 0; i < MAX_VARIABLE_NODE_DESCRIPTOR_TEST_COUNT; i++) {
+TEST(NodeInformationTests, VariableNodeDescriptorContetFormatTest)
+{
+  for (int i = 0; i < MAX_VARIABLE_NODE_DESCRIPTOR_TEST_COUNT; i++)
+  {
     VariableNodeDescription variableNodeDescriptor =
         setUpVariableNodeDescriptor(variableNodeDescriptorInformation[i][0],
                                     variableNodeDescriptorInformation[i][1]);
@@ -314,7 +349,8 @@ TEST(NodeInformationTests, NodeDescriptorContetFormatTest) {}
 //     ValuesIn(std::istream_iterator<const char *>(inputValuesFromFile),
 //              std::istream_iterator<const char *>()));
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
