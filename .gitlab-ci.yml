@@ -1,0 +1,34 @@
+variables: 
+ GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+ - prep
+ - build 
+ - test 
+ 
+prep_build_environment:
+ stage: prep
+ variables: 
+  GIT_STRATEGY: none
+ script: 
+  - mkdir build
+ allow_failure: true
+  
+build_debug: 
+ stage: build
+ variables: 
+  GIT_STRATEGY: none 
+  CONFIG: "Debug"
+ script: 
+  - 'cmake --build build/ --config $CONFIG --target all --'
+ artifacts: 
+  paths: 
+   - "./build/tests/unit_tests/*"
+  
+run_unit_tests: 
+ stage: test
+ variables: 
+  GIT_STRATEGY: none 
+ script: 
+  - cd build
+  - ctest
