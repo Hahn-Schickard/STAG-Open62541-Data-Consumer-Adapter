@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 
+set(CMAKE_VERBOSE_MAKEFILE on)
+
 set (THIS Model_Translator)
 set (PROJECT_FLAGS C CXX)
 
