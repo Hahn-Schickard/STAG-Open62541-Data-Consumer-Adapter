@@ -11,25 +11,6 @@ using ::testing::TestWithParam;
 using ::testing::Values;
 using ::testing::ValuesIn;
 
-template <typename T>
-std::vector<T> setUpNodeDescriptors(const char *inputFile)
-{
-  std::ifstream jsonFile;
-
-  jsonFile.open(inputFile, std::ifstream::in);
-
-  if (!jsonFile)
-  {
-    std::cerr << "Json file not found!" << std::endl;
-    exit(1);
-  }
-
-  std::vector<T> nodeDescriptors = setUpNodeDescriptor<T>(jsonFile);
-  jsonFile.close();
-
-  return nodeDescriptors;
-}
-
 BaseNodeDescription getBaseNodeDescription(std::string test_name)
 {
   int test_number = std::stoi(test_name.substr(test_name.find("/") + 1));
