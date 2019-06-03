@@ -18,9 +18,7 @@ class BaseNodeDescriptorTests : public ::testing::Test,
 
 TEST_P(BaseNodeDescriptorTests, isNodeClassEqual)
 {
-  const ::testing::TestInfo *const test_info =
-      ::testing::UnitTest::GetInstance()->current_test_info();
-  std::string test_name = std::string(test_info->name());
+  std::string test_name = getCurrentTestName();
 
   BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(BASE_NODE_DESCRIPTORS_FILE, test_name);
 
@@ -29,9 +27,7 @@ TEST_P(BaseNodeDescriptorTests, isNodeClassEqual)
 
 TEST_P(BaseNodeDescriptorTests, isWritableFlagEqual)
 {
-  const ::testing::TestInfo *const test_info =
-      ::testing::UnitTest::GetInstance()->current_test_info();
-  std::string test_name = std::string(test_info->name());
+  std::string test_name = getCurrentTestName();
 
   BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(BASE_NODE_DESCRIPTORS_FILE, test_name);
 
@@ -40,9 +36,7 @@ TEST_P(BaseNodeDescriptorTests, isWritableFlagEqual)
 
 TEST_P(BaseNodeDescriptorTests, isUniqueIdEqual)
 {
-  const ::testing::TestInfo *const test_info =
-      ::testing::UnitTest::GetInstance()->current_test_info();
-  std::string test_name = std::string(test_info->name());
+  std::string test_name = getCurrentTestName();
 
   BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(BASE_NODE_DESCRIPTORS_FILE, test_name);
 
@@ -51,9 +45,7 @@ TEST_P(BaseNodeDescriptorTests, isUniqueIdEqual)
 
 TEST_P(BaseNodeDescriptorTests, isLocaleEqual)
 {
-  const ::testing::TestInfo *const test_info =
-      ::testing::UnitTest::GetInstance()->current_test_info();
-  std::string test_name = std::string(test_info->name());
+  std::string test_name = getCurrentTestName();
 
   BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(BASE_NODE_DESCRIPTORS_FILE, test_name);
 
@@ -62,9 +54,7 @@ TEST_P(BaseNodeDescriptorTests, isLocaleEqual)
 
 TEST_P(BaseNodeDescriptorTests, isDisplayNameEqual)
 {
-  const ::testing::TestInfo *const test_info =
-      ::testing::UnitTest::GetInstance()->current_test_info();
-  std::string test_name = std::string(test_info->name());
+  std::string test_name = getCurrentTestName();
 
   BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(BASE_NODE_DESCRIPTORS_FILE, test_name);
 
@@ -73,9 +63,7 @@ TEST_P(BaseNodeDescriptorTests, isDisplayNameEqual)
 
 TEST_P(BaseNodeDescriptorTests, isBrowseNameEqual)
 {
-  const ::testing::TestInfo *const test_info =
-      ::testing::UnitTest::GetInstance()->current_test_info();
-  std::string test_name = std::string(test_info->name());
+  std::string test_name = getCurrentTestName();
 
   BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(BASE_NODE_DESCRIPTORS_FILE, test_name);
 
