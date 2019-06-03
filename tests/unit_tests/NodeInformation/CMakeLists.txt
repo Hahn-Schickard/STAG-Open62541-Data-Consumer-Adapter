@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 3.6)
 
 set (THIS Node_Information_Test_Suite)
 
-file(GLOB Test_Cases "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+file(GLOB Test_Suit "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+file(GLOB Test_Cases "${CMAKE_CURRENT_LIST_DIR}/*.hpp")
 
-add_executable(${THIS} ${Test_Cases})
+add_executable(${THIS} ${Test_Suit} ${Test_Cases})
 
 target_include_directories(${THIS} PUBLIC 
     ${JSON_INCLUDES}
