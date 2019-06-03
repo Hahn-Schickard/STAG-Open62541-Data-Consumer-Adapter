@@ -17,74 +17,74 @@ typedef NodeInformation NodeDescription;
 
 enum DataType
 {
-    UnsignedShort,
-    UnsignedInteger,
-    UnsignedLong,
-    SignedShort,
-    SignedInteger,
-    SignedLong,
-    Double,
-    Boolean,
-    String,
-    Unknown
+  UNSIGNED_SHORT,
+  UNSIGNED_INTEGER,
+  UNSIGNED_LONG,
+  SIGNED_SHORT,
+  SIGNED_INTEGER,
+  SIGNED_LONG,
+  DOUBLE,
+  BOOLEAN,
+  STRING,
+  UNKNOWN
 };
 
 enum NodeClassType
 {
-    VARIABLE_NODE,
-    METHOD_NODE,
-    OBJECT_NODE,
-    UNRECOGNIZED_NODE
+  VARIABLE_NODE,
+  METHOD_NODE,
+  OBJECT_NODE,
+  UNRECOGNIZED_NODE
 };
 
 union DataValue {
-    uint8_t unsigned_short_value;
-    int8_t signed_short_value;
-    uint32_t unsigned_integer_value;
-    int32_t signed_integer_value;
-    uint64_t unsigned_long_value;
-    int64_t signed_long_value;
-    double double_value;
-    bool boolean_value;
-    char *string_value;
+  uint8_t unsigned_short_value;
+  int8_t signed_short_value;
+  uint32_t unsigned_integer_value;
+  int32_t signed_integer_value;
+  uint64_t unsigned_long_value;
+  int64_t signed_long_value;
+  double double_value;
+  bool boolean_value;
+  char *string_value;
 };
 
 struct BaseNodeInformation
 {
-    NodeClassType nodeClass;
-    bool writableFlag;
-    char uniqueId[128];
-    char locale[6];
-    char displayName[256];
-    char browseName[256];
-    char description[256];
+  NodeClassType nodeClass;
+  bool writableFlag;
+  char uniqueId[128];
+  char locale[6];
+  char displayName[256];
+  char browseName[256];
+  char description[256];
 };
 
 struct VariableNodeInformation
 {
-    DataType dataType;
-    DataValue dataValue;
+  DataType dataType;
+  DataValue dataValue;
 };
 
 struct MethodNodeInformation
 {
-    //TODO: Handle methods
+  // TODO: Handle methods
 };
 
 struct ObjectNodeInformation
 {
-    uint16_t childrenCount;
-    NodeDescription *children;
+  uint16_t childrenCount;
+  NodeDescription *children;
 };
 
 struct NodeInformation
 {
-    BaseNodeDescription baseNodeDescriptor;
-    union {
-        VariableNodeDescription variableNodeDescriptor;
-        MethodNodeDescription methodNodeDescriptor;
-        ObjectNodeDescription objectNodeDescriptor;
-    };
+  BaseNodeDescription baseNodeDescriptor;
+  union {
+    VariableNodeDescription variableNodeDescriptor;
+    MethodNodeDescription methodNodeDescriptor;
+    ObjectNodeDescription objectNodeDescriptor;
+  };
 };
 
-#endif //NODE_INFORMATION_H
+#endif // NODE_INFORMATION_H
