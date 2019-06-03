@@ -1,11 +1,7 @@
-#ifndef _JSON_DESERIALIZER_HPP
-#define _JSON_DESERIALIZER_HPP
+#ifndef _BASE_NODE_DESCRIPTION_SERIALIZER_HPP
+#define _BASE_NODE_DESCRIPTION_SERIALIZER_HPP
 
-#include "NodeInformation.h"
-#include "CStringFormater.hpp"
-#include <nlohmann/json.hpp>
-#include <iostream>
-#include <fstream>
+#include "../JsonSerializerHeader.hpp"
 
 using json = nlohmann::json;
 
@@ -39,18 +35,4 @@ void from_json(const json &j, BaseNodeDescription &node)
     j.at("nodeClass").get_to(node.nodeClass);
 }
 
-BaseNodeDescription deserializeBaseNodeDescriptor(nlohmann::json &jsonDescriptor)
-{
-    return jsonDescriptor.get<BaseNodeDescription>();
-}
-
-std::vector<BaseNodeDescription> setUpBaseNodeDescriptor(std::ifstream &fileStream)
-{
-
-    json jsonFile;
-    fileStream >> jsonFile;
-    std::vector<BaseNodeDescription> baseDescriptors = jsonFile;
-    return baseDescriptors;
-}
-
-#endif //_JSON_DESERIALIZER_HPP
+#endif //_BASE_NODE_DESCRIPTION_SERIALIZER_HPP
