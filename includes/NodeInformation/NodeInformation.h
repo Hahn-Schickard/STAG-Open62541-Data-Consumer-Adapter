@@ -15,20 +15,22 @@ typedef MethodNodeInformation MethodNodeDescription;
 typedef ObjectNodeInformation ObjectNodeDescription;
 typedef NodeInformation NodeDescription;
 
-enum DataType {
-  UnsignedShort,
-  UnsignedInteger,
-  UnsignedLong,
-  SignedShort,
-  SignedInteger,
-  SignedLong,
-  Double,
-  Boolean,
-  String,
-  Unknown
+enum DataType
+{
+  UNSIGNED_SHORT,
+  UNSIGNED_INTEGER,
+  UNSIGNED_LONG,
+  SIGNED_SHORT,
+  SIGNED_INTEGER,
+  SIGNED_LONG,
+  DOUBLE,
+  BOOLEAN,
+  STRING,
+  UNKNOWN
 };
 
-enum NodeClassType {
+enum NodeClassType
+{
   VARIABLE_NODE,
   METHOD_NODE,
   OBJECT_NODE,
@@ -47,7 +49,8 @@ union DataValue {
   char *string_value;
 };
 
-struct BaseNodeInformation {
+struct BaseNodeInformation
+{
   NodeClassType nodeClass;
   bool writableFlag;
   char uniqueId[128];
@@ -57,21 +60,25 @@ struct BaseNodeInformation {
   char description[256];
 };
 
-struct VariableNodeInformation {
+struct VariableNodeInformation
+{
   DataType dataType;
   DataValue dataValue;
 };
 
-struct MethodNodeInformation {
+struct MethodNodeInformation
+{
   // TODO: Handle methods
 };
 
-struct ObjectNodeInformation {
+struct ObjectNodeInformation
+{
   uint16_t childrenCount;
   NodeDescription *children;
 };
 
-struct NodeInformation {
+struct NodeInformation
+{
   BaseNodeDescription baseNodeDescriptor;
   union {
     VariableNodeDescription variableNodeDescriptor;
