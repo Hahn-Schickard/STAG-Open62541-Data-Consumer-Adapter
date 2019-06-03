@@ -13,4 +13,11 @@ T getNodeDescription(const char *nodeDescriptorName, std::string test_name)
     return nodeDescriptor;
 }
 
+template <typename T>
+std::vector<T> getNodeDescriptors(const char *nodeDescriptorsJsonFile)
+{
+    std::vector<T> nodeDescriptors = setUpNodeDescriptors<T>(nodeDescriptorsJsonFile);
+    return nodeDescriptors;
+}
+
 #endif //_NODE_DESCRIPTORS_TEST_UTILS_HPP
