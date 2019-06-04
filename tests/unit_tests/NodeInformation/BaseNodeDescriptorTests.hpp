@@ -130,9 +130,7 @@ TEST_P(BaseNodeDescriptorTests, isBrowseNameNotEqual)
 
 TEST_P(BaseNodeDescriptorTests, isDescriptionNotEqual)
 {
-  const ::testing::TestInfo *const test_info =
-      ::testing::UnitTest::GetInstance()->current_test_info();
-  std::string test_name = std::string(test_info->name());
+  std::string test_name = getCurrentTestName();
 
   BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
