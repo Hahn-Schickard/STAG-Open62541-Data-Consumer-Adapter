@@ -1,5 +1,5 @@
-#ifndef _VARIABLE_NODE_DESCRIPTION_SERIALIZER_HPP
-#define _VARIABLE_NODE_DESCRIPTION_SERIALIZER_HPP
+#ifndef _VARIABLE_NODE_DESCRIPTION_SERIALIZER_HPP_
+#define _VARIABLE_NODE_DESCRIPTION_SERIALIZER_HPP_
 
 #include "../JsonSerializerHeader.hpp"
 
@@ -89,4 +89,4 @@ void from_json(const json &j, VariableNodeDescription &node)
     node.dataValue = identifyDataValue(node.dataType, j.at("dataValue").get<std::string>().c_str());
 }
 
-#endif //_BASE_NODE_DESCRIPTION_SERIALIZER_HPP
+#endif //_BASE_NODE_DESCRIPTION_SERIALIZER_HPP_

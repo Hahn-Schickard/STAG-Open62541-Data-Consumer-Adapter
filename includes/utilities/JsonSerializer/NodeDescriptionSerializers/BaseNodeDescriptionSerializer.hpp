@@ -1,5 +1,5 @@
-#ifndef _BASE_NODE_DESCRIPTION_SERIALIZER_HPP
-#define _BASE_NODE_DESCRIPTION_SERIALIZER_HPP
+#ifndef _BASE_NODE_DESCRIPTION_SERIALIZER_HPP_
+#define _BASE_NODE_DESCRIPTION_SERIALIZER_HPP_
 
 #include "../JsonSerializerHeader.hpp"
 
@@ -35,4 +35,4 @@ void from_json(const json &j, BaseNodeDescription &node)
     j.at("nodeClass").get_to(node.nodeClass);
 }
 
-#endif //_BASE_NODE_DESCRIPTION_SERIALIZER_HPP
+#endif //_BASE_NODE_DESCRIPTION_SERIALIZER_HPP_
