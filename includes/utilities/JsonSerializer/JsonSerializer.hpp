@@ -4,6 +4,7 @@
 #include "JsonSerializerHeader.hpp"
 #include "NodeDescriptionSerializers/BaseNodeDescriptionSerializer.hpp"
 #include "NodeDescriptionSerializers/VariableNodeDescriptionSerializer.hpp"
+#include "NodeDescriptionSerializers/ObjectNodeDescriptionSerializer.hpp"
 
 using json = nlohmann::json;
 
