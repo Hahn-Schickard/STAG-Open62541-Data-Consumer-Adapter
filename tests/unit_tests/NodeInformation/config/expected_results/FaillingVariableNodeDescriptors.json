@@ -1,0 +1,42 @@
+[
+    {
+        "dataType": "String",
+        "dataValue": "text"
+    },
+    {
+        "dataType": "Double",
+        "dataValue": "10.02"
+    },
+    {
+        "dataType": "Signed Long",
+        "dataValue": "-10000000l"
+    },
+    {
+        "dataType": "Signed Integer",
+        "dataValue": "-10000i"
+    },
+    {
+        "dataType": "Signed Integer",
+        "dataValue": "-10000i"
+    },
+    {
+        "dataType": "Signed Short",
+        "dataValue": "-10s"
+    },
+    {
+        "dataType": "Unsigned Long",
+        "dataValue": "100000000ul"
+    },
+    {
+        "dataType": "Unsigned Integer",
+        "dataValue": "100000ui"
+    },
+    {
+        "dataType": "Unsigned Short",
+        "dataValue": "10us"
+    },
+    {
+        "dataType": "Boolean",
+        "dataValue": "false"
+    }
+]
