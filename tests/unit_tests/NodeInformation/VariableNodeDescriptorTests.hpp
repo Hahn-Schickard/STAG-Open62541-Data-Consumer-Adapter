@@ -22,18 +22,18 @@ TEST_P(VariableNodeDescriptorTests, isDataTypeEqual)
 {
     std::string test_name = getCurrentTestName();
 
-    VariableNodeDescription nodeDescriptor = getNodeDescription<VariableNodeDescription>(PASSING_VARIABLE_NODE_DESCRIPTORS_FILE, test_name);
+    VariableNodeDescription node_descriptor = getNodeDescription<VariableNodeDescription>(PASSING_VARIABLE_NODE_DESCRIPTORS_FILE, test_name);
 
-    EXPECT_EQ(GetParam().dataType, nodeDescriptor.dataType);
+    EXPECT_EQ(GetParam().data_type, node_descriptor.data_type);
 }
 
 TEST_P(VariableNodeDescriptorTests, isDataTypeNotEqual)
 {
     std::string test_name = getCurrentTestName();
 
-    VariableNodeDescription nodeDescriptor = getNodeDescription<VariableNodeDescription>(FAILLING_VARIABLE_NODE_DESCRIPTORS_FILE, test_name);
+    VariableNodeDescription node_descriptor = getNodeDescription<VariableNodeDescription>(FAILLING_VARIABLE_NODE_DESCRIPTORS_FILE, test_name);
 
-    EXPECT_NE(GetParam().dataType, nodeDescriptor.dataType);
+    EXPECT_NE(GetParam().data_type, node_descriptor.data_type);
 }
 
 INSTANTIATE_TEST_SUITE_P(ParametrizedVariableNodeDescriptorTests, VariableNodeDescriptorTests,

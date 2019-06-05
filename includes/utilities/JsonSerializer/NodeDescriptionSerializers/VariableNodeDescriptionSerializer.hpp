@@ -18,55 +18,55 @@ NLOHMANN_JSON_SERIALIZE_ENUM(DataType, {
                                            {UNKNOWN, nullptr},
                                        })
 
-DataValue identifyDataValue(DataType dataType, const char *dataValueString)
+DataValue identifyDataValue(DataType data_type, const char *data_value_string)
 {
-    DataValue dataValue;
+    DataValue data_value;
 
-    switch (dataType)
+    switch (data_type)
     {
     case DataType::UNSIGNED_SHORT:
     {
-        dataValue.unsigned_short_value = (uint8_t)atoi(dataValueString);
+        data_value.unsigned_short_value = (uint8_t)atoi(data_value_string);
         break;
     }
     case DataType::UNSIGNED_INTEGER:
     {
-        dataValue.unsigned_integer_value = (uint32_t)atoi(dataValueString);
+        data_value.unsigned_integer_value = (uint32_t)atoi(data_value_string);
         break;
     }
     case DataType::UNSIGNED_LONG:
     {
-        dataValue.unsigned_long_value = (uint64_t)atoi(dataValueString);
+        data_value.unsigned_long_value = (uint64_t)atoi(data_value_string);
         break;
     }
     case DataType::SIGNED_SHORT:
     {
-        dataValue.signed_short_value = (uint8_t)atoi(dataValueString);
+        data_value.signed_short_value = (uint8_t)atoi(data_value_string);
         break;
     }
     case DataType::SIGNED_INTEGER:
     {
-        dataValue.signed_integer_value = (int32_t)atoi(dataValueString);
+        data_value.signed_integer_value = (int32_t)atoi(data_value_string);
         break;
     }
     case DataType::SIGNED_LONG:
     {
-        dataValue.signed_long_value = (int64_t)atoi(dataValueString);
+        data_value.signed_long_value = (int64_t)atoi(data_value_string);
         break;
     }
     case DataType::DOUBLE:
     {
-        dataValue.double_value = atof(dataValueString);
+        data_value.double_value = atof(data_value_string);
         break;
     }
     case DataType::BOOLEAN:
     {
-        dataValue.boolean_value = identifyBoolean(dataValueString);
+        data_value.boolean_value = identifyBoolean(data_value_string);
         break;
     }
     case DataType::STRING:
     {
-        copyCharArray(dataValueString, dataValue.string_value);
+        copyCharArray(data_value_string, data_value.string_value);
         break;
     }
     case DataType::UNKNOWN:
@@ -79,14 +79,14 @@ DataValue identifyDataValue(DataType dataType, const char *dataValueString)
 void to_json(json &j, const VariableNodeDescription &node)
 {
     j = json{
-        {"dataType", node.dataType},
+        {"dataType", node.data_type},
         {"dataValue", nullptr}};
 }
 
 void from_json(const json &j, VariableNodeDescription &node)
 {
-    j.at("dataType").get_to(node.dataType);
-    node.dataValue = identifyDataValue(node.dataType, j.at("dataValue").get<std::string>().c_str());
+    j.at("dataType").get_to(node.data_type);
+    node.data_value = identifyDataValue(node.data_type, j.at("dataValue").get<std::string>().c_str());
 }
 
 #endif //_BASE_NODE_DESCRIPTION_SERIALIZER_HPP_

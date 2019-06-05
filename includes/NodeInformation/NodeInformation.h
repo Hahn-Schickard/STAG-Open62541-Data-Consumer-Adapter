@@ -51,19 +51,19 @@ union DataValue {
 
 struct BaseNodeInformation
 {
-  NodeClassType nodeClass;
-  bool writableFlag;
-  char uniqueId[128];
-  char locale[6];
-  char displayName[256];
-  char browseName[256];
+  NodeClassType node_class;
+  bool writable_flag;
+  char locale[8];
+  char unique_id[128];
+  char display_name[256];
+  char browse_name[256];
   char description[256];
 };
 
 struct VariableNodeInformation
 {
-  DataType dataType;
-  DataValue dataValue;
+  DataType data_type;
+  DataValue data_value;
 };
 
 struct MethodNodeInformation
@@ -73,7 +73,7 @@ struct MethodNodeInformation
 
 struct ObjectNodeInformation
 {
-  uint16_t childrenCount;
+  uint16_t children_count;
   NodeDescription *children;
 };
 
@@ -81,9 +81,9 @@ struct NodeInformation
 {
   BaseNodeDescription baseNodeDescriptor;
   union {
-    VariableNodeDescription variableNodeDescriptor;
-    MethodNodeDescription methodNodeDescriptor;
-    ObjectNodeDescription objectNodeDescriptor;
+    VariableNodeDescription variable_node_descriptor;
+    MethodNodeDescription method_node_descriptor;
+    ObjectNodeDescription object_node_descriptor;
   };
 };
 

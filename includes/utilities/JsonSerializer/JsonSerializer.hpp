@@ -9,41 +9,41 @@
 using json = nlohmann::json;
 
 template <typename T>
-std::vector<T> setUpNodeDescriptor(std::ifstream &fileStream)
+std::vector<T> setUpNodeDescriptor(std::ifstream &file_stream)
 {
 
-    json jsonFile;
-    fileStream >> jsonFile;
-    std::vector<T> nodeDescriptors = jsonFile;
-    return nodeDescriptors;
+    json json_file;
+    file_stream >> json_file;
+    std::vector<T> node_descriptors = json_file;
+    return node_descriptors;
 }
 
 template <typename T>
-std::vector<T> setUpNodeDescriptors(const char *inputFile)
+std::vector<T> setUpNodeDescriptors(const char *input_file)
 {
-    std::ifstream jsonFile;
+    std::ifstream json_file;
 
-    jsonFile.open(inputFile, std::ifstream::in);
+    json_file.open(input_file, std::ifstream::in);
 
-    if (!jsonFile)
+    if (!json_file)
     {
         std::cerr << "Json file not found!" << std::endl;
         exit(1);
     }
 
-    std::vector<T> nodeDescriptors = setUpNodeDescriptor<T>(jsonFile);
-    jsonFile.close();
+    std::vector<T> node_descriptors = setUpNodeDescriptor<T>(json_file);
+    json_file.close();
 
-    return nodeDescriptors;
+    return node_descriptors;
 }
 
 template <typename T>
-T deserializeNodeDescriptor(nlohmann::json &jsonDescriptor)
+T deserializeNodeDescriptor(nlohmann::json &json_descriptor)
 {
-    return jsonDescriptor.get<T>();
+    return json_descriptor.get<T>();
 }
 
-template std::vector<BaseNodeDescription> setUpNodeDescriptor(std::ifstream &fileStream);
-template std::vector<VariableNodeDescription> setUpNodeDescriptor(std::ifstream &fileStream);
+template std::vector<BaseNodeDescription> setUpNodeDescriptor(std::ifstream &file_stream);
+template std::vector<VariableNodeDescription> setUpNodeDescriptor(std::ifstream &file_stream);
 
 #endif //_JSON_DESERIALIZER_HPP

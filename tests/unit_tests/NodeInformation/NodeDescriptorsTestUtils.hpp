@@ -5,13 +5,13 @@
 #include <string>
 
 template <typename T>
-T getNodeDescription(const char *nodeDescriptorName, std::string test_name)
+T getNodeDescription(const char *node_descriptor_name, std::string test_name)
 {
     int test_number = std::stoi(test_name.substr(test_name.find("/") + 1));
 
-    T nodeDescriptor = setUpNodeDescriptors<T>(nodeDescriptorName)[test_number];
+    T node_descriptor = setUpNodeDescriptors<T>(node_descriptor_name)[test_number];
 
-    return nodeDescriptor;
+    return node_descriptor;
 }
 
 std::string getCurrentTestName()
@@ -23,10 +23,10 @@ std::string getCurrentTestName()
 }
 
 template <typename T>
-std::vector<T> getNodeDescriptors(const char *nodeDescriptorsJsonFile)
+std::vector<T> getNodeDescriptors(const char *node_descriptors_json_file)
 {
-    std::vector<T> nodeDescriptors = setUpNodeDescriptors<T>(nodeDescriptorsJsonFile);
-    return nodeDescriptors;
+    std::vector<T> node_descriptors = setUpNodeDescriptors<T>(node_descriptors_json_file);
+    return node_descriptors;
 }
 
 #endif //_NODE_DESCRIPTORS_TEST_UTILS_HPP

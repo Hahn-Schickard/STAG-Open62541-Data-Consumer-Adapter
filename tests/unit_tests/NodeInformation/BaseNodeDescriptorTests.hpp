@@ -22,54 +22,54 @@ TEST_P(BaseNodeDescriptorTests, isNodeClassEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  EXPECT_EQ(GetParam().nodeClass, nodeDescriptor.nodeClass);
+  EXPECT_EQ(GetParam().node_class, node_descriptor.node_class);
 }
 
 TEST_P(BaseNodeDescriptorTests, isWritableFlagEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  EXPECT_EQ(GetParam().writableFlag, nodeDescriptor.writableFlag);
-}
-
-TEST_P(BaseNodeDescriptorTests, isUniqueIdEqual)
-{
-  std::string test_name = getCurrentTestName();
-
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
-
-  ASSERT_STREQ(GetParam().uniqueId, nodeDescriptor.uniqueId);
+  EXPECT_EQ(GetParam().writable_flag, node_descriptor.writable_flag);
 }
 
 TEST_P(BaseNodeDescriptorTests, isLocaleEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  ASSERT_STREQ(GetParam().locale, nodeDescriptor.locale);
+  ASSERT_STREQ(GetParam().locale, node_descriptor.locale);
+}
+
+TEST_P(BaseNodeDescriptorTests, isUniqueIdEqual)
+{
+  std::string test_name = getCurrentTestName();
+
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+
+  ASSERT_STREQ(GetParam().unique_id, node_descriptor.unique_id);
 }
 
 TEST_P(BaseNodeDescriptorTests, isDisplayNameEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  ASSERT_STREQ(GetParam().displayName, nodeDescriptor.displayName);
+  ASSERT_STREQ(GetParam().display_name, node_descriptor.display_name);
 }
 
 TEST_P(BaseNodeDescriptorTests, isBrowseNameEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  ASSERT_STREQ(GetParam().browseName, nodeDescriptor.browseName);
+  ASSERT_STREQ(GetParam().browse_name, node_descriptor.browse_name);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -78,63 +78,63 @@ TEST_P(BaseNodeDescriptorTests, isNodeClassNotEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  EXPECT_NE(GetParam().nodeClass, nodeDescriptor.nodeClass);
+  EXPECT_NE(GetParam().node_class, node_descriptor.node_class);
 }
 
 TEST_P(BaseNodeDescriptorTests, isWritableFlagNotEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  EXPECT_NE(GetParam().writableFlag, nodeDescriptor.writableFlag);
-}
-
-TEST_P(BaseNodeDescriptorTests, isUniqueIdNotEqual)
-{
-  std::string test_name = getCurrentTestName();
-
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
-
-  ASSERT_STRNE(GetParam().uniqueId, nodeDescriptor.uniqueId);
+  EXPECT_NE(GetParam().writable_flag, node_descriptor.writable_flag);
 }
 
 TEST_P(BaseNodeDescriptorTests, isLocaleNotEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  ASSERT_STRNE(GetParam().locale, nodeDescriptor.locale);
+  ASSERT_STRNE(GetParam().locale, node_descriptor.locale);
+}
+
+TEST_P(BaseNodeDescriptorTests, isUniqueIdNotEqual)
+{
+  std::string test_name = getCurrentTestName();
+
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+
+  ASSERT_STRNE(GetParam().unique_id, node_descriptor.unique_id);
 }
 
 TEST_P(BaseNodeDescriptorTests, isDisplayNameNotEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  ASSERT_STRNE(GetParam().displayName, nodeDescriptor.displayName);
+  ASSERT_STRNE(GetParam().display_name, node_descriptor.display_name);
 }
 
 TEST_P(BaseNodeDescriptorTests, isBrowseNameNotEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  ASSERT_STRNE(GetParam().browseName, nodeDescriptor.browseName);
+  ASSERT_STRNE(GetParam().browse_name, node_descriptor.browse_name);
 }
 
 TEST_P(BaseNodeDescriptorTests, isDescriptionNotEqual)
 {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription nodeDescriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
 
-  ASSERT_STRNE(GetParam().description, nodeDescriptor.description);
+  ASSERT_STRNE(GetParam().description, node_descriptor.description);
 }
 
 INSTANTIATE_TEST_SUITE_P(ParametrizedBaseNodeDescriptorTests, BaseNodeDescriptorTests,

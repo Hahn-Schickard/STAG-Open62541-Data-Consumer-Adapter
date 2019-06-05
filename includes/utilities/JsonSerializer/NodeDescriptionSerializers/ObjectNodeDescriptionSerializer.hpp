@@ -8,12 +8,12 @@ using json = nlohmann::json;
 void to_json(json &j, const ObjectNodeDescription &node)
 {
     j = json{
-        {"childrenCount", node.childrenCount}};
+        {"childrenCount", node.children_count}};
 }
 
 void from_json(const json &j, ObjectNodeDescription &node)
 {
-    j.at("childrenCount").get_to(node.childrenCount);
+    j.at("childrenCount").get_to(node.children_count);
 }
 
 #endif //_OBJECT_NODE_DESCRIPTION_SERIALIZER_HPP_
