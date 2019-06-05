@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "BaseNodeDescriptorTests.hpp"
 #include "VariableNodeDescriptorTests.hpp"
+#include "ObjectNodeDescriptorTests.hpp"
 
 int main(int argc, char **argv)
 {

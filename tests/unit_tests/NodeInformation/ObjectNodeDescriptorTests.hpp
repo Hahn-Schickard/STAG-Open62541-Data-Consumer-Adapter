@@ -18,6 +18,24 @@ class ObjectNodeDescriptorTests : public ::testing::Test,
 {
 };
 
+TEST_P(ObjectNodeDescriptorTests, isChildrenCountEqual)
+{
+    std::string test_name = getCurrentTestName();
+
+    ObjectNodeDescription node_descriptor = getNodeDescription<ObjectNodeDescription>(PASSING_OBJECT_NODE_DESCRIPTORS_FILE, test_name);
+
+    EXPECT_EQ(GetParam().children_count, node_descriptor.children_count);
+}
+
+TEST_P(ObjectNodeDescriptorTests, isChildrenCountNotEqual)
+{
+    std::string test_name = getCurrentTestName();
+
+    ObjectNodeDescription node_descriptor = getNodeDescription<ObjectNodeDescription>(FAILLING_OBJECT_NODE_DESCRIPTORS_FILE, test_name);
+
+    EXPECT_NE(GetParam().children_count, node_descriptor.children_count);
+}
+
 INSTANTIATE_TEST_SUITE_P(ParametrizedObjectNodeDescriptorTests, ObjectNodeDescriptorTests,
                          ValuesIn(getNodeDescriptors<ObjectNodeDescription>(OBJECT_NODE_DESCRIPTORS_FILE)));
 
