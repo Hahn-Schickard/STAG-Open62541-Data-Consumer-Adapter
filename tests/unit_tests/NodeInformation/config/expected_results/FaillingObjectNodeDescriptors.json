@@ -1,0 +1,20 @@
+[
+    {
+        "childrenCount": 1,
+        "children": [
+            {
+                "nodeClass": "variable",
+                "writableFlag": false,
+                "uniqueId": "1",
+                "locale": "en-US",
+                "displayName": "Base Node Descriptor Test 1",
+                "browseName": "base_node_descriptor_test_1",
+                "description": "This is some sort of a description"
+            },
+            {
+                "dataType": "Boolean",
+                "dataValue": "false"
+            }
+        ]
+    }
+]
