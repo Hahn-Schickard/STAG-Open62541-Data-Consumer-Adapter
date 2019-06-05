@@ -1,3 +1,4 @@
 tests/googletest-src/
 build
 libs
+.vscode/
