@@ -7,6 +7,9 @@
 #include "NodeDescriptionSerializers/ObjectNodeDescriptionSerializer.hpp"
 #include "NodeDescriptionSerializers/NodeDescriptionSerializer.hpp"
 
+#include <stdio.h>  // defines FILENAME_MAX
+#include <unistd.h> // for getcwd()
+
 namespace nlohmann
 {
 template <typename T>
@@ -28,7 +31,10 @@ std::vector<T> setUpNodeDescriptors(const char *input_file)
 
     if (!json_file)
     {
-        std::cerr << "Json file not found!" << std::endl;
+        std::string cwd("\0", FILENAME_MAX + 1);
+        std::cerr << "Json file: " << input_file << " not found!" << std::endl
+                  << "I am running at: " << getcwd(&cwd[0], cwd.capacity())
+                  << std::endl;
         exit(1);
     }
 
