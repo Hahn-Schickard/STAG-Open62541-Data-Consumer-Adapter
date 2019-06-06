@@ -9,7 +9,7 @@ T getNodeDescription(const char *node_descriptor_name, std::string test_name)
 {
     int test_number = std::stoi(test_name.substr(test_name.find("/") + 1));
 
-    T node_descriptor = setUpNodeDescriptors<T>(node_descriptor_name)[test_number];
+    T node_descriptor = nlohmann::setUpNodeDescriptors<T>(node_descriptor_name)[test_number];
 
     return node_descriptor;
 }
@@ -25,7 +25,7 @@ std::string getCurrentTestName()
 template <typename T>
 std::vector<T> getNodeDescriptors(const char *node_descriptors_json_file)
 {
-    std::vector<T> node_descriptors = setUpNodeDescriptors<T>(node_descriptors_json_file);
+    std::vector<T> node_descriptors = nlohmann::setUpNodeDescriptors<T>(node_descriptors_json_file);
     return node_descriptors;
 }
 
