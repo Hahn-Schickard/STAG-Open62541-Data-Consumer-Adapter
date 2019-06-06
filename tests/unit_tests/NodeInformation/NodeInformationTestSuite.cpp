@@ -2,6 +2,7 @@
 #include "BaseNodeDescriptorTests.hpp"
 #include "VariableNodeDescriptorTests.hpp"
 #include "ObjectNodeDescriptorTests.hpp"
+#include "NodeDescriptorTests.hpp"
 
 int main(int argc, char **argv)
 {
