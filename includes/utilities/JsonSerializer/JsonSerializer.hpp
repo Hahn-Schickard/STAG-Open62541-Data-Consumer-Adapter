@@ -5,9 +5,10 @@
 #include "NodeDescriptionSerializers/BaseNodeDescriptionSerializer.hpp"
 #include "NodeDescriptionSerializers/VariableNodeDescriptionSerializer.hpp"
 #include "NodeDescriptionSerializers/ObjectNodeDescriptionSerializer.hpp"
+#include "NodeDescriptionSerializers/NodeDescriptionSerializer.hpp"
 
-using json = nlohmann::json;
-
+namespace nlohmann
+{
 template <typename T>
 std::vector<T> setUpNodeDescriptor(std::ifstream &file_stream)
 {
@@ -45,5 +46,8 @@ T deserializeNodeDescriptor(nlohmann::json &json_descriptor)
 
 template std::vector<BaseNodeDescription> setUpNodeDescriptor(std::ifstream &file_stream);
 template std::vector<VariableNodeDescription> setUpNodeDescriptor(std::ifstream &file_stream);
-
+template std::vector<ObjectNodeDescription> setUpNodeDescriptor(std::ifstream &file_stream);
+//template std::vector<MethodNodeDescription> setUpNodeDescriptor(std::ifstream &file_stream);
+template std::vector<NodeDescription> setUpNodeDescriptor(std::ifstream &file_stream);
+} // namespace nlohmann
 #endif //_JSON_DESERIALIZER_HPP
