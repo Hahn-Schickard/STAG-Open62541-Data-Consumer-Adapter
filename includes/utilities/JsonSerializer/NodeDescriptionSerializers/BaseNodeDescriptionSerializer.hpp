@@ -3,15 +3,8 @@
 
 #include "../JsonSerializerHeader.hpp"
 
-using json = nlohmann::json;
-
-NLOHMANN_JSON_SERIALIZE_ENUM(NodeClassType, {
-                                                {VARIABLE_NODE, "variable"},
-                                                {METHOD_NODE, "method"},
-                                                {OBJECT_NODE, "object"},
-                                                {UNRECOGNIZED_NODE, nullptr},
-                                            })
-
+namespace nlohmann
+{
 void to_json(json &j, const BaseNodeDescription &node)
 {
     j = json{
@@ -34,5 +27,5 @@ void from_json(const json &j, BaseNodeDescription &node)
     j.at("writableFlag").get_to(node.writable_flag);
     j.at("nodeClass").get_to(node.node_class);
 }
-
+} // namespace nlohmann
 #endif //_BASE_NODE_DESCRIPTION_SERIALIZER_HPP_
