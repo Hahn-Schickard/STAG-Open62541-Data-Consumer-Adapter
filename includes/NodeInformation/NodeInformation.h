@@ -79,7 +79,7 @@ struct ObjectNodeInformation
 
 struct NodeInformation
 {
-  BaseNodeDescription baseNodeDescriptor;
+  BaseNodeDescription base_node_descriptor;
   union {
     VariableNodeDescription variable_node_descriptor;
     MethodNodeDescription method_node_descriptor;
