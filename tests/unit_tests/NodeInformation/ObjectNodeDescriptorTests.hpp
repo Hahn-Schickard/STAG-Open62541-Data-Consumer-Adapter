@@ -23,8 +23,12 @@ TEST_P(ObjectNodeDescriptorTests, isChildrenCountEqual)
     std::string test_name = getCurrentTestName();
 
     ObjectNodeDescription node_descriptor = getNodeDescription<ObjectNodeDescription>(PASSING_OBJECT_NODE_DESCRIPTORS_FILE, test_name);
+    ObjectNodeDescription expected_data = GetParam();
 
-    EXPECT_EQ(GetParam().children_count, node_descriptor.children_count);
+    EXPECT_EQ(expected_data.children_count, node_descriptor.children_count)
+        << "Children count fields are not equal for test:" << test_name << std::endl
+        << "expected: " << expected_data.children_count << std::endl
+        << "provided: " << node_descriptor.children_count << std::endl;
 }
 
 TEST_P(ObjectNodeDescriptorTests, isChildrenCountNotEqual)
@@ -32,8 +36,12 @@ TEST_P(ObjectNodeDescriptorTests, isChildrenCountNotEqual)
     std::string test_name = getCurrentTestName();
 
     ObjectNodeDescription node_descriptor = getNodeDescription<ObjectNodeDescription>(FAILLING_OBJECT_NODE_DESCRIPTORS_FILE, test_name);
+    ObjectNodeDescription expected_data = GetParam();
 
-    EXPECT_NE(GetParam().children_count, node_descriptor.children_count);
+    EXPECT_NE(expected_data.children_count, node_descriptor.children_count)
+        << "Children count fields are equal for test:" << test_name << std::endl
+        << "expected: " << expected_data.children_count << std::endl
+        << "provided: " << node_descriptor.children_count << std::endl;
 }
 
 INSTANTIATE_TEST_SUITE_P(ParametrizedObjectNodeDescriptorTests, ObjectNodeDescriptorTests,
