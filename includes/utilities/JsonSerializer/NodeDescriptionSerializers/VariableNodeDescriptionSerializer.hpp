@@ -7,8 +7,7 @@ namespace nlohmann
 void to_json(json &j, const VariableNodeDescription &node)
 {
     j = json{
-        {"dataType", node.data_type},
-        {"dataValue", nullptr}};
+        {"dataType", node.data_type}};
 }
 
 void from_json(const json &j, VariableNodeDescription &node)

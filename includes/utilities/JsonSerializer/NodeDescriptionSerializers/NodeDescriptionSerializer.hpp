@@ -82,7 +82,7 @@ void from_json(const json &j, NodeDescription &node)
     {
         j.at("variableNodeDescriptor").at("dataType").get_to(node.variable_node_descriptor.data_type);
         node.variable_node_descriptor.data_value = identifyDataValue(node.variable_node_descriptor.data_type,
-                                                                     j.at("dataValue").get<std::string>().c_str());
+                                                                     j.at("variableNodeDescriptor").at("dataValue").get<std::string>().c_str());
         break;
     }
     case NodeClassType::METHOD_NODE:
