@@ -1,6 +1,6 @@
 [
-    [
-        {
+    {
+        "baseNodeDescriptor": {
             "nodeClass": "variable",
             "writableFlag": false,
             "uniqueId": "1",
@@ -9,13 +9,13 @@
             "browseName": "base_node_descriptor_test_1",
             "description": "This is some sort of a description"
         },
-        {
+        "variableNodeDescriptor": {
             "dataType": "Boolean",
             "dataValue": "false"
         }
-    ],
-    [
-        {
+    },
+    {
+        "baseNodeDescriptor": {
             "nodeClass": "variable",
             "writableFlag": true,
             "uniqueId": "2",
@@ -24,13 +24,13 @@
             "browseName": "base_node_descriptor_test_2",
             "description": "This is some sort of a description"
         },
-        {
+        "variableNodeDescriptor": {
             "dataType": "Unsigned Short",
             "dataValue": "10us"
         }
-    ],
-    [
-        {
+    },
+    {
+        "baseNodeDescriptor": {
             "nodeClass": "variable",
             "writableFlag": false,
             "uniqueId": "3",
@@ -39,9 +39,9 @@
             "browseName": "variable_node_descriptor_test_1",
             "description": "This is some sort of a description"
         },
-        {
+        "variableNodeDescriptor": {
             "dataType": "String",
             "dataValue": "text"
         }
-    ]
+    }
 ]
