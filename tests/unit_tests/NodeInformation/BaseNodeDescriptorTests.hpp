@@ -1,8 +1,8 @@
 #ifndef _BASE_NODE_DESCRIPTOR_TEST_HPP_
 #define _BASE_NODE_DESCRIPTOR_TEST_HPP_
 
-#include "NodeInformation.h"
 #include "NodeDescriptorsTestUtils.hpp"
+#include "NodeInformation.h"
 #include <gtest/gtest.h>
 
 using ::testing::TestWithParam;
@@ -10,19 +10,20 @@ using ::testing::Values;
 using ::testing::ValuesIn;
 
 const char *BASE_NODE_DESCRIPTORS_FILE = "test_inputs/BaseNodeDescriptors.json";
-const char *PASSING_BASE_NODE_DESCRIPTORS_FILE = "expected_results/PassingBaseNodeDescriptors.json";
-const char *FAILLING_BASE_NODE_DESCRIPTORS_FILE = "expected_results/FaillingBaseNodeDescriptors.json";
+const char *PASSING_BASE_NODE_DESCRIPTORS_FILE =
+    "expected_results/BaseNodeResults/PassingBaseNodeDescriptors.json";
+const char *FAILLING_BASE_NODE_DESCRIPTORS_FILE =
+    "expected_results/BaseNodeResults/FaillingBaseNodeDescriptors.json";
 
-class BaseNodeDescriptorTests : public ::testing::Test,
-                                public ::testing::WithParamInterface<BaseNodeDescription>
-{
-};
+class BaseNodeDescriptorTests
+    : public ::testing::Test,
+      public ::testing::WithParamInterface<BaseNodeDescription> {};
 
-TEST_P(BaseNodeDescriptorTests, isNodeClassEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isNodeClassEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   EXPECT_EQ(expected_data.node_class, node_descriptor.node_class)
@@ -31,11 +32,11 @@ TEST_P(BaseNodeDescriptorTests, isNodeClassEqual)
       << "provided: " << node_descriptor.node_class << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isWritableFlagEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isWritableFlagEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   EXPECT_EQ(expected_data.writable_flag, node_descriptor.writable_flag)
@@ -44,11 +45,11 @@ TEST_P(BaseNodeDescriptorTests, isWritableFlagEqual)
       << "provided: " << node_descriptor.writable_flag << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isLocaleEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isLocaleEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   ASSERT_STREQ(expected_data.locale, node_descriptor.locale)
@@ -57,11 +58,11 @@ TEST_P(BaseNodeDescriptorTests, isLocaleEqual)
       << "provided: " << node_descriptor.locale << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isUniqueIdEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isUniqueIdEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   ASSERT_STREQ(expected_data.unique_id, node_descriptor.unique_id)
@@ -70,11 +71,11 @@ TEST_P(BaseNodeDescriptorTests, isUniqueIdEqual)
       << "provided: " << node_descriptor.unique_id << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isDisplayNameEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isDisplayNameEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   ASSERT_STREQ(expected_data.display_name, node_descriptor.display_name)
@@ -83,11 +84,11 @@ TEST_P(BaseNodeDescriptorTests, isDisplayNameEqual)
       << "provided: " << node_descriptor.display_name << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isBrowseNameEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isBrowseNameEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      PASSING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   ASSERT_STREQ(expected_data.browse_name, node_descriptor.browse_name)
@@ -98,11 +99,11 @@ TEST_P(BaseNodeDescriptorTests, isBrowseNameEqual)
 
 //------------------------------------------------------------------------------------------------------------------------------
 
-TEST_P(BaseNodeDescriptorTests, isNodeClassNotEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isNodeClassNotEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   EXPECT_NE(expected_data.node_class, node_descriptor.node_class)
@@ -111,11 +112,11 @@ TEST_P(BaseNodeDescriptorTests, isNodeClassNotEqual)
       << "provided: " << node_descriptor.node_class << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isWritableFlagNotEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isWritableFlagNotEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   EXPECT_NE(expected_data.writable_flag, node_descriptor.writable_flag)
@@ -124,11 +125,11 @@ TEST_P(BaseNodeDescriptorTests, isWritableFlagNotEqual)
       << "provided: " << node_descriptor.writable_flag << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isLocaleNotEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isLocaleNotEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   ASSERT_STRNE(expected_data.locale, node_descriptor.locale)
@@ -137,11 +138,11 @@ TEST_P(BaseNodeDescriptorTests, isLocaleNotEqual)
       << "provided: " << node_descriptor.locale << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isUniqueIdNotEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isUniqueIdNotEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   ASSERT_STRNE(expected_data.unique_id, node_descriptor.unique_id)
@@ -150,11 +151,11 @@ TEST_P(BaseNodeDescriptorTests, isUniqueIdNotEqual)
       << "provided: " << node_descriptor.unique_id << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isDisplayNameNotEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isDisplayNameNotEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   ASSERT_STRNE(expected_data.display_name, node_descriptor.display_name)
@@ -163,11 +164,11 @@ TEST_P(BaseNodeDescriptorTests, isDisplayNameNotEqual)
       << "provided: " << node_descriptor.display_name << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isBrowseNameNotEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isBrowseNameNotEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   ASSERT_STRNE(expected_data.browse_name, node_descriptor.browse_name)
@@ -176,11 +177,11 @@ TEST_P(BaseNodeDescriptorTests, isBrowseNameNotEqual)
       << "provided: " << node_descriptor.browse_name << std::endl;
 }
 
-TEST_P(BaseNodeDescriptorTests, isDescriptionNotEqual)
-{
+TEST_P(BaseNodeDescriptorTests, isDescriptionNotEqual) {
   std::string test_name = getCurrentTestName();
 
-  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
+  BaseNodeDescription node_descriptor = getNodeDescription<BaseNodeDescription>(
+      FAILLING_BASE_NODE_DESCRIPTORS_FILE, test_name);
   BaseNodeDescription expected_data = GetParam();
 
   ASSERT_STRNE(expected_data.description, node_descriptor.description)
@@ -189,7 +190,9 @@ TEST_P(BaseNodeDescriptorTests, isDescriptionNotEqual)
       << "provided: " << node_descriptor.description << std::endl;
 }
 
-INSTANTIATE_TEST_SUITE_P(ParametrizedBaseNodeDescriptorTests, BaseNodeDescriptorTests,
-                         ValuesIn(getNodeDescriptors<BaseNodeDescription>(BASE_NODE_DESCRIPTORS_FILE)));
+INSTANTIATE_TEST_SUITE_P(ParametrizedBaseNodeDescriptorTests,
+                         BaseNodeDescriptorTests,
+                         ValuesIn(getNodeDescriptors<BaseNodeDescription>(
+                             BASE_NODE_DESCRIPTORS_FILE)));
 
 #endif //_BASE_NODE_DESCRIPTOR_TEST_HPP_
