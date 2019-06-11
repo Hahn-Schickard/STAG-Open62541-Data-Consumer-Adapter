@@ -1,7 +1,111 @@
 cmake_minimum_required(VERSION 3.6)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_POSITION_INDEPENDENT_CODE on)
 set(VERBOSE_FILE_INCLUSION on)
+set(THIS Model_Translator)
+set(PROJECT_FLAGS C CXX)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 11)
+
+project(${THIS} ${PROJECT_FLAGS})
+
+enable_testing()
+
+find_program(CLANG_TIDY "clang-tidy")
+
+if(CLANG_TIDY)
+set(CMAKE_CXX_CLANG_TIDY  
+    clang-tidy;
+    -header-filter=.;
+    -checks='.*,readability-identifier-naming';
+    CheckOptions: 
+    - { key: readability-identifier-naming.ClassCase, 
+        value: CamelCase}
+    - { key: readability-identifier-naming.ClassConstantCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.ClassMethodCase,
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.ConstantCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.ConstantMemberCase, 
+        value: Camel_Snake_Case}
+    - { key: readability-identifier-naming.ConstantPointerParameterCase, 
+        value: aNy_CasE}
+    - { key: readability-identifier-naming.ConstantPointerParameterCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.ConstexprFunctionCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.ConstexprFunctionPrefix, 
+        value: CExpr_}
+    - { key: readability-identifier-naming.ConstexprMethodCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.ConstexprMethodPrefix, 
+        value: CExpr_}
+    - { key: readability-identifier-naming.ConstexprVariableCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.EnumCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.EnumConstantCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.FunctionCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.GlobalConstantCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.GlobalConstantPointerCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.GlobalFunctionCase, 
+        value: Camel_Snake_Case}
+    - { key: readability-identifier-naming.GlobalFunctionPrefix, 
+        value: GLB_FUNC_}
+    - { key: readability-identifier-naming.GlobalPointerCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.GlobalVariableCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.LocalConstantCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.LocalConstantPointerCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.LocalPointerCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.LocalVariableCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.MemberCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.MethodCase, 
+        value: camelBack}
+    - { key: readability-identifier-naming.NamespaceCase, 
+        value: camelBack}
+    - { key: readability-identifier-naming.ParameterCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.ParameterPackCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.PrivateMemberCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.PrivateMethodCase, 
+        value: camelBack}
+    - { key: readability-identifier-naming.ProtectedMethodCase, 
+        value: camelBack}
+    - { key: readability-identifier-naming.PublicMemberCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.PublicMethodCase, 
+        value: camelBack}
+    - { key: readability-identifier-naming.StaticConstantCase, 
+        value: UPPER_CASE}
+    - { key: readability-identifier-naming.StaticVariableCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.StructCase, 
+        value: CamelCase}
+    - { key: readability-identifier-naming.TypedefCase, 
+        value: CamelCase}
+    - { key: readability-identifier-naming.UnionCase, 
+        value: CamelCase}
+    - { key: readability-identifier-naming.VariableCase, 
+        value: camel_Snake_Back}
+    - { key: readability-identifier-naming.VirtualMethodCase, 
+        value: camelBack}
+    -std=c++11)
+endif()
 
 # Pass your lists in quations, for example:
 # PRINT_FILES("${file_list}")
@@ -23,16 +127,7 @@ MACRO(PRINT_MODULE_FILES module_name sources_list includes_list)
     endif()
 ENDMACRO()
 
-set (THIS Model_Translator)
-set (PROJECT_FLAGS C CXX)
-
-project(${THIS} ${PROJECT_FLAGS})
-
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_POSITION_INDEPENDENT_CODE on)
-
-enable_testing()
+# ==============================================================================================================================
 
 configure_file(JsonDependency.txt json-download/CMakeLists.txt)
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
