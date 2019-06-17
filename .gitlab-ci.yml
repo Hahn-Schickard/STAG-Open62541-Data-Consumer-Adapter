@@ -46,7 +46,6 @@ check_code_coverage:
  variables: 
   GIT_STRATEGY: none 
  script: 
-  - cd tools
   - ./check_code_coverage.sh
  artifacts:                                                           
   name: "code_coverage_results"                   
