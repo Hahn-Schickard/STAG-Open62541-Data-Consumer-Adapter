@@ -6,6 +6,7 @@ stages:
  - configure
  - build 
  - test
+ - deploy
  
 prep_build_environment:
  stage: prep
@@ -46,4 +47,21 @@ check_code_coverage:
   GIT_STRATEGY: none 
  script: 
   - cd tools
-  - check_code_coverage.sh
+  - ./check_code_coverage.sh
+ artifacts:                                                           
+  name: "code_coverage_results"                   
+  paths:
+  - /tools/code_coverage_report
+  
+deploy_coverage_report:
+ stage: deploy
+ dependencies:
+    - check_code_coverage
+ script:
+    - mv code_coverage_report/ public/
+ artifacts:
+   paths:
+     - public
+   expire_in: 30 days
+ only:
+   - master
