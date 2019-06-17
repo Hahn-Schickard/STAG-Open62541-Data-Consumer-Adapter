@@ -55,13 +55,13 @@ check_code_coverage:
   
 pages:
  stage: deploy
-  dependencies:
-   - check_code_coverage
-  script:
+ dependencies:
+    - check_code_coverage
+ script:
     - mv coverage/ public/
-  artifacts:
-    paths:
-      - public
-    expire_in: 30 days
-  only:
-    - master
+ artifacts:
+   paths:
+     - public
+   expire_in: 30 days
+ only:
+   - master
