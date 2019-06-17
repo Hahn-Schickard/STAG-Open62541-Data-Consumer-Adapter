@@ -7,7 +7,7 @@ constexpr unsigned int hash(const char *str, int h) {
 char *getMallocedUpperCase(const char *input) {
   unsigned int string_lenght = strlen(input);
   char *output = (char *)malloc(sizeof(char) * string_lenght);
-  for (int i = 0; i < string_lenght; i++) {
+  for (uint i = 0; i < string_lenght; i++) {
     if (islower(input[i]))
       output[i] = toupper(input[i]);
     output[i] = input[i];
@@ -17,7 +17,7 @@ char *getMallocedUpperCase(const char *input) {
 
 void convertToUpperCase(char *input) {
   unsigned int string_lenght = strlen(input);
-  for (int i = 0; i < string_lenght; i++) {
+  for (uint i = 0; i < string_lenght; i++) {
     if (islower(input[i]))
       input[i] = toupper(input[i]);
   }

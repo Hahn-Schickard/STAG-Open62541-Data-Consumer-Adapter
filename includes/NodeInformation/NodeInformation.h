@@ -8,15 +8,16 @@ struct VariableNodeInformation;
 struct MethodNodeInformation;
 struct ObjectNodeInformation;
 struct NodeInformation;
+struct DataValueWrapper;
 
 typedef BaseNodeInformation BaseNodeDescription;
 typedef VariableNodeInformation VariableNodeDescription;
 typedef MethodNodeInformation MethodNodeDescription;
 typedef ObjectNodeInformation ObjectNodeDescription;
 typedef NodeInformation NodeDescription;
+typedef DataValueWrapper DataWrapper;
 
-enum DataType
-{
+enum DataType {
   UNSIGNED_SHORT,
   UNSIGNED_INTEGER,
   UNSIGNED_LONG,
@@ -29,8 +30,7 @@ enum DataType
   UNKNOWN
 };
 
-enum NodeClassType
-{
+enum NodeClassType {
   VARIABLE_NODE,
   METHOD_NODE,
   OBJECT_NODE,
@@ -49,8 +49,12 @@ union DataValue {
   char *string_value;
 };
 
-struct BaseNodeInformation
-{
+struct DataValueWrapper {
+  DataType type;
+  DataValue value;
+};
+
+struct BaseNodeInformation {
   NodeClassType node_class;
   bool writable_flag;
   char locale[8];
@@ -60,25 +64,20 @@ struct BaseNodeInformation
   char description[256];
 };
 
-struct VariableNodeInformation
-{
-  DataType data_type;
-  DataValue data_value;
+struct VariableNodeInformation {
+  DataValueWrapper data;
 };
 
-struct MethodNodeInformation
-{
+struct MethodNodeInformation {
   // TODO: Handle methods
 };
 
-struct ObjectNodeInformation
-{
+struct ObjectNodeInformation {
   uint16_t children_count;
   NodeDescription *children;
 };
 
-struct NodeInformation
-{
+struct NodeInformation {
   BaseNodeDescription base_node_descriptor;
   union {
     VariableNodeDescription variable_node_descriptor;
