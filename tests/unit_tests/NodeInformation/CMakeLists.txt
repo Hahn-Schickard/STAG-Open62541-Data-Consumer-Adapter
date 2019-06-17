@@ -21,3 +21,15 @@ add_test(
     NAME ${THIS}
     COMMAND ${THIS}
 )
+
+if(WIN32)
+    add_custom_command(TARGET ${THIS} POST_BUILD 
+                        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+                            "${CMAKE_BINARY_DIR}/bin/"
+                            $<TARGET_FILE_DIR:${THIS}> 
+                        COMMENT "Copying shared library files from ${CMAKE_BINARY_DIR}/bin directory to ${CMAKE_CURRENT_BINARY_DIR} directory."
+                            VERBATIM) 
+else(UNIX)
+    add_custom_command(TARGET ${THIS} POST_BUILD
+                    COMMAND ctest -C $<CONFIGURATION> --output-on-failure)
+endif()

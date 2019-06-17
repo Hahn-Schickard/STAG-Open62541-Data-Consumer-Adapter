@@ -10,6 +10,9 @@ PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 add_library(${THIS} SHARED
             ${sources_list}
             ${includes_list})
+            
+target_link_libraries(${THIS} PUBLIC 
+                     gcov)
 
 target_include_directories(${THIS} INTERFACE 
                            ${utilities_includes_dir})

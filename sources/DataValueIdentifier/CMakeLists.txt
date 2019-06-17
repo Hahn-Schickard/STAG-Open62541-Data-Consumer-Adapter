@@ -13,7 +13,8 @@ add_library(${THIS} SHARED
             ${includes_list})
 
 target_link_libraries(${THIS} PRIVATE
-                      C_String_Formater)
+                      C_String_Formater
+                      gcov)
 
 target_include_directories(${THIS} INTERFACE 
                            ${utilities_includes_dir})
