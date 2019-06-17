@@ -3,3 +3,4 @@
 ## Depenencies 
 ### Visual Studio Code:
 * clang-format
+* clang-tidy

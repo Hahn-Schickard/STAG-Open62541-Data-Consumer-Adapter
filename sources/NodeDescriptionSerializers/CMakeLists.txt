@@ -15,7 +15,8 @@ add_library(${THIS} SHARED
 target_link_libraries(${THIS} PUBLIC 
                       C_String_Formater
                       Data_Value_Identifier
-                      nlohmann_json::nlohmann_json)
+                      nlohmann_json::nlohmann_json
+                      gcov)
 
 target_include_directories(${THIS} INTERFACE 
                            ${json_serializer_includes_dir})

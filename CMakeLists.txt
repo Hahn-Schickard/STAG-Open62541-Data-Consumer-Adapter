@@ -1,62 +1,30 @@
 cmake_minimum_required(VERSION 3.6)
 
+set(THIS Model_Translator)
+
 set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_POSITION_INDEPENDENT_CODE on)
 set(VERBOSE_FILE_INCLUSION on)
-
-# Pass your lists in quations, for example:
-# PRINT_FILES("${file_list}")
-MACRO(PRINT_FILES file_list)
-    foreach(thing ${file_list})
-        message(STATUS " |-- ${thing}")
-    endforeach()
-    message("----------------------------------------------------------------------------------------------------------------")
-    message(" ")
-ENDMACRO()
-
-MACRO(PRINT_MODULE_FILES module_name sources_list includes_list)
-    if(VERBOSE_FILE_INCLUSION)
-        message(STATUS "${module_name} library files are:")
-        message(STATUS "=====Source Files=====")
-        PRINT_FILES("${sources_list}")
-        message(STATUS "=====Include Files=====")
-        PRINT_FILES("${includes_list}")
-    endif()
-ENDMACRO()
-
-set (THIS Model_Translator)
-set (PROJECT_FLAGS C CXX)
+set(PROJECT_FLAGS C CXX)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 11)
 
 project(${THIS} ${PROJECT_FLAGS})
 
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_POSITION_INDEPENDENT_CODE on)
-
 enable_testing()
 
-configure_file(JsonDependency.txt json-download/CMakeLists.txt)
-execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/json-download" )
-execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/json-download" )
-set(JSON_INCLUDES "${PROJECT_SOURCE_DIR}/libs/json-src/single_include/")
-set(JSON_BuildTests OFF CACHE INTERNAL "")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(clang_output clang-tidy-fixes.yml)
 
-configure_file(GoogleTestDependency.txt googletest-download/CMakeLists.txt)
-execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
-execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
+include(macros)
+include(compiler_settings)
 
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/tests/googletest-src"
-                 "${CMAKE_BINARY_DIR}/googletest-build")
-
-if(CMAKE_VERSION VERSION_LESS 2.8.11)
-    include_directories("${gtest_SOURCE_DIR}/include"
-                        "${gmock_SOURCE_DIR}/include")
+if(UNIX)
+    include(linter)
 endif()
+
+include(dependencies)
 
 set(node_information_includes_dir "${PROJECT_SOURCE_DIR}/includes/NodeInformation")
 set(utilities_includes_dir "${PROJECT_SOURCE_DIR}/includes/utilities")

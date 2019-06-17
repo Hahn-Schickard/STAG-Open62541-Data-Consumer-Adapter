@@ -3,6 +3,7 @@
 
 #include "NodeInformation.h"
 
-DataValue identifyDataValue(DataType data_type, const char *data_value_string);
+DataWrapper identifyDataValue(DataType data_type,
+                              const char *data_value_string);
 
 #endif //_DATA_VALUE_IDENTIFIER_HPP_
