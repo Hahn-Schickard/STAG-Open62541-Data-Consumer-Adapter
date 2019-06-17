@@ -3,17 +3,24 @@ variables:
 
 stages:
  - prep
+ - configure
  - build 
- - test 
+ - test
  
 prep_build_environment:
  stage: prep
- variables: 
-  GIT_STRATEGY: none
  script: 
   - mkdir build
  allow_failure: true
-  
+
+configure_cmake: 
+ stage: configure
+ variables: 
+  GIT_STRATEGY: none
+ script:
+  - cd build
+  - 'cmake ..'
+ 
 build_debug: 
  stage: build
  variables: 
@@ -32,3 +39,11 @@ run_unit_tests:
  script: 
   - cd build
   - ctest
+
+check_code_coverage: 
+ stage: test 
+ variables: 
+  GIT_STRATEGY: none 
+ script: 
+  - cd tools
+  - check_code_coverage.sh
