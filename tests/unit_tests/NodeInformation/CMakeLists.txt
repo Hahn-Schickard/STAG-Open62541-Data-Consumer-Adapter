@@ -28,8 +28,5 @@ if(WIN32)
                             "${CMAKE_BINARY_DIR}/bin/"
                             $<TARGET_FILE_DIR:${THIS}> 
                         COMMENT "Copying shared library files from ${CMAKE_BINARY_DIR}/bin directory to ${CMAKE_CURRENT_BINARY_DIR} directory."
-                            VERBATIM) 
-else(UNIX)
-    add_custom_command(TARGET ${THIS} POST_BUILD
-                    COMMAND ctest -C $<CONFIGURATION> --output-on-failure)
+                            VERBATIM)
 endif()
