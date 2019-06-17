@@ -47,3 +47,9 @@ check_code_coverage:
  script: 
   - cd tools
   - ./check_code_coverage.sh
+artifacts:                                                           
+  untracked: true                                                      
+  name: "code_coverage_results"                   
+  paths:
+  - "./tools/code_coverage_report/*"
+
