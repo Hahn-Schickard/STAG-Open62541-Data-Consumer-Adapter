@@ -46,4 +46,4 @@ check_code_coverage:
   GIT_STRATEGY: none 
  script: 
   - cd tools
-  - check_code_coverage.sh
+  - ./check_code_coverage.sh
