@@ -31,7 +31,7 @@ build_debug:
   - 'cmake --build build/ --config $CONFIG --target all --'
  artifacts: 
   paths: 
-   - "./build/tests/unit_tests/*"
+   - build/
   
 run_unit_tests: 
  stage: test
