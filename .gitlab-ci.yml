@@ -46,12 +46,11 @@ check_code_coverage:
  variables: 
   GIT_STRATEGY: none 
  script: 
-  - cd tools
   - ./check_code_coverage.sh
  artifacts:                                                           
   name: "code_coverage_results"                   
   paths:
-  - /tools/code_coverage_report
+  - code_coverage_report/
   
 deploy_coverage_report:
  stage: deploy
