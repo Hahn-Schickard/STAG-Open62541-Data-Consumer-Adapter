@@ -6,6 +6,7 @@ stages:
  - configure
  - build 
  - test
+ - deploy
  
 prep_build_environment:
  stage: prep
@@ -50,4 +51,17 @@ check_code_coverage:
  artifacts:                                                           
   name: "code_coverage_results"                   
   paths:
-  - "./tools/code_coverage_report/*"
+  - /tools/code_coverage_report/
+  
+pages:
+ stage: deploy
+  dependencies:
+   - check_code_coverage
+  script:
+    - mv coverage/ public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master
