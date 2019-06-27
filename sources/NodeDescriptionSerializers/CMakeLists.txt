@@ -21,6 +21,13 @@ target_link_libraries(${THIS} PUBLIC
 target_include_directories(${THIS} INTERFACE 
                            ${json_serializer_includes_dir})
 
+if(CLANG_TIDY_EXE)               
+    set_target_properties(
+                        ${THIS} PROPERTIES
+                        CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY}
+                        )
+endif()    
+
 add_custom_command(TARGET ${THIS} POST_BUILD 
         COMMAND ${CMAKE_COMMAND} -E make_directory 
             ${CMAKE_BINARY_DIR}/bin
