@@ -1,24 +1,35 @@
-configure_file(JsonDependency.txt json-download/CMakeLists.txt)
-execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/json-download" )
-execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/json-download" )
+if(NOT IS_SUBMODULE_PROJECT)
+    message(STATUS "Configuring external dependencies")
+    configure_file(JsonDependency.txt json-download/CMakeLists.txt)
+    execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+       WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/json-download" )
+    execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+       WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/json-download" )
 
-set(JSON_INCLUDES "${PROJECT_SOURCE_DIR}/libs/json-src/single_include/")
-set(JSON_BuildTests OFF CACHE INTERNAL "")
+    set(JSON_INCLUDES "${PROJECT_SOURCE_DIR}/libs/json-src/single_include/")
+    set(JSON_BuildTests OFF CACHE INTERNAL "")
 
-configure_file(GoogleTestDependency.txt googletest-download/CMakeLists.txt)
-execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
-execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
+    configure_file(GoogleTestDependency.txt googletest-download/CMakeLists.txt)
+    execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
+    execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
 
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-add_subdirectory("${PROJECT_SOURCE_DIR}/tests/googletest-src"
-                 "${CMAKE_BINARY_DIR}/googletest-build")
+    add_subdirectory("${PROJECT_SOURCE_DIR}/tests/googletest-src"
+                    "${CMAKE_BINARY_DIR}/googletest-build")
 
-if(CMAKE_VERSION VERSION_LESS 2.8.11)
-    include_directories("${gtest_SOURCE_DIR}/include"
-                        "${gmock_SOURCE_DIR}/include")
+    if(CMAKE_VERSION VERSION_LESS 2.8.11)
+        include_directories("${gtest_SOURCE_DIR}/include"
+                            "${gmock_SOURCE_DIR}/include")
+    endif()
+else()
+    message(STATUS "${PROJECT_NAME } is configured as a submodule. Skipping commond external depenencies!")
 endif()
+
+configure_file(InformationModelDepenency.txt modules/information-model/CMakeLists.txt)
+execute_process(COMMAND "${CMAKE_COMMAND}" -DIS_SUBMODULE_PROJECT=ON -G "${CMAKE_GENERATOR}" .
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/tmp/" )
+execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/tmp/" )
