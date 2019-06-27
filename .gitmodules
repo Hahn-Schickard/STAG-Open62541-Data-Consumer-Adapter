@@ -1,1 +1,4 @@
 
+[submodule "modules/information-model"]
+	path = modules/information-model
+	url = git@git.hahn-schickard.de:opc_ua_dev_group/information-modeller.git
