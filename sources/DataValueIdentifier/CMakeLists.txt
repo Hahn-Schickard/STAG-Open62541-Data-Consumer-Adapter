@@ -16,9 +16,11 @@ target_link_libraries(${THIS} PRIVATE
                       C_String_Formater
                       gcov)
 
-target_include_directories(${THIS} INTERFACE 
-                           ${utilities_includes_dir})
-
+target_include_directories(${THIS} INTERFACE
+                           $<BUILD_INTERFACE:${utilities_includes_dir}>
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+                           $<INSTALL_INTERFACE:${INCLUDES_DEST}>
+                           $<INSTALL_INTERFACE:${LIBS_DEST}>)
 if(CLANG_TIDY_EXE)               
     set_target_properties(
                         ${THIS} PROPERTIES
@@ -34,3 +36,17 @@ add_custom_command(TARGET ${THIS} POST_BUILD
             "${CMAKE_BINARY_DIR}/bin"
         COMMENT "Copying shared library files from ${CMAKE_CURRENT_BINARY_DIR} directory to ${CMAKE_BINARY_DIR}/bin directory."
             VERBATIM)         
+
+install(
+    TARGETS ${THIS} 
+    EXPORT ${PROJECT_NAME}
+    ARCHIVE DESTINATION ${LIBS_DEST}
+    LIBRARY DESTINATION ${LIBS_DEST}
+    COMPONENT libraries
+)
+
+install(
+    FILES ${includes_list}
+    DESTINATION ${INCLUDES_DEST}
+    COMPONENT headers
+)

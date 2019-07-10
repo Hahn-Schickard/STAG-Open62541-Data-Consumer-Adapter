@@ -20,19 +20,19 @@ CheckOptions:
  - { key: readability-identifier-naming.LocalPointerCase,               value: camel_Snake_Back }
  - { key: readability-identifier-naming.LocalVariableCase,              value: camel_Snake_Back }
  - { key: readability-identifier-naming.MemberCase,                     value: camel_Snake_Back }
- - { key: readability-identifier-naming.MethodCase,                     value: camelBack        }
+ - { key: readability-identifier-naming.MethodCase,                     value: camel_Snake_Back }
  - { key: readability-identifier-naming.NamespaceCase,                  value: camelBack        }
  - { key: readability-identifier-naming.ParameterCase,                  value: camel_Snake_Back }
  - { key: readability-identifier-naming.ParameterPackCase,              value: camel_Snake_Back }
  - { key: readability-identifier-naming.PrivateMemberCase,              value: camel_Snake_Back }
- - { key: readability-identifier-naming.PrivateMethodCase,              value: camelBack        }
- - { key: readability-identifier-naming.ProtectedMethodCase,            value: camelBack        }
+ - { key: readability-identifier-naming.PrivateMethodCase,              value: camel_Snake_Back }
+ - { key: readability-identifier-naming.ProtectedMethodCase,            value: camel_Snake_Back }
  - { key: readability-identifier-naming.PublicMemberCase,               value: camel_Snake_Back }
- - { key: readability-identifier-naming.PublicMethodCase,               value: camelBack        }
+ - { key: readability-identifier-naming.PublicMethodCase,               value: camel_Snake_Back }
  - { key: readability-identifier-naming.StaticConstantCase,             value: UPPER_CASE       }
  - { key: readability-identifier-naming.StaticVariableCase,             value: camel_Snake_Back }
  - { key: readability-identifier-naming.StructCase,                     value: CamelCase        }
  - { key: readability-identifier-naming.TypedefCase,                    value: CamelCase        }
  - { key: readability-identifier-naming.UnionCase,                      value: CamelCase        }
  - { key: readability-identifier-naming.VariableCase,                   value: camel_Snake_Back }
- - { key: readability-identifier-naming.VirtualMethodCase,              value: camelBack        }
+ - { key: readability-identifier-naming.VirtualMethodCase,              value: camel_Snake_Back }

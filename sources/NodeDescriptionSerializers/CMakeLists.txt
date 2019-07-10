@@ -18,8 +18,11 @@ target_link_libraries(${THIS} PUBLIC
                       nlohmann_json::nlohmann_json
                       gcov)
 
-target_include_directories(${THIS} INTERFACE 
-                           ${json_serializer_includes_dir})
+target_include_directories(${THIS} INTERFACE
+                           $<BUILD_INTERFACE:${json_serializer_includes_dir}>
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+                           $<INSTALL_INTERFACE:${INCLUDES_DEST}>
+                           $<INSTALL_INTERFACE:${LIBS_DEST}>)
 
 if(CLANG_TIDY_EXE)               
     set_target_properties(
@@ -35,4 +38,18 @@ add_custom_command(TARGET ${THIS} POST_BUILD
             $<TARGET_FILE:${THIS}> 
             "${CMAKE_BINARY_DIR}/bin"
         COMMENT "Copying shared library files from ${CMAKE_CURRENT_BINARY_DIR} directory to ${CMAKE_BINARY_DIR}/bin directory."
-            VERBATIM)         
+            VERBATIM)
+
+install(
+    TARGETS ${THIS} 
+    EXPORT ${PROJECT_NAME}
+    ARCHIVE DESTINATION ${LIBS_DEST}
+    LIBRARY DESTINATION ${LIBS_DEST}
+    COMPONENT libraries
+)
+
+install(
+    FILES ${includes_list}
+    DESTINATION ${INCLUDES_DEST}
+    COMPONENT headers
+)
