@@ -14,6 +14,11 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
 
+#@+ ========================== User configuration ===========================
+#set(Information_Model_DIR "./modules/Information_Model*/")
+find_package(Information_Model REQUIRED PATHS "./modules" )
+#@- ===================== END OF USER CONFIGURATION =========================
+
 project(${THIS} ${PROJECT_FLAGS})
 
 enable_testing()
@@ -30,6 +35,7 @@ set(INCLUDES_DIR "${PROJECT_SOURCE_DIR}/includes")
 set(INCLUDES_DEST "include/")
 set(LIBS_DEST "lib/")
 set(BINS_DEST "bin/")
+set(CONFIGS_DEST "./")
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "./" CACHE PATH "Specifies where the cpacked binaries and related fills will be installed." FORCE)
@@ -79,6 +85,13 @@ set(CPACK_PACKAGE_VERSION_PATCH ${PACKAGE_PATCH_VER})
 set(CPACK_OUTPUT_FILE_PREFIX cpack_packages)
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/docs/code_documentation/" DESTINATION "docs")
+set(CONFIG_FILE "")
+string(TOLOWER ${PROJECT_NAME} CONFIG_FILE)
+if(EXISTS ${PROJECT_SOURCE_DIR}/${CONFIG_FILE}-config.cmake)
+    install(FILES ${CONFIG_FILE}-config.cmake DESTINATION ${CONFIGS_DEST})
+else()
+    message(ERROR " No ${CONFIG_FILE}-config.cmake has been found! Please provide ${CONFIG_FILE}-config.cmake so your packages could be used by other developers!")
+endif()
 install(EXPORT ${PROJECT_NAME} DESTINATION ${LIBS_DEST})
 
 if(WIN32 AND NOT UNIX)
