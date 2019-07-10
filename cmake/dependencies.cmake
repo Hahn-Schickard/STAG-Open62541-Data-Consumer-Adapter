@@ -27,9 +27,3 @@ if(NOT IS_SUBMODULE_PROJECT)
 else()
     message(STATUS "${PROJECT_NAME } is configured as a submodule. Skipping commond external depenencies!")
 endif()
-
-configure_file(InformationModelDepenency.txt modules/information-model/CMakeLists.txt)
-execute_process(COMMAND "${CMAKE_COMMAND}" -DIS_SUBMODULE_PROJECT=ON -G "${CMAKE_GENERATOR}" .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/tmp/" )
-execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/tmp/" )
