@@ -14,12 +14,12 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
 
+project(${THIS} ${PROJECT_FLAGS})
+
 #@+ ========================== User configuration ===========================
 #set(Information_Model_DIR "./modules/Information_Model*/")
 find_package(Information_Model REQUIRED PATHS "./modules" )
 #@- ===================== END OF USER CONFIGURATION =========================
-
-project(${THIS} ${PROJECT_FLAGS})
 
 enable_testing()
 
