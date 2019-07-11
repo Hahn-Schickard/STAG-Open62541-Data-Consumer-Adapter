@@ -10,6 +10,8 @@ add_executable(${THIS} ${Test_Suite} ${Test_Cases} )
 
 target_link_libraries(${THIS} PUBLIC
     JSON_Nodes_Serializer
+    InfoModel_Lib
+    Node_Builder
     gtest_main
 )
 
