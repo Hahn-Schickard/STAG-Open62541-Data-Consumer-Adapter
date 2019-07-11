@@ -10,6 +10,8 @@ PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 
 include_directories("${PROJECT_SOURCE_DIR}/includes/NodeBuilder/")
 
+set(node_builder_includes_dir "${PROJECT_SOURCE_DIR}/includes/NodeBuilder")
+
 add_library(${THIS} SHARED
             ${sources_list}
             ${includes_list})
