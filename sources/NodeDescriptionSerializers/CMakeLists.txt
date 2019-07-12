@@ -8,6 +8,8 @@ file(GLOB includes_list  "${PROJECT_SOURCE_DIR}/includes/NodeInformation/*.h"
 
 PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 
+include_directories(${JSON_INCLUDES})
+
 add_library(${THIS} SHARED
             ${sources_list}
             ${includes_list})
@@ -15,11 +17,13 @@ add_library(${THIS} SHARED
 target_link_libraries(${THIS} PUBLIC 
                       C_String_Formater
                       Data_Value_Identifier
+                      PRIVATE
                       nlohmann_json::nlohmann_json
                       gcov)
 
 target_include_directories(${THIS} INTERFACE
                            $<BUILD_INTERFACE:${json_serializer_includes_dir}>
+                           $<BUILD_INTERFACE:${JSON_INCLUDES}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
                            $<INSTALL_INTERFACE:${INCLUDES_DEST}>
                            $<INSTALL_INTERFACE:${LIBS_DEST}>)
