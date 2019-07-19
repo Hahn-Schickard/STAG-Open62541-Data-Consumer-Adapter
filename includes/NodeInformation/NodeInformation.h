@@ -3,21 +3,12 @@
 
 #include <stdint.h>
 
-struct BaseNodeInformation;
-struct VariableNodeInformation;
-struct MethodNodeInformation;
-struct ObjectNodeInformation;
 struct NodeInformation;
-struct DataValueWrapper;
 
-typedef BaseNodeInformation BaseNodeDescription;
-typedef VariableNodeInformation VariableNodeDescription;
-typedef MethodNodeInformation MethodNodeDescription;
-typedef ObjectNodeInformation ObjectNodeDescription;
-typedef NodeInformation NodeDescription;
-typedef DataValueWrapper DataWrapper;
+typedef struct NodeInformation NodeDescription;
 
-enum DataType {
+typedef enum DataTypeEnum
+{
   UNSIGNED_SHORT,
   UNSIGNED_INTEGER,
   UNSIGNED_LONG,
@@ -28,16 +19,17 @@ enum DataType {
   BOOLEAN,
   STRING,
   UNKNOWN
-};
+} DataType;
 
-enum NodeClassType {
+typedef enum NodeClassTypeEnum
+{
   VARIABLE_NODE,
   METHOD_NODE,
   OBJECT_NODE,
   UNRECOGNIZED_NODE
-};
+} NodeClassType;
 
-union DataValue {
+typedef union DataValueUnion {
   uint8_t unsigned_short_value;
   int8_t signed_short_value;
   uint32_t unsigned_integer_value;
@@ -47,14 +39,16 @@ union DataValue {
   double double_value;
   bool boolean_value;
   char *string_value;
-};
+} DataValue;
 
-struct DataValueWrapper {
+typedef struct DataValueWrapperStruct
+{
   DataType type;
   DataValue value;
-};
+} DataValueWrapper;
 
-struct BaseNodeInformation {
+typedef struct BaseNodeInformation
+{
   NodeClassType node_class;
   bool writable_flag;
   char locale[8];
@@ -62,22 +56,26 @@ struct BaseNodeInformation {
   char display_name[256];
   char browse_name[256];
   char description[256];
-};
+} BaseNodeDescription;
 
-struct VariableNodeInformation {
+typedef struct VariableNodeInformation
+{
   DataValueWrapper data;
-};
+} VariableNodeDescription;
 
-struct MethodNodeInformation {
+typedef struct MethodNodeInformation
+{
   // TODO: Handle methods
-};
+} MethodNodeDescription;
 
-struct ObjectNodeInformation {
+typedef struct ObjectNodeInformation
+{
   uint16_t children_count;
   NodeDescription *children;
-};
+} ObjectNodeDescription;
 
-struct NodeInformation {
+struct NodeInformation
+{
   BaseNodeDescription base_node_descriptor;
   union {
     VariableNodeDescription variable_node_descriptor;
