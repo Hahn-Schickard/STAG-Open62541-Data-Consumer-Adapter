@@ -9,6 +9,8 @@ if(NOT IS_SUBMODULE_PROJECT)
     set(JSON_INCLUDES "${PROJECT_SOURCE_DIR}/libs/json-src/single_include/")
     set(JSON_BuildTests OFF CACHE INTERNAL "")
 
+    option(INSTALL_GMOCK "Install Googletest's GMock?" OFF)
+    option(INSTALL_GTEST "Install Googletest's GTest?" OFF)
     configure_file(GoogleTestDependency.txt googletest-download/CMakeLists.txt)
     execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
