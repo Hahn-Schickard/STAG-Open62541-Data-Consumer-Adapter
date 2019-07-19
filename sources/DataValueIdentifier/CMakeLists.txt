@@ -8,6 +8,8 @@ file(GLOB includes_list  "${PROJECT_SOURCE_DIR}/includes/NodeInformation/*.h"
 
 PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 
+include_directories("${PROJECT_SOURCE_DIR}/includes/NodeInformation")
+
 add_library(${THIS} SHARED
             ${sources_list}
             ${includes_list})
