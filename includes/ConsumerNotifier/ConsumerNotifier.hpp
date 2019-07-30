@@ -3,7 +3,7 @@
 
 #include "NodeInformation.h"
 
-extern void update_DataConsumer(NodeDescription *device);
+extern "C" void update_DataConsumer(NodeDescription *device);
 
 void notifyConsumers(NodeDescription *device);
 

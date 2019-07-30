@@ -2,6 +2,7 @@
 #define NODE_INFORMATION_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 struct NodeInformation;
 
