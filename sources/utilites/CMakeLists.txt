@@ -11,8 +11,18 @@ add_library(${THIS} SHARED
             ${sources_list}
             ${includes_list})
             
-target_link_libraries(${THIS} PUBLIC 
-                     gcov)
+if (WIN32)
+    target_link_libraries(${THIS} PUBLIC
+                                  Node_Information)
+elseif (UNIX)
+    target_link_libraries(${THIS} PUBLIC 
+                                  gcov
+                                  Node_Information)
+else ()
+    target_link_libraries(${THIS} PUBLIC
+                                  Node_Information)
+    message(WARNING "Please configure your linking for your operating system for target ${THIS}")
+endif ()
 
 target_include_directories(${THIS} INTERFACE
                            $<BUILD_INTERFACE:${utilities_includes_dir}>

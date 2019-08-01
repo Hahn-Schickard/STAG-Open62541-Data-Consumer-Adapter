@@ -3,21 +3,32 @@ cmake_minimum_required(VERSION 3.6)
 set (THIS Data_Value_Identifier)
 
 file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
-file(GLOB includes_list  "${PROJECT_SOURCE_DIR}/includes/NodeInformation/*.h"
-                        "${PROJECT_SOURCE_DIR}/includes/utilities/*.hpp")
+file(GLOB includes_list "${PROJECT_SOURCE_DIR}/includes/utilities/*.hpp")
 
 PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 
-include_directories("${PROJECT_SOURCE_DIR}/includes/NodeInformation")
+include_directories(${PROJECT_SOURCE_DIR}/includes/utilities)
 
 add_library(${THIS} SHARED
             ${sources_list}
             ${includes_list})
 
-target_link_libraries(${THIS} PRIVATE
-                      C_String_Formater
-                      gcov)
-
+if (WIN32)
+    target_link_libraries(${THIS} PUBLIC
+                                  Node_Information
+                                  C_String_Formater)
+elseif (UNIX)
+    target_link_libraries(${THIS} PUBLIC 
+                                  gcov
+                                  Node_Information
+                                  C_String_Formater)
+else ()
+    target_link_libraries(${THIS} PUBLIC
+                                  Node_Information
+                                  C_String_Formater)
+    message(WARNING "Please configure your linking for your operating system for target ${THIS}")
+endif ()
+               
 target_include_directories(${THIS} INTERFACE
                            $<BUILD_INTERFACE:${utilities_includes_dir}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
