@@ -16,11 +16,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
 
 project(${THIS} ${PROJECT_FLAGS})
 
-#@+ ========================== User configuration ===========================
-#set(Information_Model_DIR "./modules/Information_Model*/")
-find_package(Information_Model REQUIRED PATHS "./modules" )
-#@- ===================== END OF USER CONFIGURATION =========================
-
 enable_testing()
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -33,9 +28,21 @@ set(PACKAGE_PATCH_VER "0" CACHE STRING "Major version number of the release pack
 set(CLANG_OUTPUT "${PROJECT_SOURCE_DIR}/clang-tidy-suggested-fixes.yml")
 set(INCLUDES_DIR "${PROJECT_SOURCE_DIR}/includes")
 set(INCLUDES_DEST "include/")
+set(MODULES_DEST "modules/")
 set(LIBS_DEST "lib/")
 set(BINS_DEST "bin/")
 set(CONFIGS_DEST "./")
+
+#@+ ========================== User configuration ===========================
+find_package(OPCUA_Node_Model REQUIRED PATHS "./modules")
+install(DIRECTORY ${OPCUA_Node_Model_DIR} DESTINATION ${MODULES_DEST})
+find_package(Information_Modeler REQUIRED PATHS "./modules")
+install(DIRECTORY ${Information_Modeler_DIR} DESTINATION ${MODULES_DEST})
+find_package(Data_Consumer_Notifier REQUIRED PATHS "./modules")
+install(DIRECTORY ${Data_Consumer_Notifier_DIR} DESTINATION ${MODULES_DEST})
+find_package(open62541_server_runner REQUIRED PATHS "./modules")
+install(DIRECTORY ${open62541_server_runner_DIR} DESTINATION ${MODULES_DEST})
+#@- ===================== END OF USER CONFIGURATION =========================
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "./" CACHE PATH "Specifies where the cpacked binaries and related fills will be installed." FORCE)
@@ -61,7 +68,6 @@ set(node_information_includes_dir "${PROJECT_SOURCE_DIR}/includes/NodeInformatio
 set(utilities_includes_dir "${PROJECT_SOURCE_DIR}/includes/utilities")
 set(json_serializer_includes_dir "${PROJECT_SOURCE_DIR}/includes/utilities/JsonSerializer")
 
-include_directories(${node_information_includes_dir})
 include_directories(${utilities_includes_dir})
 include_directories(${json_serializer_includes_dir})
 
