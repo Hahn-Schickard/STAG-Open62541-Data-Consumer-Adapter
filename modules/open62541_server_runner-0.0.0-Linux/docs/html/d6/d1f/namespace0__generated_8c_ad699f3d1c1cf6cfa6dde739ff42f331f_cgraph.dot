@@ -1,0 +1,23 @@
+digraph "function_namespace0_generated_75_begin"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1866 [label="function_namespace0\l_generated_75_begin",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1866 -> Node1867 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1867 [label="UA_EXPANDEDNODEID_NUMERIC",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a8230eade4aa1b1e59a8c0ad3090c895b"];
+  Node1867 -> Node1868 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1868 [label="UA_NODEID_NUMERIC",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac579ccd233069ba89fe18f8d30ab6a4a"];
+  Node1866 -> Node1869 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1869 [label="UA_LOCALIZEDTEXT",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a4589b0fbae908b0f628c56a98dfa0eab"];
+  Node1869 -> Node1870 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1870 [label="UA_STRING",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a0929e31c4c386f0def38fa5510be5db4"];
+  Node1866 -> Node1868 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1866 -> Node1871 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1871 [label="UA_QUALIFIEDNAME",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a8cce7c464f2bf0e4f36872a0dccfac79"];
+  Node1871 -> Node1870 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1866 -> Node1872 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1872 [label="UA_Server_addNode_begin",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#ac6ddecb06609622ce450c69a52215409"];
+  Node1866 -> Node1873 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1873 [label="UA_Server_addReference",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a19235048bd6e4a353ff5adff2b1e3524"];
+}

@@ -1,0 +1,9 @@
+digraph "Opc.Ua.RemoveCertificateMethodStateMethodCallHandler"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node154 [label="Opc.Ua.RemoveCertificate\lMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node154 -> Node155 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node155 [label="Opc.Ua.RemoveCertificate\lMethodState.InitializeOptional\lChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d3e/classOpc_1_1Ua_1_1RemoveCertificateMethodState.html#aa546e02b02b708b12f3487d3b576e66b",tooltip="Initializes the any option children defined for the instance. "];
+}

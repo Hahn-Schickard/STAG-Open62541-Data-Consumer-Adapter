@@ -1,0 +1,20 @@
+digraph "function_namespace0_generated_36_begin"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1268 [label="function_namespace0\l_generated_36_begin",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1268 -> Node1269 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1269 [label="UA_LOCALIZEDTEXT",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a4589b0fbae908b0f628c56a98dfa0eab"];
+  Node1269 -> Node1270 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1270 [label="UA_STRING",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a0929e31c4c386f0def38fa5510be5db4"];
+  Node1268 -> Node1271 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1271 [label="UA_NODEID_NUMERIC",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac579ccd233069ba89fe18f8d30ab6a4a"];
+  Node1268 -> Node1272 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1272 [label="UA_QUALIFIEDNAME",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a8cce7c464f2bf0e4f36872a0dccfac79"];
+  Node1272 -> Node1270 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1268 -> Node1273 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1273 [label="UA_Server_addNode_begin",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#ac6ddecb06609622ce450c69a52215409"];
+  Node1268 -> Node1274 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1274 [label="UA_Variant_setArray",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a7c29c839833f61b4f6ae9b2dfb0a1cb6"];
+}

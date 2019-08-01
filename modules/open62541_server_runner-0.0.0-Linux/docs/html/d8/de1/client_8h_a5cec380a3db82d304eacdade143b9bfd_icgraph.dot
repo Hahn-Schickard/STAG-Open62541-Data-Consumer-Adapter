@@ -1,0 +1,9 @@
+digraph "UA_Client_reset"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node85 [label="UA_Client_reset",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node85 -> Node86 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node86 [label="UA_Client_getContext",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/de1/client_8h.html#aefe1775f2a3c40e1695e48eaa35cae1a"];
+}

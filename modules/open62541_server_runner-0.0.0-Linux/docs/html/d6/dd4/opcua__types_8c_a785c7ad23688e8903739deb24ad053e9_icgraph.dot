@@ -1,0 +1,9 @@
+digraph "OpcUa_ProgramDiagnostic2DataType_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1904 [label="OpcUa_ProgramDiagnostic2\lDataType_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1904 -> Node1905 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1905 [label="OpcUa_ProgramDiagnostic2\lDataType_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aa7c12c867fe8401a83800665a2b8ea37"];
+}

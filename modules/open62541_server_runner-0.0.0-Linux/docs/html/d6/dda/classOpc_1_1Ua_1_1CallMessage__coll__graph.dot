@@ -1,0 +1,14 @@
+digraph "Opc.Ua.CallMessage"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  Node2 [label="Opc.Ua.CallMessage",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 [label="IServiceMessage",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+  Node4 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" CallRequest" ,fontname="Sans"];
+  Node4 [label="Opc.Ua.CallRequest",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dc3/classOpc_1_1Ua_1_1CallRequest.html"];
+  Node5 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="IEncodeable",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+  Node6 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node6 [label="IServiceRequest",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+}

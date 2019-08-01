@@ -1,0 +1,19 @@
+digraph "UA_Server_writeExecutable"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node682 [label="UA_Server_writeExecutable",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node682 -> Node683 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node683 [label="__UA_Server_write",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a1993544cea828f575e7508729480eaf1"];
+  Node682 -> Node684 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node684 [label="UA_Server_browse",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#aea7aa2500cc06626298252e7eec099a8"];
+  Node682 -> Node685 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node685 [label="UA_Server_browseNext",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a6a92547d3a02097702ad6743b14e035d"];
+  Node682 -> Node686 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node686 [label="UA_Server_browseRecursive",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a2ad70c0b94dbc1fe14b29bbba036419c"];
+  Node682 -> Node687 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node687 [label="UA_Server_browseSimplified\lBrowsePath",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a642e2b8f3d99736b27925083ddc7f6c4"];
+  Node682 -> Node688 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node688 [label="UA_Server_translateBrowse\lPathToNodeIds",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a7ec9567e999357a43348c77feb111821"];
+}

@@ -1,0 +1,11 @@
+digraph "OpcUa_SetMonitoringModeResponse_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2599 [label="OpcUa_SetMonitoringModeResponse\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2599 -> Node2600 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2600 [label="OpcUa_SetMonitoringModeResponse\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a57b0262947cf785c66c6871900f7d10a"];
+  Node2599 -> Node2601 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2601 [label="OpcUa_SetMonitoringModeResponse\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a96af683c8214bdbdc374a162c19ca56e"];
+}

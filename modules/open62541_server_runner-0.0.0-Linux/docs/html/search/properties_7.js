@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['hardwarerevision',['HardwareRevision',['../d2/d7f/classOpc_1_1Ua_1_1Di_1_1IVendorNameplateState.html#a53ad5fa1d54c68074b87ef79ba729c1d',1,'Opc.Ua.Di.IVendorNameplateState.HardwareRevision()'],['../de/d7c/classOpc_1_1Ua_1_1Di_1_1ComponentState.html#a8671039f0169e263f4990310a8b1b408',1,'Opc.Ua.Di.ComponentState.HardwareRevision()']]],
+  ['headerlayouturi',['HeaderLayoutUri',['../de/de9/classOpc_1_1Ua_1_1WriterGroupState.html#a9783e70965bdc332281dbabb52b6d256',1,'Opc.Ua.WriterGroupState.HeaderLayoutUri()'],['../d8/d24/classOpc_1_1Ua_1_1DataSetReaderState.html#a7e4c1558e768509532b5c608ad07f17d',1,'Opc.Ua.DataSetReaderState.HeaderLayoutUri()'],['../dd/da3/classOpc_1_1Ua_1_1WriterGroupDataType.html#a04bba1f95f9a4241ee4ecb357edbd8fd',1,'Opc.Ua.WriterGroupDataType.HeaderLayoutUri()'],['../d2/dff/classOpc_1_1Ua_1_1DataSetReaderDataType.html#a113560ff6e12e1c1c2c2f54612607e18',1,'Opc.Ua.DataSetReaderDataType.HeaderLayoutUri()']]],
+  ['hhlimit',['HHlimit',['../da/d37/classOpc_1_1MDIS_1_1MDISInstrumentObjectState.html#add1ce98a6a7bcf9a0b6bf9dfb67031a3',1,'Opc::MDIS::MDISInstrumentObjectState']]],
+  ['hhsetpoint',['HHSetPoint',['../da/d37/classOpc_1_1MDIS_1_1MDISInstrumentObjectState.html#ae62c7d6a88753b682ea96d04af146a74',1,'Opc::MDIS::MDISInstrumentObjectState']]],
+  ['high',['High',['../de/d6a/classOpc_1_1Ua_1_1Range.html#a7af2dd61546f7597ff716f00528b3662',1,'Opc::Ua::Range']]],
+  ['highhighlimit',['HighHighLimit',['../d7/dcc/classOpc_1_1Ua_1_1LimitAlarmState.html#a8668a9bdc9f7851522401741e2315eda',1,'Opc::Ua::LimitAlarmState']]],
+  ['highhighstate',['HighHighState',['../d7/d09/classOpc_1_1Ua_1_1NonExclusiveLimitAlarmState.html#a8ac399cc5bbdeb3b273b6cde2d580b89',1,'Opc::Ua::NonExclusiveLimitAlarmState']]],
+  ['highlimit',['HighLimit',['../d7/dcc/classOpc_1_1Ua_1_1LimitAlarmState.html#a77e4529bfaa698e04c8525df72e44137',1,'Opc::Ua::LimitAlarmState']]],
+  ['highstate',['HighState',['../d7/d09/classOpc_1_1Ua_1_1NonExclusiveLimitAlarmState.html#abf17d10f15ea51b0b13b820b4f252eb5',1,'Opc::Ua::NonExclusiveLimitAlarmState']]],
+  ['historizing',['Historizing',['../d1/d62/classOpc_1_1Ua_1_1VariableNode.html#a7468a4285e6dafb799d1cad97f3458a4',1,'Opc.Ua.VariableNode.Historizing()'],['../d8/df9/classOpc_1_1Ua_1_1VariableAttributes.html#a6ee22d7e060187d9fc8586729bb99135',1,'Opc.Ua.VariableAttributes.Historizing()']]],
+  ['historydata',['HistoryData',['../d8/d8c/classOpc_1_1Ua_1_1HistoryReadResult.html#a0e1b56092dcdf5d4c8e609de457e863c',1,'Opc::Ua::HistoryReadResult']]],
+  ['historyreadcount',['HistoryReadCount',['../df/dd3/classOpc_1_1Ua_1_1SessionDiagnosticsVariableState.html#abb09ea5c89a637694ec0b33fce3529fd',1,'Opc.Ua.SessionDiagnosticsVariableState.HistoryReadCount()'],['../d1/db4/classOpc_1_1Ua_1_1SessionDiagnosticsDataType.html#a59627c8dff3845dea11c7667ac05b3d4',1,'Opc.Ua.SessionDiagnosticsDataType.HistoryReadCount()']]],
+  ['historyreaddetails',['HistoryReadDetails',['../de/dec/classOpc_1_1Ua_1_1HistoryReadRequest.html#a9c4b11d918a77d09f66e0a3113598639',1,'Opc::Ua::HistoryReadRequest']]],
+  ['historyupdatecount',['HistoryUpdateCount',['../df/dd3/classOpc_1_1Ua_1_1SessionDiagnosticsVariableState.html#ae09373e56e8eed25930e4f2b6b1d7a65',1,'Opc.Ua.SessionDiagnosticsVariableState.HistoryUpdateCount()'],['../d1/db4/classOpc_1_1Ua_1_1SessionDiagnosticsDataType.html#ac43552da0f9d9d62cfd49521bd2db3be',1,'Opc.Ua.SessionDiagnosticsDataType.HistoryUpdateCount()']]],
+  ['historyupdatedetails',['HistoryUpdateDetails',['../d1/d72/classOpc_1_1Ua_1_1HistoryUpdateRequest.html#a25b36ff1a049961c2f74f7912f3d1425',1,'Opc::Ua::HistoryUpdateRequest']]],
+  ['hlimit',['Hlimit',['../da/d37/classOpc_1_1MDIS_1_1MDISInstrumentObjectState.html#a156eaa710c1dbd4e27eb922d6c54a432',1,'Opc::MDIS::MDISInstrumentObjectState']]],
+  ['hsetpoint',['HSetPoint',['../da/d37/classOpc_1_1MDIS_1_1MDISInstrumentObjectState.html#ace29b34dc72f9deb6a2e9bcd97db2cad',1,'Opc::MDIS::MDISInstrumentObjectState']]]
+];

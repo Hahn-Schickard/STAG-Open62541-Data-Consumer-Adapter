@@ -1,0 +1,9 @@
+digraph "OpcUa_LiteralOperand_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1274 [label="OpcUa_LiteralOperand\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1274 -> Node1275 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1275 [label="OpcUa_LiteralOperand\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ae7768baac650992e2955082b31f2cbd8"];
+}

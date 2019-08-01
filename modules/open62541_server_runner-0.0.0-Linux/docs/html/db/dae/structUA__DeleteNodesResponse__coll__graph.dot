@@ -1,0 +1,28 @@
+digraph "UA_DeleteNodesResponse"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  Node1 [label="UA_DeleteNodesResponse",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" diagnosticInfos" ,fontname="Sans"];
+  Node2 [label="UA_DiagnosticInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/d61/structUA__DiagnosticInfo.html"];
+  Node2 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" innerDiagnosticInfo" ,fontname="Sans"];
+  Node3 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" additionalInfo" ,fontname="Sans"];
+  Node3 [label="UA_String",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dfb/structUA__String.html"];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" responseHeader" ,fontname="Sans"];
+  Node4 [label="UA_ResponseHeader",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d1d/structUA__ResponseHeader.html"];
+  Node3 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" stringTable" ,fontname="Sans"];
+  Node2 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" serviceDiagnostics" ,fontname="Sans"];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" additionalHeader" ,fontname="Sans"];
+  Node5 [label="UA_ExtensionObject",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/ddf/structUA__ExtensionObject.html"];
+  Node6 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" typeId" ,fontname="Sans"];
+  Node6 [label="UA_NodeId",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/d26/structUA__NodeId.html"];
+  Node3 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" string\nbyteString" ,fontname="Sans"];
+  Node7 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" guid" ,fontname="Sans"];
+  Node7 [label="UA_Guid",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d5/d66/structUA__Guid.html"];
+  Node3 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" body" ,fontname="Sans"];
+  Node8 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" type" ,fontname="Sans"];
+  Node8 [label="UA_DataType",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/dcb/structUA__DataType.html"];
+  Node6 -> Node8 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" typeId" ,fontname="Sans"];
+  Node9 -> Node8 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" members" ,fontname="Sans"];
+  Node9 [label="UA_DataTypeMember",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d2/db1/structUA__DataTypeMember.html"];
+}

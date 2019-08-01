@@ -1,0 +1,14 @@
+digraph "UA_Server_delete"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node523 [label="UA_Server_delete",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node523 -> Node524 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node524 [label="stopServer",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#a7500c84b2d2f5225ae0db2ff4cd1a7fe"];
+  Node524 -> Node525 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node525 [label="main",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/d29/main_8c.html#a840291bc02cba5474a4cb46a9b9566fe"];
+  Node524 -> Node526 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node526 [label="startServer",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#a911c42e2b3f26672c796d2bbfd20a298"];
+  Node526 -> Node525 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

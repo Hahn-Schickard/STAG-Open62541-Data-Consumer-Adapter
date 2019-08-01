@@ -1,0 +1,11 @@
+digraph "OpcUa_HistoryUpdateDetails_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1385 [label="OpcUa_HistoryUpdateDetails\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1385 -> Node1386 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1386 [label="OpcUa_HistoryUpdateDetails\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a013028e9d7b533d4f12c086ba0038cdb"];
+  Node1385 -> Node1387 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1387 [label="OpcUa_HistoryUpdateDetails\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ace3a381bbd0fc3ee97a2e25f668ae4aa"];
+}

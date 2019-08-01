@@ -1,0 +1,9 @@
+digraph "UA_SecurityTokenRequestType_delete"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2388 [label="UA_SecurityTokenRequestType\l_delete",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2388 -> Node2389 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2389 [label="UA_delete",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac3aa154b0de1b388a3a9dfb1befa5b0c"];
+}

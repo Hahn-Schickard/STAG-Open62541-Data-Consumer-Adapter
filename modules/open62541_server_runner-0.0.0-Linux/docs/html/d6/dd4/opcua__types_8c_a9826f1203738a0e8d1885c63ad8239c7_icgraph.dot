@@ -1,0 +1,9 @@
+digraph "OpcUa_SessionlessInvokeResponseType_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2564 [label="OpcUa_SessionlessInvokeResponse\lType_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2564 -> Node2565 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2565 [label="OpcUa_SessionlessInvokeResponse\lType_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aeaffde20bba6cf8f62d190d3fe3e0931"];
+}

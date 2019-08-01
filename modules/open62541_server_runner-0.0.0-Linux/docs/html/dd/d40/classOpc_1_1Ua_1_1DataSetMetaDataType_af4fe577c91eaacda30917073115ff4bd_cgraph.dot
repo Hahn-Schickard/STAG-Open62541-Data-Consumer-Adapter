@@ -1,0 +1,12 @@
+digraph "Opc.Ua.DataSetMetaDataType.MemberwiseClone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node12 [label="Opc.Ua.DataSetMetaDataType.\lMemberwiseClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node12 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node13 [label="Opc.Ua.FieldMetaDataCollection.\lClone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/d7e/classOpc_1_1Ua_1_1FieldMetaDataCollection.html#a45ef1527422182c4af6deb1ac2bb1321",tooltip="Creates a deep copy of the collection. "];
+  Node12 -> Node14 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node14 [label="Opc.Ua.ConfigurationVersion\lDataType.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/dac/classOpc_1_1Ua_1_1ConfigurationVersionDataType.html#a6d0a15cf8ec1187e432c4708a6e279d6"];
+  Node12 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

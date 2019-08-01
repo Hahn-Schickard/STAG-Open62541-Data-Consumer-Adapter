@@ -1,0 +1,9 @@
+digraph "Opc.MDIS.MoveMethodState.InitializeOptionalChildren"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node8 [label="Opc.MDIS.MoveMethodState.\lInitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node9 [label="Opc.MDIS.MoveMethodState\lMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d94/namespaceOpc_1_1MDIS.html#ad9d10cf9f86f2a060413bd50a2533fe8",tooltip="Used to receive notifications when the method is called. "];
+}

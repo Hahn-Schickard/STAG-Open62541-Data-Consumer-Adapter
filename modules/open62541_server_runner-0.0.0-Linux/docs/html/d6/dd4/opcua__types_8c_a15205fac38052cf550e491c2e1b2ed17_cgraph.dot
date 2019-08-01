@@ -1,0 +1,11 @@
+digraph "OpcUa_ServerDiagnosticsSummaryDataType_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2457 [label="OpcUa_ServerDiagnosticsSummary\lDataType_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2457 -> Node2458 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2458 [label="OpcUa_ServerDiagnosticsSummary\lDataType_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a6efb0828eb91b7f1029baa08e82d03a6"];
+  Node2457 -> Node2459 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2459 [label="OpcUa_ServerDiagnosticsSummary\lDataType_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a0d624cb966629086033d19687100c6fb"];
+}

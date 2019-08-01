@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['gatewayserveruri',['GatewayServerUri',['../de/d34/classOpc_1_1Ua_1_1ApplicationDescription.html#abefe03539abaee1d468a71d10dbc6262',1,'Opc.Ua.ApplicationDescription.GatewayServerUri()'],['../d4/dda/classOpc_1_1Ua_1_1RegisteredServer.html#a82fead1cd3e9ceb6f538d69e70a516c4',1,'Opc.Ua.RegisteredServer.GatewayServerUri()']]],
+  ['generatefileforread',['GenerateFileForRead',['../d8/da7/classOpc_1_1Ua_1_1TemporaryFileTransferState.html#a7fbd7f218f375ab5fcca9a7c1ecfc8a2',1,'Opc::Ua::TemporaryFileTransferState']]],
+  ['generatefileforwrite',['GenerateFileForWrite',['../d8/da7/classOpc_1_1Ua_1_1TemporaryFileTransferState.html#a6268a52cca9359d532cd10e19334c7d1',1,'Opc::Ua::TemporaryFileTransferState']]],
+  ['getapplication',['GetApplication',['../d4/d7d/classOpc_1_1Ua_1_1Gds_1_1DirectoryState.html#a63f27a9b0192d148ebac37b7c4b75864',1,'Opc::Ua::Gds::DirectoryState']]],
+  ['getcertificategroups',['GetCertificateGroups',['../d8/dc2/classOpc_1_1Ua_1_1Gds_1_1CertificateDirectoryState.html#a2c44be5f94ea5bd622675dcaba41a72b',1,'Opc::Ua::Gds::CertificateDirectoryState']]],
+  ['getcertificatestatus',['GetCertificateStatus',['../d8/dc2/classOpc_1_1Ua_1_1Gds_1_1CertificateDirectoryState.html#a2e99121ba8a49ef4a2aa29b19e170542',1,'Opc::Ua::Gds::CertificateDirectoryState']]],
+  ['geteditcontext',['GetEditContext',['../de/d42/classOpc_1_1Ua_1_1Fdi5_1_1EditContextState.html#a70649039e7f7a3b78a5692aad02e4b5c',1,'Opc::Ua::Fdi5::EditContextState']]],
+  ['getencryptingkey',['GetEncryptingKey',['../dd/d1e/classOpc_1_1Ua_1_1KeyCredentialConfigurationState.html#aacf766600da7f2c93ea8e055e6713f13',1,'Opc::Ua::KeyCredentialConfigurationState']]],
+  ['getmonitoreditems',['GetMonitoredItems',['../d9/d38/classOpc_1_1Ua_1_1ServerObjectState.html#af36ab00ca679fb3e6d335048bcbd76ce',1,'Opc::Ua::ServerObjectState']]],
+  ['getposition',['GetPosition',['../d5/dc0/classOpc_1_1Ua_1_1FileState.html#a21c0ce7583e607a13aab4bcd3a37fa4e',1,'Opc::Ua::FileState']]],
+  ['getrejectedlist',['GetRejectedList',['../dd/d57/classOpc_1_1Ua_1_1ServerConfigurationState.html#af90fde526fd219b2de33ba38a7186de9',1,'Opc::Ua::ServerConfigurationState']]],
+  ['getsecuritygroup',['GetSecurityGroup',['../d9/d77/classOpc_1_1Ua_1_1PubSubKeyServiceState.html#aefa88ee28ecadea72f798cfb08f27b56',1,'Opc::Ua::PubSubKeyServiceState']]],
+  ['getsecuritykeys',['GetSecurityKeys',['../d9/d77/classOpc_1_1Ua_1_1PubSubKeyServiceState.html#a7d1365d669d7917c74c558bcdb1576ca',1,'Opc::Ua::PubSubKeyServiceState']]],
+  ['getservicedescription',['GetServiceDescription',['../d7/d20/classOpc_1_1Ua_1_1Gds_1_1AuthorizationServiceState.html#a8fabca1cff6ed89fc1694effee9c87b9',1,'Opc::Ua::Gds::AuthorizationServiceState']]],
+  ['gettrustlist',['GetTrustList',['../d8/dc2/classOpc_1_1Ua_1_1Gds_1_1CertificateDirectoryState.html#ab17919a1b34616db8572c291c873ce38',1,'Opc::Ua::Gds::CertificateDirectoryState']]],
+  ['globalvars',['GlobalVars',['../da/d51/classOpc_1_1Ua_1_1Plc_1_1CtrlConfigurationState.html#a9ef42b77af63976a3671bba20961efc7',1,'Opc.Ua.Plc.CtrlConfigurationState.GlobalVars()'],['../da/d53/classOpc_1_1Ua_1_1Plc_1_1CtrlResourceState.html#aac1fe51b2c8029694580f772815a832c',1,'Opc.Ua.Plc.CtrlResourceState.GlobalVars()']]],
+  ['grade',['Grade',['../dd/d5d/classOpc_1_1Ua_1_1MTConnect_1_1CuttingItemState.html#a281d5315f37881a0acc83b7df738a15c',1,'Opc::Ua::MTConnect::CuttingItemState']]],
+  ['groupid',['GroupId',['../d5/d63/classOpc_1_1Ua_1_1PubSubStatusEventState.html#a44f7ad22b33aa15eb925aaf4bac1d276',1,'Opc::Ua::PubSubStatusEventState']]],
+  ['groupproperties',['GroupProperties',['../d5/d41/classOpc_1_1Ua_1_1PubSubGroupState.html#af63e4c4903480e6a9027a9f716a27b0a',1,'Opc.Ua.PubSubGroupState.GroupProperties()'],['../dd/d8c/classOpc_1_1Ua_1_1PubSubGroupDataType.html#a7125e7d9334308e8f00eea389d7c38dd',1,'Opc.Ua.PubSubGroupDataType.GroupProperties()']]],
+  ['groupversion',['GroupVersion',['../d6/d13/classOpc_1_1Ua_1_1UadpWriterGroupMessageState.html#a244b36a4b14b9c3861adc80ce255aee2',1,'Opc.Ua.UadpWriterGroupMessageState.GroupVersion()'],['../d2/df7/classOpc_1_1Ua_1_1UadpDataSetReaderMessageState.html#a9ab0ce2d0847777f9bbb90f1d467da8c',1,'Opc.Ua.UadpDataSetReaderMessageState.GroupVersion()'],['../d9/dea/classOpc_1_1Ua_1_1UadpWriterGroupMessageDataType.html#a3247bb6c92b4505a23a8b6193a02a01d',1,'Opc.Ua.UadpWriterGroupMessageDataType.GroupVersion()'],['../d5/d11/classOpc_1_1Ua_1_1UadpDataSetReaderMessageDataType.html#a3705c72e46bfaec02945221625920ffd',1,'Opc.Ua.UadpDataSetReaderMessageDataType.GroupVersion()']]]
+];

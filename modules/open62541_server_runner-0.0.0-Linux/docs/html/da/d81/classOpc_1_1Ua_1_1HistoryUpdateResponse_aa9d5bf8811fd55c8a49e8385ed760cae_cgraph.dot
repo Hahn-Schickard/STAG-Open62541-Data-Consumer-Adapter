@@ -1,0 +1,12 @@
+digraph "Opc.Ua.HistoryUpdateResponse.MemberwiseClone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node10 [label="Opc.Ua.HistoryUpdateResponse.\lMemberwiseClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node10 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node11 [label="Opc.Ua.ResponseHeader.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d77/classOpc_1_1Ua_1_1ResponseHeader.html#a47203f6e7fd31e812fe8584b865f289a"];
+  Node10 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node12 [label="Opc.Ua.HistoryUpdateResult\lCollection.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d0a/classOpc_1_1Ua_1_1HistoryUpdateResultCollection.html#a2072b70a9f9f72d0e46ca353874f4d94",tooltip="Creates a deep copy of the collection. "];
+  Node10 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

@@ -1,0 +1,17 @@
+digraph "UA_EventFilterResult"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  Node1 [label="UA_EventFilterResult",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" selectClauseDiagnosticInfos" ,fontname="Sans"];
+  Node2 [label="UA_DiagnosticInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/d61/structUA__DiagnosticInfo.html"];
+  Node2 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" innerDiagnosticInfo" ,fontname="Sans"];
+  Node3 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" additionalInfo" ,fontname="Sans"];
+  Node3 [label="UA_String",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dfb/structUA__String.html"];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" whereClauseResult" ,fontname="Sans"];
+  Node4 [label="UA_ContentFilterResult",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d82/structUA__ContentFilterResult.html"];
+  Node2 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" elementDiagnosticInfos" ,fontname="Sans"];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" elementResults" ,fontname="Sans"];
+  Node5 [label="UA_ContentFilterElementResult",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d15/structUA__ContentFilterElementResult.html"];
+  Node2 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" operandDiagnosticInfos" ,fontname="Sans"];
+}

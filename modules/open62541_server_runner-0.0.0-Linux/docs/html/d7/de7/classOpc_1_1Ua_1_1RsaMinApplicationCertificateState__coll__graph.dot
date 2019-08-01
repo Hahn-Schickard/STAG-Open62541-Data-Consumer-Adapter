@@ -1,0 +1,12 @@
+digraph "Opc.Ua.RsaMinApplicationCertificateState"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  Node4 [label="Opc.Ua.RsaMinApplication\lCertificateState",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node5 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="ApplicationCertificateState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/da2/classOpc_1_1Ua_1_1ApplicationCertificateState.html",tooltip="Stores an instance of the ApplicationCertificateType ObjectType. "];
+  Node6 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node6 [label="CertificateState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d92/classOpc_1_1Ua_1_1CertificateState.html",tooltip="Stores an instance of the CertificateType ObjectType. "];
+  Node7 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node7 [label="BaseObjectState",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+}

@@ -1,0 +1,13 @@
+digraph "OpcUa_HistoryUpdateRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1212 [label="OpcUa_HistoryUpdateRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1212 -> Node1213 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1213 [label="OpcUa_ClientApi_BeginHistory\lUpdate",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#a81f82457019d43fd094ec1a440183511"];
+  Node1212 -> Node1214 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1214 [label="OpcUa_ClientApi_HistoryUpdate",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#a080448db55787162079ab1fa23b577fe"];
+  Node1212 -> Node1215 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1215 [label="OpcUa_HistoryUpdateRequest\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a5bd7e613c6398e6e20da2494c15056ee"];
+}

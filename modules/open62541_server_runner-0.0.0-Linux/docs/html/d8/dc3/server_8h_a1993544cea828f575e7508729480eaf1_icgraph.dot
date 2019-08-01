@@ -1,0 +1,39 @@
+digraph "__UA_Server_write"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node36 [label="__UA_Server_write",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node36 -> Node37 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node37 [label="UA_Server_readExecutable",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a3324abe9419cebad6727c9647dcff12a"];
+  Node36 -> Node38 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node38 [label="UA_Server_writeAccessLevel",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#acf93fc40ecc7823e487b5461afd125d4"];
+  Node36 -> Node39 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node39 [label="UA_Server_writeArrayDimensions",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a71887d11647f92486f3c7a867564c731"];
+  Node36 -> Node40 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node40 [label="UA_Server_writeBrowseName",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a58c4c2f5c5cf0c55c9415c326e194374"];
+  Node36 -> Node41 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node41 [label="UA_Server_writeDataType",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#acb0121dedeb9b5e38af4aea3e043117e"];
+  Node36 -> Node42 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node42 [label="UA_Server_writeDescription",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a63b538f8b8faaf92c6146ff2635ec990"];
+  Node36 -> Node43 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node43 [label="UA_Server_writeDisplayName",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a87fc73c9b820e4887d1a4a158182d132"];
+  Node36 -> Node44 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node44 [label="UA_Server_writeEventNotifier",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#abb711350ebb000ae89268f0f81900e33"];
+  Node36 -> Node45 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node45 [label="UA_Server_writeExecutable",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#aa24c3e3018c4ff7243961ebaa44e409a"];
+  Node36 -> Node46 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node46 [label="UA_Server_writeHistorizing",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a6b5198cb62185fd258dda1fc53db9622"];
+  Node36 -> Node47 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node47 [label="UA_Server_writeInverseName",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a089a9b40d9317b971d10a08718c210e1"];
+  Node36 -> Node48 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node48 [label="UA_Server_writeIsAbstract",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#ab7ebb67608ee5a85755b7ee7d612d669"];
+  Node36 -> Node49 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node49 [label="UA_Server_writeMinimumSampling\lInterval",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#afabd427f39edf07b3255474c7c976229"];
+  Node36 -> Node50 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node50 [label="UA_Server_writeValue",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#ad0c877003d10dc53e013b4469be29149"];
+  Node36 -> Node51 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node51 [label="UA_Server_writeValueRank",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#abec4774dcce85c1c1a48812f6c1b8c8e"];
+  Node36 -> Node52 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node52 [label="UA_Server_writeWriteMask",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#ab59d96ff7bdbfffbc30878084e89affd"];
+}

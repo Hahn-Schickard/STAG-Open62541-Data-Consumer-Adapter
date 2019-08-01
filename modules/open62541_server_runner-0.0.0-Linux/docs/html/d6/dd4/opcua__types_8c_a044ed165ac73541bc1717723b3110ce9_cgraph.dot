@@ -1,0 +1,11 @@
+digraph "OpcUa_ReadValueId_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2141 [label="OpcUa_ReadValueId_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2141 -> Node2142 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2142 [label="OpcUa_ReadValueId_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a713c7f02cc6c6bec6dcf665383e9207a"];
+  Node2141 -> Node2143 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2143 [label="OpcUa_ReadValueId_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a0c45c64fd52d66c24ee6b558d48ae2a3"];
+}

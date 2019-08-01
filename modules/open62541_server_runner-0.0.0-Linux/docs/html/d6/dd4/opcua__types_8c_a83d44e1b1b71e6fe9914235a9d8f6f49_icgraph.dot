@@ -1,0 +1,13 @@
+digraph "OpcUa_RepublishRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2366 [label="OpcUa_RepublishRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2366 -> Node2367 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2367 [label="OpcUa_ClientApi_BeginRepublish",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#ab816dab7d251f1b12373f1bc1cd4fa55"];
+  Node2366 -> Node2368 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2368 [label="OpcUa_ClientApi_Republish",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#ac6fee766f0f3c2c00bc1669f9689e6e0"];
+  Node2366 -> Node2369 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2369 [label="OpcUa_RepublishRequest\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a59ee73cffb97d5a284fec70596e42da4"];
+}

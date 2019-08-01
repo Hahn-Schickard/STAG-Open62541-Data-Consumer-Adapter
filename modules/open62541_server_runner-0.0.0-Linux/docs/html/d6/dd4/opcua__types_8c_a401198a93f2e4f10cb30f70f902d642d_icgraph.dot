@@ -1,0 +1,13 @@
+digraph "OpcUa_DeleteReferencesRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node920 [label="OpcUa_DeleteReferencesRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node920 -> Node921 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node921 [label="OpcUa_ClientApi_BeginDelete\lReferences",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#acbb710382f502e2d8c80e111c86b480f"];
+  Node920 -> Node922 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node922 [label="OpcUa_ClientApi_DeleteReferences",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#a8dc8221f80f740e220025c9fd352fcef"];
+  Node920 -> Node923 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node923 [label="OpcUa_DeleteReferencesRequest\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aab3f9eab13041b7f86fd6f6033420891"];
+}

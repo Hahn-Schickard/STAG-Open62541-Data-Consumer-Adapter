@@ -1,0 +1,22 @@
+digraph "UA_NODEID_STRING"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1574 [label="UA_NODEID_STRING",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1574 -> Node1575 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1575 [label="addDeviceNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#a31c80dcffd322bea405d71b1d17baa8a"];
+  Node1575 -> Node1576 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1576 [label="update_DataConsumer",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#a345d0e3be278b6a5cfcea2494ef96c70"];
+  Node1574 -> Node1577 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1577 [label="addGroupNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#a9b532a0c87c2aaafa7cb4927bbfc0a33"];
+  Node1577 -> Node1578 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1578 [label="addDeviceNodeElement",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#aa243cc170c070327fe9157dfc6b1e48f"];
+  Node1578 -> Node1575 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1578 -> Node1577 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1574 -> Node1579 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1579 [label="addMetricNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#ae3e37a7511ea52945e08d0c0d83a9495"];
+  Node1579 -> Node1578 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1574 -> Node1580 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1580 [label="UA_EXPANDEDNODEID_STRING",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a71883bf4c00708acbb7af2de78a2fa9d"];
+}

@@ -1,0 +1,11 @@
+digraph "OpcUa_EnumDefinition_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1041 [label="OpcUa_EnumDefinition\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1041 -> Node1042 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1042 [label="OpcUa_EnumDefinition\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a3be077147b832271dbc1c2f5b8def7bd"];
+  Node1041 -> Node1043 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1043 [label="OpcUa_EnumDefinition\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aecf0a05f9654781993287a60c4d4161a"];
+}

@@ -1,0 +1,11 @@
+digraph "OpcUa_AnonymousIdentityToken_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node191 [label="OpcUa_AnonymousIdentityToken\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node191 -> Node192 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node192 [label="OpcUa_AnonymousIdentityToken\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a55f8c35b0f51958b354ed85cc29ccf07"];
+  Node191 -> Node193 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node193 [label="OpcUa_AnonymousIdentityToken\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ab388c75e8d57d8ad83167851c03dc622"];
+}

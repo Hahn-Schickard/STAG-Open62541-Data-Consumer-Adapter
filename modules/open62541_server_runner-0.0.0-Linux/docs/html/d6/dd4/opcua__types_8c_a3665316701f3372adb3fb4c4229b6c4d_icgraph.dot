@@ -1,0 +1,9 @@
+digraph "OpcUa_OpenSecureChannelRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1848 [label="OpcUa_OpenSecureChannelRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1848 -> Node1849 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1849 [label="OpcUa_OpenSecureChannelRequest\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aa0989e33800da722d7cd854f3c37e71e"];
+}

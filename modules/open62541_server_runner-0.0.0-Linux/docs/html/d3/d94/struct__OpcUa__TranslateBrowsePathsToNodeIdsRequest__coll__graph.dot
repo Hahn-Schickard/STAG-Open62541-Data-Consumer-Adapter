@@ -1,0 +1,14 @@
+digraph "_OpcUa_TranslateBrowsePathsToNodeIdsRequest"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  Node1 [label="_OpcUa_TranslateBrowsePaths\lToNodeIdsRequest",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" RequestHeader" ,fontname="Sans"];
+  Node2 [label="_OpcUa_RequestHeader",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/d79/struct__OpcUa__RequestHeader.html"];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" BrowsePaths" ,fontname="Sans"];
+  Node3 [label="_OpcUa_BrowsePath",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dde/struct__OpcUa__BrowsePath.html"];
+  Node4 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" RelativePath" ,fontname="Sans"];
+  Node4 [label="_OpcUa_RelativePath",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/df8/struct__OpcUa__RelativePath.html"];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" Elements" ,fontname="Sans"];
+  Node5 [label="_OpcUa_RelativePathElement",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/d34/struct__OpcUa__RelativePathElement.html"];
+}

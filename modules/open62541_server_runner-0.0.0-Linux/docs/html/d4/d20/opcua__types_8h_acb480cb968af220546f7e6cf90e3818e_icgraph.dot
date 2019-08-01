@@ -1,0 +1,9 @@
+digraph "OpcUa_RegisterServerResponse_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2000 [label="OpcUa_RegisterServerResponse\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2000 -> Node2001 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2001 [label="OpcUa_RegisterServerResponse\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#adfe8863658cf7dc766971a9e156ebb1f"];
+}

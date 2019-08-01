@@ -1,0 +1,9 @@
+digraph "OpcUa_OptionSet_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1876 [label="OpcUa_OptionSet_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1876 -> Node1877 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1877 [label="OpcUa_OptionSet_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#af8408d2708b6d5dbccbc6c3376f4af9b"];
+}

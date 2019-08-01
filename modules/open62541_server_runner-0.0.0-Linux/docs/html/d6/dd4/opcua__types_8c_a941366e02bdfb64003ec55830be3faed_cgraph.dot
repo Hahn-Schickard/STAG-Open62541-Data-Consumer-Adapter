@@ -1,0 +1,11 @@
+digraph "OpcUa_ReferenceTypeNode_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2211 [label="OpcUa_ReferenceTypeNode\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2211 -> Node2212 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2212 [label="OpcUa_ReferenceTypeNode\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a4fa17c56d4d3ea5e711fb946abb55c9a"];
+  Node2211 -> Node2213 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2213 [label="OpcUa_ReferenceTypeNode\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ae2fb8bd09a10ed4a2d609fbd98a4ff51"];
+}

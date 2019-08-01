@@ -1,0 +1,9 @@
+digraph "Opc.Ua.OpenWithMasksMethodStateMethodCallHandler"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node115 [label="Opc.Ua.OpenWithMasksMethod\lStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node115 -> Node116 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node116 [label="Opc.Ua.OpenWithMasksMethod\lState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dc/d87/classOpc_1_1Ua_1_1OpenWithMasksMethodState.html#a4f7ab134998fd7db709546cc3dacd308",tooltip="Initializes the any option children defined for the instance. "];
+}

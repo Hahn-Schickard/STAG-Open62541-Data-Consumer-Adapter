@@ -1,0 +1,13 @@
+digraph "OpcUa_ModifyMonitoredItemsRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1346 [label="OpcUa_ModifyMonitoredItems\lRequest_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1346 -> Node1347 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1347 [label="OpcUa_ClientApi_BeginModify\lMonitoredItems",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#a246d48c23e4a3f48532caec9aff41bbc"];
+  Node1346 -> Node1348 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1348 [label="OpcUa_ClientApi_ModifyMonitored\lItems",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#aec0fd860c1220a9844e42119fb8b6520"];
+  Node1346 -> Node1349 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1349 [label="OpcUa_ModifyMonitoredItems\lRequest_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a025290d0dc67002be9d5d8f2d3c0fbc8"];
+}

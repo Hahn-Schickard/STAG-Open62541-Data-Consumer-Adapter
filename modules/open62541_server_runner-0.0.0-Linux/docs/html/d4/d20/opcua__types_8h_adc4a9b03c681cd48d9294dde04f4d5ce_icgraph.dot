@@ -1,0 +1,9 @@
+digraph "OpcUa_ModelChangeStructureDataType_Clear"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1313 [label="OpcUa_ModelChangeStructure\lDataType_Clear",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1313 -> Node1314 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1314 [label="OpcUa_ModelChangeStructure\lDataType_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aacd2a2d56f8e90262c02eeb6a7fad5f5"];
+}

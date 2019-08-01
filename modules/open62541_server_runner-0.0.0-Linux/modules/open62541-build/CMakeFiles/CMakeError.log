@@ -1,0 +1,36 @@
+Performing C SOURCE FILE Test CC_HAS_-fstack-clash-protection failed with the following output:
+Change Dir: /home/saukijan/Documents/HS-OPCUA/open62541-server/build/open62541-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_64a13/fast"
+/usr/bin/make -f CMakeFiles/cmTC_64a13.dir/build.make CMakeFiles/cmTC_64a13.dir/build
+make[1]: Entering directory '/home/saukijan/Documents/HS-OPCUA/open62541-server/build/open62541-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_64a13.dir/src.c.o
+/usr/bin/gcc-6    -DCC_HAS_-fstack-clash-protection   -fstack-clash-protection -o CMakeFiles/cmTC_64a13.dir/src.c.o   -c /home/saukijan/Documents/HS-OPCUA/open62541-server/build/open62541-build/CMakeFiles/CMakeTmp/src.c
+gcc-6: error: unrecognized command line option '-fstack-clash-protection'; did you mean '-fstack-protector'?
+CMakeFiles/cmTC_64a13.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_64a13.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_64a13.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/saukijan/Documents/HS-OPCUA/open62541-server/build/open62541-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_64a13/fast' failed
+make: *** [cmTC_64a13/fast] Error 2
+
+Source file was:
+int main(void) { return 0; }
+Performing C SOURCE FILE Test CC_HAS_-mcet -fcf-protection failed with the following output:
+Change Dir: /home/saukijan/Documents/HS-OPCUA/open62541-server/build/open62541-build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_5bdd8/fast"
+/usr/bin/make -f CMakeFiles/cmTC_5bdd8.dir/build.make CMakeFiles/cmTC_5bdd8.dir/build
+make[1]: Entering directory '/home/saukijan/Documents/HS-OPCUA/open62541-server/build/open62541-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_5bdd8.dir/src.c.o
+/usr/bin/gcc-6    -DCC_HAS_-mcet -fcf-protection   -mcet -fcf-protection -o CMakeFiles/cmTC_5bdd8.dir/src.c.o   -c /home/saukijan/Documents/HS-OPCUA/open62541-server/build/open62541-build/CMakeFiles/CMakeTmp/src.c
+gcc-6: error: unrecognized command line option '-fcf-protection'; did you mean '-fstack-protector'?
+gcc-6: error: unrecognized command line option '-mcet'; did you mean '-maes'?
+gcc-6: error: unrecognized command line option '-fcf-protection'; did you mean '-fstack-protector'?
+CMakeFiles/cmTC_5bdd8.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_5bdd8.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_5bdd8.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/saukijan/Documents/HS-OPCUA/open62541-server/build/open62541-build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_5bdd8/fast' failed
+make: *** [cmTC_5bdd8/fast] Error 2
+
+Source file was:
+int main(void) { return 0; }

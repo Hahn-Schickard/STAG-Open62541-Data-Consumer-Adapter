@@ -1,0 +1,9 @@
+digraph "UA_Client_readDescriptionAttribute_async"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node109 [label="UA_Client_readDescription\lAttribute_async",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node109 -> Node110 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node110 [label="__UA_Client_readAttribute\l_async",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/de8/client__highlevel__async_8h.html#affe9d34c718e9a5bd5251d86c5f3d231"];
+}

@@ -1,0 +1,11 @@
+digraph "__UA_Client_translateBrowsePathsToNodeIds_async"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node39 [label="__UA_Client_translateBrowse\lPathsToNodeIds_async",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node39 -> Node40 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node40 [label="UA_Cient_translateBrowse\lPathsToNodeIds_async",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/de8/client__highlevel__async_8h.html#ab9cffdecefe7ef1ffae178a22336a116"];
+  Node39 -> Node41 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node41 [label="UA_Client_addMethodNode\l_async",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/de8/client__highlevel__async_8h.html#a4e9b4a26c4abce03c53cd326b4bb0d34"];
+}

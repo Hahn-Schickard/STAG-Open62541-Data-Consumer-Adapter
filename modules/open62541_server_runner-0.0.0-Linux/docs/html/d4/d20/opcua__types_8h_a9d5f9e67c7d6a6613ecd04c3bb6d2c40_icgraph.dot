@@ -1,0 +1,13 @@
+digraph "OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2466 [label="OpcUa_TranslateBrowsePaths\lToNodeIdsRequest_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2466 -> Node2467 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2467 [label="OpcUa_ClientApi_BeginTranslate\lBrowsePathsToNodeIds",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#abfa831a8eabbb2c188bf66690a5e452c"];
+  Node2466 -> Node2468 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2468 [label="OpcUa_ClientApi_Translate\lBrowsePathsToNodeIds",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#ad1ddfaa8098cb1fa87ab15a23ceef348"];
+  Node2466 -> Node2469 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2469 [label="OpcUa_TranslateBrowsePaths\lToNodeIdsRequest_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aa85f9c2f2c2f5ae9394d4fdcb044db85"];
+}

@@ -1,0 +1,9 @@
+digraph "UA_Server_AccessControl_allowHistoryUpdateUpdateData"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node57 [label="UA_Server_AccessControl\l_allowHistoryUpdateUpdateData",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node57 -> Node58 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node58 [label="UA_Server_addMethodNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a0e656ba8362645a747b33cf42624a09b"];
+}

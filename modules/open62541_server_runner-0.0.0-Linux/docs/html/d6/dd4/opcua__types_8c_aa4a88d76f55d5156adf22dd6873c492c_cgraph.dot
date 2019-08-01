@@ -1,0 +1,11 @@
+digraph "OpcUa_EventFilter_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1111 [label="OpcUa_EventFilter_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1111 -> Node1112 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1112 [label="OpcUa_EventFilter_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a4c1b679486a8a4ff843759830f2f504b"];
+  Node1111 -> Node1113 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1113 [label="OpcUa_EventFilter_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a81d77d157b47aec77e7d55d9ce3cb9ef"];
+}

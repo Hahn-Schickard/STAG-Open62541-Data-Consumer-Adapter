@@ -1,0 +1,9 @@
+digraph "OpcUa_ReferenceNode_Clear"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2181 [label="OpcUa_ReferenceNode\l_Clear",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2181 -> Node2182 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2182 [label="OpcUa_ReferenceNode\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a0ec9e5e913458ab26f18c8a1279d9f7a"];
+}

@@ -1,0 +1,29 @@
+digraph "Opc.Ua.Node"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="Opc.Ua.Node",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 [label="IEncodeable",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2 [label="Opc.Ua.InstanceNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d5/df9/classOpc_1_1Ua_1_1InstanceNode.html"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 [label="Opc.Ua.MethodNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/d94/classOpc_1_1Ua_1_1MethodNode.html"];
+  Node2 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node4 [label="Opc.Ua.ObjectNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/d64/classOpc_1_1Ua_1_1ObjectNode.html"];
+  Node2 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="Opc.Ua.VariableNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d62/classOpc_1_1Ua_1_1VariableNode.html"];
+  Node2 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node6 [label="Opc.Ua.ViewNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$da/d91/classOpc_1_1Ua_1_1ViewNode.html"];
+  Node0 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node7 [label="Opc.Ua.TypeNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/d38/classOpc_1_1Ua_1_1TypeNode.html"];
+  Node7 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node8 [label="Opc.Ua.DataTypeNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d2/d2b/classOpc_1_1Ua_1_1DataTypeNode.html"];
+  Node7 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node9 [label="Opc.Ua.ObjectTypeNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d95/classOpc_1_1Ua_1_1ObjectTypeNode.html"];
+  Node7 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node10 [label="Opc.Ua.ReferenceTypeNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d33/classOpc_1_1Ua_1_1ReferenceTypeNode.html"];
+  Node7 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node11 [label="Opc.Ua.VariableTypeNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/de1/classOpc_1_1Ua_1_1VariableTypeNode.html"];
+}

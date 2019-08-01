@@ -1,0 +1,9 @@
+digraph "nlohmann::detail::binary_writer::binary_writer"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="nlohmann::detail::binary\l_writer::binary_writer",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node0 -> Node1 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 [label="nlohmann::detail::assert",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dc/df0/namespacenlohmann_1_1detail.html#a42547dfd3748c5e6d5c576a7f958ab8e"];
+}

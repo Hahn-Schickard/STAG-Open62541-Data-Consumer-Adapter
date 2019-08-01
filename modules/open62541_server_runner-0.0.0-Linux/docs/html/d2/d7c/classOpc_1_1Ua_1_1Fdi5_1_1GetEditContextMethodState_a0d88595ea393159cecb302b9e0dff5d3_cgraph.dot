@@ -1,0 +1,9 @@
+digraph "Opc.Ua.Fdi5.GetEditContextMethodState.InitializeOptionalChildren"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node8 [label="Opc.Ua.Fdi5.GetEditContext\lMethodState.InitializeOptional\lChildren",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node9 [label="Opc.Ua.Fdi5.GetEditContext\lMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/db2/namespaceOpc_1_1Ua_1_1Fdi5.html#ae2c930504a6ed088a060ce662252d095",tooltip="Used to receive notifications when the method is called. "];
+}

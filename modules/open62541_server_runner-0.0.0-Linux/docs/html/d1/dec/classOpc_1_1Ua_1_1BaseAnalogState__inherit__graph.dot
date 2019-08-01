@@ -1,0 +1,13 @@
+digraph "Opc.Ua.BaseAnalogState"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="Opc.Ua.BaseAnalogState",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 [label="Opc.Ua.AnalogItemState\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d06/classOpc_1_1Ua_1_1AnalogItemState.html",tooltip="A typed version of the AnalogItemType variable. "];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2 [label="Opc.Ua.AnalogUnitState\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d30/classOpc_1_1Ua_1_1AnalogUnitState.html",tooltip="A typed version of the AnalogUnitType variable. "];
+  Node0 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 [label="Opc.Ua.BaseAnalogState\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$db/de8/classOpc_1_1Ua_1_1BaseAnalogState.html",tooltip="A typed version of the BaseAnalogType variable. "];
+}

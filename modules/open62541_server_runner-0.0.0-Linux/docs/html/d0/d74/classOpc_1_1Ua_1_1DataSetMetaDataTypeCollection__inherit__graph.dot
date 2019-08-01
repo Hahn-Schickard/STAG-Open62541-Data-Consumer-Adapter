@@ -1,0 +1,11 @@
+digraph "Opc.Ua.DataSetMetaDataTypeCollection"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="Opc.Ua.DataSetMetaDataType\lCollection",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 [label="List\< DataSetMetaDataType \>",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+  Node2 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2 [label="ICloneableelse\n    public partial\l class DataSetMetaDataType\lCollection List\< DataSetMetaData\lType \>endif",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+}

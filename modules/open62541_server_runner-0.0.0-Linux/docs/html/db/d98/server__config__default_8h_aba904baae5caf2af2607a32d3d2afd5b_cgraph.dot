@@ -1,0 +1,11 @@
+digraph "UA_ServerConfig_setMinimal"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node73 [label="UA_ServerConfig_setMinimal",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node73 -> Node74 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node74 [label="UA_ServerConfig_setDefault\lWithSecurityPolicies",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$db/d98/server__config__default_8h.html#a5bbc6fd0418849740ba97856f6804386"];
+  Node73 -> Node75 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node75 [label="UA_ServerConfig_setMinimal\lCustomBuffer",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$db/d98/server__config__default_8h.html#ac5a9b7c0c0c1b9a2b5644df3422706c2"];
+}

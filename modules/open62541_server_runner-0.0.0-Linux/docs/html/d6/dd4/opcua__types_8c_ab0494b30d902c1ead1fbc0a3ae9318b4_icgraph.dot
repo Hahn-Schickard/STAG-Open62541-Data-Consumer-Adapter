@@ -1,0 +1,9 @@
+digraph "OpcUa_ViewDescription_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node3094 [label="OpcUa_ViewDescription\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node3094 -> Node3095 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3095 [label="OpcUa_ViewDescription\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a85d5f1e7131aafeaeede13d316c96360"];
+}

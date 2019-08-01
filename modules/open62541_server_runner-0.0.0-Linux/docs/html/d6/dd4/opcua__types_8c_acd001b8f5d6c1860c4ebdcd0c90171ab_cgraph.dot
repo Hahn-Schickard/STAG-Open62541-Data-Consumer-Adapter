@@ -1,0 +1,11 @@
+digraph "OpcUa_StatusChangeNotification_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2715 [label="OpcUa_StatusChangeNotification\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2715 -> Node2716 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2716 [label="OpcUa_StatusChangeNotification\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a5e7a0b88c193349828512cba2495355b"];
+  Node2715 -> Node2717 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2717 [label="OpcUa_StatusChangeNotification\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a143950ee2c94bf063f7dc6a0fbf85a58"];
+}

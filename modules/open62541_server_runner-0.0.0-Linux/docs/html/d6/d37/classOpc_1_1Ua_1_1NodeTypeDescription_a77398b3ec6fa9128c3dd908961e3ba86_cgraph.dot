@@ -1,0 +1,10 @@
+digraph "Opc.Ua.NodeTypeDescription.MemberwiseClone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node10 [label="Opc.Ua.NodeTypeDescription.\lMemberwiseClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node10 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node11 [label="Opc.Ua.QueryDataDescription\lCollection.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/db8/classOpc_1_1Ua_1_1QueryDataDescriptionCollection.html#abdb5c571403d77cad5f23e4c92dc0720",tooltip="Creates a deep copy of the collection. "];
+  Node10 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

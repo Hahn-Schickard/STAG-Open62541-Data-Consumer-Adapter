@@ -1,0 +1,41 @@
+digraph "function_namespace0_generated_97_begin"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2212 [label="function_namespace0\l_generated_97_begin",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2212 -> Node2213 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2213 [label="UA_init",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a9fd8dd9b4599d3be03a044414d8be468"];
+  Node2213 -> Node2214 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2214 [label="UA_copy",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#aa2902fbc211543d7635bd99e5696dad0"];
+  Node2213 -> Node2215 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2215 [label="UA_clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a7232220135b6d5ef3a17c3c3f93aabd3"];
+  Node2213 -> Node2216 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2216 [label="UA_delete",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac3aa154b0de1b388a3a9dfb1befa5b0c"];
+  Node2213 -> Node2217 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2217 [label="UA_Array_new",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#acdc2a1e23e19ecdf24b5a642ad4d8263"];
+  Node2213 -> Node2218 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2218 [label="UA_Array_copy",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a113cafc13758926b8b8df55a02d45286"];
+  Node2213 -> Node2219 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2219 [label="UA_Array_delete",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a86be407695287c3ba6603da176b3712a"];
+  Node2213 -> Node2220 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2220 [label="UA_random_seed",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a19155a0b01bd2653fea203fbb5d136d6"];
+  Node2213 -> Node2221 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2221 [label="UA_UInt32_random",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a48452e8be4dba0fa524d74cf38bda3e6"];
+  Node2213 -> Node2222 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2222 [label="UA_Guid_random",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a60a7c639fb94776e13acf0f28f013c6b"];
+  Node2212 -> Node2223 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2223 [label="UA_LOCALIZEDTEXT",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a4589b0fbae908b0f628c56a98dfa0eab"];
+  Node2223 -> Node2224 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2224 [label="UA_STRING",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a0929e31c4c386f0def38fa5510be5db4"];
+  Node2212 -> Node2225 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2225 [label="UA_NODEID_NUMERIC",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac579ccd233069ba89fe18f8d30ab6a4a"];
+  Node2212 -> Node2226 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2226 [label="UA_QUALIFIEDNAME",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a8cce7c464f2bf0e4f36872a0dccfac79"];
+  Node2226 -> Node2224 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2212 -> Node2227 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2227 [label="UA_Server_addNode_begin",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#ac6ddecb06609622ce450c69a52215409"];
+  Node2212 -> Node2224 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2212 -> Node2228 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2228 [label="UA_Variant_setArray",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a7c29c839833f61b4f6ae9b2dfb0a1cb6"];
+}

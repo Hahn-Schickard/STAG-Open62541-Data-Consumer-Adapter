@@ -1,0 +1,9 @@
+digraph "OpcUa_EventNotificationList_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1148 [label="OpcUa_EventNotificationList\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1148 -> Node1149 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1149 [label="OpcUa_EventNotificationList\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a26fb50c40aa19124fdde312a21ba652b"];
+}

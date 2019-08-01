@@ -1,0 +1,34 @@
+digraph "__UA_Server_addNode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="__UA_Server_addNode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2 [label="UA_Server_addDataTypeNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a20499398ced5689df22e872469f3e931"];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 [label="UA_Server_addObjectNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a21512a457fd9a62270d01dd4126987f9"];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node4 [label="addDeviceNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#a31c80dcffd322bea405d71b1d17baa8a"];
+  Node4 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="update_DataConsumer",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#a345d0e3be278b6a5cfcea2494ef96c70"];
+  Node3 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node6 [label="addGroupNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#a9b532a0c87c2aaafa7cb4927bbfc0a33"];
+  Node6 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node7 [label="addDeviceNodeElement",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#aa243cc170c070327fe9157dfc6b1e48f"];
+  Node7 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node7 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node8 [label="UA_Server_addObjectTypeNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a6b4dca221028c6412856a6151721b38e"];
+  Node1 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node9 [label="UA_Server_addReferenceTypeNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a562dda13ccb5d66ccdb8da4bb3b7c9dc"];
+  Node1 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node10 [label="UA_Server_addVariableNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a5ae6fc459338d882afdf68b4baa61236"];
+  Node10 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node11 [label="addMetricNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#ae3e37a7511ea52945e08d0c0d83a9495"];
+  Node11 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node12 [label="UA_Server_addVariableTypeNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a11c0d01fabab71a274102d58f1d61e8f"];
+  Node1 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node13 [label="UA_Server_addViewNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a63b2d9d10f45cef6ba47299a0891ed4f"];
+}

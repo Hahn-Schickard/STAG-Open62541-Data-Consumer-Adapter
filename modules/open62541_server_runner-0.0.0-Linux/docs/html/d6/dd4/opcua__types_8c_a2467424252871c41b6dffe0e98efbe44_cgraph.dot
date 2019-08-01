@@ -1,0 +1,11 @@
+digraph "OpcUa_CloseSessionRequest_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node535 [label="OpcUa_CloseSessionRequest\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node535 -> Node536 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node536 [label="OpcUa_CloseSessionRequest\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#afbd1007512f5e3a1ac45cf7868b14e48"];
+  Node535 -> Node537 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node537 [label="OpcUa_CloseSessionRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a6c630cbfa723a4650ad2465512e959d0"];
+}

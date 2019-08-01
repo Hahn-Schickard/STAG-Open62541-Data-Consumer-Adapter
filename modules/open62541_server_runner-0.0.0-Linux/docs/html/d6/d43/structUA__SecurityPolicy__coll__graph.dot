@@ -1,0 +1,29 @@
+digraph "UA_SecurityPolicy"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="UA_SecurityPolicy",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" certificateVerification" ,fontname="Sans"];
+  Node2 [label="UA_CertificateVerification",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d5/d9e/structUA__CertificateVerification.html"];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" localCertificate\npolicyUri" ,fontname="Sans"];
+  Node3 [label="UA_String",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dfb/structUA__String.html"];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" asymmetricModule" ,fontname="Sans"];
+  Node4 [label="UA_SecurityPolicyAsymmetric\lModule",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dd3/structUA__SecurityPolicyAsymmetricModule.html"];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" cryptoModule" ,fontname="Sans"];
+  Node5 [label="UA_SecurityPolicyCryptoModule",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/dc2/structUA__SecurityPolicyCryptoModule.html"];
+  Node6 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" encryptionAlgorithm" ,fontname="Sans"];
+  Node6 [label="UA_SecurityPolicyEncryption\lAlgorithm",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d1d/structUA__SecurityPolicyEncryptionAlgorithm.html"];
+  Node3 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" uri" ,fontname="Sans"];
+  Node7 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" signatureAlgorithm" ,fontname="Sans"];
+  Node7 [label="UA_SecurityPolicySignature\lAlgorithm",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/d10/structUA__SecurityPolicySignatureAlgorithm.html"];
+  Node3 -> Node7 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" uri" ,fontname="Sans"];
+  Node8 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" channelModule" ,fontname="Sans"];
+  Node8 [label="UA_SecurityPolicyChannel\lModule",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dfd/structUA__SecurityPolicyChannelModule.html"];
+  Node9 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" symmetricModule" ,fontname="Sans"];
+  Node9 [label="UA_SecurityPolicySymmetric\lModule",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/d38/structUA__SecurityPolicySymmetricModule.html"];
+  Node5 -> Node9 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" cryptoModule" ,fontname="Sans"];
+  Node10 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" logger" ,fontname="Sans"];
+  Node10 [label="UA_Logger",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d27/structUA__Logger.html"];
+  Node7 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" certificateSigningAlgorithm" ,fontname="Sans"];
+}

@@ -1,0 +1,11 @@
+digraph "OpcUa_ServerOnNetwork_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2471 [label="OpcUa_ServerOnNetwork\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2471 -> Node2472 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2472 [label="OpcUa_ServerOnNetwork\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#afea8fec6129518da3944926b07a30b65"];
+  Node2471 -> Node2473 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2473 [label="OpcUa_ServerOnNetwork\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ac917894bcf98054baf0955b78b12a910"];
+}

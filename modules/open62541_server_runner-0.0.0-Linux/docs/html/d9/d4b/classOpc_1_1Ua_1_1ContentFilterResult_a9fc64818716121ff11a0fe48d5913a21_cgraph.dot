@@ -1,0 +1,10 @@
+digraph "Opc.Ua.ContentFilterResult.MemberwiseClone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node12 [label="Opc.Ua.ContentFilterResult.\lMemberwiseClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node12 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node13 [label="Opc.Ua.ContentFilterElement\lResultCollection.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d67/classOpc_1_1Ua_1_1ContentFilterElementResultCollection.html#a0776fc67dcd59ee5ddb8aa62299713be",tooltip="Creates a deep copy of the collection. "];
+  Node12 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

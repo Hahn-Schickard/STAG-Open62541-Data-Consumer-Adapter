@@ -1,0 +1,9 @@
+digraph "OpcUa_ClientApi_BeginDeleteMonitoredItems"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node42 [label="OpcUa_ClientApi_BeginDelete\lMonitoredItems",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node42 -> Node43 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node43 [label="OpcUa_DeleteMonitoredItems\lRequest_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#af4028cd8a104e059c14700b0a7f5a6e9"];
+}

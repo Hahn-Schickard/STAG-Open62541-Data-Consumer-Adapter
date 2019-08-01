@@ -1,0 +1,24 @@
+digraph "std::hash&lt; nlohmann::json &gt;::operator()"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="std::hash\< nlohmann\l::json \>::operator()",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node0 -> Node1 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 [label="nlohmann::basic_json\l::dump",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/dcc/classnlohmann_1_1basic__json.html#a50ec80b02d0f3f51130d4abb5d1cfdc5",tooltip="serialization "];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2 [label="nlohmann::detail::serializer\l::dump",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d0a/classnlohmann_1_1detail_1_1serializer.html#a95460ebd1a535a543e5a0ec52e00f48b",tooltip="internal implementation of the serialization function "];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 [label="nlohmann::detail::assert",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dc/df0/namespacenlohmann_1_1detail.html#a42547dfd3748c5e6d5c576a7f958ab8e"];
+  Node2 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node4 [label="nlohmann::detail::type\l_error::create",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$da/d1c/classnlohmann_1_1detail_1_1type__error.html#aecc083aea4b698c33d042670ba50c10f"];
+  Node4 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="nlohmann::detail::JSON\l_HEDLEY_NON_NULL",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dc/df0/namespacenlohmann_1_1detail.html#af87cd7287de8935a5285d3cd31aa6336",tooltip="generates a decimal representation of the floating-point number value in [first, last). "];
+  Node4 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node6 [label="nlohmann::detail::exception\l::name",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/df2/classnlohmann_1_1detail_1_1exception.html#abf41a7e9178356314082284e6cfea278"];
+  Node6 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node7 [label="nlohmann::to_string",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d3/d9b/namespacenlohmann.html#a6ce645a0b8717757e096a5b5773b7a16",tooltip="user-defined to_string function for JSON values "];
+  Node2 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node8 [label="nlohmann::detail::binary\l_writer::to_char_type",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d1a/classnlohmann_1_1detail_1_1binary__writer.html#ab77aa48692bd4e64e4f051ce6aeb6d2d"];
+  Node2 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

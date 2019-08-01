@@ -1,0 +1,9 @@
+digraph "OpcUa_MonitoredItemModifyRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1652 [label="OpcUa_MonitoredItemModify\lRequest_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1652 -> Node1653 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1653 [label="OpcUa_MonitoredItemModify\lRequest_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ad5eae539a97e4584325aef23ec5d3a97"];
+}

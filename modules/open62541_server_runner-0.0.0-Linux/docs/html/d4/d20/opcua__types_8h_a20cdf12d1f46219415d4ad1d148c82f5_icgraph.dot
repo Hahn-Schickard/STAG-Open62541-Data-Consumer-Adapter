@@ -1,0 +1,9 @@
+digraph "OpcUa_MdnsDiscoveryConfiguration_Clear"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1277 [label="OpcUa_MdnsDiscoveryConfiguration\l_Clear",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1277 -> Node1278 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1278 [label="OpcUa_MdnsDiscoveryConfiguration\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a337705414f531f78ee9edcfcd3e24b6a"];
+}

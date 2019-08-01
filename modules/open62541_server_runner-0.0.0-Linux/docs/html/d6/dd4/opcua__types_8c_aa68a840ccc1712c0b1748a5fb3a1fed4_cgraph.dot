@@ -1,0 +1,11 @@
+digraph "OpcUa_TimeZoneDataType_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2799 [label="OpcUa_TimeZoneDataType\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2799 -> Node2800 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2800 [label="OpcUa_TimeZoneDataType\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a08d674929a0aec64a016fff533fe290b"];
+  Node2799 -> Node2801 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2801 [label="OpcUa_TimeZoneDataType\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aecfe3dff8373d16cb7588a6c856af3e6"];
+}

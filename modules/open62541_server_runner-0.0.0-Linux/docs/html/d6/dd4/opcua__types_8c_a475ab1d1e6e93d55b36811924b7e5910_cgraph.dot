@@ -1,0 +1,11 @@
+digraph "OpcUa_RolePermissionType_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2415 [label="OpcUa_RolePermissionType\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2415 -> Node2416 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2416 [label="OpcUa_RolePermissionType\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a2bcb7823a0c4ee207d745fcbe23047f3"];
+  Node2415 -> Node2417 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2417 [label="OpcUa_RolePermissionType\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ab520e30a4003c16d7b197684087220d9"];
+}

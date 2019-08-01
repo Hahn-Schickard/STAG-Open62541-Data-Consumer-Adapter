@@ -1,0 +1,9 @@
+digraph "UA_ServerStatusDataType_clear"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2423 [label="UA_ServerStatusDataType\l_clear",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2423 -> Node2424 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2424 [label="UA_clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a7232220135b6d5ef3a17c3c3f93aabd3"];
+}

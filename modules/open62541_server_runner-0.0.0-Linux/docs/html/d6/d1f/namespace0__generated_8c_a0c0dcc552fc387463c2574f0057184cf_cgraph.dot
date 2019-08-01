@@ -1,0 +1,30 @@
+digraph "function_namespace0_generated_65_begin"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1691 [label="function_namespace0\l_generated_65_begin",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1691 -> Node1692 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1692 [label="UA_LOCALIZEDTEXT",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a4589b0fbae908b0f628c56a98dfa0eab"];
+  Node1692 -> Node1693 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1693 [label="UA_STRING",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a0929e31c4c386f0def38fa5510be5db4"];
+  Node1691 -> Node1694 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1694 [label="UA_NODEID_NUMERIC",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac579ccd233069ba89fe18f8d30ab6a4a"];
+  Node1691 -> Node1695 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1695 [label="UA_QUALIFIEDNAME",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a8cce7c464f2bf0e4f36872a0dccfac79"];
+  Node1695 -> Node1693 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1691 -> Node1696 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1696 [label="UA_Server_addNode_begin",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#ac6ddecb06609622ce450c69a52215409"];
+  Node1691 -> Node1697 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1697 [label="UA_String_delete",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d29/libs_2include_2open62541_2types__generated__handling_8h.html#a5df27c222ea023fdee01ee47e951cf2a"];
+  Node1697 -> Node1698 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1698 [label="UA_delete",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac3aa154b0de1b388a3a9dfb1befa5b0c"];
+  Node1691 -> Node1699 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1699 [label="UA_String_init",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d29/libs_2include_2open62541_2types__generated__handling_8h.html#afe1f43b72333ca43687d313d13ac8711"];
+  Node1691 -> Node1700 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1700 [label="UA_String_new",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d29/libs_2include_2open62541_2types__generated__handling_8h.html#ab472b5e7452db71cfc7e85733c0aa56a"];
+  Node1700 -> Node1701 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1701 [label="UA_new",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a40bf20c146fc1f9eca242aee40d768ef"];
+  Node1691 -> Node1702 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1702 [label="UA_Variant_setScalar",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a075bd6c1d01aeb7460a588c68700661a"];
+}

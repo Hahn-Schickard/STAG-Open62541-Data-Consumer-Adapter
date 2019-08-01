@@ -1,0 +1,13 @@
+digraph "UA_SecurityPolicyCryptoModule"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  Node1 [label="UA_SecurityPolicyCryptoModule",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" encryptionAlgorithm" ,fontname="Sans"];
+  Node2 [label="UA_SecurityPolicyEncryption\lAlgorithm",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d1d/structUA__SecurityPolicyEncryptionAlgorithm.html"];
+  Node3 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" uri" ,fontname="Sans"];
+  Node3 [label="UA_String",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dfb/structUA__String.html"];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" signatureAlgorithm" ,fontname="Sans"];
+  Node4 [label="UA_SecurityPolicySignature\lAlgorithm",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/d10/structUA__SecurityPolicySignatureAlgorithm.html"];
+  Node3 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" uri" ,fontname="Sans"];
+}

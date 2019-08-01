@@ -1,0 +1,25 @@
+digraph "Opc.Ua.BaseConditionClassState"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="Opc.Ua.BaseConditionClass\lState",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 [label="BaseObjectState",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2 [label="Opc.Ua.HighlyManagedAlarm\lConditionClassState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/db7/classOpc_1_1Ua_1_1HighlyManagedAlarmConditionClassState.html",tooltip="Stores an instance of the HighlyManagedAlarmConditionClassType ObjectType. "];
+  Node0 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 [label="Opc.Ua.MaintenanceCondition\lClassState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d3/d19/classOpc_1_1Ua_1_1MaintenanceConditionClassState.html",tooltip="Stores an instance of the MaintenanceConditionClassType ObjectType. "];
+  Node0 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node4 [label="Opc.Ua.ProcessConditionClass\lState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d87/classOpc_1_1Ua_1_1ProcessConditionClassState.html",tooltip="Stores an instance of the ProcessConditionClassType ObjectType. "];
+  Node0 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="Opc.Ua.SafetyConditionClass\lState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d97/classOpc_1_1Ua_1_1SafetyConditionClassState.html",tooltip="Stores an instance of the SafetyConditionClassType ObjectType. "];
+  Node0 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node6 [label="Opc.Ua.StatisticalCondition\lClassState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$db/d2f/classOpc_1_1Ua_1_1StatisticalConditionClassState.html",tooltip="Stores an instance of the StatisticalConditionClassType ObjectType. "];
+  Node0 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node7 [label="Opc.Ua.SystemConditionClass\lState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d3/d46/classOpc_1_1Ua_1_1SystemConditionClassState.html",tooltip="Stores an instance of the SystemConditionClassType ObjectType. "];
+  Node0 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node8 [label="Opc.Ua.TestingConditionSub\lClassState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d3b/classOpc_1_1Ua_1_1TestingConditionSubClassState.html",tooltip="Stores an instance of the TestingConditionSubClassType ObjectType. "];
+  Node0 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node9 [label="Opc.Ua.TrainingCondition\lClassState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/db8/classOpc_1_1Ua_1_1TrainingConditionClassState.html",tooltip="Stores an instance of the TrainingConditionClassType ObjectType. "];
+}

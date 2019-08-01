@@ -1,0 +1,11 @@
+digraph "OpcUa_RegisterNodesResponse_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2255 [label="OpcUa_RegisterNodesResponse\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2255 -> Node2256 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2256 [label="OpcUa_RegisterNodesResponse\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ae14efd12deb5d2dd73b960d8ad177d80"];
+  Node2255 -> Node2257 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2257 [label="OpcUa_RegisterNodesResponse\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#acb4ad8910bb0cb940080398fa70c000d"];
+}

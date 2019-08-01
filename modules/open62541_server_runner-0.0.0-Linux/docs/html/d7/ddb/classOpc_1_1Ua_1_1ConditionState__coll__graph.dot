@@ -1,0 +1,10 @@
+digraph "Opc.Ua.ConditionState"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  Node70 [label="Opc.Ua.ConditionState",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node71 -> Node70 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node71 [label="BaseEventState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d96/classOpc_1_1Ua_1_1BaseEventState.html",tooltip="Stores an instance of the BaseEventType ObjectType. "];
+  Node72 -> Node71 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node72 [label="BaseObjectState",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+}

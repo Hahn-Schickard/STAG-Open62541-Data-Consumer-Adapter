@@ -1,0 +1,12 @@
+digraph "Opc.Ua.ThreeDFrame.MemberwiseClone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node10 [label="Opc.Ua.ThreeDFrame.Memberwise\lClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node10 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node11 [label="Opc.Ua.ThreeDCartesianCoordinates.\lClone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/d17/classOpc_1_1Ua_1_1ThreeDCartesianCoordinates.html#a1f92c5c7bb111ad2ffd5a635a2839f1b"];
+  Node10 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node12 [label="Opc.Ua.ThreeDOrientation.\lClone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dae/classOpc_1_1Ua_1_1ThreeDOrientation.html#a68ed39c12eca8c803ff401a0d529ffa9"];
+  Node10 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

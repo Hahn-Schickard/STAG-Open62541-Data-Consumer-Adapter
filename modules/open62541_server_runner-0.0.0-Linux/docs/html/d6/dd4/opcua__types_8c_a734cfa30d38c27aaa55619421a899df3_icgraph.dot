@@ -1,0 +1,13 @@
+digraph "OpcUa_DeleteNodesRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node862 [label="OpcUa_DeleteNodesRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node862 -> Node863 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node863 [label="OpcUa_ClientApi_BeginDelete\lNodes",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#a42f83770b336e3e3e062ea2e8c17fdd6"];
+  Node862 -> Node864 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node864 [label="OpcUa_ClientApi_DeleteNodes",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#a972237b6e40e46f73538cf7b415b0338"];
+  Node862 -> Node865 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node865 [label="OpcUa_DeleteNodesRequest\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a0d413d0508078a7f1d26564bd66e6732"];
+}

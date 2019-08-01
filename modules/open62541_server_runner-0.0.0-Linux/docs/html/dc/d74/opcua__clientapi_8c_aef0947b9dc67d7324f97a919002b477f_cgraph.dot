@@ -1,0 +1,9 @@
+digraph "OpcUa_ClientApi_BeginSetTriggering"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node105 [label="OpcUa_ClientApi_BeginSet\lTriggering",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node105 -> Node106 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node106 [label="OpcUa_SetTriggeringRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a71a094586b7f9b4ad71b68fce556627a"];
+}

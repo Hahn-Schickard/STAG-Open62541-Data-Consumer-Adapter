@@ -1,0 +1,9 @@
+digraph "Opc.Ua.RemoveConnectionMethodStateMethodCallHandler"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node157 [label="Opc.Ua.RemoveConnectionMethod\lStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node157 -> Node158 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node158 [label="Opc.Ua.RemoveConnectionMethod\lState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$da/d86/classOpc_1_1Ua_1_1RemoveConnectionMethodState.html#a0f0ad429f03cd328756d1408880742a4",tooltip="Initializes the any option children defined for the instance. "];
+}

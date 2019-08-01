@@ -1,0 +1,9 @@
+digraph "Opc.Ua.AddExtensionFieldMethodStateMethodCallHandler"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node19 [label="Opc.Ua.AddExtensionField\lMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node19 -> Node20 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node20 [label="Opc.Ua.AddExtensionField\lMethodState.InitializeOptional\lChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d4a/classOpc_1_1Ua_1_1AddExtensionFieldMethodState.html#a982dfa06dd1cb146ed94b51cd2b90ffa",tooltip="Initializes the any option children defined for the instance. "];
+}

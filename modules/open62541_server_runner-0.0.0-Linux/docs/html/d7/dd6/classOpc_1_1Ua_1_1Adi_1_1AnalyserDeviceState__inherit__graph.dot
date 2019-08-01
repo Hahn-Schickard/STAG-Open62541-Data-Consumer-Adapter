@@ -1,0 +1,27 @@
+digraph "Opc.Ua.Adi.AnalyserDeviceState"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="Opc.Ua.Adi.AnalyserDevice\lState",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 [label="DeviceState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d28/classOpc_1_1Ua_1_1Di_1_1DeviceState.html",tooltip="Stores an instance of the DeviceType ObjectType. "];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2 [label="ComponentState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/d7c/classOpc_1_1Ua_1_1Di_1_1ComponentState.html",tooltip="Stores an instance of the ComponentType ObjectType. "];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 [label="TopologyElementState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dc/d23/classOpc_1_1Ua_1_1Di_1_1TopologyElementState.html",tooltip="Stores an instance of the TopologyElementType ObjectType. "];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node4 [label="BaseObjectState",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+  Node0 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="Opc.Ua.Adi.AcousticSpectrometer\lDeviceState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/d5e/classOpc_1_1Ua_1_1Adi_1_1AcousticSpectrometerDeviceState.html",tooltip="Stores an instance of the AcousticSpectrometerDeviceType ObjectType. "];
+  Node0 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node6 [label="Opc.Ua.Adi.Chromatograph\lDeviceState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/d55/classOpc_1_1Ua_1_1Adi_1_1ChromatographDeviceState.html",tooltip="Stores an instance of the ChromatographDeviceType ObjectType. "];
+  Node0 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node7 [label="Opc.Ua.Adi.MassSpectrometer\lDeviceState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d2/d49/classOpc_1_1Ua_1_1Adi_1_1MassSpectrometerDeviceState.html",tooltip="Stores an instance of the MassSpectrometerDeviceType ObjectType. "];
+  Node0 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node8 [label="Opc.Ua.Adi.NMRDeviceState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/de0/classOpc_1_1Ua_1_1Adi_1_1NMRDeviceState.html",tooltip="Stores an instance of the NMRDeviceType ObjectType. "];
+  Node0 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node9 [label="Opc.Ua.Adi.ParticleSizeMonitor\lDeviceState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d24/classOpc_1_1Ua_1_1Adi_1_1ParticleSizeMonitorDeviceState.html",tooltip="Stores an instance of the ParticleSizeMonitorDeviceType ObjectType. "];
+  Node0 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node10 [label="Opc.Ua.Adi.SpectrometerDevice\lState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d7e/classOpc_1_1Ua_1_1Adi_1_1SpectrometerDeviceState.html",tooltip="Stores an instance of the SpectrometerDeviceType ObjectType. "];
+}

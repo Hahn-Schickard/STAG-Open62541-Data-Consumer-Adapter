@@ -1,0 +1,15 @@
+digraph "UA_ServerConfig_setMinimalCustomBuffer"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node81 [label="UA_ServerConfig_setMinimal\lCustomBuffer",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node81 -> Node82 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node82 [label="UA_ServerConfig_setMinimal",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$db/d98/server__config__default_8h.html#aba904baae5caf2af2607a32d3d2afd5b"];
+  Node82 -> Node83 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node83 [label="UA_ServerConfig_setDefault",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$db/d98/server__config__default_8h.html#a15b5c5b5c2048014c02f2ae11f0519b6"];
+  Node83 -> Node84 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node84 [label="startServer",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/df9/Open62541__Server_8c.html#a911c42e2b3f26672c796d2bbfd20a298"];
+  Node84 -> Node85 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node85 [label="main",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/d29/main_8c.html#a840291bc02cba5474a4cb46a9b9566fe"];
+}

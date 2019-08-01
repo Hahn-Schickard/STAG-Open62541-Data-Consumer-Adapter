@@ -1,0 +1,11 @@
+digraph "OpcUa_EndpointConfiguration_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node999 [label="OpcUa_EndpointConfiguration\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node999 -> Node1000 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1000 [label="OpcUa_EndpointConfiguration\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a55ae00f701033750772aa3cb999435a0"];
+  Node999 -> Node1001 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1001 [label="OpcUa_EndpointConfiguration\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ad72104657450f14aaf6821e8aa1d5b3b"];
+}

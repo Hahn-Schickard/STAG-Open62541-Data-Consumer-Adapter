@@ -1,0 +1,9 @@
+digraph "Opc.Ua.GetMonitoredItemsMethodStateMethodCallHandler"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node91 [label="Opc.Ua.GetMonitoredItems\lMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node91 -> Node92 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node92 [label="Opc.Ua.GetMonitoredItems\lMethodState.InitializeOptional\lChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dd6/classOpc_1_1Ua_1_1GetMonitoredItemsMethodState.html#a2a1cc24635608ff7ac7d139ef6b1153a",tooltip="Initializes the any option children defined for the instance. "];
+}

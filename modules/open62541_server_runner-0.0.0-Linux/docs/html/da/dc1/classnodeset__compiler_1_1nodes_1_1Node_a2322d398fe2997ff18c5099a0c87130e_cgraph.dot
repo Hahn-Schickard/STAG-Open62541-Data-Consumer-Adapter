@@ -1,0 +1,9 @@
+digraph "nodeset_compiler.nodes.Node.parseXMLReferences"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node10 [label="nodeset_compiler.nodes.Node.parse\lXMLReferences",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node10 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node11 [label="nodeset_compiler.nodes.Ref\lOrAlias",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$da/d83/namespacenodeset__compiler_1_1nodes.html#ab08a9e207c49d6e20555f0dae62b6440"];
+}

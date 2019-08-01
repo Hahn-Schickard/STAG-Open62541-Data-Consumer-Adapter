@@ -1,0 +1,44 @@
+digraph "UA_BrowseResponse"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  Node1 [label="UA_BrowseResponse",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" diagnosticInfos" ,fontname="Sans"];
+  Node2 [label="UA_DiagnosticInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/d61/structUA__DiagnosticInfo.html"];
+  Node2 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" innerDiagnosticInfo" ,fontname="Sans"];
+  Node3 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" additionalInfo" ,fontname="Sans"];
+  Node3 [label="UA_String",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/dfb/structUA__String.html"];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" results" ,fontname="Sans"];
+  Node4 [label="UA_BrowseResult",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d5/dfa/structUA__BrowseResult.html"];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" references" ,fontname="Sans"];
+  Node5 [label="UA_ReferenceDescription",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d88/structUA__ReferenceDescription.html"];
+  Node6 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" referenceTypeId" ,fontname="Sans"];
+  Node6 [label="UA_NodeId",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/d26/structUA__NodeId.html"];
+  Node3 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" string\nbyteString" ,fontname="Sans"];
+  Node7 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" guid" ,fontname="Sans"];
+  Node7 [label="UA_Guid",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d5/d66/structUA__Guid.html"];
+  Node8 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" displayName" ,fontname="Sans"];
+  Node8 [label="UA_LocalizedText",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d7/d1e/structUA__LocalizedText.html"];
+  Node3 -> Node8 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" locale\ntext" ,fontname="Sans"];
+  Node9 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" browseName" ,fontname="Sans"];
+  Node9 [label="UA_QualifiedName",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d75/structUA__QualifiedName.html"];
+  Node3 -> Node9 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" name" ,fontname="Sans"];
+  Node10 -> Node5 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" typeDefinition\nnodeId" ,fontname="Sans"];
+  Node10 [label="UA_ExpandedNodeId",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d0f/structUA__ExpandedNodeId.html"];
+  Node6 -> Node10 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" nodeId" ,fontname="Sans"];
+  Node3 -> Node10 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" namespaceUri" ,fontname="Sans"];
+  Node3 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" continuationPoint" ,fontname="Sans"];
+  Node11 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" responseHeader" ,fontname="Sans"];
+  Node11 [label="UA_ResponseHeader",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d1d/structUA__ResponseHeader.html"];
+  Node3 -> Node11 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" stringTable" ,fontname="Sans"];
+  Node2 -> Node11 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" serviceDiagnostics" ,fontname="Sans"];
+  Node12 -> Node11 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" additionalHeader" ,fontname="Sans"];
+  Node12 [label="UA_ExtensionObject",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/ddf/structUA__ExtensionObject.html"];
+  Node6 -> Node12 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" typeId" ,fontname="Sans"];
+  Node3 -> Node12 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" body" ,fontname="Sans"];
+  Node13 -> Node12 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" type" ,fontname="Sans"];
+  Node13 [label="UA_DataType",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/dcb/structUA__DataType.html"];
+  Node6 -> Node13 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" typeId" ,fontname="Sans"];
+  Node14 -> Node13 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" members" ,fontname="Sans"];
+  Node14 [label="UA_DataTypeMember",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d2/db1/structUA__DataTypeMember.html"];
+}

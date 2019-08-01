@@ -1,0 +1,9 @@
+digraph "Opc.Ua.RemoveIdentityMethodStateMethodCallHandler"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node169 [label="Opc.Ua.RemoveIdentityMethod\lStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node169 -> Node170 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node170 [label="Opc.Ua.RemoveIdentityMethod\lState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/d1e/classOpc_1_1Ua_1_1RemoveIdentityMethodState.html#a7a27c040150219fab97dadb9c001f2ee",tooltip="Initializes the any option children defined for the instance. "];
+}

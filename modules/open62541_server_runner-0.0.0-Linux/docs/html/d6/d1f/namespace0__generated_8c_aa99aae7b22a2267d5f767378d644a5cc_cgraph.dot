@@ -1,0 +1,18 @@
+digraph "function_namespace0_generated_162_begin"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node919 [label="function_namespace0\l_generated_162_begin",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node919 -> Node920 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node920 [label="UA_LOCALIZEDTEXT",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a4589b0fbae908b0f628c56a98dfa0eab"];
+  Node920 -> Node921 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node921 [label="UA_STRING",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a0929e31c4c386f0def38fa5510be5db4"];
+  Node919 -> Node922 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node922 [label="UA_NODEID_NUMERIC",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac579ccd233069ba89fe18f8d30ab6a4a"];
+  Node919 -> Node923 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node923 [label="UA_QUALIFIEDNAME",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a8cce7c464f2bf0e4f36872a0dccfac79"];
+  Node923 -> Node921 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node919 -> Node924 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node924 [label="UA_Server_addNode_begin",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#ac6ddecb06609622ce450c69a52215409"];
+}

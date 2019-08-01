@@ -1,0 +1,10 @@
+digraph "Opc.Ua.SimpleTypeDescriptionCollection.Clone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node7 [label="Opc.Ua.SimpleTypeDescription\lCollection.Clone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node7 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node8 [label="Opc.Ua.DataTypeSchemaHeader.\lMemberwiseClone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/dd9/classOpc_1_1Ua_1_1DataTypeSchemaHeader.html#a2cbba2db45ed2853db5b382c243aed58"];
+  Node8 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

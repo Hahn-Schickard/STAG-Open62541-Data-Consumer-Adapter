@@ -1,0 +1,10 @@
+digraph "Opc.Ua.ServiceFault.MemberwiseClone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node10 [label="Opc.Ua.ServiceFault.Memberwise\lClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node10 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node11 [label="Opc.Ua.ResponseHeader.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d77/classOpc_1_1Ua_1_1ResponseHeader.html#a47203f6e7fd31e812fe8584b865f289a"];
+  Node10 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

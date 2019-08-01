@@ -1,0 +1,16 @@
+digraph "Opc.Ua.ApplicationDescription.Clone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node3 [label="Opc.Ua.ApplicationDescription.\lClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node4 [label="Opc.Ua.EndpointDescription.\lMemberwiseClone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d76/classOpc_1_1Ua_1_1EndpointDescription.html#ad65537794f18edd21f5bef6b34cc7406"];
+  Node4 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="Opc.Ua.CreateSessionRequest.\lMemberwiseClone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d59/classOpc_1_1Ua_1_1CreateSessionRequest.html#ae1d345dadc27a7e615e26425d28b08c0"];
+  Node5 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node6 [label="Opc.Ua.SessionDiagnostics\lDataType.MemberwiseClone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/db4/classOpc_1_1Ua_1_1SessionDiagnosticsDataType.html#a7d19e239cff3bd8f0ec98c99637a5a42"];
+  Node6 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

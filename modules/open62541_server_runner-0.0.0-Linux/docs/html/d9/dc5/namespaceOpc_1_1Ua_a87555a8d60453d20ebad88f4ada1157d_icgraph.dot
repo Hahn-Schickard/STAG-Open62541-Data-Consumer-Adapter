@@ -1,0 +1,9 @@
+digraph "Opc.Ua.ResendDataMethodStateMethodCallHandler"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node184 [label="Opc.Ua.ResendDataMethodState\lMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node184 -> Node185 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node185 [label="Opc.Ua.ResendDataMethodState.\lInitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d5/def/classOpc_1_1Ua_1_1ResendDataMethodState.html#adf24a88e0ce6031750e930bb27b8a994",tooltip="Initializes the any option children defined for the instance. "];
+}

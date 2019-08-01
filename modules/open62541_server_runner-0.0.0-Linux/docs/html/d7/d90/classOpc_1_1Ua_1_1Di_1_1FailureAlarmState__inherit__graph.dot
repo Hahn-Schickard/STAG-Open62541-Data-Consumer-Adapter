@@ -1,0 +1,24 @@
+digraph "Opc.Ua.Di.FailureAlarmState"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  Node0 [label="Opc.Ua.Di.FailureAlarmState",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 [label="DeviceHealthDiagnosticAlarm\lState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d9b/classOpc_1_1Ua_1_1Di_1_1DeviceHealthDiagnosticAlarmState.html",tooltip="Stores an instance of the DeviceHealthDiagnosticAlarmType ObjectType. "];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2 [label="InstrumentDiagnosticAlarm\lState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d2/dca/classOpc_1_1Ua_1_1InstrumentDiagnosticAlarmState.html",tooltip="Stores an instance of the InstrumentDiagnosticAlarmType ObjectType. "];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 [label="OffNormalAlarmState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$da/d89/classOpc_1_1Ua_1_1OffNormalAlarmState.html",tooltip="Stores an instance of the OffNormalAlarmType ObjectType. "];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node4 [label="DiscreteAlarmState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d28/classOpc_1_1Ua_1_1DiscreteAlarmState.html",tooltip="Stores an instance of the DiscreteAlarmType ObjectType. "];
+  Node5 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="AlarmConditionState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d32/classOpc_1_1Ua_1_1AlarmConditionState.html",tooltip="Stores an instance of the AlarmConditionType ObjectType. "];
+  Node6 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node6 [label="AcknowledgeableCondition\lState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/dbf/classOpc_1_1Ua_1_1AcknowledgeableConditionState.html",tooltip="Stores an instance of the AcknowledgeableConditionType ObjectType. "];
+  Node7 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node7 [label="ConditionState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/df7/classOpc_1_1Ua_1_1ConditionState.html",tooltip="Stores an instance of the ConditionType ObjectType. "];
+  Node8 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node8 [label="BaseEventState",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d96/classOpc_1_1Ua_1_1BaseEventState.html",tooltip="Stores an instance of the BaseEventType ObjectType. "];
+  Node9 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node9 [label="BaseObjectState",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+}

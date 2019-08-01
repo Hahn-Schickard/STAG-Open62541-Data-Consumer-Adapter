@@ -1,0 +1,9 @@
+digraph "OpcUa_XVType_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2736 [label="OpcUa_XVType_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2736 -> Node2737 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2737 [label="OpcUa_XVType_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#af9415834373f03e8b11a7965ce59948c"];
+}

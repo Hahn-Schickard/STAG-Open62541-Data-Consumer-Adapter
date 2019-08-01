@@ -1,0 +1,11 @@
+digraph "Opc.Ua.Di.TransferResultDataDataTypeCollection"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node3 [label="Opc.Ua.Di.TransferResult\lDataDataTypeCollection",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node4 [label="List\< TransferResultData\lDataType \>",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+  Node5 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="ICloneableelse\n    public partial\l class TransferResultDataData\lTypeCollection List\< TransferResult\lDataDataType \>endif",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+}

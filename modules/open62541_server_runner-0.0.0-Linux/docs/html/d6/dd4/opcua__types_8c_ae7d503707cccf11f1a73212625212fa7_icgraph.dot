@@ -1,0 +1,13 @@
+digraph "OpcUa_QueryNextRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2020 [label="OpcUa_QueryNextRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2020 -> Node2021 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2021 [label="OpcUa_ClientApi_BeginQueryNext",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#ac9a26dd6a2cae73b5c2fd790239da829"];
+  Node2020 -> Node2022 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2022 [label="OpcUa_ClientApi_QueryNext",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#a14e3a0d489732f9a6bd8ef058c766b54"];
+  Node2020 -> Node2023 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2023 [label="OpcUa_QueryNextRequest\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aa383b76872ad0c623b60ed71571bf46e"];
+}

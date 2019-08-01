@@ -1,0 +1,11 @@
+digraph "OpcUa_SessionlessInvokeRequestType_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2541 [label="OpcUa_SessionlessInvokeRequest\lType_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2541 -> Node2542 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2542 [label="OpcUa_SessionlessInvokeRequest\lType_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aebdae071dd3f3ee60778811e75ed9610"];
+  Node2541 -> Node2543 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2543 [label="OpcUa_SessionlessInvokeRequest\lType_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a55f7935a893dd1624781d3645a17b2b0"];
+}

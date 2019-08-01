@@ -1,0 +1,9 @@
+digraph "Opc.Ua.Gds.GetServiceDescriptionMethodStateMethodCallHandler"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node16 [label="Opc.Ua.Gds.GetServiceDescription\lMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node16 -> Node17 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node17 [label="Opc.Ua.Gds.GetServiceDescription\lMethodState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d66/classOpc_1_1Ua_1_1Gds_1_1GetServiceDescriptionMethodState.html#ab7be453e0f85929b86073d09cae55f5a",tooltip="Initializes the any option children defined for the instance. "];
+}

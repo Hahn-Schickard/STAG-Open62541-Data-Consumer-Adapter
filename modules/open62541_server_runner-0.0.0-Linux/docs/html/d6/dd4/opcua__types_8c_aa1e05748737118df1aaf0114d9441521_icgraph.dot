@@ -1,0 +1,13 @@
+digraph "OpcUa_AddReferencesRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node114 [label="OpcUa_AddReferencesRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node114 -> Node115 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node115 [label="OpcUa_AddReferencesRequest\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a8614099f50442f20ffdab31cad757de0"];
+  Node114 -> Node116 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node116 [label="OpcUa_ClientApi_AddReferences",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#a07ee884c0637d01f002ab91e89c9f34d"];
+  Node114 -> Node117 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node117 [label="OpcUa_ClientApi_BeginAdd\lReferences",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#abb6752ae3b074554d406f79c2c3bd172"];
+}

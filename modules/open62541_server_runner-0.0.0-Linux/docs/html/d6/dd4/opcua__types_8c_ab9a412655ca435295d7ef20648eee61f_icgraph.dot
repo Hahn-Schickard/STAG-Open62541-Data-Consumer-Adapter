@@ -1,0 +1,13 @@
+digraph "OpcUa_TransferSubscriptionsRequest_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node2836 [label="OpcUa_TransferSubscriptions\lRequest_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2836 -> Node2837 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2837 [label="OpcUa_ClientApi_BeginTransfer\lSubscriptions",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#a8563f0b4c998be572aee046fe3a37ff6"];
+  Node2836 -> Node2838 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2838 [label="OpcUa_ClientApi_Transfer\lSubscriptions",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/d3e/opcua__clientapi_8h.html#aa79db2e8c62b0c0fe1e670789d3fbf5e"];
+  Node2836 -> Node2839 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2839 [label="OpcUa_TransferSubscriptions\lRequest_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a1c01a2729fd0bae9086068ff2ab1a221"];
+}

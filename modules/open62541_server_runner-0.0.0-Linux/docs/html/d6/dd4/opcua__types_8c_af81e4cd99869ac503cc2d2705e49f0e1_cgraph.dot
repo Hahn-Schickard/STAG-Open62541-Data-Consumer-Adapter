@@ -1,0 +1,11 @@
+digraph "OpcUa_MonitoredItemModifyResult_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1657 [label="OpcUa_MonitoredItemModify\lResult_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1657 -> Node1658 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1658 [label="OpcUa_MonitoredItemModify\lResult_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ab536f901ca183251c309d5262140895d"];
+  Node1657 -> Node1659 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1659 [label="OpcUa_MonitoredItemModify\lResult_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a6d0aed37694165b9f405d30b59797736"];
+}

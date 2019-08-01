@@ -1,0 +1,11 @@
+digraph "UA_BYTESTRING"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node22 [label="UA_BYTESTRING",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node22 -> Node23 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node23 [label="UA_NODEID_BYTESTRING",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a6d7f7e5cc440ff6c5054ad4078fe388a"];
+  Node23 -> Node24 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node24 [label="UA_EXPANDEDNODEID_BYTESTRING",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac11c83f47f8dd8da868b0dd54e91051d"];
+}

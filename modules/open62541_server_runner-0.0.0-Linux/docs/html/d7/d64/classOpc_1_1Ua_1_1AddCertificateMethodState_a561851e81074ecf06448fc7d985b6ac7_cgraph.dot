@@ -1,0 +1,9 @@
+digraph "Opc.Ua.AddCertificateMethodState.InitializeOptionalChildren"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node8 [label="Opc.Ua.AddCertificateMethod\lState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node9 [label="Opc.Ua.AddCertificateMethod\lStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/dc5/namespaceOpc_1_1Ua.html#a2c0bc861d8dd7b7c5e2455d48fbe8856",tooltip="Used to receive notifications when the method is called. "];
+}

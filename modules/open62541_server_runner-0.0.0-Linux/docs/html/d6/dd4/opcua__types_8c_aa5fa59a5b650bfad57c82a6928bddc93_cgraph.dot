@@ -1,0 +1,11 @@
+digraph "OpcUa_CallMethodResult_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node419 [label="OpcUa_CallMethodResult\l_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node419 -> Node420 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node420 [label="OpcUa_CallMethodResult\l_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ae8a675ef90f7cd91a5e032991eb370c1"];
+  Node419 -> Node421 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node421 [label="OpcUa_CallMethodResult\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aa0e39d5783008b1e8bba0803521fba4a"];
+}

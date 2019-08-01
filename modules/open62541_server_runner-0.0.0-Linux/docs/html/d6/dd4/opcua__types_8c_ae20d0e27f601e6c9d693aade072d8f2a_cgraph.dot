@@ -1,0 +1,11 @@
+digraph "OpcUa_CloseSecureChannelRequest_Decode"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node507 [label="OpcUa_CloseSecureChannel\lRequest_Decode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node507 -> Node508 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node508 [label="OpcUa_CloseSecureChannel\lRequest_Clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a1826abee76c984ad4ae64ad4e161a303"];
+  Node507 -> Node509 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node509 [label="OpcUa_CloseSecureChannel\lRequest_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#abbe1403dd7d7f7d6a66ae7176b8ea472"];
+}

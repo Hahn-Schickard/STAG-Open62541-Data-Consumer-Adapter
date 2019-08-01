@@ -1,0 +1,9 @@
+digraph "OpcUa_BrowseDescription_Initialize"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node232 [label="OpcUa_BrowseDescription\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node232 -> Node233 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node233 [label="OpcUa_BrowseDescription\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a73019509ea85ad51491170d7e1406b3c"];
+}

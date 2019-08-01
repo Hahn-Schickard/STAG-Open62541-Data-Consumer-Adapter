@@ -1,0 +1,9 @@
+digraph "Opc.Ua.Fdi7.CommunicationServerTypeInitializeMethodStateMethodCallHandler"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node4 [label="Opc.Ua.Fdi7.Communication\lServerTypeInitializeMethodState\lMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node4 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node5 [label="Opc.Ua.Fdi7.Communication\lServerTypeInitializeMethodState.\lInitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dad/classOpc_1_1Ua_1_1Fdi7_1_1CommunicationServerTypeInitializeMethodState.html#ae16a7553e53b007ee5bc9cc9c9ca755e",tooltip="Initializes the any option children defined for the instance. "];
+}

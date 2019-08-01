@@ -1,0 +1,10 @@
+digraph "Opc.Ua.EnumDefinition.MemberwiseClone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node11 [label="Opc.Ua.EnumDefinition.Memberwise\lClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node11 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node12 [label="Opc.Ua.EnumFieldCollection.\lClone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/dd6/classOpc_1_1Ua_1_1EnumFieldCollection.html#add860efe75d3db98a66a4edc35dacad7",tooltip="Creates a deep copy of the collection. "];
+  Node11 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

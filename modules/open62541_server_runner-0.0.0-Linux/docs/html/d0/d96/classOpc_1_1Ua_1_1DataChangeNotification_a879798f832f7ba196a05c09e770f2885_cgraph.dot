@@ -1,0 +1,10 @@
+digraph "Opc.Ua.DataChangeNotification.MemberwiseClone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node10 [label="Opc.Ua.DataChangeNotification.\lMemberwiseClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node10 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node11 [label="Opc.Ua.MonitoredItemNotification\lCollection.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/dd9/classOpc_1_1Ua_1_1MonitoredItemNotificationCollection.html#a80e12ce06aaaec80c361a026ef2d6bb9",tooltip="Creates a deep copy of the collection. "];
+  Node10 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}

@@ -1,0 +1,9 @@
+digraph "OpcUa_ClientApi_QueryNext"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node183 [label="OpcUa_ClientApi_QueryNext",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node183 -> Node184 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node184 [label="OpcUa_QueryNextRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ae7d503707cccf11f1a73212625212fa7"];
+}

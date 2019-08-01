@@ -1,0 +1,14 @@
+digraph "Opc.Ua.BrowseRequest.MemberwiseClone"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node10 [label="Opc.Ua.BrowseRequest.Memberwise\lClone",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node10 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node11 [label="Opc.Ua.RequestHeader.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/d70/classOpc_1_1Ua_1_1RequestHeader.html#afeda17ef18cc912277627c6a435a2794"];
+  Node10 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node12 [label="Opc.Ua.ViewDescription.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/ddb/classOpc_1_1Ua_1_1ViewDescription.html#ab89002e8f6730e578b02ebc9169259a0"];
+  Node10 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node13 [label="Opc.Ua.BrowseDescription\lCollection.Clone",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$df/dbd/classOpc_1_1Ua_1_1BrowseDescriptionCollection.html#a06cb1ee7a6a9f20546438a7a7089db3d",tooltip="Creates a deep copy of the collection. "];
+  Node10 -> Node10 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+}
