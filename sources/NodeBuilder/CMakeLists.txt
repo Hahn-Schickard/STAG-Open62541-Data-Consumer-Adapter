@@ -3,27 +3,39 @@ cmake_minimum_required(VERSION 3.6)
 set (THIS Node_Builder)
 
 file(GLOB sources_list  "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
-file(GLOB includes_list "${PROJECT_SOURCE_DIR}/includes/NodeBuilder/*.hpp"
-                        "${PROJECT_SOURCE_DIR}/includes/NodeInformation/*.h")
+file(GLOB includes_list "${PROJECT_SOURCE_DIR}/includes/NodeBuilder/*.hpp")
 
 PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 
-include_directories("${PROJECT_SOURCE_DIR}/includes/NodeBuilder/")
-
 set(node_builder_includes_dir "${PROJECT_SOURCE_DIR}/includes/NodeBuilder")
+include_directories(${node_builder_includes_dir})
 
 add_library(${THIS} SHARED
             ${sources_list}
             ${includes_list})
 
-target_link_libraries(${THIS} PRIVATE
-                      InfoModel_Lib
-                      C_String_Formater
-                      gcov)
+if (WIN32)
+    target_link_libraries(${THIS} PRIVATE 
+                              Node_Information
+                              C_String_Formater
+                              Information_Model)
+elseif (UNIX)
+    target_link_libraries(${THIS} PRIVATE 
+                              Node_Information
+                              C_String_Formater
+                              Information_Model
+                              gcov)
+else ()
+    target_link_libraries(${THIS} PRIVATE 
+                              Node_Information
+                              C_String_Formater
+                              Information_Model)
+    message(WARNING "Please configure your linking for your operating system for target ${THIS}")
+endif ()
+
 
 target_include_directories(${THIS} INTERFACE
                            $<BUILD_INTERFACE:${node_builder_includes_dir}>
-                           $<BUILD_INTERFACE:${node_information_includes_dir}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
                            $<INSTALL_INTERFACE:${INCLUDES_DEST}>
                            $<INSTALL_INTERFACE:${LIBS_DEST}>)
