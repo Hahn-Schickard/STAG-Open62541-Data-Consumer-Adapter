@@ -2,6 +2,7 @@
 #define _NODE_DESCRIPTORS_TEST_UTILS_HPP
 
 #include "JsonSerializer.hpp"
+#include <gtest/gtest.h>
 #include <string>
 
 template <typename T>
