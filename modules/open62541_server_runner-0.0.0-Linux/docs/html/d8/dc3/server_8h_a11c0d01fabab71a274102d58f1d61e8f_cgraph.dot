@@ -1,9 +1,0 @@
-digraph "UA_Server_addVariableTypeNode"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node495 [label="UA_Server_addVariableTypeNode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node495 -> Node496 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node496 [label="__UA_Server_addNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#a2cb477320bc3fec2a84336eb70fa3a46"];
-}

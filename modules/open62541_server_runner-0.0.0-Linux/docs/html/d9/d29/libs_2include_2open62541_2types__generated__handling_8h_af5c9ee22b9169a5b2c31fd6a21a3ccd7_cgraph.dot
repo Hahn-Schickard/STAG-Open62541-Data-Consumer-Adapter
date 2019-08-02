@@ -1,9 +1,0 @@
-digraph "UA_CreateMonitoredItemsRequest_deleteMembers"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node742 [label="UA_CreateMonitoredItemsRequest\l_deleteMembers",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node742 -> Node743 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node743 [label="UA_clear",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a7232220135b6d5ef3a17c3c3f93aabd3"];
-}

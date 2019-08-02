@@ -1,9 +1,0 @@
-digraph "Opc.MDIS.WriteStateMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node22 [label="Opc.MDIS.WriteStateMethod\lStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node22 -> Node23 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node23 [label="Opc.MDIS.WriteStateMethod\lState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d10/classOpc_1_1MDIS_1_1WriteStateMethodState.html#abe03135bce9e678777a07b820ce8d93b",tooltip="Initializes the any option children defined for the instance. "];
-}

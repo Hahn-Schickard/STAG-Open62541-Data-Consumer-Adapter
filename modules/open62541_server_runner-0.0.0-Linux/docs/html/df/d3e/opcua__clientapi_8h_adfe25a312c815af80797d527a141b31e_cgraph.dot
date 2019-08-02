@@ -1,9 +1,0 @@
-digraph "OpcUa_ClientApi_BeginAddNodes"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node12 [label="OpcUa_ClientApi_BeginAdd\lNodes",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node12 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node13 [label="OpcUa_AddNodesRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#adb18f4b666fa8bab8586212b57aef971"];
-}

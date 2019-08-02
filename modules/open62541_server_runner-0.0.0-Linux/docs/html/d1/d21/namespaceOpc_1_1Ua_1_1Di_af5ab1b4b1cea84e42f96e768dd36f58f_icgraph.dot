@@ -1,9 +1,0 @@
-digraph "Opc.Ua.Di.TransferFromDeviceMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node16 [label="Opc.Ua.Di.TransferFromDevice\lMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node16 -> Node17 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node17 [label="Opc.Ua.Di.TransferFromDevice\lMethodState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/d82/classOpc_1_1Ua_1_1Di_1_1TransferFromDeviceMethodState.html#a213ac7e3c135fceddb81ce73a4db24c1",tooltip="Initializes the any option children defined for the instance. "];
-}

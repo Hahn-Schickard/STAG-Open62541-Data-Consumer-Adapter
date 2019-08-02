@@ -1,9 +1,0 @@
-digraph "OpcUa_ProgramDiagnosticDataType_Clear"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node1907 [label="OpcUa_ProgramDiagnosticData\lType_Clear",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node1907 -> Node1908 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node1908 [label="OpcUa_ProgramDiagnosticData\lType_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a1a317cff90443cfac261ae6077af2ad3"];
-}

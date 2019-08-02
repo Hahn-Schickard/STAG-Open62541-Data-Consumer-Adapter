@@ -4,8 +4,7 @@
 #include "NodeInformation.h"
 #include <open62541/server.h>
 
-typedef enum ReturnStatus
-{
+typedef enum ReturnStatus {
   OPEN62541_SUCCESS,
   OPEN62541_FAILURE
 } OPEN62541_ReturnStatus;

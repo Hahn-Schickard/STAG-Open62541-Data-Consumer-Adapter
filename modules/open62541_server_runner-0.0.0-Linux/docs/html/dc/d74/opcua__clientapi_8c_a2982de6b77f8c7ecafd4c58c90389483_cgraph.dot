@@ -1,9 +1,0 @@
-digraph "OpcUa_ClientApi_RegisterNodes"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node189 [label="OpcUa_ClientApi_Register\lNodes",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node189 -> Node190 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node190 [label="OpcUa_RegisterNodesRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ae60a3bf870fba0716bb51c47ff8bb004"];
-}

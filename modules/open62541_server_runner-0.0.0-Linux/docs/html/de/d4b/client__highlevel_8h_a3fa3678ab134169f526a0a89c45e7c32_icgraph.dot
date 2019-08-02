@@ -1,9 +1,0 @@
-digraph "UA_Client_NamespaceGetIndex"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node111 [label="UA_Client_NamespaceGetIndex",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node111 -> Node112 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node112 [label="UA_Client_addMethodNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/d4b/client__highlevel_8h.html#a0447c80e86545af70e8c79ee0245bdc5"];
-}

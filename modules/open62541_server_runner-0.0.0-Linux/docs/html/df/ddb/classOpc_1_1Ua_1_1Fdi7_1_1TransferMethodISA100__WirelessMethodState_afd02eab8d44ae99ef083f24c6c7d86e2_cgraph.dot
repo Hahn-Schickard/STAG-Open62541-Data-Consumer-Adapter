@@ -1,9 +1,0 @@
-digraph "Opc.Ua.Fdi7.TransferMethodISA100_WirelessMethodState.InitializeOptionalChildren"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node8 [label="Opc.Ua.Fdi7.TransferMethod\lISA100_WirelessMethodState.Initialize\lOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node9 [label="Opc.Ua.Fdi7.TransferMethod\lISA100_WirelessMethodStateMethod\lCallHandler",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$db/d6e/namespaceOpc_1_1Ua_1_1Fdi7.html#a80b153d33a630e3cd68151c3cb8e381d",tooltip="Used to receive notifications when the method is called. "];
-}

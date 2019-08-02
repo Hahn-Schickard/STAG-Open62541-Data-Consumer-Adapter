@@ -1,9 +1,0 @@
-digraph "Opc.Ua.RequestServerStateChangeMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node181 [label="Opc.Ua.RequestServerState\lChangeMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node181 -> Node182 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node182 [label="Opc.Ua.RequestServerState\lChangeMethodState.InitializeOptional\lChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d2/d8f/classOpc_1_1Ua_1_1RequestServerStateChangeMethodState.html#a28cf03bd99618e7caf36675c0b961568",tooltip="Initializes the any option children defined for the instance. "];
-}

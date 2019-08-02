@@ -1,9 +1,0 @@
-digraph "Opc.Ua.Gds.RevokeCertificateMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node43 [label="Opc.Ua.Gds.RevokeCertificate\lMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node43 -> Node44 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node44 [label="Opc.Ua.Gds.RevokeCertificate\lMethodState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dc/d55/classOpc_1_1Ua_1_1Gds_1_1RevokeCertificateMethodState.html#abec6dc2bcdc4b40140a2e036e9452d36",tooltip="Initializes the any option children defined for the instance. "];
-}

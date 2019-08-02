@@ -1,9 +1,0 @@
-digraph "UA_Client_readSymmetricAttribute"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node158 [label="UA_Client_readSymmetricAttribute",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node158 -> Node159 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node159 [label="__UA_Client_readAttribute",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/d4b/client__highlevel_8h.html#ad3d8d1d5c78520e67f97a76b9e7a81d0"];
-}

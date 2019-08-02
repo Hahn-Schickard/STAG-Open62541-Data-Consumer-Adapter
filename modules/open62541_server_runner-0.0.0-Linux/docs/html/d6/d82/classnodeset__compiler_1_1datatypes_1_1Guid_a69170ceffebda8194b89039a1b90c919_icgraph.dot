@@ -1,9 +1,0 @@
-digraph "nodeset_compiler.datatypes.Guid.parseXML"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node22 [label="nodeset_compiler.datatypes.\lGuid.parseXML",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node22 -> Node23 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node23 [label="nodeset_compiler.datatypes.\lGuid.__init__",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/d82/classnodeset__compiler_1_1datatypes_1_1Guid.html#a3af5bf80d3a5c7dd27583e71c297e1a2"];
-}

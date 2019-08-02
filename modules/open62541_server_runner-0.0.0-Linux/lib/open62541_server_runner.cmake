@@ -16,7 +16,7 @@ set(CMAKE_IMPORT_FILE_VERSION 1)
 set(_targetsDefined)
 set(_targetsNotDefined)
 set(_expectedTargets)
-foreach(_expectedTarget OPCUA_Server Runner_MAIN)
+foreach(_expectedTarget OPCUA_Server Server_Runner Runner_MAIN)
   list(APPEND _expectedTargets ${_expectedTarget})
   if(NOT TARGET ${_expectedTarget})
     list(APPEND _targetsNotDefined ${_expectedTarget})
@@ -49,11 +49,19 @@ if(_IMPORT_PREFIX STREQUAL "/")
 endif()
 
 # Create imported target OPCUA_Server
-add_library(OPCUA_Server STATIC IMPORTED)
+add_library(OPCUA_Server SHARED IMPORTED)
 
 set_target_properties(OPCUA_Server PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include/;${_IMPORT_PREFIX}/lib/"
   INTERFACE_LINK_LIBRARIES "Node_Information;open62541::open62541;gcov"
+)
+
+# Create imported target Server_Runner
+add_library(Server_Runner SHARED IMPORTED)
+
+set_target_properties(Server_Runner PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include/;${_IMPORT_PREFIX}/lib/"
+  INTERFACE_LINK_LIBRARIES "Node_Information"
 )
 
 # Create imported target Runner_MAIN

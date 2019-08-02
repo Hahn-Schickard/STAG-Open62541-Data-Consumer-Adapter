@@ -1,9 +1,0 @@
-digraph "UA_DeleteNodesResponse_delete"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node1010 [label="UA_DeleteNodesResponse\l_delete",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node1010 -> Node1011 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node1011 [label="UA_delete",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#ac3aa154b0de1b388a3a9dfb1befa5b0c"];
-}

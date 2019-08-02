@@ -1,9 +1,0 @@
-digraph "OpcUa_ClientApi_BeginFindServersOnNetwork"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node57 [label="OpcUa_ClientApi_BeginFind\lServersOnNetwork",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node57 -> Node58 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node58 [label="OpcUa_FindServersOnNetwork\lRequest_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aa112a7d9bf57e0fc6f988e62a15df232"];
-}

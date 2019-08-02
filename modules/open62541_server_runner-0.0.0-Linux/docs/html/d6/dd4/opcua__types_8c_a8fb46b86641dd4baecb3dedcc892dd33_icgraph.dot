@@ -1,9 +1,0 @@
-digraph "OpcUa_StructureField_Initialize"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node2766 [label="OpcUa_StructureField\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node2766 -> Node2767 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node2767 [label="OpcUa_StructureField\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a521afe300ebfea04c8d366b38f8ebbc9"];
-}

@@ -1,9 +1,0 @@
-digraph "UA_Cient_translateBrowsePathsToNodeIds_async"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node66 [label="UA_Cient_translateBrowse\lPathsToNodeIds_async",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node66 -> Node67 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node67 [label="__UA_Client_translateBrowse\lPathsToNodeIds_async",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/de8/client__highlevel__async_8h.html#ad04adcdd301711baf1890e42ff84d94b"];
-}

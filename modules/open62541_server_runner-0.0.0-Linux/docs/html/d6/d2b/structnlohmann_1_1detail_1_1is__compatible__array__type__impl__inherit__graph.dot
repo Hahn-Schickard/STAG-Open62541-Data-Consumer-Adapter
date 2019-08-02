@@ -1,8 +1,0 @@
-digraph "nlohmann::detail::is_compatible_array_type_impl&lt; BasicJsonType, CompatibleArrayType, typename &gt;"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  Node0 [label="nlohmann::detail::is\l_compatible_array_type\l_impl\< BasicJsonType, Compatible\lArrayType, typename \>",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node1 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node1 [label="false_type",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
-}

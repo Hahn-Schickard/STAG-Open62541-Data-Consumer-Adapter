@@ -1,9 +1,0 @@
-digraph "OpcUa_ContentFilter_Initialize"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node506 [label="OpcUa_ContentFilter\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node506 -> Node507 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node507 [label="OpcUa_ContentFilter\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ad49a3460f568517920b131fc321c7f1e"];
-}

@@ -1,9 +1,0 @@
-digraph "OpcUa_EndpointDescription_Clear"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node871 [label="OpcUa_EndpointDescription\l_Clear",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node871 -> Node872 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node872 [label="OpcUa_EndpointDescription\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ac9518338965cc3a37187623e952dea5a"];
-}

@@ -1,9 +1,0 @@
-digraph "OpcUa_ClientApi_BeginWrite"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node117 [label="OpcUa_ClientApi_BeginWrite",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node117 -> Node118 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node118 [label="OpcUa_WriteRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#ae26d1f6b231f6d22093d6d44935338d3"];
-}

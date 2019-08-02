@@ -1,9 +1,0 @@
-digraph "nlohmann::detail::wide_string_input_helper::fill_buffer"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node1 [label="nlohmann::detail::wide\l_string_input_helper::\lfill_buffer",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node2 [label="nlohmann::detail::wide\l_string_input_adapter\l::get_character",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/dea/classnlohmann_1_1detail_1_1wide__string__input__adapter.html#abb62b34cf77e557ce5321b7f2490c3b0",tooltip="get a character [0,255] or std::char_traits<char>::eof(). "];
-}

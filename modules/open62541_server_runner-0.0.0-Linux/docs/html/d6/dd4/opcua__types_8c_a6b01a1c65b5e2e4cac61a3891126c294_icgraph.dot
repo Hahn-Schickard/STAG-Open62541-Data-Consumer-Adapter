@@ -1,9 +1,0 @@
-digraph "OpcUa_UserIdentityToken_Clear"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node2971 [label="OpcUa_UserIdentityToken\l_Clear",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node2971 -> Node2972 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node2972 [label="OpcUa_UserIdentityToken\l_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#aea46b594f60056302663056253c46cc5"];
-}

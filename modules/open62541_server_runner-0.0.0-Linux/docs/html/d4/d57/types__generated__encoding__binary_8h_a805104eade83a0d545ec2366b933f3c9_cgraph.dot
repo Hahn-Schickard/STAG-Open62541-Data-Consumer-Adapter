@@ -1,9 +1,0 @@
-digraph "UA_WriteRequest_calcSizeBinary"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node1629 [label="UA_WriteRequest_calcSize\lBinary",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node1629 -> Node1630 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node1630 [label="UA_calcSizeBinary",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dba/namespace0__generated_8h.html#a239fed33e44a9d2309cd256b1153d54a"];
-}

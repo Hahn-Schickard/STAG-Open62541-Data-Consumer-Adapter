@@ -1,9 +1,0 @@
-digraph "UA_Client_addObjectTypeNode_async"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node79 [label="UA_Client_addObjectTypeNode\l_async",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node79 -> Node80 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node80 [label="__UA_Client_addNode\l_async",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/de8/client__highlevel__async_8h.html#a076b7953371d26dfaed662177463a58c"];
-}

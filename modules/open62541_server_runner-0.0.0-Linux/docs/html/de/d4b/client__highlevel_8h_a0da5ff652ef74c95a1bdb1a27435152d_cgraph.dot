@@ -1,9 +1,0 @@
-digraph "UA_Client_addDataTypeNode"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node57 [label="UA_Client_addDataTypeNode",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node57 -> Node58 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node58 [label="__UA_Client_addNode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/d4b/client__highlevel_8h.html#a97782b23730fd7465fcb4627b8ddcd06"];
-}

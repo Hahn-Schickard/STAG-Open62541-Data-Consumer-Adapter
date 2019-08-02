@@ -1,8 +1,0 @@
-digraph "Opc.Ua.SetPositionMethodState"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  Node0 [label="Opc.Ua.SetPositionMethod\lState",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node1 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node1 [label="MethodState",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
-}

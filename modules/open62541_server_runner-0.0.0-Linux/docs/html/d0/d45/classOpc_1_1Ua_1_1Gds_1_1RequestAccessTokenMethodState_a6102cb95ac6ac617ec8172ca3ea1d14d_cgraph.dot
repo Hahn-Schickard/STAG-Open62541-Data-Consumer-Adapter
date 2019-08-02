@@ -1,9 +1,0 @@
-digraph "Opc.Ua.Gds.RequestAccessTokenMethodState.InitializeOptionalChildren"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node8 [label="Opc.Ua.Gds.RequestAccess\lTokenMethodState.InitializeOptional\lChildren",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node9 [label="Opc.Ua.Gds.RequestAccess\lTokenMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/dcc/namespaceOpc_1_1Ua_1_1Gds.html#abf8105be534395688439c76591d9292b",tooltip="Used to receive notifications when the method is called. "];
-}

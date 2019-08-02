@@ -1,9 +1,0 @@
-digraph "UA_Range_new"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node2027 [label="UA_Range_new",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node2027 -> Node2028 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node2028 [label="UA_new",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a40bf20c146fc1f9eca242aee40d768ef"];
-}

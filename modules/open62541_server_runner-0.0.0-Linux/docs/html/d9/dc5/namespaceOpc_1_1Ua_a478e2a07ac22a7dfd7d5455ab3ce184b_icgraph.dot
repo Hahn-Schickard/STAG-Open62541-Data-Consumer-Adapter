@@ -1,9 +1,0 @@
-digraph "Opc.Ua.CreateDirectoryMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node61 [label="Opc.Ua.CreateDirectoryMethod\lStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node61 -> Node62 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node62 [label="Opc.Ua.CreateDirectoryMethod\lState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/d5b/classOpc_1_1Ua_1_1CreateDirectoryMethodState.html#a807db7368bc4bce994e1ef499a7f5da2",tooltip="Initializes the any option children defined for the instance. "];
-}

@@ -1,9 +1,0 @@
-digraph "UA_Variant_setRange"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node2005 [label="UA_Variant_setRange",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node2005 -> Node2006 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node2006 [label="UA_Variant_hasArrayType",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a7d5ea8ac685b2a07cce553d9dc8e1fa4"];
-}

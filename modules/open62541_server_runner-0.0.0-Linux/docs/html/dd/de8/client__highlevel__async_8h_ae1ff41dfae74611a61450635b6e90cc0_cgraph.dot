@@ -1,9 +1,0 @@
-digraph "UA_Client_call_async"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node94 [label="UA_Client_call_async",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node94 -> Node95 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node95 [label="__UA_Client_call_async",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$dd/de8/client__highlevel__async_8h.html#ae21d0250c6af265015b67122fd08f129"];
-}

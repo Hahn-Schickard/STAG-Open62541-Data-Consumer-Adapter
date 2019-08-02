@@ -1,9 +1,0 @@
-digraph "Opc.Ua.Fdi5.ApplyMethodState.InitializeOptionalChildren"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node8 [label="Opc.Ua.Fdi5.ApplyMethodState.\lInitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node9 [label="Opc.Ua.Fdi5.ApplyMethodState\lMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/db2/namespaceOpc_1_1Ua_1_1Fdi5.html#a04341a2375fa7c69c8b499be7732baa0",tooltip="Used to receive notifications when the method is called. "];
-}

@@ -1,9 +1,0 @@
-digraph "UA_Client_deleteReference"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node92 [label="UA_Client_deleteReference",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node92 -> Node93 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node93 [label="UA_Client_writeUserExecutable\lAttribute",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$de/d4b/client__highlevel_8h.html#ab0a22bd7345d25e5a64939d4d51c44f4"];
-}

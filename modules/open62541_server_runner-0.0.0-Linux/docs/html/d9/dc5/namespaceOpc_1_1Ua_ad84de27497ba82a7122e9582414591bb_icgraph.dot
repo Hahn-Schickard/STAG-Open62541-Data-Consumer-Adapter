@@ -1,9 +1,0 @@
-digraph "Opc.Ua.CloseAndCommitMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node43 [label="Opc.Ua.CloseAndCommitMethod\lStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node43 -> Node44 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node44 [label="Opc.Ua.CloseAndCommitMethod\lState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d2/d94/classOpc_1_1Ua_1_1CloseAndCommitMethodState.html#a5d660870bdc3a86a8389bf17a028874a",tooltip="Initializes the any option children defined for the instance. "];
-}

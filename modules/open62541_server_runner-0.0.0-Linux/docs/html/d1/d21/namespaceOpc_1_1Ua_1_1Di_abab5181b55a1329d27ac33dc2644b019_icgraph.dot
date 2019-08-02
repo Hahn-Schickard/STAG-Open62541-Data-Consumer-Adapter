@@ -1,9 +1,0 @@
-digraph "Opc.Ua.Di.FetchTransferResultDataMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node7 [label="Opc.Ua.Di.FetchTransferResult\lDataMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node7 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node8 [label="Opc.Ua.Di.FetchTransferResult\lDataMethodState.InitializeOptional\lChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d6a/classOpc_1_1Ua_1_1Di_1_1FetchTransferResultDataMethodState.html#a45d2603ea634330a85701e88f849daf3",tooltip="Initializes the any option children defined for the instance. "];
-}

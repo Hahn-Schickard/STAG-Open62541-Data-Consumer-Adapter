@@ -1,9 +1,0 @@
-digraph "Opc.Ua.PublishedEventsTypeModifyFieldSelectionMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node124 [label="Opc.Ua.PublishedEventsType\lModifyFieldSelectionMethodState\lMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node124 -> Node125 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node125 [label="Opc.Ua.PublishedEventsType\lModifyFieldSelectionMethodState.\lInitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d1/d52/classOpc_1_1Ua_1_1PublishedEventsTypeModifyFieldSelectionMethodState.html#a8dfa4b92a938a7611dbd57fb5b4b5495",tooltip="Initializes the any option children defined for the instance. "];
-}

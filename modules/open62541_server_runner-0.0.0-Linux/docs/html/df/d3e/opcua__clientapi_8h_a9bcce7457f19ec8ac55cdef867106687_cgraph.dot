@@ -1,9 +1,0 @@
-digraph "OpcUa_ClientApi_GetEndpoints"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node162 [label="OpcUa_ClientApi_GetEndpoints",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node162 -> Node163 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node163 [label="OpcUa_GetEndpointsRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a8236e77e00424a6acb9f84607e76c6a7"];
-}

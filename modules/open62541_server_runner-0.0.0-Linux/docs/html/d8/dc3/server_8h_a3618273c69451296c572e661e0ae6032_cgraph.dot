@@ -1,9 +1,0 @@
-digraph "UA_Server_readMinimumSamplingInterval"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node592 [label="UA_Server_readMinimumSampling\lInterval",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node592 -> Node593 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node593 [label="__UA_Server_read",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dc3/server_8h.html#ae4f03fdfb770ae5b8e8d26fbcceb8560"];
-}

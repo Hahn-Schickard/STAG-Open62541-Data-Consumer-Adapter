@@ -1,9 +1,0 @@
-digraph "Opc.Ua.Gds.GetCertificateStatusMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node13 [label="Opc.Ua.Gds.GetCertificate\lStatusMethodStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node13 -> Node14 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node14 [label="Opc.Ua.Gds.GetCertificate\lStatusMethodState.InitializeOptional\lChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/dc8/classOpc_1_1Ua_1_1Gds_1_1GetCertificateStatusMethodState.html#af61cb4da4e616fc1a862d883123adfe8",tooltip="Initializes the any option children defined for the instance. "];
-}

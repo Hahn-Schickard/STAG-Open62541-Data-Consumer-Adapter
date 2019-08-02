@@ -1,9 +1,0 @@
-digraph "OpcUa_ClientApi_BeginCloseSession"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node30 [label="OpcUa_ClientApi_BeginClose\lSession",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node30 -> Node31 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node31 [label="OpcUa_CloseSessionRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a6c630cbfa723a4650ad2465512e959d0"];
-}

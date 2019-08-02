@@ -1,9 +1,0 @@
-digraph "generate_datatypes.getNodeidTypeAndId"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node4 [label="generate_datatypes.getNodeid\lTypeAndId",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node4 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node5 [label="generate_datatypes.Type.datatype_c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d3/d0c/classgenerate__datatypes_1_1Type.html#ad45a979b29e9c3c2d795d655cc19585c"];
-}

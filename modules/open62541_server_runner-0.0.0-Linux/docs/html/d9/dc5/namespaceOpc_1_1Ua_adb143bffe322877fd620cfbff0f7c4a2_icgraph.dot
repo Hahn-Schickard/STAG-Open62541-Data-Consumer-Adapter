@@ -1,9 +1,0 @@
-digraph "Opc.Ua.PublishedDataItemsAddVariablesMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node118 [label="Opc.Ua.PublishedDataItems\lAddVariablesMethodStateMethodCall\lHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node118 -> Node119 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node119 [label="Opc.Ua.PublishedDataItems\lAddVariablesMethodState.Initialize\lOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d93/classOpc_1_1Ua_1_1PublishedDataItemsAddVariablesMethodState.html#ac70719b3d1ed64bef61d1bafe4719ca3",tooltip="Initializes the any option children defined for the instance. "];
-}

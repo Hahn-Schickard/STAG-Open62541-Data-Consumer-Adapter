@@ -1,9 +1,0 @@
-digraph "UA_MonitoredItemCreateRequest_init"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node1734 [label="UA_MonitoredItemCreateRequest_init",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node1734 -> Node1735 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node1735 [label="UA_MonitoredItemCreateRequest\l_default",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/d45/client__subscriptions_8h.html#a8193a16b891418f4f5c449fccc2d2792"];
-}

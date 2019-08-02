@@ -1,9 +1,0 @@
-digraph "UA_CreateSessionResponse_new"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node798 [label="UA_CreateSessionResponse_new",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node798 -> Node799 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node799 [label="UA_new",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/d49/types_8h.html#a40bf20c146fc1f9eca242aee40d768ef"];
-}

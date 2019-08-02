@@ -1,9 +1,0 @@
-digraph "Opc.Ua.ReadMethodState.InitializeOptionalChildren"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node8 [label="Opc.Ua.ReadMethodState.Initialize\lOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node9 [label="Opc.Ua.ReadMethodStateMethod\lCallHandler",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d9/dc5/namespaceOpc_1_1Ua.html#a84e10074cfb54ab9e06d15fe0061ffac",tooltip="Used to receive notifications when the method is called. "];
-}

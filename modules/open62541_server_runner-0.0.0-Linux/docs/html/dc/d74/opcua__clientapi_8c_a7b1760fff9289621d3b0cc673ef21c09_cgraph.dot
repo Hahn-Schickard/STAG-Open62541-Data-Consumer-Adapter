@@ -1,9 +1,0 @@
-digraph "OpcUa_ClientApi_Browse"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node120 [label="OpcUa_ClientApi_Browse",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node120 -> Node121 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node121 [label="OpcUa_BrowseRequest\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a1a4fad57b3646201e2fc14f6bb5ef60c"];
-}

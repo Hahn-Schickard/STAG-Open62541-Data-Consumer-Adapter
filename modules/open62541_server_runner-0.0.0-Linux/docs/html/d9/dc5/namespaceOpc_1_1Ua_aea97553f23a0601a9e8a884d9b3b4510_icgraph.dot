@@ -1,9 +1,0 @@
-digraph "Opc.Ua.GetEncryptingKeyMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node88 [label="Opc.Ua.GetEncryptingKeyMethod\lStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node88 -> Node89 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node89 [label="Opc.Ua.GetEncryptingKeyMethod\lState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d4/d59/classOpc_1_1Ua_1_1GetEncryptingKeyMethodState.html#a527255014c4fdcb5ecd41c2ffc5a46b5",tooltip="Initializes the any option children defined for the instance. "];
-}

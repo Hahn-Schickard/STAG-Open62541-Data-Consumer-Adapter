@@ -1,9 +1,0 @@
-digraph "Opc.Ua.GetSecurityGroupMethodStateMethodCallHandler"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node100 [label="Opc.Ua.GetSecurityGroupMethod\lStateMethodCallHandler",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node100 -> Node101 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node101 [label="Opc.Ua.GetSecurityGroupMethod\lState.InitializeOptionalChildren",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$db/dbd/classOpc_1_1Ua_1_1GetSecurityGroupMethodState.html#ab2a876cc94eb916bde8ee7e22b32298a",tooltip="Initializes the any option children defined for the instance. "];
-}

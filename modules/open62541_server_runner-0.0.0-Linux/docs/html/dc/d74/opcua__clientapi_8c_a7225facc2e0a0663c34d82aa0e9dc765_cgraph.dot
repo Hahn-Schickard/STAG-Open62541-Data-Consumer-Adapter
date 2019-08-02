@@ -1,9 +1,0 @@
-digraph "OpcUa_ClientApi_BeginRegisterServer2"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node93 [label="OpcUa_ClientApi_BeginRegister\lServer2",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node93 -> Node94 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node94 [label="OpcUa_RegisterServer2Request\l_Initialize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a62a5c6641e45f39e690d9e9bed709812"];
-}

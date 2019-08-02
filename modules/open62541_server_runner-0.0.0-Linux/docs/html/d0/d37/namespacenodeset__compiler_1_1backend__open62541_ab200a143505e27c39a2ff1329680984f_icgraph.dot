@@ -1,9 +1,0 @@
-digraph "nodeset_compiler.backend_open62541.sortNodes"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node40 [label="nodeset_compiler.backend\l_open62541.sortNodes",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node40 -> Node41 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node41 [label="nodeset_compiler.backend\l_open62541.generateOpen62541Code",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/d37/namespacenodeset__compiler_1_1backend__open62541.html#af06887eb003f60b4f7f98e89753469e6",tooltip="Generate C Code #. "];
-}

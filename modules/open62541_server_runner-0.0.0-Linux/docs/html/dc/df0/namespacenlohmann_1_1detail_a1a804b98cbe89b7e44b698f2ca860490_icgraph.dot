@@ -1,9 +1,0 @@
-digraph "nlohmann::detail::to_json"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node262 [label="nlohmann::detail::to_json",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node262 -> Node263 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node263 [label="nlohmann::detail::to\l_json_fn::operator()",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d2/d7e/structnlohmann_1_1detail_1_1to__json__fn.html#aecfb5114c8a737fc89d98589482795b8"];
-}

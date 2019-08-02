@@ -1,9 +1,0 @@
-digraph "OpcUa_ModifySubscriptionRequest_Clear"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node1363 [label="OpcUa_ModifySubscription\lRequest_Clear",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node1363 -> Node1364 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node1364 [label="OpcUa_ModifySubscription\lRequest_Decode",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dd4/opcua__types_8c.html#a4a09987e919a0bc5751c4cbfb3cc8e94"];
-}
