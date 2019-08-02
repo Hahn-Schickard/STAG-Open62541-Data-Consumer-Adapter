@@ -2,7 +2,7 @@
 #define __OPCUA_ADAPTER_HPP
 
 #include "ConsumerNotifier.hpp"
-#include "Open62541_Server.h"
+#include "Server_Runner.h"
 
 class OpcuaAdapter : public OPCUA_Notifier::ConsumerNotifier {
 public:

@@ -18,16 +18,16 @@ add_library(${THIS} SHARED
 if (WIN32)
     target_link_libraries(${THIS} PRIVATE 
                                   Consumer_Notifier                                
-                                  OPCUA_Server)
+                                  Server_Runner)
 elseif (UNIX)
     target_link_libraries(${THIS} PRIVATE 
                                   Consumer_Notifier                                
-                                  OPCUA_Server
+                                  Server_Runner
                                   gcov)
 else ()
     target_link_libraries(${THIS} PRIVATE 
                                   Consumer_Notifier                                
-                                  OPCUA_Server)
+                                  Server_Runner)
     message(WARNING "Please configure your linking for your operating system for target ${THIS}")
 endif ()
 
