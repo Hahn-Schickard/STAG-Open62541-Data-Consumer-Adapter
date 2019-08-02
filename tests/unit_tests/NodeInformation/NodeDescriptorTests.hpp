@@ -33,10 +33,11 @@ TEST(NodeDescriptorTests, isDefaultBuildCorrect) {
   abstraction_builder->addDeviceElement(
       "SimpleElement", "This is a simple element",
       Information_Model::ElementType::Readonly);
+  std::unique_ptr<Information_Model::Device> device =
+      abstraction_builder->getDevice();
 
   opcua_model_translator::NodeBuilder *node_builder =
-      new opcua_model_translator::NodeBuilder(
-          abstraction_builder->getDevice().get());
+      new opcua_model_translator::NodeBuilder(device.get());
   NodeDescription *node_descriptor = node_builder->get_Node_Description();
 
   EXPECT_STREQ("TestDevice", node_descriptor->base_node_descriptor.browse_name)
