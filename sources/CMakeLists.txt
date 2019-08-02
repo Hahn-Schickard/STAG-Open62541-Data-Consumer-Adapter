@@ -1,0 +1,8 @@
+set(THIS Model_Translator)
+
+add_subdirectory(utilites)
+add_subdirectory(DataValueIdentifier)
+add_subdirectory(NodeDescriptionSerializers)
+add_subdirectory(NodeBuilder)
+add_subdirectory(ConsumerNotifier)
+add_subdirectory(OpcuaAdapter)

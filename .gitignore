@@ -1,2 +1,6 @@
 tests/googletest-src/
 build
+libs
+.vscode/
+code_coverage_report/ 
+code_coverage.info

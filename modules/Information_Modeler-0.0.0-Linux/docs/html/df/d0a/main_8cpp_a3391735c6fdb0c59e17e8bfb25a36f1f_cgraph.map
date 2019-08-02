@@ -1,0 +1,11 @@
+<map id="buildDeviceFromAFunction" name="buildDeviceFromAFunction">
+<area shape="rect" id="node2" href="$dd/d42/classModel__Factory_1_1DeviceBuilder.html#a08d83b1afbe24eb1f7eab3b9d983ee0e" title="This method calls DeviceElementGroupImpl::addDeviceElement() method to create an instance of Informat..." alt="" coords="243,71,449,112"/>
+<area shape="rect" id="node8" href="$dd/d42/classModel__Factory_1_1DeviceBuilder.html#a901b2902eb0c26729e9e3a2b3251f8b6" title="This calls DeviceImpl::addDeviceElementGroup() method, whcih sets a single instance of Information_Mo..." alt="" coords="243,136,449,177"/>
+<area shape="rect" id="node10" href="$dd/d42/classModel__Factory_1_1DeviceBuilder.html#a66c6fb2f0332a17f56ffc2ac0fe1e97d" title="This method returns a pointer with full ownership rights. " alt="" coords="243,201,449,243"/>
+<area shape="rect" id="node3" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#ad09d7f77e990709d320abe021c7d4f46" title="This method creates an instance of Information_Model:DeviceElement class and adds it to DeviceElement..." alt="" coords="497,71,713,112"/>
+<area shape="rect" id="node4" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#a415bdb5741553e5dffb90e15200a6de4" title="Model_Factory::DeviceElement\lGroupImpl::generate_Reference_ID" alt="" coords="761,71,1005,112"/>
+<area shape="rect" id="node5" href="$d3/d15/classInformation__Model_1_1NamedElement.html#af2632fe7fb4c20c7d68ea20c127d95f7" title="Information_Model::\lNamedElement::getElementRefId" alt="" coords="1053,5,1288,47"/>
+<area shape="rect" id="node6" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#ad702989f5cab3b5a0617cbb51234fcaa" title="Model_Factory::DeviceElement\lGroupImpl::getNumericElementId" alt="" coords="1053,71,1288,112"/>
+<area shape="rect" id="node7" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#a7d0c8f8d1fbe5d85268d5c17ec328c52" title="Model_Factory::DeviceElement\lGroupImpl::incrementElementId" alt="" coords="1058,136,1283,177"/>
+<area shape="rect" id="node9" href="$dc/d8c/classModel__Factory_1_1DeviceImpl.html#a6b4657905de62f38bd9f1c32855f985c" title="This sets the DeviceImpl: DeviceImpl::device_element_group field. " alt="" coords="510,136,701,177"/>
+</map>

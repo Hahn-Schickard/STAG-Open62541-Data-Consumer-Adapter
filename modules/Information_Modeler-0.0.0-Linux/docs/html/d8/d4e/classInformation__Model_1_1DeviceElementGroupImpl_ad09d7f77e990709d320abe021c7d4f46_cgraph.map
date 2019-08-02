@@ -1,0 +1,6 @@
+<map id="Information_Model::DeviceElementGroupImpl::addDeviceElement" name="Information_Model::DeviceElementGroupImpl::addDeviceElement">
+<area shape="rect" id="node2" href="$d8/d4e/classInformation__Model_1_1DeviceElementGroupImpl.html#a7410ba50df07d7f0ba0dab3a5def359c" title="Information_Model::\lDeviceElementGroupImpl\l::generate_Reference_ID" alt="" coords="237,71,421,127"/>
+<area shape="rect" id="node3" href="$d3/d15/classInformation__Model_1_1NamedElement.html#af2632fe7fb4c20c7d68ea20c127d95f7" title="Information_Model::\lNamedElement::getElementRefId" alt="" coords="469,5,704,47"/>
+<area shape="rect" id="node4" href="$d8/d4e/classInformation__Model_1_1DeviceElementGroupImpl.html#ad702989f5cab3b5a0617cbb51234fcaa" title="Information_Model::\lDeviceElementGroupImpl\l::getNumericElementId" alt="" coords="495,71,679,127"/>
+<area shape="rect" id="node5" href="$d8/d4e/classInformation__Model_1_1DeviceElementGroupImpl.html#a7d0c8f8d1fbe5d85268d5c17ec328c52" title="Information_Model::\lDeviceElementGroupImpl\l::incrementElementId" alt="" coords="495,151,679,207"/>
+</map>

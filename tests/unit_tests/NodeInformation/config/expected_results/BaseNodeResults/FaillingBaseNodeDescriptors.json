@@ -1,0 +1,29 @@
+[
+    {
+        "nodeClass": "variable",
+        "writableFlag": true,
+        "uniqueId": "I",
+        "locale": "en-GB",
+        "displayName": "Variable Node Descriptor Test I",
+        "browseName": "variable_node_descriptor_test_I",
+        "description": "This is some other description"
+    },
+    {
+        "nodeClass": "method",
+        "writableFlag": false,
+        "uniqueId": "II",
+        "locale": "en-GB",
+        "displayName": "Base Node Descriptor Test II",
+        "browseName": "base_node_descriptor_test_II",
+        "description": "This is some otherdescription"
+    },
+    {
+        "nodeClass": null,
+        "writableFlag": true,
+        "uniqueId": "III",
+        "locale": "en-GB",
+        "displayName": "Base Node Descriptor Test III",
+        "browseName": "base_node_descriptor_test_III",
+        "description": "This is some other description"
+    }
+]

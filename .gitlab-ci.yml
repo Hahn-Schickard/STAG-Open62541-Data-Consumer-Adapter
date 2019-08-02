@@ -1,0 +1,159 @@
+variables: 
+ GIT_SUBMODULE_STRATEGY: recursive
+
+include: 
+ - local: "ci-variables.yml"
+ 
+stages:
+ - configure
+ - build 
+ - test
+ - analyze
+ - document
+ - package
+ - deploy
+ - trigger
+ 
+configure_release_cmake: 
+ stage: configure
+ variables: 
+  GIT_STRATEGY: fetch
+ script:
+  - './.do_release.sh build'
+ only: 
+  - /Release.*/
+
+configure_debug_cmake: 
+ stage: configure
+ variables: 
+  GIT_STRATEGY: fetch 
+ script:
+  - mkdir -p build
+  - cd build
+  - 'cmake -DCMAKE_BUILD_TYPE="Debug" ..'
+ except: 
+  - /Release.*/
+ 
+build_debug: 
+ stage: build
+ variables: 
+  GIT_STRATEGY: none 
+  CONFIG: "Debug"
+ script: 
+  - 'cmake --build build/ --config $CONFIG --target all --'
+ artifacts: 
+  paths: 
+   - build/
+ except: 
+  - /Release.*/
+  
+build_release: 
+ stage: build
+ variables: 
+  GIT_STRATEGY: none 
+  CONFIG: "Release"
+ script: 
+  - 'cmake --build build/ --config $CONFIG --target all --'
+ artifacts: 
+  paths: 
+   - build/
+ only: 
+  - /Release.*/
+  
+run_unit_tests: 
+ stage: test
+ variables: 
+  GIT_STRATEGY: none 
+ script: 
+  - cd build
+  - ctest
+ except: 
+  - /Release.*/
+
+check_code_coverage: 
+ stage: analyze 
+ variables: 
+  GIT_STRATEGY: none 
+ script: 
+  - ./.check_code_coverage.sh
+ dependencies:
+  - run_unit_tests
+ artifacts:                                                           
+  name: "code_coverage_results"
+  paths:
+  - code_coverage_report/
+ except: 
+   - /Release.*/
+ allow_failure: true
+ 
+test_for_memory_leaks: 
+ stage: analyze
+ variables: 
+  GIT_STRATEGY: none
+ script: 
+  - "./.run_valgrind.sh -e $VALGRIND_EXECUTABLE -a $VALGRIND_EXECUTABLE_ARGS"
+ artifacts:                                                           
+  name: "valgrind_results"
+  paths:
+  - valgrind-results.log
+ only: 
+  variables: 
+   - $RUN_VALGRIND == "true" 
+ allow_failure: true
+ 
+generate_documentation: 
+ stage: document
+ variables: 
+  GIT_STRATEGY: none 
+ script: 
+  - doxygen Doxyfile 
+ artifacts: 
+  name: "doc_files"
+  paths: 
+  - docs/code_documentation/
+  expire_in: 30 days
+ only:
+   - /Release.*/
+ allow_failure: true
+ 
+package_tgz: 
+ stage: package
+ variables: 
+  GIT_STRATEGY: none 
+ script:
+  - cd build
+  - cpack
+ artifacts: 
+  name: "binaries_tgz_package"
+  paths: 
+  - build/cpack_packages/*
+  expire_in: 99 yrs
+ only: 
+  - /Release.*/
+ allow_failure: true
+  
+deploy_coverage_report:
+ stage: deploy
+ dependencies:
+    - check_code_coverage
+ script:
+    - mv code_coverage_report/ public/
+ artifacts:
+   paths:
+     - public
+   expire_in: 30 days
+ only:
+   - master
+ except: 
+   - /Release.*/
+ allow_failure: true
+
+update_versioning: 
+ stage: trigger
+ script: 
+  - ./.update_versioning.sh $CI_REPOSITORY_URL
+ only: 
+  - master
+ except: 
+  - /Release.*/
+ allow_failure: true
