@@ -52,11 +52,11 @@ typedef struct BaseNodeInformation
 {
   NodeClassType node_class;
   bool writable_flag;
-  char locale[8];
-  char unique_id[128];
-  char display_name[256];
-  char browse_name[256];
-  char description[256];
+  char *locale;
+  char *unique_id;
+  char *display_name;
+  char *browse_name;
+  char *description;
 } BaseNodeDescription;
 
 typedef struct VariableNodeInformation
