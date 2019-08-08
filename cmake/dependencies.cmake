@@ -1,15 +1,4 @@
 if(NOT IS_SUBMODULE_PROJECT AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-#====================================== JSON SERIALIZER DEPENDENCY ==========================================
-    message(STATUS "Configuring external dependencies")
-    configure_file(JsonDependency.txt json-download/CMakeLists.txt)
-    execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
-       WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/json-download" )
-    execute_process(COMMAND "${CMAKE_COMMAND}" --build .
-       WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/json-download" )
-
-    set(JSON_INCLUDES "${PROJECT_SOURCE_DIR}/libs/json-src/single_include/")
-    set(JSON_BuildTests OFF CACHE INTERNAL "")
-
 #======================================== GOOGLE TEST DEPENDENCY ============================================
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         option(INSTALL_GMOCK "Install Googletest's GMock?" OFF)
