@@ -1,16 +1,14 @@
 #ifndef __CONSUMER_NOTIFIER_HPP
 #define __CONSUMER_NOTIFIER_HPP
 
+#include "Device.hpp"
 #include "Listener.hpp"
-#include "NodeInformation.h"
-
-extern "C" void update_DataConsumer(NodeDescription *device);
 
 namespace OPCUA_Notifier {
 class ConsumerNotifier : public Notifier::Listener {
 public:
-  void handleEvent(Information_Model::Device *device);
+  virtual void handleEvent(Information_Model::Device *device) = 0;
 };
-}
+} // namespace OPCUA_Notifier
 
 #endif //__CONSUMER_NOTIFIER_HPP

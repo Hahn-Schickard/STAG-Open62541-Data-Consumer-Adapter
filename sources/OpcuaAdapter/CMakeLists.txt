@@ -8,7 +8,6 @@ file(GLOB includes_list "${PROJECT_SOURCE_DIR}/includes/OpcuaAdapter/*.hpp")
 PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 
 set(opcua_adapter_includes_dir "${PROJECT_SOURCE_DIR}/includes/OpcuaAdapter")
-
 include_directories(${opcua_adapter_includes_dir})
 
 add_library(${THIS} SHARED
@@ -16,22 +15,30 @@ add_library(${THIS} SHARED
             ${includes_list})
 
 if (WIN32)
-    target_link_libraries(${THIS} PRIVATE 
-                                  Consumer_Notifier                                
+    target_link_libraries(${THIS} PUBLIC
+                                  Notifier
+                                  Information_Model 
+                                  PRIVATE                              
                                   Server_Runner)
 elseif (UNIX)
-    target_link_libraries(${THIS} PRIVATE 
-                                  Consumer_Notifier                                
+    target_link_libraries(${THIS} PUBLIC
+                                  Notifier
+                                  Information_Model 
+                                  PRIVATE                               
                                   Server_Runner
                                   gcov)
 else ()
-    target_link_libraries(${THIS} PRIVATE 
-                                  Consumer_Notifier                                
+    target_link_libraries(${THIS} PUBLIC
+                                  Notifier
+                                  Information_Model 
+                                  PRIVATE                                
                                   Server_Runner)
     message(WARNING "Please configure your linking for your operating system for target ${THIS}")
 endif ()
 
 target_include_directories(${THIS} PUBLIC
+                           $<BUILD_INTERFACE:${consumer_notifier_includes}>
+                           $<BUILD_INTERFACE:${opcua_adapter_includes_dir}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
                            $<INSTALL_INTERFACE:${INCLUDES_DEST}>
                            $<INSTALL_INTERFACE:${LIBS_DEST}>)
