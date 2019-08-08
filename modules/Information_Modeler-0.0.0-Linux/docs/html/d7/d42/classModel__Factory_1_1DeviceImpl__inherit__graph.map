@@ -1,0 +1,4 @@
+<map id="Model_Factory::DeviceImpl" name="Model_Factory::DeviceImpl">
+<area shape="rect" id="node2" href="$dd/d81/classInformation__Model_1_1Device.html" title="This class models a Device. It contains a single instance of Information_Model::DeviceElementGroup, which has all of the elements that this device uses. " alt="" coords="27,95,175,136"/>
+<area shape="rect" id="node3" href="$d3/d15/classInformation__Model_1_1NamedElement.html" title="This is the base class for all of the other modelling classes. " alt="" coords="27,5,175,47"/>
+</map>

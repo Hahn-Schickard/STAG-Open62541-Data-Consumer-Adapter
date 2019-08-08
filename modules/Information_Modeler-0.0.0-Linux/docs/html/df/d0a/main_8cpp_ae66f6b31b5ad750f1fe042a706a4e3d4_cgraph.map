@@ -1,0 +1,22 @@
+<map id="main" name="main">
+<area shape="rect" id="node2" href="$dd/d42/classModel__Factory_1_1DeviceBuilder.html#a08d83b1afbe24eb1f7eab3b9d983ee0e" title="This method calls DeviceElementGroupImpl::addDeviceElement() method to create an instance of Informat..." alt="" coords="356,27,563,68"/>
+<area shape="rect" id="node8" href="$dd/d42/classModel__Factory_1_1DeviceBuilder.html#a901b2902eb0c26729e9e3a2b3251f8b6" title="This calls DeviceImpl::addDeviceElementGroup() method, whcih sets a single instance of Information_Mo..." alt="" coords="356,92,563,133"/>
+<area shape="rect" id="node10" href="$df/d0a/main_8cpp.html#a3391735c6fdb0c59e17e8bfb25a36f1f" title="buildDeviceFromAFunction" alt="" coords="113,85,303,111"/>
+<area shape="rect" id="node11" href="$dd/d42/classModel__Factory_1_1DeviceBuilder.html#a66c6fb2f0332a17f56ffc2ac0fe1e97d" title="This method returns a pointer with full ownership rights. " alt="" coords="356,168,563,209"/>
+<area shape="rect" id="node12" href="$df/d0a/main_8cpp.html#a3c9f91031cc80b32b3c5a10c52e091bd" title="printDevice" alt="" coords="412,275,507,302"/>
+<area shape="rect" id="node21" href="$d2/d45/structGroupElementDoesNotExistException.html#a29f9797afc7f28530ca21814bbc8c90a" title="GroupElementDoesNotExist\lException::what" alt="" coords="108,288,308,329"/>
+<area shape="rect" id="node3" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#ad09d7f77e990709d320abe021c7d4f46" title="This method creates an instance of Information_Model:DeviceElement class and adds it to DeviceElement..." alt="" coords="617,27,833,68"/>
+<area shape="rect" id="node4" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#a415bdb5741553e5dffb90e15200a6de4" title="Model_Factory::DeviceElement\lGroupImpl::generate_Reference_ID" alt="" coords="888,41,1132,83"/>
+<area shape="rect" id="node5" href="$d3/d15/classInformation__Model_1_1NamedElement.html#af2632fe7fb4c20c7d68ea20c127d95f7" title="Information_Model::\lNamedElement::getElementRefId" alt="" coords="1201,151,1435,192"/>
+<area shape="rect" id="node6" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#ad702989f5cab3b5a0617cbb51234fcaa" title="Model_Factory::DeviceElement\lGroupImpl::getNumericElementId" alt="" coords="1201,71,1435,112"/>
+<area shape="rect" id="node7" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#a7d0c8f8d1fbe5d85268d5c17ec328c52" title="Model_Factory::DeviceElement\lGroupImpl::incrementElementId" alt="" coords="1205,5,1431,47"/>
+<area shape="rect" id="node9" href="$dc/d8c/classModel__Factory_1_1DeviceImpl.html#a6b4657905de62f38bd9f1c32855f985c" title="This sets the DeviceImpl: DeviceImpl::device_element_group field. " alt="" coords="630,92,821,133"/>
+<area shape="rect" id="node13" href="$d3/d15/classInformation__Model_1_1NamedElement.html#ad9240e589de0bab6d0ff52061d819069" title="Information_Model::\lNamedElement::getElementName" alt="" coords="1197,271,1439,312"/>
+<area shape="rect" id="node14" href="$d3/d15/classInformation__Model_1_1NamedElement.html#ad434e9f9bf62d370baae7eba8a7c1bba" title="Information_Model::\lNamedElement::getElementDescription" alt="" coords="1180,455,1456,496"/>
+<area shape="rect" id="node15" href="$dd/d81/classInformation__Model_1_1Device.html#aceba0b174bb27d7d887a3a5e78de1a7e" title="Information_Model::\lDevice::getDeviceElementGroup" alt="" coords="611,209,840,251"/>
+<area shape="rect" id="node16" href="$df/d20/classInformation__Model_1_1DeviceElementGroup.html#a51e3690d3c056c39f3bc1594381a12f7" title="Information_Model::\lDeviceElementGroup::\lgetSubelements" alt="" coords="927,326,1093,382"/>
+<area shape="rect" id="node17" href="$df/d0a/main_8cpp.html#aef8875f56afb592d4cb3ed38054b8de2" title="printSubelements" alt="" coords="657,377,793,403"/>
+<area shape="rect" id="node18" href="$df/d0a/main_8cpp.html#ab002931a8be407abde32097da0814c01" title="printElement" alt="" coords="958,406,1062,433"/>
+<area shape="rect" id="node19" href="$df/d0a/main_8cpp.html#a3fe98b9530ed3a68d932afc8b7d53e65" title="elementType_str" alt="" coords="1255,403,1381,430"/>
+<area shape="rect" id="node20" href="$d6/d9e/classInformation__Model_1_1DeviceElement.html#a54d7b1f13d2074d411cb632f5492110d" title="Information_Model::\lDeviceElement::getElementType" alt="" coords="1204,337,1432,379"/>
+</map>

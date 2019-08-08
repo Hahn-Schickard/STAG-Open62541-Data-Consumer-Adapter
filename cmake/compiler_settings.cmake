@@ -24,6 +24,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         -lgcov
         --coverage
     )
+
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   # setup your MSVC toolchain here
 endif()
