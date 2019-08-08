@@ -3,38 +3,29 @@ cmake_minimum_required(VERSION 3.6)
 set (THIS OPCUA_Adapter)
 
 file(GLOB sources_list  "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
-file(GLOB includes_list "${PROJECT_SOURCE_DIR}/includes/OpcuaAdapter/*.hpp")
+file(GLOB includes_list "${PROJECT_SOURCE_DIR}/includes/Opcua_Adapter/*.hpp")
 
 PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 
-set(opcua_adapter_includes_dir "${PROJECT_SOURCE_DIR}/includes/OpcuaAdapter")
+set(opcua_adapter_includes_dir "${PROJECT_SOURCE_DIR}/includes/Opcua_Adapter")
 include_directories(${opcua_adapter_includes_dir})
 
 add_library(${THIS} SHARED
-            ${sources_list}
             ${includes_list})
 
-if (WIN32)
-    target_link_libraries(${THIS} PUBLIC
-                                  Notifier
-                                  Information_Model 
-                                  PRIVATE                              
-                                  Server_Runner)
-elseif (UNIX)
-    target_link_libraries(${THIS} PUBLIC
-                                  Notifier
-                                  Information_Model 
-                                  PRIVATE                               
-                                  Server_Runner
+target_sources(${THIS} PRIVATE ${sources_list})
+
+target_link_libraries(${THIS} PUBLIC
+                              Notifier
+                              Information_Model 
+                              PRIVATE                              
+                              Server_Runner)
+                              
+if (UNIX)
+    target_link_libraries(${THIS} PRIVATE
                                   gcov)
-else ()
-    target_link_libraries(${THIS} PUBLIC
-                                  Notifier
-                                  Information_Model 
-                                  PRIVATE                                
-                                  Server_Runner)
-    message(WARNING "Please configure your linking for your operating system for target ${THIS}")
-endif ()
+endif()
+
 
 target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${consumer_notifier_includes}>
