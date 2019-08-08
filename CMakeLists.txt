@@ -34,14 +34,12 @@ set(BINS_DEST "bin/")
 set(CONFIGS_DEST "./")
 
 #@+ ========================== User configuration ===========================
-find_package(OPCUA_Node_Model REQUIRED PATHS "./modules")
-install(DIRECTORY ${OPCUA_Node_Model_DIR} DESTINATION ${MODULES_DEST})
 find_package(Information_Modeler REQUIRED PATHS "./modules")
 install(DIRECTORY ${Information_Modeler_DIR} DESTINATION ${MODULES_DEST})
 find_package(Data_Consumer_Notifier REQUIRED PATHS "./modules")
 install(DIRECTORY ${Data_Consumer_Notifier_DIR} DESTINATION ${MODULES_DEST})
-find_package(open62541_server_runner REQUIRED PATHS "./modules")
-install(DIRECTORY ${open62541_server_runner_DIR} DESTINATION ${MODULES_DEST})
+find_package(open62541 REQUIRED PATHS "./modules")
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/modules/open62541-linux64 DESTINATION ${MODULES_DEST})
 #@- ===================== END OF USER CONFIGURATION =========================
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -64,20 +62,8 @@ include(dependencies)
 
 include_directories(${INCLUDES_DIR})
 
-set(node_information_includes_dir "${PROJECT_SOURCE_DIR}/includes/NodeInformation")
-set(utilities_includes_dir "${PROJECT_SOURCE_DIR}/includes/utilities")
-set(json_serializer_includes_dir "${PROJECT_SOURCE_DIR}/includes/utilities/JsonSerializer")
-
-include_directories(${utilities_includes_dir})
-include_directories(${json_serializer_includes_dir})
-
-file(GLOB C_Includes "${PROJECT_SOURCE_DIR}/includes/NodeInformation/*.h")
-file(GLOB CXX_Includes  "${PROJECT_SOURCE_DIR}/includes/*.hpp"
-                        "${PROJECT_SOURCE_DIR}/includes/utilities/*.hpp")
-
-add_subdirectory(libs/json-src)        
 add_subdirectory(sources)
-add_subdirectory(tests/unit_tests/NodeInformation)
+add_subdirectory(tests/unit_tests/)
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "This is an example project with template files.")
 set(CPACK_PACKAGE_VENDOR "Hahn-Schickard")
