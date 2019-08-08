@@ -1,6 +1,6 @@
 variables:
  RUN_VALGRIND: "true"
- VALGRIND_EXECUTABLE: "build/bin/Runner_MAIN"
+ VALGRIND_EXECUTABLE: "build/bin/Model_Translator_Runner_MAIN"
  VALGRIND_EXECUTABLE_ARGS: ""
  RELEASE_MAJOR_VERSION: "0"
  RELEASE_MINOR_VERSION: "1"
