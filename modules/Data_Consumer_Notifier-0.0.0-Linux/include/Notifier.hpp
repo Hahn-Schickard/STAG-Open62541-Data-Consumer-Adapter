@@ -4,22 +4,27 @@
 #include "Listener.hpp"
 #include <memory>
 
-namespace Notifier {
-class Notifier {
+namespace Notifier
+{
+class Notifier
+{
 public:
-  void registerListener(std::shared_ptr<Listener> listiner) {
+  void registerListener(Listener *listiner)
+  {
     listiners.push_back(listiner);
   }
 
 protected:
-  void notifyListeners(Information_Model::Device *device) {
-    for (auto listiner : listiners) {
+  void notifyListeners(Information_Model::Device *device)
+  {
+    for (auto listiner : listiners)
+    {
       listiner->handleEvent(device);
     }
   }
 
 private:
-  std::vector<std::shared_ptr<Listener>> listiners;
+  std::vector<Listener *> listiners;
 };
 } // namespace Notifier
 
