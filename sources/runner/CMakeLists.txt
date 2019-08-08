@@ -6,7 +6,7 @@ file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 
 PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 
-add_executable(${THIS} 
+add_executable(${THIS}
                ${sources_list}
                ${includes_list})              
 

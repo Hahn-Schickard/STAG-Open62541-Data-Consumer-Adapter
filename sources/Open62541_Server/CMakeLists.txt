@@ -12,34 +12,25 @@ PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
 include_directories(${open62541_Server_includes_dir})
 
 add_library(${THIS} SHARED
-            ${sources_list}
             ${includes_list})
 
-if (WIN32)
-    target_link_libraries(${THIS} PUBLIC
-                                  Information_Model
-                                  open62541::open62541)
-elseif (UNIX)
-    target_link_libraries(${THIS} PUBLIC
-                                  Information_Model
-                                  open62541::open62541
+target_sources(${THIS} PRIVATE ${sources_list})
+
+target_link_libraries(${THIS} PUBLIC
+                              Information_Model
+                              open62541::open62541)
+                            
+if (UNIX)
+    target_link_libraries(${THIS} PRIVATE
                                   gcov)
-else ()
-    target_link_libraries(${THIS} PUBLIC
-                                  Information_Model
-                                  open62541::open62541)
-    message(WARNING "Please configure your linking for your operating system for target ${THIS}")
-endif ()
+endif()
+
 
 target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${open62541_Server_includes_dir}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
                            $<INSTALL_INTERFACE:${INCLUDES_DEST}>
-                           $<INSTALL_INTERFACE:${LIBS_DEST}>
-                           $<INSTALL_INTERFACE:${MODULES_DEST}/open62541-linux64/lib>
-                           $<INSTALL_INTERFACE:${MODULES_DEST}/open62541-linux64/include>
-                           $<INSTALL_INTERFACE:${MODULES_DEST}/open62541-linux64/share>)
-
+                           $<INSTALL_INTERFACE:${LIBS_DEST}>)
 
 if(CLANG_TIDY_EXE)               
     set_target_properties(
