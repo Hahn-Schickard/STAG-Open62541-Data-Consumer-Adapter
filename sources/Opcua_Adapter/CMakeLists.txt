@@ -2,43 +2,48 @@ cmake_minimum_required(VERSION 3.6)
 
 set (THIS OPCUA_Adapter)
 
+list(APPEND PUBLIC_INCLUDES_DIRS
+            ${PROJECT_SOURCE_DIR}/includes/Opcua_Adapter
+)
+
 file(GLOB sources_list  "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
-file(GLOB includes_list "${PROJECT_SOURCE_DIR}/includes/Opcua_Adapter/*.hpp")
 
-PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
-
-set(opcua_adapter_includes_dir "${PROJECT_SOURCE_DIR}/includes/Opcua_Adapter")
-include_directories(${opcua_adapter_includes_dir})
+INCLUDE_DIRS_AND_FILES(PUBLIC_INCLUDES_DIRS PUBLIC_INCLUDES)
+PRINT_MODULE_FILES(${THIS} "${sources_list}" "${PUBLIC_INCLUDES}")
 
 add_library(${THIS} SHARED
-            ${includes_list})
+                    ${includes_list}
+)
 
-target_sources(${THIS} PRIVATE ${sources_list})
+target_sources(${THIS} PRIVATE 
+                       ${sources_list}
+)
 
 target_link_libraries(${THIS} PUBLIC
                               Notifier
                               Information_Model 
                               PRIVATE                              
-                              Server_Runner)
+                              Server_Runner
+)
                               
 if (UNIX)
     target_link_libraries(${THIS} PRIVATE
-                                  gcov)
+                                  gcov
+    )
 endif()
 
-
 target_include_directories(${THIS} PUBLIC
-                           $<BUILD_INTERFACE:${consumer_notifier_includes}>
-                           $<BUILD_INTERFACE:${opcua_adapter_includes_dir}>
+                           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/includes/Opcua_Adapter>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
                            $<INSTALL_INTERFACE:${INCLUDES_DEST}>
-                           $<INSTALL_INTERFACE:${LIBS_DEST}>)
+                           $<INSTALL_INTERFACE:${LIBS_DEST}>
+)
 
 if(CLANG_TIDY_EXE AND DO_LINTING)               
     set_target_properties(
                         ${THIS} PROPERTIES
                         CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY}
-                        )
+    )
 endif()    
 
 add_custom_command(TARGET ${THIS} POST_BUILD 
@@ -48,7 +53,8 @@ add_custom_command(TARGET ${THIS} POST_BUILD
             $<TARGET_FILE:${THIS}> 
             "${CMAKE_BINARY_DIR}/bin"
         COMMENT "Copying shared library files from ${CMAKE_CURRENT_BINARY_DIR} directory to ${CMAKE_BINARY_DIR}/bin directory."
-            VERBATIM) 
+            VERBATIM
+) 
 
 install(
     TARGETS ${THIS} 

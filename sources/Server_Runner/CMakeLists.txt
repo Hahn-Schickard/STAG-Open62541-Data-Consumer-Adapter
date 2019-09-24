@@ -2,33 +2,39 @@ cmake_minimum_required(VERSION 3.6)
 
 set(THIS Server_Runner)
 
+list(APPEND PUBLIC_INCLUDES_DIRS
+            ${PROJECT_SOURCE_DIR}/includes/Server_Runner
+)
+
 file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
-file(GLOB includes_list "${PROJECT_SOURCE_DIR}/includes/Server_Runner/*.hpp")
 
-set(server_runner_includes_dir "${PROJECT_SOURCE_DIR}/includes/Server_Runner/")
-
-PRINT_MODULE_FILES(${THIS} "${sources_list}" "${includes_list}")
-
-include_directories(${server_runner_includes_dir})
+INCLUDE_DIRS_AND_FILES(PUBLIC_INCLUDES_DIRS PUBLIC_INCLUDES)
+PRINT_MODULE_FILES(${THIS} "${sources_list}" "${PUBLIC_INCLUDES}")
 
 add_library(${THIS} SHARED 
-            ${includes_list})
+                    ${includes_list}
+)
 
-target_sources(${THIS} PRIVATE ${sources_list})
+target_sources(${THIS} PRIVATE 
+                       ${sources_list}
+)
 
 target_link_libraries(${THIS} PRIVATE
-                              OPCUA_Server)
+                              OPCUA_Server
+)
 
 if (UNIX)
     target_link_libraries(${THIS} PRIVATE
-                                  gcov)
+                                  gcov
+    )
 endif()
 
 target_include_directories(${THIS} PUBLIC
-                           $<BUILD_INTERFACE:${server_runner_includes_dir}>
+                           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/includes/Server_Runner>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
                            $<INSTALL_INTERFACE:${INCLUDES_DEST}>
-                           $<INSTALL_INTERFACE:${LIBS_DEST}>)
+                           $<INSTALL_INTERFACE:${LIBS_DEST}>
+)
 
 if(CLANG_TIDY_EXE)               
     set_target_properties(
@@ -44,7 +50,8 @@ add_custom_command(TARGET ${THIS} POST_BUILD
                         $<TARGET_FILE:${THIS}> 
                         "${CMAKE_BINARY_DIR}/bin"
                     COMMENT "Copying shared library files from ${CMAKE_CURRENT_BINARY_DIR} directory to ${CMAKE_BINARY_DIR}/bin directory."
-                        VERBATIM)
+                        VERBATIM
+)
 
 install(
     TARGETS ${THIS} 
