@@ -7,7 +7,7 @@
 namespace OPCUA_Notifier {
 class ConsumerNotifier : public Notifier::Listener {
 public:
-  virtual void handleEvent(Information_Model::Device *device) = 0;
+  virtual void handleEvent(Notifier::NotifierEvent *event) = 0;
 };
 } // namespace OPCUA_Notifier
 
