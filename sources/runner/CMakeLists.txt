@@ -13,10 +13,8 @@ target_sources(${THIS} PRIVATE
 )
 
 target_link_libraries(${THIS} PRIVATE
-                              Information_Model
-                              Model_Factory
+                              Information_Modeler::Information_Model_Interface
                               OPCUA_Adapter
-                              Notifier
 )
 
 if(UNIX)

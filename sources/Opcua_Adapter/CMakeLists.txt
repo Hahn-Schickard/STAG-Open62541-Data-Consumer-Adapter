@@ -20,8 +20,8 @@ target_sources(${THIS} PRIVATE
 )
 
 target_link_libraries(${THIS} PUBLIC
-                              Notifier
-                              Information_Model 
+                              Model_Event_Handler::Listener
+                              Information_Modeler::Information_Model_Interface
                               PRIVATE                              
                               Server_Runner
 )
