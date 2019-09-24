@@ -56,6 +56,8 @@ include(macros)
 include(compiler_settings)
 include(linter)
 
+CREATE_PKG_CONFIG_FILE(${THIS} pkg_config_name)
+
 #@+ ========================== User configuration ===========================
 set(PROJECT_MAINTAINERS "Dovydas Girdvainis")
 
@@ -64,7 +66,10 @@ include(dependencies)
 include_directories(${INCLUDES_DIR})
 
 add_subdirectory(sources)
-add_subdirectory(tests/unit_tests/)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_subdirectory(tests/unit_tests/)
+endif()
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "This is an example project with template files.")
 set(CPACK_PACKAGE_VENDOR "Hahn-Schickard")
@@ -86,6 +91,8 @@ else()
     message(ERROR " No ${CONFIG_FILE}-config.cmake has been found! Please provide ${CONFIG_FILE}-config.cmake so your packages could be used by other developers!")
 endif()
 install(EXPORT ${PROJECT_NAME} DESTINATION ${LIBS_DEST})
+install(FILES "${PROJECT_SOURCE_DIR}/CONTRIBUTING.md" DESTINATION "./")		
+install(FILES "${PROJECT_SOURCE_DIR}/README.md" DESTINATION "./")
 
 if(WIN32 AND NOT UNIX)
     message(STATUS "Using ZIP archiving format for packages!")
