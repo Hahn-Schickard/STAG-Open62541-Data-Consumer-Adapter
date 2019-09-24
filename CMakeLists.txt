@@ -36,7 +36,7 @@ set(CONFIGS_DEST "./")
 #@+ ========================== User configuration ===========================
 find_package(Information_Modeler REQUIRED PATHS "./modules")
 install(DIRECTORY ${Information_Modeler_DIR} DESTINATION ${MODULES_DEST})
-find_package(Data_Consumer_Notifier REQUIRED PATHS "./modules")
+find_package(Model_Event_Handler REQUIRED PATHS "./modules")
 install(DIRECTORY ${Data_Consumer_Notifier_DIR} DESTINATION ${MODULES_DEST})
 find_package(open62541 REQUIRED PATHS "./modules")
 file(GLOB open62541_libs "${PROJECT_SOURCE_DIR}/modules/open62541-linux64/lib/*.so*")
