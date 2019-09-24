@@ -1,7 +1,0 @@
-<map id="Model_Factory::DeviceBuilder::addDeviceElement" name="Model_Factory::DeviceBuilder::addDeviceElement">
-<area shape="rect" id="node2" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#ad09d7f77e990709d320abe021c7d4f46" title="This method creates an instance of Information_Model:DeviceElement class and adds it to DeviceElement..." alt="" coords="260,71,476,112"/>
-<area shape="rect" id="node3" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#a415bdb5741553e5dffb90e15200a6de4" title="Model_Factory::DeviceElement\lGroupImpl::generate_Reference_ID" alt="" coords="524,71,768,112"/>
-<area shape="rect" id="node4" href="$d3/d15/classInformation__Model_1_1NamedElement.html#af2632fe7fb4c20c7d68ea20c127d95f7" title="Information_Model::\lNamedElement::getElementRefId" alt="" coords="816,5,1051,47"/>
-<area shape="rect" id="node5" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#ad702989f5cab3b5a0617cbb51234fcaa" title="Model_Factory::DeviceElement\lGroupImpl::getNumericElementId" alt="" coords="816,71,1051,112"/>
-<area shape="rect" id="node6" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#a7d0c8f8d1fbe5d85268d5c17ec328c52" title="Model_Factory::DeviceElement\lGroupImpl::incrementElementId" alt="" coords="821,136,1046,177"/>
-</map>

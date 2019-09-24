@@ -1,9 +1,0 @@
-<map id="printSubelements" name="printSubelements">
-<area shape="rect" id="node2" href="$df/d20/classInformation__Model_1_1DeviceElementGroup.html#a51e3690d3c056c39f3bc1594381a12f7" title="Information_Model::\lDeviceElementGroup::\lgetSubelements" alt="" coords="189,49,355,105"/>
-<area shape="rect" id="node3" href="$df/d0a/main_8cpp.html#ab002931a8be407abde32097da0814c01" title="printElement" alt="" coords="220,129,324,156"/>
-<area shape="rect" id="node4" href="$df/d0a/main_8cpp.html#a3fe98b9530ed3a68d932afc8b7d53e65" title="elementType_str" alt="" coords="477,5,604,32"/>
-<area shape="rect" id="node5" href="$d3/d15/classInformation__Model_1_1NamedElement.html#ad434e9f9bf62d370baae7eba8a7c1bba" title="Information_Model::\lNamedElement::getElementDescription" alt="" coords="403,57,679,98"/>
-<area shape="rect" id="node6" href="$d3/d15/classInformation__Model_1_1NamedElement.html#ad9240e589de0bab6d0ff52061d819069" title="Information_Model::\lNamedElement::getElementName" alt="" coords="419,122,662,163"/>
-<area shape="rect" id="node7" href="$d3/d15/classInformation__Model_1_1NamedElement.html#af2632fe7fb4c20c7d68ea20c127d95f7" title="Information_Model::\lNamedElement::getElementRefId" alt="" coords="423,187,658,229"/>
-<area shape="rect" id="node8" href="$d6/d9e/classInformation__Model_1_1DeviceElement.html#a54d7b1f13d2074d411cb632f5492110d" title="Information_Model::\lDeviceElement::getElementType" alt="" coords="427,253,655,294"/>
-</map>

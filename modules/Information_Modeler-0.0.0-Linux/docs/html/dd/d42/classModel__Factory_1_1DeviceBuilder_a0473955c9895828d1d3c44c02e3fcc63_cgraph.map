@@ -1,5 +1,0 @@
-<map id="Model_Factory::DeviceBuilder::addDeviceElement" name="Model_Factory::DeviceBuilder::addDeviceElement">
-<area shape="rect" id="node2" href="$d3/d15/classInformation__Model_1_1NamedElement.html#af2632fe7fb4c20c7d68ea20c127d95f7" title="Information_Model::\lNamedElement::getElementRefId" alt="" coords="260,5,495,47"/>
-<area shape="rect" id="node3" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#a27761330a7f8872ffb5f16b07e2b6f5c" title="Model_Factory::DeviceElement\lGroupImpl::getSubelement" alt="" coords="269,71,485,112"/>
-<area shape="rect" id="node4" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html#a61c1e19b3688ec8c8934eb020e4b7eb3" title="Model_Factory::DeviceElement\lGroupImpl::getSubelements" alt="" coords="269,136,485,177"/>
-</map>
