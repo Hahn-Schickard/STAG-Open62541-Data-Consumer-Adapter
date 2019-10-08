@@ -3,16 +3,15 @@ cmake_minimum_required(VERSION 3.6)
 set(THIS Server_Runner)
 
 list(APPEND PUBLIC_INCLUDES_DIRS
-            ${PROJECT_SOURCE_DIR}/includes/Server_Runner
+            ${INCLUDES_DIR}/Server_Runner
 )
 
 file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 
-INCLUDE_DIRS_AND_FILES(PUBLIC_INCLUDES_DIRS PUBLIC_INCLUDES)
-PRINT_MODULE_FILES(${THIS} "${sources_list}" "${PUBLIC_INCLUDES}")
+INCLUDE_DIRS_AND_FILES("${PUBLIC_INCLUDES_DIRS}" PUBLIC_INCLUDES)
 
 add_library(${THIS} SHARED 
-                    ${includes_list}
+                    ${PUBLIC_INCLUDES}
 )
 
 target_sources(${THIS} PRIVATE 
@@ -30,18 +29,19 @@ if (UNIX)
 endif()
 
 target_include_directories(${THIS} PUBLIC
-                           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/includes/Server_Runner>
+                           $<BUILD_INTERFACE:${INCLUDES_DIR}/Server_Runner>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-                           $<INSTALL_INTERFACE:${INCLUDES_DEST}>
-                           $<INSTALL_INTERFACE:${LIBS_DEST}>
+                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Server_Runner>
 )
 
 if(CLANG_TIDY_EXE)               
     set_target_properties(
                         ${THIS} PROPERTIES
-                        CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY}
-                        )
+                        CMAKE_CXX_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY}"
+    )
 endif()    
+
+PRINT_TARGET_PROPERTIES(${THIS})
 
 add_custom_command(TARGET ${THIS} POST_BUILD 
                     COMMAND ${CMAKE_COMMAND} -E make_directory 
@@ -54,15 +54,12 @@ add_custom_command(TARGET ${THIS} POST_BUILD
 )
 
 install(
-    TARGETS ${THIS} 
-    EXPORT ${PROJECT_NAME}
-    ARCHIVE DESTINATION ${LIBS_DEST}
-    LIBRARY DESTINATION ${LIBS_DEST}
-    COMPONENT libraries
+    TARGETS ${THIS}
+    EXPORT ${PROJECT_NAME}Targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 install(
-    FILES ${includes_list}
-    DESTINATION ${INCLUDES_DEST}
-    COMPONENT headers
+    DIRECTORY ${PUBLIC_INCLUDES_DIRS}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
