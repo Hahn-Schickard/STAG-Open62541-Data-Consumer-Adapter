@@ -5,9 +5,9 @@
 #include "Listener.hpp"
 
 namespace OPCUA_Notifier {
-class ConsumerNotifier : public Notifier::Listener {
+class ConsumerNotifier : public Model_Event_Handler::Listener {
 public:
-  virtual void handleEvent(Notifier::NotifierEvent *event) = 0;
+  virtual void handleEvent(Model_Event_Handler::NotifierEvent *event) = 0;
 };
 } // namespace OPCUA_Notifier
 

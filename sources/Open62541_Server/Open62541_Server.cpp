@@ -86,7 +86,8 @@ OPEN62541_ReturnStatus addDeviceNode(Device *device) {
                           reference_type_id, device_browse_name,
                           type_definition, node_attr, NULL, NULL);
 
-  DeviceElementGroup *device_element_group = device->getDeviceElementGroup();
+  DeviceElementGroup *device_element_group =
+      device->getDeviceElementGroup().get();
 
   return addGroupNode(device_element_group, device_node_id);
 }

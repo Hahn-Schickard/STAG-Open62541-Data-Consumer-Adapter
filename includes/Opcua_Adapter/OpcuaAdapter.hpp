@@ -7,7 +7,7 @@
 class OpcuaAdapter : public OPCUA_Notifier::ConsumerNotifier {
 public:
   void startOpen62541();
-  void handleEvent(Notifier::NotifierEvent *event);
+  void handleEvent(Model_Event_Handler::NotifierEvent *event);
   void stopOpen62541();
 };
 
