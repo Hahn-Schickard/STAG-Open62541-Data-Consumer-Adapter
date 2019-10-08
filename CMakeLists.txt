@@ -28,6 +28,7 @@ set(THIS_PACKAGE_NAME "${PROJECT_NAME}-${PACKAGE_MAJOR_VER}.${PACKAGE_MINOR_VER}
 set(CLANG_OUTPUT "${PROJECT_SOURCE_DIR}/clang-tidy-suggested-fixes.yml")
 set(INCLUDES_DIR "${PROJECT_SOURCE_DIR}/includes")
 set(MODULES_DEST "modules/")
+set(LIBS_DEST "lib/")
 
 #@+ ========================== User configuration ===========================
 find_package(Information_Modeler REQUIRED PATHS "./modules")
