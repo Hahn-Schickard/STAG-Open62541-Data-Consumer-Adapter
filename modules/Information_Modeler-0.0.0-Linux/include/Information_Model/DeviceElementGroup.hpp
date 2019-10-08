@@ -1,11 +1,13 @@
-#ifndef _I_DEVICE_ELEMENT_GROUP_HPP
-#define _I_DEVICE_ELEMENT_GROUP_HPP
+#ifndef DEVICE_ELEMENT_GROUP_HPP
+#define DEVICE_ELEMENT_GROUP_HPP
 
 #include "DeviceElement.hpp"
 #include "NamedElement.hpp"
 #include <memory>
 #include <string>
 #include <vector>
+
+
 
 namespace Information_Model
 {
@@ -18,28 +20,30 @@ namespace Information_Model
  * @author Dovydas Girdvainis
  * @date 18.07.2019
  */
-class DeviceElementGroup : public DeviceElement
-{
-protected:
-  DeviceElementGroup(const std::string REF_ID, const std::string NAME,
-                     const std::string DESC)
-      : DeviceElement(REF_ID, NAME, DESC, ElementType::Group) {
-        
-      }
+  class DeviceElementGroup : public DeviceElement
+  {
+  protected:
+    DeviceElementGroup(const std::string REF_ID, const std::string NAME,
+                      const std::string DESC)
+        : DeviceElement(REF_ID, NAME, DESC, ElementType::Group) {
+          
+        }
+
+    
+
+  public:
+    virtual std::vector<std::shared_ptr<DeviceElement>> getSubelements() = 0;
 
   
 
-public:
-  virtual std::vector<std::shared_ptr<DeviceElement>> getSubelements() = 0;
+    //virtual DeviceElement *getSubelement(const std::string REF_ID) = 0; //bearbeitet
+    virtual std::shared_ptr<DeviceElement>
+    getSubelement(const std::string REF_ID) = 0;
+    virtual unsigned int getNumericElementId() = 0;
 
- 
+    virtual ~DeviceElementGroup() = default;
 
-  virtual DeviceElement *getSubelement(const std::string REF_ID) = 0;
-  virtual unsigned int getNumericElementId() = 0;
-
-  virtual ~DeviceElementGroup() = default;
-
-};
+  };
 } // namespace Information_Model
 
-#endif //_I_DEVICE_ELEMENT_GROUP_HPP
+#endif //DEVICE_ELEMENT_GROUP_HPP

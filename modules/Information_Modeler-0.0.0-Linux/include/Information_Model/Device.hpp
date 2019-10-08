@@ -5,6 +5,7 @@
 #include "NamedElement.hpp"
 #include <string>
 
+
 namespace Information_Model {
 /**
  * @brief This class models a Device.
@@ -21,7 +22,8 @@ protected:
       : NamedElement(REF_ID, NAME, DESC) {}
 
 public:
-  virtual DeviceElementGroup *getDeviceElementGroup() = 0;
+  //virtual DeviceElementGroup *getDeviceElementGroup() = 0; //bearbeitet
+  virtual std::shared_ptr<Information_Model::DeviceElementGroup> getDeviceElementGroup() = 0; 
 };
 } // namespace Information_Model
 

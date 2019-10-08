@@ -1,32 +1,27 @@
 #ifndef __NOTIFIER_HPP
 #define __NOTIFIER_HPP
 
-#include "Notifier_Event.hpp"
 #include "Listener.hpp"
+#include "Notifier_Event.hpp"
 #include <memory>
 #include <vector>
 
-namespace Notifier
-{
-class Notifier
-{
+namespace Model_Event_Handler {
+class Notifier {
 public:
-  void registerListener(std::reference_wrapper<Listener> listiner)
-  {
+  void registerListener(std::shared_ptr<Listener> listiner) {
     listiners.push_back(listiner);
   }
 
 protected:
-  void notifyListeners(NotifierEvent *event)
-  {
-    for (auto listiner : listiners)
-    {
-      listiner.get().handleEvent(event);
+  void notifyListeners(NotifierEvent *event) {
+    for (auto listiner : listiners) {
+      listiner.get()->handleEvent(event);
     }
   }
 
-  std::vector<std::reference_wrapper<Listener>> listiners;
+  std::vector<std::shared_ptr<Listener>> listiners;
 };
-} // namespace Notifier
+} // namespace Model_Event_Handler
 
 #endif //__NOTIFIER_HPP

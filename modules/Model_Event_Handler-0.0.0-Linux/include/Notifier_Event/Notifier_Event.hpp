@@ -9,14 +9,14 @@
 #include <string.h>
 #include <string>
 
-namespace Notifier {
+namespace Model_Event_Handler {
 typedef struct DeviceValueStruct {
   std::string deviceId;
   // TODO: handle values buffer
 } DeviceValue;
 
 typedef union EventUnionType {
-  std::shared_ptr<Information_Model::Device> device;
+  Information_Model::Device *device;
   std::string device_ID;
   std::shared_ptr<DeviceValue> device_value;
 
@@ -35,7 +35,7 @@ typedef enum NotifierEventTypeEnum {
 class NotifierEvent {
 public:
   NotifierEvent(NotifierEventType event_type,
-                std::shared_ptr<Information_Model::Device> new_device) {
+                Information_Model::Device *new_device) {
     if (event_type == NotifierEventType::NEW_DEVICE_REGISTERED ||
         event_type == NotifierEventType::DEVICE_UPDATED) {
       type = event_type;
@@ -82,6 +82,6 @@ private:
   NotifierEventType type;
   EventUnion *event;
 };
-} // namespace Notifier
+} // namespace Model_Event_Handler
 
 #endif //__NOTIFIER_EVENT_HPP
