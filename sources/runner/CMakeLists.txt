@@ -21,7 +21,7 @@ if(UNIX)
     )
 endif()
 
-iif(CLANG_TIDY_EXE)               
+if(CLANG_TIDY_EXE)               
 set_target_properties(
                     ${THIS} PROPERTIES
                     CMAKE_CXX_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY}"
