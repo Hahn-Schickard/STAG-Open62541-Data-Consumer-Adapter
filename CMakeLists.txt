@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 
 #@+ ========================== User configuration ===========================
-set(THIS Model_Translator)
+set(THIS Open62541_Data_Consumer_Adapter)
 #@- ===================== END OF USER CONFIGURATION =========================
 
 set(CMAKE_VERBOSE_MAKEFILE on)
