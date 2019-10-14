@@ -4,3 +4,4 @@ libs
 .vscode/
 code_coverage_report/ 
 code_coverage.info
+*.cmake.in
