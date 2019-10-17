@@ -65,9 +65,9 @@ bool stopServer() {
   }
 }
 
-void update_DataConsumer(Device *device) { addDeviceNode(device); }
+void update_DataConsumer(shared_ptr<Device> device) { addDeviceNode(device); }
 
-OPEN62541_ReturnStatus addDeviceNode(Device *device) {
+OPEN62541_ReturnStatus addDeviceNode(shared_ptr<Device> device) {
   UA_NodeId device_node_id = UA_NODEID_STRING(
       server_namespace_index, (char *)device->getElementRefId().c_str());
   UA_NodeId parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
@@ -86,19 +86,19 @@ OPEN62541_ReturnStatus addDeviceNode(Device *device) {
                           reference_type_id, device_browse_name,
                           type_definition, node_attr, NULL, NULL);
 
-  DeviceElementGroup *device_element_group =
-      device->getDeviceElementGroup().get();
+  shared_ptr<DeviceElementGroup> device_element_group =
+      device->getDeviceElementGroup();
 
   return addGroupNode(device_element_group, device_node_id);
 }
 
-OPEN62541_ReturnStatus addDeviceNodeElement(DeviceElement *element,
+OPEN62541_ReturnStatus addDeviceNodeElement(shared_ptr<DeviceElement> element,
                                             UA_NodeId parent_id) {
   OPEN62541_ReturnStatus status = OPEN62541_FAILURE;
   switch (element->getElementType()) {
   case Group: {
-    status =
-        addGroupNode(static_cast<DeviceElementGroup *>(element), parent_id);
+    status = addGroupNode(static_pointer_cast<DeviceElementGroup>(element),
+                          parent_id);
     break;
   }
   case Function: {
@@ -120,8 +120,9 @@ OPEN62541_ReturnStatus addDeviceNodeElement(DeviceElement *element,
   return status;
 }
 
-OPEN62541_ReturnStatus addGroupNode(DeviceElementGroup *device_element_group,
-                                    UA_NodeId parent_id) {
+OPEN62541_ReturnStatus
+addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
+             UA_NodeId parent_id) {
   OPEN62541_ReturnStatus status = OPEN62541_FAILURE;
 
   UA_NodeId group_node_id =
@@ -145,19 +146,19 @@ OPEN62541_ReturnStatus addGroupNode(DeviceElementGroup *device_element_group,
   vector<shared_ptr<DeviceElement>> elements =
       device_element_group->getSubelements();
   for (auto element : elements) {
-    status = addDeviceNodeElement(element.get(), group_node_id);
+    status = addDeviceNodeElement(element, group_node_id);
   }
   return status;
 }
 
-OPEN62541_ReturnStatus addFunctionNode(DeviceElement *function,
+OPEN62541_ReturnStatus addFunctionNode(shared_ptr<DeviceElement> function,
                                        UA_NodeId parent_id) {
   OPEN62541_ReturnStatus status = OPEN62541_FAILURE;
   //@TODO: Implement addFunctionNode stub
   return status;
 }
 
-OPEN62541_ReturnStatus addMetricNode(DeviceElement *metric,
+OPEN62541_ReturnStatus addMetricNode(shared_ptr<DeviceElement> metric,
                                      UA_NodeId parent_id) {
   OPEN62541_ReturnStatus status = OPEN62541_FAILURE;
 
