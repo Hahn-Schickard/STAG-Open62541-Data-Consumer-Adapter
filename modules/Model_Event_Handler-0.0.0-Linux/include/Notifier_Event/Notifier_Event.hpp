@@ -16,7 +16,7 @@ typedef struct DeviceValueStruct {
 } DeviceValue;
 
 typedef union EventUnionType {
-  Information_Model::Device *device;
+  std::shared_ptr<Information_Model::Device> device;
   std::string device_ID;
   std::shared_ptr<DeviceValue> device_value;
 
@@ -35,7 +35,7 @@ typedef enum NotifierEventTypeEnum {
 class NotifierEvent {
 public:
   NotifierEvent(NotifierEventType event_type,
-                Information_Model::Device *new_device) {
+                std::shared_ptr<Information_Model::Device> new_device) {
     if (event_type == NotifierEventType::NEW_DEVICE_REGISTERED ||
         event_type == NotifierEventType::DEVICE_UPDATED) {
       type = event_type;
