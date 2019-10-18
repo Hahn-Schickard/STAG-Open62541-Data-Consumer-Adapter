@@ -1,9 +1,7 @@
 #include "Open62541_Server.hpp"
-#include "NullLogger.hpp"
+#include "server_config.hpp"
 
-#include <open62541/plugin/log_stdout.h>
 #include <open62541/server.h>
-#include <open62541/server_config_default.h>
 
 #include <memory>
 #include <pthread.h>
@@ -32,10 +30,12 @@ bool startServer() {
   signal(SIGTERM, stopHandler);
   SERVER_RUNNING_FLAG = true;
 
-  opcua_server = UA_Server_new();
-  UA_ServerConfig *config = UA_Server_getConfig(opcua_server);
-  UA_ServerConfig_setDefault(config);
-  config->logger = Null_Logger_;
+  UA_ServerConfig config;
+  memset(&config, 0, sizeof(UA_ServerConfig));
+
+  HS_ServerConfig_setDefault(&config);
+
+  opcua_server = UA_Server_newWithConfig(&config);
 
   pthread_t server_thread_id;
   int return_code = 0;
