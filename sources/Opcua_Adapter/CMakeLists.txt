@@ -20,8 +20,7 @@ target_sources(${THIS} PRIVATE
 
 target_link_libraries(${THIS} PUBLIC
                               Model_Event_Handler::Listener
-                              Information_Modeler::Information_Model_Interface
-                              PRIVATE                              
+                              Information_Modeler::Information_Model_Interface                              
                               Server_Runner
 )
                               
