@@ -16,10 +16,7 @@ using namespace Information_Model;
 static volatile UA_Boolean SERVER_RUNNING_FLAG = false;
 
 // nolint
-static void stopHandler(int sig) {
-  UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND, "received ctrl-c");
-  SERVER_RUNNING_FLAG = false;
-}
+static void stopHandler(int sig) { SERVER_RUNNING_FLAG = false; }
 
 void *serverThread(void *args) {
   UA_Server_run(opcua_server, &SERVER_RUNNING_FLAG);
