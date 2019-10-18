@@ -32,8 +32,6 @@ set(INCLUDES_DIR "${PROJECT_SOURCE_DIR}/includes")
 find_package(Information_Modeler REQUIRED PATHS "./modules")
 find_package(Model_Event_Handler REQUIRED PATHS "./modules")
 find_package(open62541 REQUIRED PATHS "./modules")
-file(GLOB open62541_libs "${PROJECT_SOURCE_DIR}/modules/open62541-linux64/lib/*.so*")
-install(FILES ${open62541_libs} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 #@- ===================== END OF USER CONFIGURATION =========================
 
 set(CMAKE_CONFIGURATION_TYPES "DEBUG" CACHE STRING "Configs" FORCE)
