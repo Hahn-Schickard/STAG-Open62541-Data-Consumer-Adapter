@@ -27,17 +27,13 @@ set(PACKAGE_PATCH_VER "0" CACHE STRING "Major version number of the release pack
 set(THIS_PACKAGE_NAME "${PROJECT_NAME}-${PACKAGE_MAJOR_VER}.${PACKAGE_MINOR_VER}.${PACKAGE_PATCH_VER}-${CMAKE_SYSTEM_NAME}")
 set(CLANG_OUTPUT "${PROJECT_SOURCE_DIR}/clang-tidy-suggested-fixes.yml")
 set(INCLUDES_DIR "${PROJECT_SOURCE_DIR}/includes")
-set(MODULES_DEST "modules/")
-set(LIBS_DEST "lib/")
 
 #@+ ========================== User configuration ===========================
 find_package(Information_Modeler REQUIRED PATHS "./modules")
-install(DIRECTORY ${Information_Modeler_DIR} DESTINATION ${MODULES_DEST})
 find_package(Model_Event_Handler REQUIRED PATHS "./modules")
-install(DIRECTORY ${Data_Consumer_Notifier_DIR} DESTINATION ${MODULES_DEST})
 find_package(open62541 REQUIRED PATHS "./modules")
 file(GLOB open62541_libs "${PROJECT_SOURCE_DIR}/modules/open62541-linux64/lib/*.so*")
-install(FILES ${open62541_libs} DESTINATION ${LIBS_DEST})
+install(FILES ${open62541_libs} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 #@- ===================== END OF USER CONFIGURATION =========================
 
 set(CMAKE_CONFIGURATION_TYPES "DEBUG" CACHE STRING "Configs" FORCE)
