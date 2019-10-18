@@ -21,9 +21,6 @@ target_sources(${THIS} PRIVATE
 target_link_libraries(${THIS} PUBLIC
                               Information_Modeler::Information_Model_Interface
                               open62541::open62541
-)
-
-target_link_libraries(${THIS} PRIVATE
                               OPCUA_Logger
 )
                             

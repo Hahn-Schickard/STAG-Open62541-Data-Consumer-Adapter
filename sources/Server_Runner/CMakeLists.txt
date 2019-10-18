@@ -18,7 +18,7 @@ target_sources(${THIS} PRIVATE
                        ${sources_list}
 )
 
-target_link_libraries(${THIS} PRIVATE
+target_link_libraries(${THIS} PUBLIC
                               OPCUA_Server
 )
 
