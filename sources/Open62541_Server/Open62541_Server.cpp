@@ -85,8 +85,11 @@ OPEN62541_ReturnStatus addDeviceNode(shared_ptr<Device> device) {
 
   shared_ptr<DeviceElementGroup> device_element_group =
       device->getDeviceElementGroup();
-
-  return addGroupNode(device_element_group, device_node_id);
+  OPEN62541_ReturnStatus status = OPEN62541_ReturnStatus::OPEN62541_FAILURE;
+  for (auto device_element : device_element_group->getSubelements()) {
+    status = addDeviceNodeElement(device_element, device_node_id);
+  }
+  return status;
 }
 
 OPEN62541_ReturnStatus addDeviceNodeElement(shared_ptr<DeviceElement> element,
@@ -122,29 +125,31 @@ addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
              UA_NodeId parent_id) {
   OPEN62541_ReturnStatus status = OPEN62541_FAILURE;
 
-  UA_NodeId group_node_id =
-      UA_NODEID_STRING(server_namespace_index,
-                       (char *)device_element_group->getElementRefId().c_str());
-  UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-  UA_QualifiedName group_browse_name =
-      UA_QUALIFIEDNAME(server_namespace_index,
-                       (char *)device_element_group->getElementName().c_str());
-  UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
-  UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
+  if (!device_element_group->getSubelements().empty()) {
+    UA_NodeId group_node_id = UA_NODEID_STRING(
+        server_namespace_index,
+        (char *)device_element_group->getElementRefId().c_str());
+    UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
+    UA_QualifiedName group_browse_name = UA_QUALIFIEDNAME(
+        server_namespace_index,
+        (char *)device_element_group->getElementName().c_str());
+    UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
+    UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
 
-  node_attr.description = UA_LOCALIZEDTEXT(
-      "EN_US", (char *)device_element_group->getElementDescription().c_str());
-  node_attr.displayName = UA_LOCALIZEDTEXT(
-      "EN_US", (char *)device_element_group->getElementName().c_str());
+    node_attr.description = UA_LOCALIZEDTEXT(
+        "EN_US", (char *)device_element_group->getElementDescription().c_str());
+    node_attr.displayName = UA_LOCALIZEDTEXT(
+        "EN_US", (char *)device_element_group->getElementName().c_str());
 
-  UA_Server_addObjectNode(opcua_server, group_node_id, parent_id,
-                          reference_type_id, group_browse_name, type_definition,
-                          node_attr, NULL, NULL);
-  vector<shared_ptr<DeviceElement>> elements =
-      device_element_group->getSubelements();
-  for (auto element : elements) {
-    status = addDeviceNodeElement(element, group_node_id);
-  }
+    UA_Server_addObjectNode(opcua_server, group_node_id, parent_id,
+                            reference_type_id, group_browse_name,
+                            type_definition, node_attr, NULL, NULL);
+    vector<shared_ptr<DeviceElement>> elements =
+        device_element_group->getSubelements();
+    for (auto element : elements) {
+      status = addDeviceNodeElement(element, group_node_id);
+    }
+  } // LOG that the group was empty!
   return status;
 }
 
