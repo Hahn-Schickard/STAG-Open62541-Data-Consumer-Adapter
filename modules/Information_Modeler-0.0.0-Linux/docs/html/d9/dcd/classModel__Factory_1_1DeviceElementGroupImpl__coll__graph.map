@@ -1,5 +1,0 @@
-<map id="Model_Factory::DeviceElementGroupImpl" name="Model_Factory::DeviceElementGroupImpl">
-<area shape="rect" id="node2" href="$df/d20/classInformation__Model_1_1DeviceElementGroup.html" title="This Class Models a List of Elements within the Device. It may contain more DeviceElementGroup instan..." alt="" coords="35,184,192,225"/>
-<area shape="rect" id="node3" href="$d6/d9e/classInformation__Model_1_1DeviceElement.html" title="This class is the base for all of the elements within the Information_Model::Device. " alt="" coords="39,95,187,136"/>
-<area shape="rect" id="node4" href="$d3/d15/classInformation__Model_1_1NamedElement.html" title="This is the base class for all of the other modelling classes. " alt="" coords="39,5,187,47"/>
-</map>

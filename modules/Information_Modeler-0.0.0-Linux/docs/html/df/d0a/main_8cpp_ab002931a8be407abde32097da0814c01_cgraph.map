@@ -1,7 +1,0 @@
-<map id="printElement" name="printElement">
-<area shape="rect" id="node2" href="$df/d0a/main_8cpp.html#a3fe98b9530ed3a68d932afc8b7d53e65" title="elementType_str" alt="" coords="232,5,359,32"/>
-<area shape="rect" id="node3" href="$d3/d15/classInformation__Model_1_1NamedElement.html#ad434e9f9bf62d370baae7eba8a7c1bba" title="Information_Model::\lNamedElement::getElementDescription" alt="" coords="157,57,433,98"/>
-<area shape="rect" id="node4" href="$d3/d15/classInformation__Model_1_1NamedElement.html#ad9240e589de0bab6d0ff52061d819069" title="Information_Model::\lNamedElement::getElementName" alt="" coords="174,122,417,163"/>
-<area shape="rect" id="node5" href="$d3/d15/classInformation__Model_1_1NamedElement.html#af2632fe7fb4c20c7d68ea20c127d95f7" title="Information_Model::\lNamedElement::getElementRefId" alt="" coords="178,187,413,229"/>
-<area shape="rect" id="node6" href="$d6/d9e/classInformation__Model_1_1DeviceElement.html#a54d7b1f13d2074d411cb632f5492110d" title="Information_Model::\lDeviceElement::getElementType" alt="" coords="181,253,409,294"/>
-</map>

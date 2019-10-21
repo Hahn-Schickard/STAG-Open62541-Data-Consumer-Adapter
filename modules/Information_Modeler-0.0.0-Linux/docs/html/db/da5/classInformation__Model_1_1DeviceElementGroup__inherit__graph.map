@@ -1,6 +1,4 @@
 <map id="Information_Model::DeviceElementGroup" name="Information_Model::DeviceElementGroup">
-<area shape="rect" id="node4" href="$d4/d29/classModel__Factory_1_1DeviceElementGroupImpl.html" title="This class is an implementation of Information_Model::DeviceElementGroup It contains all of the virtu..." alt="" coords="5,273,221,315"/>
-<area shape="rect" id="node2" href="$d6/d9e/classInformation__Model_1_1DeviceElement.html" title="This class is the base for all of the elements within the Information_Model::Device. " alt="" coords="39,95,187,136"/>
-<area shape="rect" id="node3" href="$d3/d15/classInformation__Model_1_1NamedElement.html" title="This is the base class for all of the other modelling classes. " alt="" coords="39,5,187,47"/>
-<area shape="rect" id="node5" href="$d5/d44/classModel__Factory_1_1DeviceGroupBuilder.html" title="This class constructs an instance of Information_Model::DeviceElement that are used by Model_Factory:..." alt="" coords="12,363,215,404"/>
+<area shape="rect" id="node2" href="$d6/d9e/classInformation__Model_1_1DeviceElement.html" title="This class is the base for all of the elements within the Information_Model::Device. " alt="" coords="9,95,161,136"/>
+<area shape="rect" id="node3" href="$d3/d15/classInformation__Model_1_1NamedElement.html" title="This is the base class for all of the other modelling classes. " alt="" coords="9,5,161,47"/>
 </map>

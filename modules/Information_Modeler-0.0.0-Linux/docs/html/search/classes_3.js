@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['functionelementexception',['FunctionElementException',['../d5/d07/structFunctionElementException.html',1,'']]]
+  ['groupelementdoesnotexistexception',['GroupElementDoesNotExistException',['../d2/d45/structGroupElementDoesNotExistException.html',1,'']]]
 ];

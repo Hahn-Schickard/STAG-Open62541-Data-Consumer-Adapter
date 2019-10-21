@@ -1,5 +1,0 @@
-<map id="Information_Model::DeviceElementGroupImpl::generate_Reference_ID" name="Information_Model::DeviceElementGroupImpl::generate_Reference_ID">
-<area shape="rect" id="node2" href="$d3/d15/classInformation__Model_1_1NamedElement.html#af2632fe7fb4c20c7d68ea20c127d95f7" title="Information_Model::\lNamedElement::getElementRefId" alt="" coords="237,5,472,47"/>
-<area shape="rect" id="node3" href="$d8/d4e/classInformation__Model_1_1DeviceElementGroupImpl.html#ad702989f5cab3b5a0617cbb51234fcaa" title="Information_Model::\lDeviceElementGroupImpl\l::getNumericElementId" alt="" coords="263,71,447,127"/>
-<area shape="rect" id="node4" href="$d8/d4e/classInformation__Model_1_1DeviceElementGroupImpl.html#a7d0c8f8d1fbe5d85268d5c17ec328c52" title="Information_Model::\lDeviceElementGroupImpl\l::incrementElementId" alt="" coords="263,151,447,207"/>
-</map>

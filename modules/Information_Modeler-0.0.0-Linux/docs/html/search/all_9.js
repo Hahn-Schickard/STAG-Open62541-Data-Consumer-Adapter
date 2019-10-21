@@ -1,8 +1,4 @@
 var searchData=
 [
-  ['main',['main',['../d9/d4b/CMakeCCompilerId_8c.html#acdef7a1fd863a6d3770c1268cb06add3',1,'main():&#160;CMakeCCompilerId.c'],['../d9/d4b/CMakeCCompilerId_8c.html#afced8478b91af5c169926dfa4426333d',1,'main(int argc, argv):&#160;CMakeCCompilerId.c'],['../d6/d83/CMakeCXXCompilerId_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97',1,'main(int argc, char *argv[]):&#160;CMakeCXXCompilerId.cpp'],['../db/d7f/feature__tests_8c.html#a3c04138a5bfe5d72780bb7e82a18e627',1,'main(int argc, char **argv):&#160;feature_tests.c'],['../dd/d6e/feature__tests_8cxx.html#a3c04138a5bfe5d72780bb7e82a18e627',1,'main(int argc, char **argv):&#160;feature_tests.cxx'],['../df/d0a/main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4',1,'main():&#160;main.cpp']]],
-  ['main_2ecpp',['main.cpp',['../df/d0a/main_8cpp.html',1,'']]],
-  ['make_5funique',['make_unique',['../d8/dcc/namespacestd.html#a300958e41ca196cf6108a2b91a363b1c',1,'std::make_unique(Args &amp;&amp;... args)'],['../d8/dcc/namespacestd.html#a114e9c954eee68b8f2058949ef4c8345',1,'std::make_unique(size_t n)'],['../d8/dcc/namespacestd.html#adf12c752a5b1bdeb568aa5bf2086dd16',1,'std::make_unique(Args &amp;&amp;...)=delete']]],
-  ['makeunique_2ehpp',['MakeUnique.hpp',['../d1/de3/MakeUnique_8hpp.html',1,'']]],
-  ['model_5ffactory',['Model_Factory',['../da/d69/namespaceModel__Factory.html',1,'']]]
+  ['project_20template',['Project Template',['../index.html',1,'']]]
 ];

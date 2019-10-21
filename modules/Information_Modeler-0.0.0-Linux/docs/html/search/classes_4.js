@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['groupelementdoesnotexistexception',['GroupElementDoesNotExistException',['../d2/d45/structGroupElementDoesNotExistException.html',1,'']]]
+  ['invalidreferenceidexception',['InvalidReferenceIdException',['../d4/dd3/structInvalidReferenceIdException.html',1,'']]]
 ];

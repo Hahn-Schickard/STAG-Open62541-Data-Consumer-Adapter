@@ -1,8 +1,0 @@
-<map id="NodeInformation" name="NodeInformation">
-<area shape="rect" id="node7" href="$d3/db9/structObjectNodeInformation.html" title="ObjectNodeInformation" alt="" coords="1201,57,1372,84"/>
-<area shape="rect" id="node2" href="$dc/d1d/structVariableNodeInformation.html" title="VariableNodeInformation" alt="" coords="477,7,657,33"/>
-<area shape="rect" id="node3" href="$d7/df4/structDataValueWrapperStruct.html" title="DataValueWrapperStruct" alt="" coords="217,7,396,33"/>
-<area shape="rect" id="node4" href="$d1/d93/unionDataValueUnion.html" title="DataValueUnion" alt="" coords="5,7,131,33"/>
-<area shape="rect" id="node5" href="$dd/df0/structBaseNodeInformation.html" title="BaseNodeInformation" alt="" coords="487,57,648,84"/>
-<area shape="rect" id="node6" href="$d5/de3/structMethodNodeInformation.html" title="MethodNodeInformation" alt="" coords="479,108,656,135"/>
-</map>

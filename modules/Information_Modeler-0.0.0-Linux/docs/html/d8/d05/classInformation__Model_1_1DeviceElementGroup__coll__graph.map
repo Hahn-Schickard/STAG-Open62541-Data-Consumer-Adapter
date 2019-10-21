@@ -1,4 +1,4 @@
 <map id="Information_Model::DeviceElementGroup" name="Information_Model::DeviceElementGroup">
-<area shape="rect" id="node2" href="$d6/d9e/classInformation__Model_1_1DeviceElement.html" title="This class is the base for all of the elements within the Information_Model::Device. " alt="" coords="10,95,158,136"/>
-<area shape="rect" id="node3" href="$d3/d15/classInformation__Model_1_1NamedElement.html" title="This is the base class for all of the other modelling classes. " alt="" coords="10,5,158,47"/>
+<area shape="rect" id="node2" href="$d6/d9e/classInformation__Model_1_1DeviceElement.html" title="This class is the base for all of the elements within the Information_Model::Device. " alt="" coords="9,95,161,136"/>
+<area shape="rect" id="node3" href="$d3/d15/classInformation__Model_1_1NamedElement.html" title="This is the base class for all of the other modelling classes. " alt="" coords="9,5,161,47"/>
 </map>

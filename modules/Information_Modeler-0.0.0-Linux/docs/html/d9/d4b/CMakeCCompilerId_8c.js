@@ -10,5 +10,6 @@ var CMakeCCompilerId_8c =
     [ "info_simulate", "d9/d4b/CMakeCCompilerId_8c.html#a3183b7b04f5924048f9b117ebcb45226", null ],
     [ "info_simulate_version", "d9/d4b/CMakeCCompilerId_8c.html#a05fcc1e67566c09b9c89ff04c20daf0a", null ],
     [ "info_version", "d9/d4b/CMakeCCompilerId_8c.html#a74688a78009d8531274b1c3cb63ba8aa", null ],
+    [ "info_version_internal", "d9/d4b/CMakeCCompilerId_8c.html#a129136602504b3f22bcafe03b2f464a5", null ],
     [ "qnxnto", "d9/d4b/CMakeCCompilerId_8c.html#a6369dd31ba1f7ebce2384ff8f8f32df7", null ]
 ];

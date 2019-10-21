@@ -9,5 +9,6 @@ var CMakeCXXCompilerId_8cpp =
     [ "info_simulate", "d6/d83/CMakeCXXCompilerId_8cpp.html#a3183b7b04f5924048f9b117ebcb45226", null ],
     [ "info_simulate_version", "d6/d83/CMakeCXXCompilerId_8cpp.html#a05fcc1e67566c09b9c89ff04c20daf0a", null ],
     [ "info_version", "d6/d83/CMakeCXXCompilerId_8cpp.html#a74688a78009d8531274b1c3cb63ba8aa", null ],
+    [ "info_version_internal", "d6/d83/CMakeCXXCompilerId_8cpp.html#a129136602504b3f22bcafe03b2f464a5", null ],
     [ "qnxnto", "d6/d83/CMakeCXXCompilerId_8cpp.html#a6369dd31ba1f7ebce2384ff8f8f32df7", null ]
 ];
