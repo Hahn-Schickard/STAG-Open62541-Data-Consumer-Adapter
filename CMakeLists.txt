@@ -53,9 +53,7 @@ include_directories(${INCLUDES_DIR})
 
 add_subdirectory(sources)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_subdirectory(tests/unit_tests/)
-endif()
+add_subdirectory(tests/unit_tests/)
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "This is an example project with template files.")
 set(CPACK_PACKAGE_VENDOR "Hahn-Schickard")

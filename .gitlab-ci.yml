@@ -9,7 +9,6 @@ stages:
  - build 
  - test
  - analyze
- - document
  - package
  - deploy
  - trigger
@@ -30,7 +29,7 @@ configure_debug_cmake:
  script:
   - mkdir -p build
   - cd build
-  - 'cmake -DCMAKE_BUILD_TYPE="Debug" ..'
+  - 'cmake -DCMAKE_TOOLCHAIN_FILE=./compiler-toolchain.cmake -DCMAKE_BUILD_TYPE="Debug" ..'
  except: 
   - /Release.*/
  
@@ -41,7 +40,9 @@ build_debug:
   CONFIG: "Debug"
  script: 
   - 'cmake --build build/ --config $CONFIG --target all --'
+ coverage: '/Total:\|(\d+\.?\d+\%)/'
  artifacts: 
+  name: "Commit:${CI_COMMIT_SHORT_SHA}_Debug_Build_Binaries"
   paths: 
    - build/
  except: 
@@ -54,7 +55,9 @@ build_release:
   CONFIG: "Release"
  script: 
   - 'cmake --build build/ --config $CONFIG --target all --'
+ coverage: '/Total:\|(\d+\.?\d+\%)/'
  artifacts: 
+  name: "Commit:${CI_COMMIT_SHORT_SHA}_Release_Build_Binaries"
   paths: 
    - build/
  only: 
@@ -66,9 +69,22 @@ run_unit_tests:
   GIT_STRATEGY: none 
  script: 
   - cd build
-  - ctest
- except: 
-  - /Release.*/
+  - ctest --verbose
+
+test_for_memory_leaks: 
+ stage: analyze
+ variables: 
+  GIT_STRATEGY: none
+ script: 
+  - "./.run_valgrind.sh -e $VALGRIND_EXECUTABLE -a $VALGRIND_EXECUTABLE_ARGS"
+ artifacts:                                                           
+  name: "Commit:${CI_COMMIT_SHORT_SHA}_Valgrind_Results"
+  paths:
+  - valgrind-results.log
+ only: 
+  variables: 
+   - $RUN_VALGRIND == "true" 
+ allow_failure: true
 
 check_code_coverage: 
  stage: analyze 
@@ -79,41 +95,25 @@ check_code_coverage:
  dependencies:
   - run_unit_tests
  artifacts:                                                           
-  name: "code_coverage_results"
+  name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Coverage_Results"
   paths:
   - code_coverage_report/
- except: 
-   - /Release.*/
- allow_failure: true
- 
-test_for_memory_leaks: 
- stage: analyze
- variables: 
-  GIT_STRATEGY: none
- script: 
-  - "./.run_valgrind.sh -e $VALGRIND_EXECUTABLE -a $VALGRIND_EXECUTABLE_ARGS"
- artifacts:                                                           
-  name: "valgrind_results"
-  paths:
-  - valgrind-results.log
- only: 
-  variables: 
-   - $RUN_VALGRIND == "true" 
  allow_failure: true
  
 generate_documentation: 
- stage: document
+ stage: analyze
  variables: 
   GIT_STRATEGY: none 
  script: 
   - doxygen Doxyfile 
+  - cp -v docs/code_documentation/hs_logo.png docs/code_documentation/html
  artifacts: 
-  name: "doc_files"
+  name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Documentation"
   paths: 
   - docs/code_documentation/
   expire_in: 30 days
- only:
-   - /Release.*/
+ only: 
+  - /Release.*/
  allow_failure: true
  
 package_tgz: 
@@ -124,7 +124,7 @@ package_tgz:
   - cd build
   - cpack
  artifacts: 
-  name: "binaries_tgz_package"
+  name: "Commit:${CI_COMMIT_SHORT_SHA}_Package"
   paths: 
   - build/cpack_packages/*
   expire_in: 99 yrs
@@ -132,26 +132,25 @@ package_tgz:
   - /Release.*/
  allow_failure: true
   
-deploy_coverage_report:
+pages:
  stage: deploy
  dependencies:
     - check_code_coverage
+    - generate_documentation 
+    - package_tgz
  script:
-    - mv code_coverage_report/ public/
+    - ./.make_public.sh -n $CI_PROJECT_NAME -l $CI_PROJECT_URL
  artifacts:
    paths:
      - public
-   expire_in: 30 days
- only:
-   - master
- except: 
-   - /Release.*/
+ only: 
+  - /Release.*/
  allow_failure: true
 
 update_versioning: 
  stage: trigger
  script: 
-  - ./.update_versioning.sh $CI_REPOSITORY_URL
+  - ./.update_versioning.sh $CI_REPOSITORY_URL $TRIGGER_RELEASE $RELEASE_TYPE
  only: 
   - master
  except: 
