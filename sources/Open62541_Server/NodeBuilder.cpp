@@ -12,13 +12,13 @@ public:
   DeviceElementNodeInfo(shared_ptr<NamedElement> element) {
     if (element) {
       node_id_ = new char[element->getElementRefId().length() + 1];
-      node_name_ = new char[element->getElementName().length() + 1];
+      node_name_ = new char[element->getElementDescription().length() + 1];
       node_description_ =
           new char[element->getElementDescription().length() + 1];
 
       strcpy(node_id_, element->getElementRefId().c_str());
       strcpy(node_name_, element->getElementName().c_str());
-      strcpy(node_description_, element->getElementName().c_str());
+      strcpy(node_description_, element->getElementDescription().c_str());
     } else {
       //@TODO: throw exception / log error
     }
