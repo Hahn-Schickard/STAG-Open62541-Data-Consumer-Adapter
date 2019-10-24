@@ -15,6 +15,7 @@ void stopServer() {
 static void stopHandler(int sig) {
   cout << "Received stop signal!" << endl;
   stopServer();
+  exit(0);
 }
 
 int main(int argc, char *argv[]) {
@@ -37,6 +38,4 @@ int main(int argc, char *argv[]) {
     while (true)
       ;
   }
-
-  exit(0);
 }
