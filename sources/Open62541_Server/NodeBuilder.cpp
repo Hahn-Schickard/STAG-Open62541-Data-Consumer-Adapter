@@ -11,9 +11,9 @@ class DeviceElementNodeInfo {
 public:
   DeviceElementNodeInfo(shared_ptr<NamedElement> element) {
     if (element) {
-      char *node_id_ = new char[element->getElementRefId().length() + 1];
-      char *node_name_ = new char[element->getElementName().length() + 1];
-      char *node_description_ =
+      node_id_ = new char[element->getElementRefId().length() + 1];
+      node_name_ = new char[element->getElementName().length() + 1];
+      node_description_ =
           new char[element->getElementDescription().length() + 1];
 
       strcpy(node_id_, element->getElementRefId().c_str());
