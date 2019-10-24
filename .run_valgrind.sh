@@ -23,7 +23,7 @@ check_for_errors() {
     found_errors=$(sed -n "s/^\(.*\)${HEAD_REGEX}//p" ./valgrind-results.log)
     found_errors=$(sed "s/$TAIL_REGEX//" <<< $found_errors)
     found_errors=$(sed '$d' <<< $found_errors)
-    if [ $found_errors -ne 0 ]
+    if [[ "$found_errors" -ne 0 ]];
     then 
         echo "Error checker found: $found_errors"
         echo "Some errors exits! Please fix them before doing a release!" 
