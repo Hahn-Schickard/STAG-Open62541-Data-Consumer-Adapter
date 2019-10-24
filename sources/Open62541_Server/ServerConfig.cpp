@@ -11,7 +11,7 @@
  *    Copyright 2019 (c) Kalycito Infotech Private Limited
  */
 
-#include "server_config.hpp"
+#include "ServerConfig.hpp"
 #include "NullLogger.hpp"
 
 #include <open62541/client_config_default.h>
