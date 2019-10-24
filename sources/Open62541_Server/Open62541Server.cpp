@@ -13,7 +13,7 @@ Open62541Server::Open62541Server() {
   server_namespace_index_ = 1;
 }
 
-Open62541Server::~Open62541Server() {}
+Open62541Server::~Open62541Server() { free(config_); }
 
 Open62541Server *Open62541Server::getInstance() {
   if (!instance_) {
