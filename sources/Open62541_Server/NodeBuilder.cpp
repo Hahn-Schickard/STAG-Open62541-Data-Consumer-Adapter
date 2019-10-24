@@ -9,15 +9,19 @@ using namespace Information_Model;
 
 class DeviceElementNodeInfo {
 public:
-  DeviceElementNodeInfo(shared_ptr<DeviceElement> element) {
-    char *node_id_ = new char[element->getElementRefId().length() + 1];
-    char *node_name_ = new char[element->getElementName().length() + 1];
-    char *node_description_ =
-        new char[element->getElementDescription().length() + 1];
+  DeviceElementNodeInfo(shared_ptr<NamedElement> element) {
+    if (element) {
+      char *node_id_ = new char[element->getElementRefId().length() + 1];
+      char *node_name_ = new char[element->getElementName().length() + 1];
+      char *node_description_ =
+          new char[element->getElementDescription().length() + 1];
 
-    strcpy(node_id_, element->getElementRefId().c_str());
-    strcpy(node_name_, element->getElementName().c_str());
-    strcpy(node_description_, element->getElementName().c_str());
+      strcpy(node_id_, element->getElementRefId().c_str());
+      strcpy(node_name_, element->getElementName().c_str());
+      strcpy(node_description_, element->getElementName().c_str());
+    } else {
+      //@TODO: throw exception / log error
+    }
   }
 
   ~DeviceElementNodeInfo() {
@@ -45,7 +49,7 @@ NodeBuilder::~NodeBuilder() {}
 bool NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
 
   DeviceElementNodeInfo device_node_info =
-      DeviceElementNodeInfo(dynamic_pointer_cast<DeviceElement>(device));
+      DeviceElementNodeInfo(static_pointer_cast<NamedElement>(device));
 
   UA_NodeId device_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
                                               device_node_info.getNodeId());
@@ -108,7 +112,7 @@ bool NodeBuilder::addGroupNode(
   bool status = false;
 
   DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(
-      static_pointer_cast<DeviceElement>(device_element_group));
+      static_pointer_cast<NamedElement>(device_element_group));
 
   if (!device_element_group->getSubelements().empty()) {
     UA_NodeId group_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
@@ -147,7 +151,8 @@ bool NodeBuilder::addMetricNode(shared_ptr<DeviceElement> metric,
                                 UA_NodeId parent_id) {
   bool status = false;
 
-  DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(metric);
+  DeviceElementNodeInfo element_node_info =
+      DeviceElementNodeInfo(static_pointer_cast<NamedElement>(metric));
 
   UA_NodeId metrid_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
                                               element_node_info.getNodeId());
