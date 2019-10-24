@@ -3,12 +3,21 @@
 
 #include "ConsumerNotifier.hpp"
 #include "Device.hpp"
+#include "NodeBuilder.hpp"
+#include "Open62541Server.hpp"
 
 class OpcuaAdapter : public OPCUA_Notifier::ConsumerNotifier {
 public:
-  void startOpen62541();
+  OpcuaAdapter();
+  ~OpcuaAdapter();
+
+  void start();
   void handleEvent(Model_Event_Handler::NotifierEvent *event);
-  void stopOpen62541();
+  void stop();
+
+private:
+  NodeBuilder *node_builder_;
+  Open62541Server *server_;
 };
 
 #endif //__OPCUA_ADAPTER_HPP

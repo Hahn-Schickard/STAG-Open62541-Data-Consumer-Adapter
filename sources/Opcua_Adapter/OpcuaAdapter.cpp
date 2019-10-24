@@ -1,16 +1,26 @@
 #include "OpcuaAdapter.hpp"
 
-#include "Server_Runner.hpp"
-
 using namespace Information_Model;
 using namespace Model_Event_Handler;
 
-void OpcuaAdapter::startOpen62541() { start(); }
-void OpcuaAdapter::stopOpen62541() { stop(); }
+OpcuaAdapter::OpcuaAdapter() {
+  server_ = server_->getInstance();
+  node_builder_ = new NodeBuilder(server_);
+}
+
+OpcuaAdapter::~OpcuaAdapter() {
+  delete server_;
+  delete node_builder_;
+}
+
+void OpcuaAdapter::start() { server_->start(); }
+
+void OpcuaAdapter::stop() { server_->stop(); }
+
 void OpcuaAdapter::handleEvent(NotifierEvent *event) {
   switch (event->getEventType()) {
   case NotifierEventTypeEnum::NEW_DEVICE_REGISTERED: {
-    addDevice(event->getEvent()->device);
+    node_builder_->addDeviceNode(event->getEvent()->device);
     break;
   }
   case NotifierEventTypeEnum::DEVICE_UPDATED: {
