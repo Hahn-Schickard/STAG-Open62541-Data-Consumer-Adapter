@@ -1,16 +1,13 @@
 #include "OpcuaAdapter.hpp"
-#include <iostream>
-#include <memory>
-#include <unistd.h>
 
 using namespace std;
 
 #define SERVER_LIFETIME 60
 
 int main() {
-  OpcuaAdapter *server = new OpcuaAdapter();
 
-  server->startOpen62541();
+  OpcuaAdapter *adapter = new OpcuaAdapter();
+  adapter->start();
 
   sleep(SERVER_LIFETIME);
 
