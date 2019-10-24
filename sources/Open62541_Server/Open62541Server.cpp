@@ -46,7 +46,7 @@ bool Open62541Server::start() {
 bool Open62541Server::stop() {
   if (is_running_) {
     is_running_ = false;
-    if (pthread_join(server_thread_id, NULL)) {
+    if (pthread_join(server_thread_id, NULL) == 0) {
       UA_StatusCode retval = UA_Server_run_shutdown(open62541_server_);
       if (retval == UA_STATUSCODE_GOOD) {
         UA_Server_delete(open62541_server_);
