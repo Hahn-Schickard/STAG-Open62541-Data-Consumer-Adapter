@@ -7,24 +7,59 @@
 using namespace std;
 using namespace Information_Model;
 
+class DeviceElementNodeInfo {
+public:
+  DeviceElementNodeInfo(shared_ptr<DeviceElement> element) {
+    char *node_id_ = new char[element->getElementRefId().length() + 1];
+    char *node_name_ = new char[element->getElementName().length() + 1];
+    char *node_description_ =
+        new char[element->getElementDescription().length() + 1];
+
+    strcpy(node_id_, element->getElementRefId().c_str());
+    strcpy(node_name_, element->getElementName().c_str());
+    strcpy(node_description_, element->getElementName().c_str());
+  }
+
+  ~DeviceElementNodeInfo() {
+    delete[] node_id_;
+    delete[] node_name_;
+    delete[] node_description_;
+  }
+
+  char *getNodeId() { return node_id_; }
+
+  char *getNodeName() { return node_name_; }
+
+  char *getNodeDescription() { return node_description_; }
+
+private:
+  char *node_id_;
+  char *node_name_;
+  char *node_description_;
+};
+
 NodeBuilder::NodeBuilder(Open62541Server *server) : server_(server) {}
 
 NodeBuilder::~NodeBuilder() {}
 
 bool NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
-  UA_NodeId device_node_id = UA_NODEID_STRING(
-      server_->getServerNamespace(), (char *)device->getElementRefId().c_str());
+
+  DeviceElementNodeInfo device_node_info =
+      DeviceElementNodeInfo(dynamic_pointer_cast<DeviceElement>(device));
+
+  UA_NodeId device_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
+                                              device_node_info.getNodeId());
   UA_NodeId parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
   UA_QualifiedName device_browse_name = UA_QUALIFIEDNAME(
-      server_->getServerNamespace(), (char *)device->getElementName().c_str());
+      server_->getServerNamespace(), device_node_info.getNodeName());
   UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
   UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
 
-  node_attr.description = UA_LOCALIZEDTEXT(
-      "EN_US", (char *)device->getElementDescription().c_str());
+  node_attr.description =
+      UA_LOCALIZEDTEXT("EN_US", device_node_info.getNodeDescription());
   node_attr.displayName =
-      UA_LOCALIZEDTEXT("EN_US", (char *)device->getElementName().c_str());
+      UA_LOCALIZEDTEXT("EN_US", device_node_info.getNodeName());
 
   UA_Server_addObjectNode(server_->getServer(), device_node_id, parent_node_id,
                           reference_type_id, device_browse_name,
@@ -36,6 +71,7 @@ bool NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
   for (auto device_element : device_element_group->getSubelements()) {
     status = addDeviceNodeElement(device_element, device_node_id);
   }
+
   return status;
 }
 
@@ -71,21 +107,22 @@ bool NodeBuilder::addGroupNode(
     shared_ptr<DeviceElementGroup> device_element_group, UA_NodeId parent_id) {
   bool status = false;
 
+  DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(
+      static_pointer_cast<DeviceElement>(device_element_group));
+
   if (!device_element_group->getSubelements().empty()) {
-    UA_NodeId group_node_id = UA_NODEID_STRING(
-        server_->getServerNamespace(),
-        (char *)device_element_group->getElementRefId().c_str());
+    UA_NodeId group_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
+                                               element_node_info.getNodeId());
     UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
     UA_QualifiedName group_browse_name = UA_QUALIFIEDNAME(
-        server_->getServerNamespace(),
-        (char *)device_element_group->getElementName().c_str());
+        server_->getServerNamespace(), element_node_info.getNodeName());
     UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
     UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
 
-    node_attr.description = UA_LOCALIZEDTEXT(
-        "EN_US", (char *)device_element_group->getElementDescription().c_str());
-    node_attr.displayName = UA_LOCALIZEDTEXT(
-        "EN_US", (char *)device_element_group->getElementName().c_str());
+    node_attr.description =
+        UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeDescription());
+    node_attr.displayName =
+        UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeName());
 
     UA_Server_addObjectNode(server_->getServer(), group_node_id, parent_id,
                             reference_type_id, group_browse_name,
@@ -110,11 +147,13 @@ bool NodeBuilder::addMetricNode(shared_ptr<DeviceElement> metric,
                                 UA_NodeId parent_id) {
   bool status = false;
 
-  UA_NodeId metrid_node_id = UA_NODEID_STRING(
-      server_->getServerNamespace(), (char *)metric->getElementRefId().c_str());
+  DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(metric);
+
+  UA_NodeId metrid_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
+                                              element_node_info.getNodeId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME(
-      server_->getServerNamespace(), (char *)metric->getElementName().c_str());
+      server_->getServerNamespace(), element_node_info.getNodeName());
   UA_NodeId type_definition =
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
@@ -125,10 +164,10 @@ bool NodeBuilder::addMetricNode(shared_ptr<DeviceElement> metric,
                           UA_ACCESSLEVELMASK_WRITE; //@TODO: change to a
                                                     // function that assigns
                                                     // proper accessLevel
-  node_attr.description = UA_LOCALIZEDTEXT(
-      "EN_US", (char *)metric->getElementDescription().c_str());
+  node_attr.description =
+      UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeDescription());
   node_attr.displayName =
-      UA_LOCALIZEDTEXT("EN_US", (char *)metric->getElementName().c_str());
+      UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeName());
 
   UA_Server_addVariableNode(server_->getServer(), metrid_node_id, parent_id,
                             reference_type_id, metric_browse_name,
