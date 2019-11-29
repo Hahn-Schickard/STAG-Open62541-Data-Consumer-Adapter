@@ -2,7 +2,7 @@
 .header {
   overflow: hidden;
   padding: 10px 10px;
-  background-image: linear-gradient(#ffffff,  #fffae6, #fff8dc, #fff5cc);
+  background: linear-gradient(#f2e8ce 0%,#fff9ea 50%,#f2e8ce 100%);
 }
 
 .line {
@@ -21,6 +21,7 @@
 
 .header img{
   float: right;
+  max-height: 100%;
 }
 
 .home-container a:hover {
@@ -29,8 +30,8 @@
   font-weight: bold;
   text-decoration: none;
   cursor: auto;
-  background-color: #ede0b6;
-  color: #9f2914;
+  background-color: #5f180c;
+  color: #ede0b6;
 }
 
 .home-container a {
@@ -48,6 +49,7 @@
 
 .header-right {
   float: right;
+  height: 80px;
 }
 
 @media screen and (max-width: 500px) {
@@ -59,3 +61,4 @@
   .header-right {
     float: none;
   }
+}

@@ -11,7 +11,7 @@ PACKAGE_VENDOR=""
 CONTACT_INFO=""
 
 usage(){
-    echo "-n | --name           - Specifies projects name. DO NOT USE WHITESPACES!"
+    echo "-n | --name           - Specifies projects name. DO NOT USE WHITESPACES! Use _ charachters instead!"
     echo "-b | --brief          - Specifies project description in a brief summary."
     echo "-m | --maintainers    - Specifies project authros/maintainers."
     echo "-v | --vendor         - Specifies package vendor."
@@ -20,7 +20,7 @@ usage(){
     echo "-h | --help           - Print this message"
     echo ""
     echo "=============== EXAMPLE CALL ==============="
-    echo "./configure_project.sh  -n \"Template_Project\" -b \"Short project description\" -m \"Dovydas Girdvainis, Tasso Kaup, Gerhard Marki\" -v \"Hahn-Schickard\" -c \"info@hahn-schickard.de\" -l \"./docs/images/hs_logo.png\" "
+    echo "./configure_project.sh  -n \"Template_Project\" -b \"Short project description\" -m \"Dovydas Girdvainis, Tasso Kaup, Gerhard Marki\" -v \"Hahn-Schickard\" -c \"info@hahn-schickard.de\" -l \"./docs/code_documentation/hs_logo.png\" "
 }
 
 pritify_project_name() {
@@ -30,7 +30,7 @@ pritify_project_name() {
 
 set_project_name() {
     echo "Setting project name to ${PROJECT_NAME} in $ROOT_CMAKE_FILE"
-    sed -i "s/\(Project_Template\)/${PROJECT_NAME}/g" $ROOT_CMAKE_FILE
+    sed -i "s/\(Project_Template_Example_Code\)/${PROJECT_NAME}/g" $ROOT_CMAKE_FILE
     
     pritify_project_name
     echo "Setting project name to ${PROJECT_NAME} in $DOXYFILE"
@@ -55,6 +55,20 @@ set_project_brief() {
     
     echo "Setting project descrtiption to ${PROJECT_BRIEF} in $DOXYFILE"
     sed -i "s/\(PROJECT_BRIEF=\)/\(PROJECT_BRIEF=${PROJECT_BRIEF})/g" $DOXYFILE
+    
+    touch README.md
+    echo "# ${PROJECT_NAME}" > README.md
+    echo -en '\n' >> README.md
+    
+    if [ -n "$PROJECT_LOGO" ] && [ -f $PROJECT_LOGO ];
+    then
+        echo "![logo](${PROJECT_LOGO})" >> README.md
+        echo -en '\n' >> README.md
+    fi
+    
+    echo "## Brief description" >> README.md
+    echo -en '\n' >> README.md
+    echo ${PROJECT_BRIEF} >> README.md
 }
 
 set_project_maintainers() {

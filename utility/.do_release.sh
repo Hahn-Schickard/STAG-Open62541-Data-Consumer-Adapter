@@ -1,40 +1,14 @@
-#!/bin/bash 
+#!/bin/bash
 BUILD_DIR=$1
-PROJECT_ID=$2
-API_LINK=$3
+CROSSCOMPILE_FLAG=$2
+EXTRA_ARGS=$3
 RELEASE_TAG=""
 VERSION=""
 MAJOR_VER="0"
 MINOR_VER="0"
 PATCH_VER="0"
 
-check_args() {
-    if [ -z "$BUILD_DIR" ];
-    then 
-        echo "Build directory has not been provided! Aborting..." 
-        exit 1
-    elif [ -z "$PROJECT_ID" ];
-    then
-        echo "Project ID has not been provided! Aborting..."
-        exit 1
-    elif [ -z "$API_LINK" ]; 
-    then
-        echo "Project REST API has not been provided! Aborting..." 
-        exit 1
-    fi
-}
-
-upload_binaries() {
-    
-}
-
-send_post_cmd() {
-
-}
-
 do_release() {
-    check_args
-    
     RELEASE_TAG=$(git describe --exact-match --abbrev=0)
     git_cmd_status=$?
     
@@ -85,7 +59,13 @@ check_build_dir() {
 
 create_build_config() {
     cd $BUILD_DIR 
-    cmake -DCMAKE_BUILD_TYPE="Release" -DPACKAGE_MAJOR_VER=$MAJOR_VER -DPACKAGE_MINOR_VER=$MINOR_VER -DPACKAGE_PATCH_VER=$PATCH_VER ..
+    if [[ "${CROSSCOMPILE_FLAG,,}" =~ "y" ]];
+    then
+        TOOLCHAIN="cmake/crosscompiler-toolchain.cmake"
+    else
+        TOOLCHAIN="cmake/native-toolchain.cmake"
+    fi
+    cmake -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} -DCMAKE_BUILD_TYPE="Release" -DPACKAGE_MAJOR_VER=$MAJOR_VER -DPACKAGE_MINOR_VER=$MINOR_VER -DPACKAGE_PATCH_VER=$PATCH_VER ${EXTRA_ARGS} ..
 }
 
 do_release

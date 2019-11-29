@@ -37,10 +37,11 @@ target_include_directories(${THIS} PUBLIC
 
 if(CLANG_TIDY_EXE)               
     set_target_properties(
-                        ${THIS} PROPERTIES
-                        CMAKE_CXX_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY}"
+        ${THIS} PROPERTIES
+        CMAKE_CXX_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY}"
     )
-endif()    
+    target_clangformat_setup(${THIS})
+endif()   
 
 PRINT_TARGET_PROPERTIES(${THIS})
 

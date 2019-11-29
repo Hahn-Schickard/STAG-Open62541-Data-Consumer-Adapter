@@ -4,10 +4,10 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Project Template"
+PROJECT_NAME           = "HaSSL"
 PROJECT_NUMBER         =
-PROJECT_BRIEF          = "Template project for your future repositories"
-PROJECT_LOGO           =
+PROJECT_BRIEF          = "Hahn-Schickard Logging library for Cpp, a logging frontend for spd-log C++ library with filesystem managment capabilites."
+PROJECT_LOGO           = 
 OUTPUT_DIRECTORY       = docs/code_documentation
 CREATE_SUBDIRS         = YES
 ALLOW_UNICODE_NAMES    = NO
@@ -32,7 +32,7 @@ FULL_PATH_NAMES        = NO
 STRIP_FROM_PATH        =
 STRIP_FROM_INC_PATH    =
 SHORT_NAMES            = NO
-JAVADOC_AUTOBRIEF      = NO
+JAVADOC_AUTOBRIEF      = YES
 QT_AUTOBRIEF           = NO
 MULTILINE_CPP_IS_BRIEF = NO
 INHERIT_DOCS           = YES
@@ -49,8 +49,8 @@ EXTENSION_MAPPING      =
 MARKDOWN_SUPPORT       = YES
 TOC_INCLUDE_HEADINGS   = 0
 AUTOLINK_SUPPORT       = YES
-BUILTIN_STL_SUPPORT    = NO
-CPP_CLI_SUPPORT        = NO
+BUILTIN_STL_SUPPORT    = YES
+CPP_CLI_SUPPORT        = YES
 SIP_SUPPORT            = NO
 IDL_PROPERTY_SUPPORT   = YES
 DISTRIBUTE_GROUP_DOC   = NO
@@ -64,7 +64,7 @@ LOOKUP_CACHE_SIZE      = 0
 # Build related configuration options
 #---------------------------------------------------------------------------
 EXTRACT_ALL            = YES
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 EXTRACT_PACKAGE        = NO
 EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = YES
@@ -79,7 +79,7 @@ CASE_SENSE_NAMES       = YES
 HIDE_SCOPE_NAMES       = NO
 HIDE_COMPOUND_REFERENCE= NO
 SHOW_INCLUDE_FILES     = YES
-SHOW_GROUPED_MEMB_INC  = NO
+SHOW_GROUPED_MEMB_INC  = YES
 FORCE_LOCAL_INCLUDES   = NO
 INLINE_INFO            = YES
 SORT_MEMBER_DOCS       = YES
@@ -95,10 +95,10 @@ GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       =
 MAX_INITIALIZER_LINES  = 30
 SHOW_USED_FILES        = YES
-SHOW_FILES             = YES
+SHOW_FILES             = NO
 SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
-LAYOUT_FILE            =
+LAYOUT_FILE            = 
 CITE_BIB_FILES         =
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -114,7 +114,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = "." "include/**"
+INPUT                  = "." "includes/Logger/"
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \
@@ -164,32 +164,31 @@ FILE_PATTERNS          = *.c \
 RECURSIVE              = YES
 EXCLUDE                = libs/
 EXCLUDE               += tests/googletestsrc
-EXCLUDE               += modules
+EXCLUDE               += sources/
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = */tests/*
-EXCLUDE_PATTERNS      += */modules/*
-EXCLUDE_SYMBOLS        =
+EXCLUDE_SYMBOLS        = 
 EXAMPLE_PATH           =
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO
-IMAGE_PATH             = doxygen_special_command_cheatsheet.md
+IMAGE_PATH             = 
 INPUT_FILTER           =
 FILTER_PATTERNS        =
-FILTER_SOURCE_FILES    = NO
+FILTER_SOURCE_FILES    = YES
 FILTER_SOURCE_PATTERNS =
-USE_MDFILE_AS_MAINPAGE = doc_main_page.md
+USE_MDFILE_AS_MAINPAGE = README.md
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
 #---------------------------------------------------------------------------
-SOURCE_BROWSER         = YES
+SOURCE_BROWSER         = NO
 INLINE_SOURCES         = NO
 STRIP_CODE_COMMENTS    = YES
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
-REFERENCES_LINK_SOURCE = YES
+REFERENCES_LINK_SOURCE = NO
 SOURCE_TOOLTIPS        = YES
 USE_HTAGS              = NO
-VERBATIM_HEADERS       = YES
+VERBATIM_HEADERS       = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the alphabetical class index
 #---------------------------------------------------------------------------
@@ -202,14 +201,14 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html/
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            = 
-HTML_FOOTER            = 
+HTML_HEADER            = docs/code_documentation/header.html
+HTML_FOOTER            = docs/code_documentation/footer.html
 HTML_STYLESHEET        = 
-HTML_EXTRA_STYLESHEET  = docs/code_documentation/hs_layout.css
-HTML_EXTRA_FILES       =
-HTML_COLORSTYLE_HUE    = 220
-HTML_COLORSTYLE_SAT    = 100
-HTML_COLORSTYLE_GAMMA  = 80
+HTML_EXTRA_STYLESHEET  = docs/code_documentation/stylesheet.css
+HTML_EXTRA_FILES       = docs/code_documentation/vendor-logo.png
+HTML_COLORSTYLE_HUE    = 
+HTML_COLORSTYLE_SAT    = 
+HTML_COLORSTYLE_GAMMA  = 
 HTML_TIMESTAMP         = NO
 HTML_DYNAMIC_MENUS     = YES
 HTML_DYNAMIC_SECTIONS  = YES
@@ -323,13 +322,13 @@ PERLMOD_MAKEVAR_PREFIX =
 #---------------------------------------------------------------------------
 # Configuration options related to the preprocessor
 #---------------------------------------------------------------------------
-ENABLE_PREPROCESSING   = NO
-MACRO_EXPANSION        = NO
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = NO
-SEARCH_INCLUDES        = NO
-INCLUDE_PATH           = includes/
+SEARCH_INCLUDES        = YES
+INCLUDE_PATH           = includes/Logger
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             =
+PREDEFINED             = DOXYGEN
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------

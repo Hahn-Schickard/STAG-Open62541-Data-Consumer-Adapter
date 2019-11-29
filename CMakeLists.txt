@@ -16,6 +16,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
 
 project(${THIS} ${PROJECT_FLAGS})
 
+if(NOT CMAKE_TOOLCHAIN_FILE)
+    message(WARNING "No toolchain specified, defaulting to native one!")
+    set(CMAKE_TOOLCHAIN_FILE cmake/native-toolchain.cmake)
+endif()
+
 enable_testing()
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -40,6 +45,8 @@ if(DEFINED CMAKE_BUILD_TYPE AND CMAKE_VERSION VERSION_GREATER "2.8")
 endif()
 
 include(GNUInstallDirs)
+include(ClangFormat)
+include(HunterGate)
 include(macros)
 include(compiler_settings)
 include(linter)
@@ -92,6 +99,11 @@ install(FILES
         ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake		
         ${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake		
         DESTINATION ${CONFIGS_DEST}
+)
+
+install(FILES 
+        README.md	
+        DESTINATION ${CONFIGS_DEST}/..
 )
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/docs/code_documentation/" DESTINATION "docs")

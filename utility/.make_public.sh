@@ -23,9 +23,9 @@ setup_env(){
 }
 
 setup_amalgam_index(){
-    cp -v .amalgam_index.html public/index.html
-    cp -v .amalgam.css public/amalgam.css
-    cp -v docs/images/hs_logo.png public/
+    cp -v utility/.amalgam_index.html public/index.html
+    cp -v utility/.amalgam.css public/amalgam.css
+    cp -v docs/code_documentation/vendor-logo.png public/
 }
 
 
@@ -92,13 +92,34 @@ copy_packages(){
     fi
 }
 
+# Arg1 - link name 
+# Arg2 - filename
+link_file(){
+    link_name=$1
+    filename=$2
+    lineNum="$(grep -n ${link_name} index.html | head -n 1 | cut -d: -f1)"
+    lineNum=$((lineNum+1))
+    pattern="<a id=\"${link_name}\" href=\"${filename}\">${filename}</a>"
+    sed "${lineNum}i${pattern}" index.html > new_index.html
+    rm index.html
+    mv new_index.html index.html
+}
+
 write_files_to_index(){
     cwd=$(pwd)
     cd public
     echo $(pwd)
     for f in "${FILE_LIST[@]}"
     do
-        sed -i "29a\<li><a href=\"${f}\">Latest Release</a></li>" index.html
+        if [[ "${f,,}" =~ "linux" ]];
+        then
+            link_file linux-release "${f}"
+        elif [[ "${f,,}" =~ "window" ]];
+        then
+            link_file windows-release "${f}"
+        else
+            echo "$f is not a release file!"
+        fi
     done
     cd "$cwd"
 }

@@ -22,11 +22,12 @@ if(UNIX)
 endif()
 
 if(CLANG_TIDY_EXE)               
-set_target_properties(
-                    ${THIS} PROPERTIES
-                    CMAKE_CXX_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY}"
-)
-endif()    
+    set_target_properties(
+        ${THIS} PROPERTIES
+        CMAKE_CXX_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY}"
+    )
+    target_clangformat_setup(${THIS})
+endif() 
 
 PRINT_TARGET_PROPERTIES(${THIS})
 

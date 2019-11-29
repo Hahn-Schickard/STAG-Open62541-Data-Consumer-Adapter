@@ -9,18 +9,27 @@ usage(){
     echo "-h | --help         - Print this message"
 }
 
-run_valgrind(){
-    if [ -f valgrind-results.log ]
-    then 
-        rm valgrind-results.log
+check_executable() {
+    if [ ! -f "$EXECUTABLE_FILE" ];
+    then
+        echo "Executable file: $EXECUTABLE_FILE was not found. Aborting!"
+        exit 1
     fi
-    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose $EXECUTABLE_FILE $ARGUMENTS 2>&1 | tee valgrind-results.log 
+}
+
+run_valgrind(){
+    if [ -d valgrind_results ]
+    then 
+        rm -rf valgrind_results
+    fi
+    mkdir valgrind_results
+    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose $EXECUTABLE_FILE $ARGUMENTS 2>&1 | tee valgrind_results/valgrind-results.log 
 }
 
 check_for_errors() {
     HEAD_REGEX="\(ERROR SUMMARY:.\)"
     TAIL_REGEX="\(\s.*\)"
-    found_errors=$(sed -n "s/^\(.*\)${HEAD_REGEX}//p" ./valgrind-results.log)
+    found_errors=$(sed -n "s/^\(.*\)${HEAD_REGEX}//p" valgrind_results/valgrind-results.log)
     found_errors=$(sed "s/$TAIL_REGEX//" <<< $found_errors)
     found_errors=$(sed '$d' <<< $found_errors)
     if [[ "$found_errors" -ne 0 ]];
@@ -61,5 +70,6 @@ do
 	shift
 done
 
+check_executable
 run_valgrind
 check_for_errors
