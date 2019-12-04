@@ -1,0 +1,13 @@
+digraph "Information_Model::DataWrapper::DataWrapper"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="Information_Model::\lDataWrapper::DataWrapper",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node0 -> Node1 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node1 [label="Information_Model::\lDataWrapper::setValue",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dfd/classInformation__Model_1_1DataWrapper.html#a27332cd314fe5b9dbcdb79bb6dda47ed"];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node2 [label="Information_Model::\lDataWrapper::throwNoSpecialization\lImplemented",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dfd/classInformation__Model_1_1DataWrapper.html#a07cc30a48831bdf28eb0ba6a296d4a86"];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node3 [label="Information_Model::\lDataWrapper::typeName",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d8/dfd/classInformation__Model_1_1DataWrapper.html#a09207023f3867e218455207403c2b775",tooltip="Demangles given type name and returns it as a readable string. "];
+}
