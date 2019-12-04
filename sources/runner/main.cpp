@@ -5,7 +5,7 @@
 
 using namespace std;
 
-OpcuaAdapter *adapter;
+OpcuaAdapter* adapter;
 
 void stopServer() {
   adapter->stop();
@@ -18,7 +18,7 @@ static void stopHandler(int sig) {
   exit(0);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   signal(SIGINT, stopHandler);
   signal(SIGTERM, stopHandler);
 
@@ -28,14 +28,14 @@ int main(int argc, char *argv[]) {
   cout << "Started open62541 server!" << endl
        << "Press Ctrl+C to stop the program!" << endl;
 
-  if (argc > 1) {
+  if(argc > 1) {
     uint server_lifetime = atoi(argv[1]);
     cout << "Open62541 server will automatically shut down in "
          << server_lifetime << " seconds." << endl;
     sleep(server_lifetime);
     stopServer();
   } else {
-    while (true)
+    while(true)
       ;
   }
 }

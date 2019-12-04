@@ -18,8 +18,8 @@ typedef enum DataTypeEnum {
 } DataType;
 
 class NodeBuilder {
-public:
-  NodeBuilder(Open62541Server *server);
+ public:
+  NodeBuilder(Open62541Server* server);
 
   ~NodeBuilder();
 
@@ -30,16 +30,16 @@ public:
       UA_NodeId parent_id);
   bool addGroupNode(std::shared_ptr<Information_Model::DeviceElementGroup>
                         device_element_group,
-                    UA_NodeId parent_id);
-  bool
-  addFunctionNode(std::shared_ptr<Information_Model::DeviceElement> function,
-                  UA_NodeId parent_id);
+      UA_NodeId parent_id);
+  bool addFunctionNode(
+      std::shared_ptr<Information_Model::DeviceElement> function,
+      UA_NodeId parent_id);
   bool addMetricNode(std::shared_ptr<Information_Model::DeviceElement> metric,
-                     UA_NodeId parent_id);
+      UA_NodeId parent_id);
   UA_NodeId getOpcDataType(DataType type);
 
-private:
-  Open62541Server *server_;
+ private:
+  Open62541Server* server_;
 };
 
-#endif //__OPEN62541_NODE_BUILDER_HPP
+#endif   //__OPEN62541_NODE_BUILDER_HPP
