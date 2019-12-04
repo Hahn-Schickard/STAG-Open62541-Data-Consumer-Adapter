@@ -2,9 +2,11 @@
 
 using namespace Information_Model;
 using namespace Model_Event_Handler;
+using namespace DCAI;
 
 OpcuaAdapter::OpcuaAdapter() {
-  server_ = server_->getInstance();
+  status_       = DataConsumerAdapterStatus::UNKNOWN;
+  server_       = server_->getInstance();
   node_builder_ = new NodeBuilder(server_);
 }
 
@@ -13,27 +15,41 @@ OpcuaAdapter::~OpcuaAdapter() {
   delete node_builder_;
 }
 
-void OpcuaAdapter::start() { server_->start(); }
+void OpcuaAdapter::start() {
+  status_ = DataConsumerAdapterStatus::INITIALISING;
+  if(server_->start()) {
+    status_ = DataConsumerAdapterStatus::RUNNING;
+  }
+  status_ = DataConsumerAdapterStatus::EXITED;
+}
 
-void OpcuaAdapter::stop() { server_->stop(); }
+DataConsumerAdapterStatus OpcuaAdapter::getStatus() {
+  return status_;
+}
 
-void OpcuaAdapter::handleEvent(NotifierEvent *event) {
-  switch (event->getEventType()) {
-  case NotifierEventTypeEnum::NEW_DEVICE_REGISTERED: {
-    node_builder_->addDeviceNode(event->getEvent()->device);
-    break;
+void OpcuaAdapter::stop() {
+  if(server_->stop()) {
+    status_ = DataConsumerAdapterStatus::STOPPED;
   }
-  case NotifierEventTypeEnum::DEVICE_UPDATED: {
-    // @TODO: Implemnent Device updates
-    break;
-  }
-  case NotifierEventTypeEnum::DEVICE_REMOVED: {
-    // @TODO: Implemnent Device removal
-    break;
-  }
-  case NotifierEventTypeEnum::DEVICE_VALUE_UPDATED: {
-    // @TODO: Implemnent Device value updates
-    break;
-  }
+}
+
+void OpcuaAdapter::handleEvent(NotifierEvent* event) {
+  switch(event->getEventType()) {
+    case NotifierEventTypeEnum::NEW_DEVICE_REGISTERED: {
+      node_builder_->addDeviceNode(event->getEvent()->device);
+      break;
+    }
+    case NotifierEventTypeEnum::DEVICE_UPDATED: {
+      // @TODO: Implemnent Device updates
+      break;
+    }
+    case NotifierEventTypeEnum::DEVICE_REMOVED: {
+      // @TODO: Implemnent Device removal
+      break;
+    }
+    case NotifierEventTypeEnum::DEVICE_VALUE_UPDATED: {
+      // @TODO: Implemnent Device value updates
+      break;
+    }
   }
 }

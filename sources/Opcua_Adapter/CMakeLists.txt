@@ -20,7 +20,8 @@ target_sources(${THIS} PRIVATE
 
 target_link_libraries(${THIS} PUBLIC
                               Model_Event_Handler::Listener
-                              Information_Modeler::Information_Model_Interface                              
+                              Information_Modeler::Information_Model_Interface
+                              Data_Consumer_Adapter_Interface::DCAI                              
                               OPCUA_Server
 )
                               
