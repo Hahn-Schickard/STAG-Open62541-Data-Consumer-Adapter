@@ -1,4 +1,0 @@
-<map id="Information_Model::DeviceElement" name="Information_Model::DeviceElement">
-<area shape="rect" id="node3" href="$df/d20/classInformation__Model_1_1DeviceElementGroup.html" title="This Class Models a List of Elements within the Device. It may contain more DeviceElementGroup instan..." alt="" coords="5,184,165,225"/>
-<area shape="rect" id="node2" href="$d3/d15/classInformation__Model_1_1NamedElement.html" title="This is the base class for all of the other modelling classes. " alt="" coords="9,5,161,47"/>
-</map>

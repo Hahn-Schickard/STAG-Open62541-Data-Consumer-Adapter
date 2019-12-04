@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node2" href="$d9/dcc/structElementTypeMismatchException.html" title="ElementTypeMismatchException" alt="" coords="141,5,375,32"/>
-<area shape="rect" id="node3" href="$d5/d07/structFunctionElementException.html" title="FunctionElementException" alt="" coords="161,56,355,83"/>
-<area shape="rect" id="node4" href="$d2/d45/structGroupElementDoesNotExistException.html" title="GroupElementDoesNotExist\lException" alt="" coords="157,107,359,149"/>
-<area shape="rect" id="node5" href="$d4/dd3/structInvalidReferenceIdException.html" title="InvalidReferenceIdException" alt="" coords="155,173,361,200"/>
-<area shape="rect" id="node6" href="$de/d07/structUndefinedElementTypeException.html" title="UndefinedElementTypeException" alt="" coords="140,224,376,251"/>
-</map>

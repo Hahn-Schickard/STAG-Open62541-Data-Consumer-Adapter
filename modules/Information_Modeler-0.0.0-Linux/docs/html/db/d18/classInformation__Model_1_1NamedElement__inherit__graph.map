@@ -1,5 +1,0 @@
-<map id="Information_Model::NamedElement" name="Information_Model::NamedElement">
-<area shape="rect" id="node2" href="$dd/d81/classInformation__Model_1_1Device.html" title="This class models a Device. It contains a single instance of Information_Model::DeviceElementGroup, which has all of the elements that this device uses. " alt="" coords="5,95,157,136"/>
-<area shape="rect" id="node3" href="$d6/d9e/classInformation__Model_1_1DeviceElement.html" title="This class is the base for all of the elements within the Information_Model::Device. " alt="" coords="181,95,333,136"/>
-<area shape="rect" id="node4" href="$df/d20/classInformation__Model_1_1DeviceElementGroup.html" title="This Class Models a List of Elements within the Device. It may contain more DeviceElementGroup instan..." alt="" coords="177,184,337,225"/>
-</map>
