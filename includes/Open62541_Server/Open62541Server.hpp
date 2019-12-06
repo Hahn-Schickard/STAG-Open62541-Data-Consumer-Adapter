@@ -2,33 +2,35 @@
 #define _OPEN62541_SERVER_H_
 
 #include "Device.hpp"
+#include "Logger.hpp"
 
 #include <memory>
+#include <mutex>
 #include <open62541/server.h>
-#include <pthread.h>
+#include <thread>
 
 class Open62541Server {
-public:
+ public:
+  Open62541Server();
+  ~Open62541Server();
+
   bool start();
   bool stop();
   bool configure();
   bool isRunning();
-  ~Open62541Server();
-  static Open62541Server *getInstance();
   UA_UInt16 getServerNamespace();
-  UA_Server *getServer();
+  UA_Server* getServer();
 
-private:
-  Open62541Server();
-  static void *runnable(void *none);
-  void *serverThread();
+ private:
+  void runnable();
 
   volatile bool is_running_;
-  static Open62541Server *instance_;
-  UA_ServerConfig *config_;
-  UA_Server *open62541_server_;
+  UA_ServerConfig* config_;
+  UA_Server* open62541_server_;
   UA_UInt16 server_namespace_index_;
-  pthread_t server_thread_id;
+  std::thread server_thread_;
+  std::shared_ptr<HaSLL::Logger> logger_;
+  std::mutex status_mutex_;
 };
 
-#endif //_OPEN62541_SERVER_H_
+#endif   //_OPEN62541_SERVER_H_

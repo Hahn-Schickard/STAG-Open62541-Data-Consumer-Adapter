@@ -21,6 +21,7 @@ target_sources(${THIS} PRIVATE
 target_link_libraries(${THIS} PUBLIC
                               Information_Modeler::Information_Model_Interface
                               open62541::open62541
+                              HaSLL::Logger   
 )
                             
 if (UNIX)
@@ -33,6 +34,7 @@ target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${INCLUDES_DIR}/Open62541_Server>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
                            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Open62541_Server>
+                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/>
 )
 
 if(CLANG_TIDY_EXE)               
