@@ -1,0 +1,17 @@
+digraph "HaSLL::LoggerRepository::getTypeName"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node32 [label="HaSLL::LoggerRepository\l::getTypeName",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node32 -> Node33 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node33 [label="HaSLL::LoggerRepository\l::configureUnguarded",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a08b673118251dc4e5fa6878c1582f78e",tooltip="Non threaded call to change the global logging level. "];
+  Node32 -> Node34 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node34 [label="HaSLL::LoggerRepository\l::configureUnguardedPattern",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a955be6d88861f51fe40c66800ca1e556",tooltip="Non threaded call to change the global logging pattern. "];
+  Node32 -> Node35 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node35 [label="HaSLL::LoggerRepository\l::getUnguardedLogger",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a32e969f62284843d0df1edcf19626667",tooltip="Non threaded call to get a specific logger from the repository. "];
+  Node32 -> Node36 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node36 [label="HaSLL::LoggerRepository\l::LoggerRepository",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#ae1249192ec459634aaf8827cd4707e93",tooltip="Constructs an instace of LoggerRepository object with a null sink. "];
+  Node32 -> Node37 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node37 [label="HaSLL::LoggerRepository\l::~LoggerRepository",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#af07036bb170020680217fc9c9e8464d5",tooltip="Destroy the Logger Repository object and clean up the logger registery. "];
+}

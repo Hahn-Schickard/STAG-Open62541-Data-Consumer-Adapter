@@ -1,0 +1,9 @@
+digraph "HaSLL::LoggerRepository::deregisterLoger"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node25 [label="HaSLL::LoggerRepository\l::deregisterLoger",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node25 -> Node26 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node26 [label="HaSLL::LoggerRepository\l::registerTypedLoger",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a7b48624298b3147084359ca4090f3f20",tooltip="Creates and registers a logger based on a given typename. "];
+}

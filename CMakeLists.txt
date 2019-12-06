@@ -34,17 +34,12 @@ set(CLANG_OUTPUT "${PROJECT_SOURCE_DIR}/clang-tidy-suggested-fixes.yml")
 set(INCLUDES_DIR "${PROJECT_SOURCE_DIR}/includes")
 
 #@+ ========================== User configuration ===========================
+find_package(Threads)
+find_package(HaSLL REQUIRED PATHS "./modules")
 find_package(Information_Modeler REQUIRED PATHS "./modules")
 find_package(Model_Event_Handler REQUIRED PATHS "./modules")
 find_package(Data_Consumer_Adapter_Interface REQUIRED PATHS "./modules")
 find_package(open62541 REQUIRED PATHS "./modules")
-# install(
-#     TARGETS open62541::open62541
-#     EXPORT ${PROJECT_NAME}Targets
-#     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-# )
 #@- ===================== END OF USER CONFIGURATION =========================
 
 set(CMAKE_CONFIGURATION_TYPES "DEBUG" CACHE STRING "Configs" FORCE)

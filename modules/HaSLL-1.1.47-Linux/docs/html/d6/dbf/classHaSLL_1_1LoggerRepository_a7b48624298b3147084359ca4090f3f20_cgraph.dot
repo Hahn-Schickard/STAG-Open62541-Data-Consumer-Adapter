@@ -1,0 +1,29 @@
+digraph "HaSLL::LoggerRepository::registerTypedLoger"
+{
+  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
+  node [fontname="Sans",fontsize="10",shape=record];
+  rankdir="LR";
+  Node47 [label="HaSLL::LoggerRepository\l::registerTypedLoger",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node47 -> Node48 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node48 [label="HaSLL::LoggerRepository\l::configure",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#aa52cf531376f7a971f320b1f40a844c7",tooltip="Controls logging level and pattern for all of the registered loggers. "];
+  Node47 -> Node49 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node49 [label="HaSLL::LoggerRepository\l::configurePattern",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#aaa7f6bf61b4e74fb8a48a2f75a35eb3f",tooltip="Changes the global logging pattern. "];
+  Node47 -> Node50 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node50 [label="HaSLL::LoggerRepository\l::deregisterLoger",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a1fc95200ad487dab848c2451fdd3c28c",tooltip="Removes a given logger from the registery. "];
+  Node47 -> Node51 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node51 [label="HaSLL::LoggerRepository\l::getLogger",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a0a45fff14f7f63dc64edc24d0b07c2fe",tooltip="Get the Logger object from the repositroy. "];
+  Node47 -> Node52 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node52 [label="HaSLL::LoggerRepository\l::getTypeName",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a7263cf241b9449f34a724cca2a870de8",tooltip="returns a demangeled string from a given typename "];
+  Node52 -> Node53 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node53 [label="HaSLL::LoggerRepository\l::configureUnguarded",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a08b673118251dc4e5fa6878c1582f78e",tooltip="Non threaded call to change the global logging level. "];
+  Node52 -> Node54 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node54 [label="HaSLL::LoggerRepository\l::configureUnguardedPattern",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a955be6d88861f51fe40c66800ca1e556",tooltip="Non threaded call to change the global logging pattern. "];
+  Node52 -> Node55 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node55 [label="HaSLL::LoggerRepository\l::getUnguardedLogger",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a32e969f62284843d0df1edcf19626667",tooltip="Non threaded call to get a specific logger from the repository. "];
+  Node52 -> Node56 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node56 [label="HaSLL::LoggerRepository\l::LoggerRepository",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#ae1249192ec459634aaf8827cd4707e93",tooltip="Constructs an instace of LoggerRepository object with a null sink. "];
+  Node52 -> Node57 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node57 [label="HaSLL::LoggerRepository\l::~LoggerRepository",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#af07036bb170020680217fc9c9e8464d5",tooltip="Destroy the Logger Repository object and clean up the logger registery. "];
+  Node47 -> Node58 [color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
+  Node58 [label="HaSLL::LoggerRepository\l::registerLoger",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/dbf/classHaSLL_1_1LoggerRepository.html#a75c0759446181eaeec54c6ce4113c2fa",tooltip="Creates and registers a logger within the repository. "];
+}
