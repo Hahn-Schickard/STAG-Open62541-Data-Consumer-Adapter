@@ -19,6 +19,10 @@ Open62541Server::Open62541Server()
 
 Open62541Server::~Open62541Server() {
   free(config_);
+  logger_->log(SeverityLevel::INFO,
+      "Removing {} from logger registery",
+      logger_->getName());
+  LoggerRepository::getInstance().deregisterLoger(logger_->getName());
 }
 
 bool Open62541Server::configure() {

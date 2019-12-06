@@ -18,6 +18,10 @@ OpcuaAdapter::OpcuaAdapter()
 OpcuaAdapter::~OpcuaAdapter() {
   delete server_;
   delete node_builder_;
+  logger_->log(SeverityLevel::INFO,
+      "Removing {} from logger registery",
+      logger_->getName());
+  LoggerRepository::getInstance().deregisterLoger(logger_->getName());
 }
 
 void OpcuaAdapter::start() {
