@@ -2,8 +2,11 @@
 #define __OPCUA_ADAPTER_HPP
 
 #include "DataConsumerAdapterInterface.hpp"
+#include "Logger.hpp"
 #include "NodeBuilder.hpp"
 #include "Open62541Server.hpp"
+
+#include <memory>
 
 class OpcuaAdapter : public DCAI::DataConsumerAdapterInterface {
  public:
@@ -18,6 +21,7 @@ class OpcuaAdapter : public DCAI::DataConsumerAdapterInterface {
  private:
   NodeBuilder* node_builder_;
   Open62541Server* server_;
+  std::shared_ptr<HaSLL::Logger> logger_;
   DCAI::DataConsumerAdapterStatus status_;
 };
 
