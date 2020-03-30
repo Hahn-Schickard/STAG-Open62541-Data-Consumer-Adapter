@@ -1,9 +1,0 @@
-{
-    "log_to_standard_output": true,
-    "logfile_name": "logfile.log",
-    "logfile_path": "./log",
-    "logging_level": "info",
-    "maximum_file_count": 25,
-    "maximum_file_size_MB": 100,
-    "message_pattern": "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$"
-}

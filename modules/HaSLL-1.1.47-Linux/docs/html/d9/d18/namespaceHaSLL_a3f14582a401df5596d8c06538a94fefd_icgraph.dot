@@ -1,9 +1,0 @@
-digraph "HaSLL::getSPDLogLevel"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node3 [label="HaSLL::getSPDLogLevel",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
-  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Sans"];
-  Node4 [label="HaSLL::Logger::log",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d6/db5/classHaSLL_1_1Logger.html#a1fe9a1826f926bc7f7ee2fbe70d90a6e",tooltip="Logs a message to SeverityLevel. "];
-}

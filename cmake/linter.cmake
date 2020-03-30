@@ -1,4 +1,4 @@
-if(ENABLE_STATIC_CODE_ANALYSIS)
+if(STATIC_CODE_ANALYSIS)
   message(STATUS "Running Static analysis during build!")
   find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
   if(CLANG_TIDY_EXE)

@@ -1,7 +1,0 @@
-digraph "Graphical Class Hierarchy"
-{
-  edge [fontname="Sans",fontsize="10",labelfontname="Sans",labelfontsize="10"];
-  node [fontname="Sans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node0 [label="Model_Event_Handler\l::Notifier",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d0/dc3/classModel__Event__Handler_1_1Notifier.html"];
-}
