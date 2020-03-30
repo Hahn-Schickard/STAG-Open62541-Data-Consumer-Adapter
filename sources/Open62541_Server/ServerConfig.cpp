@@ -12,7 +12,7 @@
  */
 
 #include "ServerConfig.hpp"
-#include "NullLogger.hpp"
+#include "HaSLLLogger.hpp"
 
 #include <open62541/client_config_default.h>
 #include <open62541/network_tcp.h>
@@ -108,7 +108,7 @@ static UA_StatusCode setDefaultConfig(UA_ServerConfig *conf) {
 
   /* --> Start setting the default static config <-- */
   conf->nThreads = 1;
-  conf->logger = Null_Logger_;
+  conf->logger = HaSLL_Logger_;
 
   conf->shutdownDelay = 0.0;
 
@@ -630,9 +630,9 @@ UA_StatusCode UA_ClientConfig_setDefault(UA_ClientConfig *config) {
   config->timeout = 5000;
   config->secureChannelLifeTime = 10 * 60 * 1000; /* 10 minutes */
 
-  config->logger.log = Null_Logger_log;
+  config->logger.log = HaSLL_Logger_log;
   config->logger.context = NULL;
-  config->logger.clear = Null_Logger_clear;
+  config->logger.clear = HaSLL_Logger_clear;
 
   config->localConnectionConfig = UA_ConnectionConfig_default;
 
