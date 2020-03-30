@@ -4,9 +4,9 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "HaSSL"
+PROJECT_NAME           = "Open62541 Data Consumer Adapter"
 PROJECT_NUMBER         =
-PROJECT_BRIEF          = "Hahn-Schickard Logging library for Cpp, a logging frontend for spd-log C++ library with filesystem managment capabilites."
+PROJECT_BRIEF          = "This module implements open62541 server SDK, which confirms with Data Consumer Interface."
 PROJECT_LOGO           = 
 OUTPUT_DIRECTORY       = docs/code_documentation
 CREATE_SUBDIRS         = YES
