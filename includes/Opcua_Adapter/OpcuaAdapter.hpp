@@ -9,20 +9,15 @@
 #include <memory>
 
 class OpcuaAdapter : public DCAI::DataConsumerAdapterInterface {
- public:
+  Open62541Server *server_;
+  NodeBuilder *node_builder_;
+
+  void run();
+  void handleEvent(std::shared_ptr<Model_Event_Handler::NotifierEvent> event);
+
+public:
   OpcuaAdapter();
   ~OpcuaAdapter();
-
-  void start();
-  DCAI::DataConsumerAdapterStatus getStatus();
-  void handleEvent(Model_Event_Handler::NotifierEvent* event);
-  void stop();
-
- private:
-  NodeBuilder* node_builder_;
-  Open62541Server* server_;
-  std::shared_ptr<HaSLL::Logger> logger_;
-  DCAI::DataConsumerAdapterStatus status_;
 };
 
-#endif   //__OPCUA_ADAPTER_HPP
+#endif //__OPCUA_ADAPTER_HPP

@@ -9,85 +9,67 @@ using namespace HaSLL;
 using namespace std;
 
 OpcuaAdapter::OpcuaAdapter()
-    : logger_(LoggerRepository::getInstance().registerTypedLoger(this))
-    , status_(DataConsumerAdapterStatus::UNKNOWN) {
-  server_       = new Open62541Server();
-  node_builder_ = new NodeBuilder(server_);
-}
+    : DataConsumerAdapterInterface("open62541 adapter"),
+      server_(new Open62541Server()), node_builder_(new NodeBuilder(server_)) {}
 
 OpcuaAdapter::~OpcuaAdapter() {
   delete server_;
   delete node_builder_;
-  logger_->log(SeverityLevel::INFO,
-      "Removing {} from logger registery",
-      logger_->getName());
-  LoggerRepository::getInstance().deregisterLoger(logger_->getName());
+  adapter_logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
+                       adapter_logger_->getName());
+  LoggerRepository::getInstance().deregisterLoger(adapter_logger_->getName());
 }
 
-void OpcuaAdapter::start() {
-  logger_->log(SeverityLevel::INFO, "Initialising OPC UA Adapter...");
-  status_ = DataConsumerAdapterStatus::INITIALISING;
-  if(server_->start()) {
-    logger_->log(SeverityLevel::INFO, "OPC UA Adapter is running!");
-    status_ = DataConsumerAdapterStatus::RUNNING;
+void OpcuaAdapter::run() {
+  adapter_logger_->log(SeverityLevel::INFO, "Initialising OPC UA Adapter...");
+  if (server_->start()) {
+    adapter_logger_->log(SeverityLevel::INFO, "OPC UA Adapter is running!");
   } else {
-    logger_->log(SeverityLevel::ERROR, "Failled to initialize OPC UA Adapter!");
-    status_ = DataConsumerAdapterStatus::EXITED;
+    adapter_logger_->log(SeverityLevel::ERROR,
+                         "Failled to initialize OPC UA Adapter!");
   }
 }
 
-DataConsumerAdapterStatus OpcuaAdapter::getStatus() {
-  if(status_ == DataConsumerAdapterStatus::RUNNING) {
-    if(!server_->isRunning()) {
-      status_ = DataConsumerAdapterStatus::EXITED;
-    }
+void OpcuaAdapter::handleEvent(
+    std::shared_ptr<Model_Event_Handler::NotifierEvent> event) {
+  switch (event->getEventType()) {
+  case NotifierEventTypeEnum::NEW_DEVICE_REGISTERED: {
+    adapter_logger_->log(
+        SeverityLevel::TRACE,
+        "OPC UA Adapter recieved NEW_DEVICE_REGISTERED event!");
+    node_builder_->addDeviceNode(event->getEvent()->device);
+    break;
   }
-  return status_;
-}
-
-void OpcuaAdapter::stop() {
-  if(server_->stop()) {
-    logger_->log(SeverityLevel::INFO, "OPC UA Adapter was stopped!");
-    status_ = DataConsumerAdapterStatus::STOPPED;
+  case NotifierEventTypeEnum::DEVICE_UPDATED: {
+    adapter_logger_->log(SeverityLevel::TRACE,
+                         "OPC UA Adapter recieved DEVICE_UPDATED event!");
+    adapter_logger_->log(
+        SeverityLevel::WARNNING,
+        "Event handler for DEVICE_UPDATED event is not implemented!");
+    // @TODO: Implemnent Device updates
+    break;
   }
-  logger_->log(SeverityLevel::ERROR, "Failled to stop OPC UA Adapter!");
-}
-
-void OpcuaAdapter::handleEvent(NotifierEvent* event) {
-  switch(event->getEventType()) {
-    case NotifierEventTypeEnum::NEW_DEVICE_REGISTERED: {
-      logger_->log(SeverityLevel::TRACE,
-          "OPC UA Adapter recieved NEW_DEVICE_REGISTERED event!");
-      node_builder_->addDeviceNode(event->getEvent()->device);
-      break;
-    }
-    case NotifierEventTypeEnum::DEVICE_UPDATED: {
-      logger_->log(SeverityLevel::TRACE,
-          "OPC UA Adapter recieved DEVICE_UPDATED event!");
-      logger_->log(SeverityLevel::WARNNING,
-          "Event handler for DEVICE_UPDATED event is not implemented!");
-      // @TODO: Implemnent Device updates
-      break;
-    }
-    case NotifierEventTypeEnum::DEVICE_REMOVED: {
-      logger_->log(SeverityLevel::TRACE,
-          "OPC UA Adapter recieved DEVICE_REMOVED event!");
-      logger_->log(SeverityLevel::WARNNING,
-          "Event handler for DEVICE_REMOVED event is not implemented!");
-      // @TODO: Implemnent Device removal
-      break;
-    }
-    case NotifierEventTypeEnum::DEVICE_VALUE_UPDATED: {
-      logger_->log(SeverityLevel::TRACE,
-          "OPC UA Adapter recieved DEVICE_VALUE_UPDATED event!");
-      logger_->log(SeverityLevel::WARNNING,
-          "Event handler for DEVICE_VALUE_UPDATED event is not implemented!");
-      // @TODO: Implemnent Device value updates
-      break;
-    }
-    default: {
-      logger_->log(SeverityLevel::ERROR,
-          "OPC UA Adapter recieved an unreconized event!");
-    }
+  case NotifierEventTypeEnum::DEVICE_REMOVED: {
+    adapter_logger_->log(SeverityLevel::TRACE,
+                         "OPC UA Adapter recieved DEVICE_REMOVED event!");
+    adapter_logger_->log(
+        SeverityLevel::WARNNING,
+        "Event handler for DEVICE_REMOVED event is not implemented!");
+    // @TODO: Implemnent Device removal
+    break;
+  }
+  case NotifierEventTypeEnum::DEVICE_VALUE_UPDATED: {
+    adapter_logger_->log(SeverityLevel::TRACE,
+                         "OPC UA Adapter recieved DEVICE_VALUE_UPDATED event!");
+    adapter_logger_->log(
+        SeverityLevel::WARNNING,
+        "Event handler for DEVICE_VALUE_UPDATED event is not implemented!");
+    // @TODO: Implemnent Device value updates
+    break;
+  }
+  default: {
+    adapter_logger_->log(SeverityLevel::ERROR,
+                         "OPC UA Adapter recieved an unreconized event!");
+  }
   }
 }
