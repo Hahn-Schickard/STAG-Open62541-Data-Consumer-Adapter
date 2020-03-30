@@ -1,13 +1,61 @@
 #include "NodeBuilder.hpp"
 
+#include "LoggerRepository.hpp"
+
 #include <memory>
 #include <open62541/nodeids.h>
+#include <string>
 #include <vector>
 
 using namespace std;
+using namespace HaSLL;
 using namespace Information_Model;
 
+string uaStringToCppString(UA_String input) {
+  string output;
+  for (size_t i = 0; i < input.length; i++) {
+    output.push_back(*input.data);
+  }
+  return output;
+}
+
+string uaGuIdToCppString(UA_Guid input) {
+  string output = to_string(input.data1) + ":" + to_string(input.data2) + ":" +
+                  to_string(input.data3) + ":";
+  for (int i = 0; i < 8; i++) {
+    output.push_back(input.data4[i]);
+  }
+  return output;
+}
+
+string nodeIdToString(UA_NodeId nodeId) {
+  string namespace_index_string = to_string(nodeId.namespaceIndex);
+  string node_id_string;
+  switch (nodeId.identifierType) {
+  case UA_NodeIdType::UA_NODEIDTYPE_NUMERIC: {
+    node_id_string = to_string(nodeId.identifier.numeric);
+    break;
+  }
+  case UA_NodeIdType::UA_NODEIDTYPE_GUID: {
+    node_id_string = uaGuIdToCppString(nodeId.identifier.guid);
+    break;
+  }
+  case UA_NodeIdType::UA_NODEIDTYPE_BYTESTRING: {
+  }
+  case UA_NodeIdType::UA_NODEIDTYPE_STRING: {
+    node_id_string = uaStringToCppString(nodeId.identifier.string);
+    break;
+  }
+  default: { node_id_string = "UNRECOGNIZED"; }
+  }
+  return namespace_index_string + ":" + node_id_string;
+}
+
 class DeviceElementNodeInfo {
+  char *node_id_;
+  char *node_name_;
+  char *node_description_;
+
 public:
   DeviceElementNodeInfo(shared_ptr<NamedElement> element) {
     if (element) {
@@ -20,7 +68,7 @@ public:
       strcpy(node_name_, element->getElementName().c_str());
       strcpy(node_description_, element->getElementDescription().c_str());
     } else {
-      //@TODO: throw exception / log error
+      // @TODO: thorw an exception that will be logged by the builder
     }
   }
 
@@ -31,22 +79,23 @@ public:
   }
 
   char *getNodeId() { return node_id_; }
-
   char *getNodeName() { return node_name_; }
-
   char *getNodeDescription() { return node_description_; }
-
-private:
-  char *node_id_;
-  char *node_name_;
-  char *node_description_;
 };
 
-NodeBuilder::NodeBuilder(Open62541Server *server) : server_(server) {}
+NodeBuilder::NodeBuilder(Open62541Server *server)
+    : server_(server),
+      logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {}
 
-NodeBuilder::~NodeBuilder() {}
+NodeBuilder::~NodeBuilder() {
+  logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
+               logger_->getName());
+  LoggerRepository::getInstance().deregisterLoger(logger_->getName());
+}
 
 bool NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
+  logger_->log(SeverityLevel::INFO, "Adding a new Device: {}, with id: {}",
+               device->getElementName(), device->getElementRefId());
 
   DeviceElementNodeInfo device_node_info =
       DeviceElementNodeInfo(static_pointer_cast<NamedElement>(device));
@@ -81,26 +130,34 @@ bool NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
 
 bool NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
                                        UA_NodeId parent_id) {
+  logger_->log(SeverityLevel::INFO, "Adding element {} to node {}",
+               element->getElementName(), nodeIdToString(parent_id));
   bool status = false;
   switch (element->getElementType()) {
-  case Group: {
+  case GROUP: {
     status = addGroupNode(static_pointer_cast<DeviceElementGroup>(element),
                           parent_id);
     break;
   }
-  case Function: {
+  case FUNCTION: {
     status = addFunctionNode(element, parent_id);
     break;
   }
-  case Observable:
-  case Writable:
-  case Readonly: {
-    status = addMetricNode(element, parent_id);
+  case OBSERVABLE:
+  case WRITABLE: {
+    status = addWritableNode(static_pointer_cast<WritableMetric>(element),
+                             parent_id);
     break;
   }
-  case Undefined:
+  case READABLE: {
+    status = addReadableNode(static_pointer_cast<Metric>(element), parent_id);
+    break;
+  }
+  case UNDEFINED:
   default: {
-    //@TODO: Handle default behaviour for UNRECOGNIZED_NODE
+    logger_->log(SeverityLevel::ERROR,
+                 "Unknown element type, for element {} to node {}",
+                 element->getElementName(), nodeIdToString(parent_id));
     break;
   }
   }
@@ -109,6 +166,9 @@ bool NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
 
 bool NodeBuilder::addGroupNode(
     shared_ptr<DeviceElementGroup> device_element_group, UA_NodeId parent_id) {
+  logger_->log(SeverityLevel::TRACE, "Adding group element {} to node {}",
+               device_element_group->getElementName(),
+               nodeIdToString(parent_id));
   bool status = false;
 
   DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(
@@ -133,22 +193,33 @@ bool NodeBuilder::addGroupNode(
                             type_definition, node_attr, NULL, NULL);
     vector<shared_ptr<DeviceElement>> elements =
         device_element_group->getSubelements();
+
+    logger_->log(SeverityLevel::INFO,
+                 "Group element {}:{} contains {} subelements.",
+                 device_element_group->getElementName(),
+                 nodeIdToString(group_node_id), elements.size());
     for (auto element : elements) {
       status = addDeviceNodeElement(element, group_node_id);
     }
-  } // LOG that the group was empty!
+  } else {
+    logger_->log(
+        SeverityLevel::WARNNING, "Parent's {} group element {} is empty!",
+        nodeIdToString(parent_id), device_element_group->getElementName());
+  }
   return status;
 }
 
 bool NodeBuilder::addFunctionNode(shared_ptr<DeviceElement> function,
                                   UA_NodeId parent_id) {
   bool status = false;
+  logger_->log(SeverityLevel::WARNNING, "Method element is not implemented!",
+               nodeIdToString(parent_id), function->getElementName());
   //@TODO: Implement addFunctionNode stub
   return status;
 }
 
-bool NodeBuilder::addMetricNode(shared_ptr<DeviceElement> metric,
-                                UA_NodeId parent_id) {
+bool NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
+                                  UA_NodeId parent_id) {
   bool status = false;
 
   DeviceElementNodeInfo element_node_info =
@@ -163,12 +234,39 @@ bool NodeBuilder::addMetricNode(shared_ptr<DeviceElement> metric,
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  // TODO: handle data types
-  node_attr.dataType = getOpcDataType(DataType::STRING);
-  node_attr.accessLevel = UA_ACCESSLEVELMASK_READ |
-                          UA_ACCESSLEVELMASK_WRITE; //@TODO: change to a
-                                                    // function that assigns
-                                                    // proper accessLevel
+  node_attr.dataType = getOpcDataType(metric->getDataType());
+  node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
+
+  node_attr.description =
+      UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeDescription());
+  node_attr.displayName =
+      UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeName());
+
+  UA_Server_addVariableNode(server_->getServer(), metrid_node_id, parent_id,
+                            reference_type_id, metric_browse_name,
+                            type_definition, node_attr, NULL, NULL);
+  return status;
+}
+
+bool NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
+                                  UA_NodeId parent_id) {
+  bool status = false;
+
+  DeviceElementNodeInfo element_node_info =
+      DeviceElementNodeInfo(static_pointer_cast<NamedElement>(metric));
+
+  UA_NodeId metrid_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
+                                              element_node_info.getNodeId());
+  UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
+  UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME(
+      server_->getServerNamespace(), element_node_info.getNodeName());
+  UA_NodeId type_definition =
+      UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+  UA_VariableAttributes node_attr = UA_VariableAttributes_default;
+
+  node_attr.dataType = getOpcDataType(metric->getDataType());
+  node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+
   node_attr.description =
       UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeDescription());
   node_attr.displayName =
@@ -181,40 +279,34 @@ bool NodeBuilder::addMetricNode(shared_ptr<DeviceElement> metric,
 }
 
 UA_NodeId NodeBuilder::getOpcDataType(DataType type) {
-  //@TODO: set some initial value that would be common for all nodes, string
-  // maybe?
   UA_NodeId typeId;
   switch (type) {
-  case UNSIGNED_SHORT: {
-    typeId = UA_TYPES[UA_TYPES_UINT16].typeId;
+  case BOOLEAN: {
+    typeId = UA_TYPES[UA_TYPES_BOOLEAN].typeId;
     break;
   }
-  case UNSIGNED_INTEGER: {
-    typeId = UA_TYPES[UA_TYPES_UINT32].typeId;
+  case BYTE: {
+    typeId = UA_TYPES[UA_TYPES_BYTE].typeId;
     break;
   }
-  case UNSIGNED_LONG: {
-    typeId = UA_TYPES[UA_TYPES_UINT64].typeId;
-    break;
-  }
-  case SIGNED_SHORT: {
+  case SHORT: {
     typeId = UA_TYPES[UA_TYPES_INT16].typeId;
     break;
   }
-  case SIGNED_INTEGER: {
+  case INTEGER: {
     typeId = UA_TYPES[UA_TYPES_INT32].typeId;
     break;
   }
-  case SIGNED_LONG: {
+  case LONG: {
     typeId = UA_TYPES[UA_TYPES_INT64].typeId;
+    break;
+  }
+  case FLOAT: {
+    typeId = UA_TYPES[UA_TYPES_FLOAT].typeId;
     break;
   }
   case DOUBLE: {
     typeId = UA_TYPES[UA_TYPES_DOUBLE].typeId;
-    break;
-  }
-  case BOOLEAN: {
-    typeId = UA_TYPES[UA_TYPES_BOOLEAN].typeId;
     break;
   }
   case STRING: {

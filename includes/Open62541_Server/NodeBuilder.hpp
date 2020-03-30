@@ -2,24 +2,14 @@
 #define __OPEN62541_NODE_BUILDER_HPP
 
 #include "Device.hpp"
+#include "Logger.hpp"
+#include "Metric.hpp"
 #include "Open62541Server.hpp"
-
-typedef enum DataTypeEnum {
-  UNSIGNED_SHORT,
-  UNSIGNED_INTEGER,
-  UNSIGNED_LONG,
-  SIGNED_SHORT,
-  SIGNED_INTEGER,
-  SIGNED_LONG,
-  DOUBLE,
-  BOOLEAN,
-  STRING,
-  UNKNOWN
-} DataType;
+#include "WritableMetric.hpp"
 
 class NodeBuilder {
- public:
-  NodeBuilder(Open62541Server* server);
+public:
+  NodeBuilder(Open62541Server *server);
 
   ~NodeBuilder();
 
@@ -30,16 +20,21 @@ class NodeBuilder {
       UA_NodeId parent_id);
   bool addGroupNode(std::shared_ptr<Information_Model::DeviceElementGroup>
                         device_element_group,
-      UA_NodeId parent_id);
-  bool addFunctionNode(
-      std::shared_ptr<Information_Model::DeviceElement> function,
-      UA_NodeId parent_id);
-  bool addMetricNode(std::shared_ptr<Information_Model::DeviceElement> metric,
-      UA_NodeId parent_id);
-  UA_NodeId getOpcDataType(DataType type);
+                    UA_NodeId parent_id);
+  bool
+  addFunctionNode(std::shared_ptr<Information_Model::DeviceElement> function,
+                  UA_NodeId parent_id);
+  bool addReadableNode(std::shared_ptr<Information_Model::Metric> metric,
+                       UA_NodeId parent_id);
+  bool
+  addWritableNode(std::shared_ptr<Information_Model::WritableMetric> metric,
+                  UA_NodeId parent_id);
 
- private:
-  Open62541Server* server_;
+  UA_NodeId getOpcDataType(Information_Model::DataType type);
+
+private:
+  Open62541Server *server_;
+  std::shared_ptr<HaSLL::Logger> logger_;
 };
 
-#endif   //__OPEN62541_NODE_BUILDER_HPP
+#endif //__OPEN62541_NODE_BUILDER_HPP
