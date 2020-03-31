@@ -7,6 +7,7 @@ using namespace Model_Event_Handler;
 using namespace DCAI;
 using namespace HaSLL;
 using namespace std;
+using namespace open62541;
 
 OpcuaAdapter::OpcuaAdapter()
     : DataConsumerAdapterInterface("open62541 adapter"),

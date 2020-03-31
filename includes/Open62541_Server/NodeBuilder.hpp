@@ -7,6 +7,7 @@
 #include "Open62541Server.hpp"
 #include "WritableMetric.hpp"
 
+namespace open62541 {
 class NodeBuilder {
 public:
   NodeBuilder(Open62541Server *server);
@@ -36,5 +37,6 @@ private:
   Open62541Server *server_;
   std::shared_ptr<HaSLL::Logger> logger_;
 };
+} // namespace open62541
 
 #endif //__OPEN62541_NODE_BUILDER_HPP

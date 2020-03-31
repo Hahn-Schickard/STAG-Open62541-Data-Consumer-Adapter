@@ -9,8 +9,8 @@
 #include <memory>
 
 class OpcuaAdapter : public DCAI::DataConsumerAdapterInterface {
-  Open62541Server *server_;
-  NodeBuilder *node_builder_;
+  open62541::Open62541Server *server_;
+  open62541::NodeBuilder *node_builder_;
 
   void run();
   void handleEvent(std::shared_ptr<Model_Event_Handler::NotifierEvent> event);

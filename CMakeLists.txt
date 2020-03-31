@@ -28,6 +28,7 @@ list(APPEND DEPENDENCIES_LIST
             Information_Model
             Data_Consumer_Adapter_Interface
             open62541
+            nlohmann_json
             Threads
 )
 #@- ========================= END OF USER CONFIGURATION ============================

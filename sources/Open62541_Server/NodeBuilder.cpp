@@ -10,6 +10,7 @@
 using namespace std;
 using namespace HaSLL;
 using namespace Information_Model;
+using namespace open62541;
 
 string uaStringToCppString(UA_String input) {
   string output;

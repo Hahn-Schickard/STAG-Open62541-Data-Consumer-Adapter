@@ -9,6 +9,7 @@
 using namespace std;
 using namespace HaSLL;
 using namespace Information_Model;
+using namespace open62541;
 
 Open62541Server::Open62541Server()
     : is_running_(false),

@@ -3,6 +3,7 @@ gtest/1.8.1@bincrafters/stable
 Information_Model/0.1@dg1024/testing
 Data_Consumer_Adapter_Interface/[~=0.1]@dg1024/testing
 open62541/1.0.0@dg1024/testing
+nlohmann_json/3.7.3
 
 [generators]
 cmake_paths

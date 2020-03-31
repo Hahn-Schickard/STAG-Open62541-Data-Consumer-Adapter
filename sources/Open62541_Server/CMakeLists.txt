@@ -20,6 +20,7 @@ target_sources(${THIS} PRIVATE
 target_link_libraries(${THIS} PUBLIC
                               Information_Model::Information_Model
                               open62541::open62541
+                              nlohmann_json::nlohmann_json
                               HaSLL::HaSLL   
 )
                             
