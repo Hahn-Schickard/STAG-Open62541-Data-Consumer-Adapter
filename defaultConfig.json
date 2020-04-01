@@ -1,0 +1,90 @@
+{
+    "app_info": {
+        "applicationName": {
+            "locale": "en",
+            "text": "open62541-based OPC UA Application"
+        },
+        "applicationType": "Server",
+        "applicationUri": "urn:open62541.server.application",
+        "discoveryProfileUri": "",
+        "gatewayServerUri": "",
+        "productUri": "http://open62541.org"
+    },
+    "build_info": {
+        "buildDate": 132302334966070990,
+        "buildNumber": "Apr  1 2020 18:50:21",
+        "manufacturerName": "open62541",
+        "productName": "open62541 OPC UA Server",
+        "productUri": "http://open62541.org",
+        "softwareVersion": "\"0\".\"0\".\"0\"-rc"
+    },
+    "discovery": {
+        "cleanupTimeout": 0,
+        "mdnsEnable": false
+    },
+    "max_publish_req_per_session": 0,
+    "max_references_per_node": 0,
+    "monitored_items_limits": {
+        "max_monitored_items": 0,
+        "max_monitored_items_per_subscription": 0,
+        "queue_size_limits": {
+            "max": 100,
+            "min": 1
+        },
+        "sampling_interval_limits_ms": {
+            "max": 86400000.0,
+            "min": 50.0
+        }
+    },
+    "networking": {
+        "maxChunkCount": 0,
+        "maxMessageSize": 0,
+        "protocolVersion": 0,
+        "recvBufferSize": 65535,
+        "sendBufferSize": 65535
+    },
+    "operation_limits": {
+        "max_monitored_items_per_call": 0,
+        "max_nodes_per_browse": 0,
+        "max_nodes_per_method_call": 0,
+        "max_nodes_per_node_management": 0,
+        "max_nodes_per_read": 0,
+        "max_nodes_per_register_nodes": 0,
+        "max_nodes_per_translate_browse_paths_to_nodeids": 0,
+        "max_nodes_per_write": 0
+    },
+    "port_nubmer": 8888,
+    "rules_handling": "default",
+    "secure_channels_limits": {
+        "max_secure_channels": 40,
+        "max_security_token_lifetime_ms": 600000
+    },
+    "security_policy": 0,
+    "server_certificate": "",
+    "session_limits": {
+        "max_session_timeout_ms": 3600000.0,
+        "max_sessions": 100
+    },
+    "shutdown_delay_ms": 0.0,
+    "subscription_limits": {
+        "enable_retransmission_queue": true,
+        "keep_alive_count_limits": {
+            "max": 100,
+            "min": 1
+        },
+        "life_time_count_limits": {
+            "max": 15000,
+            "min": 3
+        },
+        "max_events_per_node": 0,
+        "max_notifications_per_publish": 1000,
+        "max_retransmission_queue_size": 0,
+        "max_subscriptions": 0,
+        "max_subscriptions_per_session": 0,
+        "publishing_interval_limits_ms": {
+            "max": 3600000.0,
+            "min": 100.0
+        }
+    },
+    "thread_count": 1
+}

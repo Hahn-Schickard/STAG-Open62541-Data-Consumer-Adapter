@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.6) 
 
-set(THIS OPCUA_Server)
+set(THIS Config_Serializer)
 
 list(APPEND PUBLIC_INCLUDES_DIRS
-            ${INCLUDES_DIR}/Open62541_Server
+            ${INCLUDES_DIR}/Serializer
 )
 
 file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
@@ -18,10 +18,9 @@ target_sources(${THIS} PRIVATE
 )
 
 target_link_libraries(${THIS} PUBLIC
-                              Information_Model::Information_Model
                               open62541::open62541
-                              HaSLL::HaSLL
-                              Config_Serializer
+                              nlohmann_json::nlohmann_json
+                              HaSLL::HaSLL   
 )
                             
 if (UNIX)
@@ -31,7 +30,7 @@ if (UNIX)
 endif()
 
 target_include_directories(${THIS} PUBLIC
-                           $<BUILD_INTERFACE:${INCLUDES_DIR}/Open62541_Server>
+                           $<BUILD_INTERFACE:${INCLUDES_DIR}/Serializer>
                            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/>
 )
 

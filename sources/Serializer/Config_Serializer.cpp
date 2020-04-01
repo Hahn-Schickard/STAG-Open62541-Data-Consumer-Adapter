@@ -71,6 +71,8 @@ Config makeDefaultConfig() {
   UA_ServerConfig_Discovery discovery = {0, false};
 
   Config config = {
+      1,
+      8888,
       networking,
       SecurityPolicy::NONE,
       build_info,
@@ -405,6 +407,8 @@ static void to_json(json &j, const UA_ServerConfig_Discovery &p) {
 // ======================== Config ===========================
 static void from_json(const json &j, Config &p) {
   try {
+    p.thread_count = j.at("thread_count").get<UA_UInt16>();
+    p.port_nubmer = j.at("port_nubmer").get<UA_UInt16>();
     p.networking = j.at("networking").get<UA_ConnectionConfig>();
     p.security_policy = j.at("security_policy").get<SecurityPolicy>();
     p.build_info = j.at("build_info").get<UA_BuildInfo>();
@@ -432,7 +436,9 @@ static void from_json(const json &j, Config &p) {
 }
 
 static void to_json(json &j, const Config &p) {
-  j = json{{"networking", p.networking},
+  j = json{{"thread_count", p.thread_count},
+           {"port_nubmer", p.port_nubmer},
+           {"networking", p.networking},
            {"security_policy", p.security_policy},
            {"build_info", p.build_info},
            {"app_info", p.app_info},
@@ -450,7 +456,7 @@ static void to_json(json &j, const Config &p) {
 }
 } // namespace nlohmann
 
-const Config deserializeConfig(const string &file_path) {
+const Config open62541::deserializeConfig(const string &file_path) {
   Config config = makeDefaultConfig();
   ifstream input_file_stream(file_path);
   if (input_file_stream) {
@@ -465,7 +471,7 @@ const Config deserializeConfig(const string &file_path) {
   return move(config);
 }
 
-void serializeConfig(const string &file_path, const Config &config) {
+void open62541::serializeConfig(const string &file_path, const Config &config) {
   ofstream output_file_stream(file_path);
   if (output_file_stream) {
     nlohmann::json j = config;

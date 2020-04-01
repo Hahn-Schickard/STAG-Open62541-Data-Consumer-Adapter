@@ -61,6 +61,8 @@ typedef struct MonitoredItemsLimitsStruct {
 } MonitoredItemsLimits;
 
 struct Config {
+  UA_UInt16 thread_count;
+  UA_UInt16 port_nubmer;
   UA_ConnectionConfig networking;
   SecurityPolicy security_policy;
   UA_BuildInfo build_info;
