@@ -43,6 +43,23 @@ NodeIDWrapper::NodeIDWrapper(const UA_NodeId *node_id)
 
 NodeIDWrapper::~NodeIDWrapper() { delete (node_id_); }
 
+string makeString(UA_Guid guid) {
+  string result;
+  string string1 = to_string(guid.data1);
+  string string2 = to_string(guid.data2);
+  string string3 = to_string(guid.data3);
+  string string4;
+  for (uint8_t i = 0; i < 8; i++) {
+    string4.push_back(guid.data4[i]);
+  }
+  if (!string1.empty() && !string2.empty() && !string3.empty() &&
+      !string4.empty()) {
+    // find out if it is Bigendian or Littleendian
+    result = string1 + "-" + string2 + "-" + string3 + "-" + string4;
+  }
+  return result;
+}
+
 string NodeIDWrapper::getString() {
   string result;
   switch (node_id_->identifierType) {
@@ -58,15 +75,7 @@ string NodeIDWrapper::getString() {
     break;
   }
   case UA_NodeIdType::UA_NODEIDTYPE_GUID: {
-    // find out if it is Bigendian or Littleendian
-    string string1 = to_string(node_id_->identifier.guid.data1);
-    string string2 = to_string(node_id_->identifier.guid.data2);
-    string string3 = to_string(node_id_->identifier.guid.data3);
-    string string4;
-    for (uint8_t i = 0; i < 8; i++) {
-      string4.push_back(node_id_->identifier.guid.data4[i]);
-    }
-    result = string1 + "-" + string2 + "-" + string3 + "-" + string4;
+    result = makeString(node_id_->identifier.guid);
     break;
   }
   default: { break; }
@@ -272,6 +281,101 @@ NodeManager::writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
                             void *nodeContext, const UA_NumericRange *range,
                             const UA_DataValue *value) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTWRITABLE;
-
+  auto element_node_id = make_shared<NodeIDWrapper>(nodeId);
+  auto it = findIndexPosition(element_node_id);
+  if (it != node_calbacks_map_.end()) {
+    auto callbacks = it->second;
+    if (it->second->write_callback.has_value()) {
+      auto write_CB = callbacks->write_callback.value();
+      switch (value->value.type->typeKind) {
+      case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
+        bool boolean_value = *((bool *)(value->value.data));
+        write_CB(DataVariant(boolean_value));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+        uint8_t byte_value = *((uint8_t *)(value->value.data));
+        write_CB(DataVariant(byte_value));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE:
+      case UA_DataTypeKind::UA_DATATYPEKIND_UINT16:
+      case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+        int16_t short_value = *((int16_t *)(value->value.data));
+        write_CB(DataVariant(short_value));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_UINT32:
+      case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+        int32_t integer_value = *((int32_t *)(value->value.data));
+        write_CB(DataVariant(integer_value));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME:
+      case UA_DataTypeKind::UA_DATATYPEKIND_UINT64:
+      case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+        int64_t long_value = *((int64_t *)(value->value.data));
+        write_CB(DataVariant(long_value));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+        float float_value = *((float *)(value->value.data));
+        write_CB(DataVariant(float_value));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+        double double_value = *((double *)(value->value.data));
+        write_CB(DataVariant(double_value));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING:
+      case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE:
+      case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
+        UA_String *ua_string = (UA_String *)(value->value.data);
+        auto string_value = string((char *)ua_string->data, ua_string->length);
+        write_CB(DataVariant(string_value));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
+        UA_Guid ua_guid;
+        ua_guid.data1 = ((UA_Guid *)(value->value.data))->data1;
+        ua_guid.data2 = ((UA_Guid *)(value->value.data))->data2;
+        ua_guid.data3 = ((UA_Guid *)(value->value.data))->data3;
+        for (uint8_t i = 0; i < 8; i++) {
+          ua_guid.data4[i] = ((UA_Guid *)(value->value.data))->data4[i];
+        }
+        auto string_value = makeString(ua_guid);
+        write_CB(DataVariant(string_value));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
+      default: {
+        logger_->log(
+            SeverityLevel::ERROR,
+            "Node [] does not take [] as its argument for write callback!",
+            element_node_id->getString(), string(value->value.type->typeName));
+        status = UA_STATUSCODE_BADINVALIDARGUMENT;
+        break;
+      }
+      }
+    } else {
+      logger_->log(SeverityLevel::ERROR,
+                   "Node [] does not have a registered write callback!",
+                   element_node_id->getString());
+    }
+  } else {
+    logger_->log(SeverityLevel::ERROR,
+                 "Node [] does not have any registered callbacks!",
+                 element_node_id->getString());
+    status = UA_STATUSCODE_BADNOTFOUND;
+  }
   return status;
 }
