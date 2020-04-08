@@ -1,5 +1,4 @@
 #include "NodeMananger.hpp"
-#include "LoggerRepository.hpp"
 #include "Utility.hpp"
 
 using namespace std;
@@ -7,40 +6,25 @@ using namespace HaSLL;
 using namespace Information_Model;
 using namespace open62541;
 
-NodeIDWrapper::NodeIDWrapper(const UA_NodeId *node_id)
-    : node_id_((UA_NodeId *)malloc(sizeof(UA_NodeId))) {
-  memcpy(node_id_, node_id, sizeof(*node_id));
-}
-
-NodeIDWrapper::~NodeIDWrapper() { delete (node_id_); }
-
-NodeManager::NodeManager()
-    : logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {}
-
-NodeManager::~NodeManager() {
-  LoggerRepository::getInstance().deregisterLoger(logger_->getName());
-}
-
-unordered_map<shared_ptr<NodeIDWrapper>, shared_ptr<CallbackWrapper>>::iterator
-NodeManager::findIndexPosition(shared_ptr<NodeIDWrapper> node_id) {
-  unordered_map<shared_ptr<NodeIDWrapper>,
-                shared_ptr<CallbackWrapper>>::iterator it;
+unordered_map<const UA_NodeId *, shared_ptr<CallbackWrapper>>::iterator
+NodeManager::findIndexPosition(const UA_NodeId *node_id) {
+  unordered_map<const UA_NodeId *, shared_ptr<CallbackWrapper>>::iterator it;
   it = node_calbacks_map_.find(node_id);
   return it;
 }
 
 shared_ptr<CallbackWrapper>
-NodeManager::findCallbackWrapper(shared_ptr<NodeIDWrapper> node_id) {
+NodeManager::findCallbackWrapper(const UA_NodeId *node_id) {
   auto result = make_shared<CallbackWrapper>();
   auto it = findIndexPosition(node_id);
   if (it != node_calbacks_map_.end()) {
     logger_->log(SeverityLevel::TRACE, "Node [] callbacks found.",
-                 node_id->getString());
+                 toString(node_id));
     result = it->second;
   } else {
     logger_->log(SeverityLevel::ERROR,
                  "Node [] does not have any callbacks registered!",
-                 node_id->getString());
+                 toString(node_id));
   }
   return result;
 }
@@ -50,39 +34,37 @@ UA_StatusCode NodeManager::addNode(DataType type, const UA_NodeId *nodeId,
   return addNode(type, nodeId, read_callback, nullptr);
 }
 
-UA_StatusCode NodeManager::addNode(DataType type, const UA_NodeId *nodeId,
+UA_StatusCode NodeManager::addNode(DataType type, const UA_NodeId *node_id,
                                    ReadCallback read_callback,
                                    WriteCallback write_callback) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTSUPPORTED;
-  auto element_node_id = make_shared<NodeIDWrapper>(nodeId);
-  if (findCallbackWrapper(element_node_id)) {
+  if (findCallbackWrapper(node_id)) {
     logger_->log(SeverityLevel::TRACE, "Adding callbacks for Node [].",
-                 element_node_id->getString());
+                 toString(node_id));
     node_calbacks_map_.emplace(
-        move(element_node_id),
+        move(node_id),
         make_shared<CallbackWrapper>(type, read_callback, write_callback));
     status = UA_STATUSCODE_GOOD;
   } else {
     logger_->log(SeverityLevel::ERROR, "Node [] was already registered ealier!",
-                 element_node_id->getString());
+                 toString(node_id));
     status = UA_STATUSCODE_BADNODEIDEXISTS;
   }
   return status;
 }
 
-UA_StatusCode NodeManager::removeNode(const UA_NodeId *nodeId) {
+UA_StatusCode NodeManager::removeNode(const UA_NodeId *node_id) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTSUPPORTED;
-  auto element_node_id = make_shared<NodeIDWrapper>(nodeId);
-  auto it = findIndexPosition(element_node_id);
+  auto it = findIndexPosition(node_id);
   if (it != node_calbacks_map_.end()) {
     logger_->log(SeverityLevel::TRACE, "Removing callbacks for Node [].",
-                 element_node_id->getString());
+                 toString(node_id));
     node_calbacks_map_.erase(it);
     status = UA_STATUSCODE_GOOD;
   } else {
     logger_->log(SeverityLevel::ERROR,
                  "Node [] does not have any registered callbacks!",
-                 element_node_id->getString());
+                 toString(node_id));
     status = UA_STATUSCODE_BADNOTFOUND;
   }
   return status;
@@ -90,16 +72,15 @@ UA_StatusCode NodeManager::removeNode(const UA_NodeId *nodeId) {
 
 UA_StatusCode
 NodeManager::readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
-                           void *sessionContext, const UA_NodeId *nodeId,
+                           void *sessionContext, const UA_NodeId *node_id,
                            void *nodeContext, UA_Boolean includeSourceTimeStamp,
                            const UA_NumericRange *range, UA_DataValue *value) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTREADABLE;
 
-  auto element_node_id = make_shared<NodeIDWrapper>(nodeId);
-  auto it = findIndexPosition(element_node_id);
+  auto it = findIndexPosition(node_id);
   if (it != node_calbacks_map_.end()) {
     logger_->log(SeverityLevel::TRACE, "Calling read callback for Node [].",
-                 element_node_id->getString());
+                 toString(node_id));
     auto callbacks = it->second;
     auto variant_value = callbacks->read_callback();
     try {
@@ -195,25 +176,24 @@ NodeManager::readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
     } catch (const exception &exp) {
       logger_->log(SeverityLevel::ERROR,
                    "Node [] does not contain the requested data type: []",
-                   element_node_id->getString(), exp.what());
+                   toString(node_id), exp.what());
       status = UA_STATUSCODE_BADTYPEMISMATCH;
     }
   } else {
     logger_->log(SeverityLevel::ERROR,
                  "Node [] does not have any registered read callbacks!",
-                 element_node_id->getString());
+                 toString(node_id));
   }
   return status;
 }
 
 UA_StatusCode
 NodeManager::writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
-                            void *sessionContext, const UA_NodeId *nodeId,
+                            void *sessionContext, const UA_NodeId *node_id,
                             void *nodeContext, const UA_NumericRange *range,
                             const UA_DataValue *value) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTWRITABLE;
-  auto element_node_id = make_shared<NodeIDWrapper>(nodeId);
-  auto it = findIndexPosition(element_node_id);
+  auto it = findIndexPosition(node_id);
   if (it != node_calbacks_map_.end()) {
     auto callbacks = it->second;
     if (it->second->write_callback.has_value()) {
@@ -292,7 +272,7 @@ NodeManager::writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
         logger_->log(
             SeverityLevel::ERROR,
             "Node [] does not take [] as its argument for write callback!",
-            element_node_id->getString(), string(value->value.type->typeName));
+            toString(node_id), string(value->value.type->typeName));
         status = UA_STATUSCODE_BADINVALIDARGUMENT;
         break;
       }
@@ -300,12 +280,12 @@ NodeManager::writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
     } else {
       logger_->log(SeverityLevel::ERROR,
                    "Node [] does not have a registered write callback!",
-                   element_node_id->getString());
+                   toString(node_id));
     }
   } else {
     logger_->log(SeverityLevel::ERROR,
                  "Node [] does not have any registered callbacks!",
-                 element_node_id->getString());
+                 toString(node_id));
     status = UA_STATUSCODE_BADNOTFOUND;
   }
   return status;

@@ -2,7 +2,7 @@
 #define __DCAI_OPEN62541_NODE_MANAGER_HPP_
 
 #include "DataVariant.hpp"
-#include "Logger.hpp"
+#include "LoggerRepository.hpp"
 #include "Metric.hpp"
 #include "WritableMetric.hpp"
 
@@ -16,6 +16,20 @@
 namespace open62541 {
 typedef std::function<Information_Model::DataVariant(void)> ReadCallback;
 typedef std::function<void(Information_Model::DataVariant)> WriteCallback;
+
+typedef UA_StatusCode (*UA_READ_CB)(UA_Server *server,
+                                    const UA_NodeId *sessionId,
+                                    void *sessionContext,
+                                    const UA_NodeId *nodeId, void *nodeContext,
+                                    UA_Boolean includeSourceTimeStamp,
+                                    const UA_NumericRange *range,
+                                    UA_DataValue *value);
+typedef UA_StatusCode (*UA_WRITE_CB)(UA_Server *server,
+                                     const UA_NodeId *sessionId,
+                                     void *sessionContext,
+                                     const UA_NodeId *nodeId, void *nodeContext,
+                                     const UA_NumericRange *range,
+                                     const UA_DataValue *value);
 
 struct CallbackWrapper {
   const Information_Model::DataType data_type;
@@ -40,27 +54,12 @@ struct CallbackWrapper {
   }
 };
 
-class NodeIDWrapper {
-  UA_NodeId *node_id_;
-
-public:
-  /**
-   * @brief Creates a copy of UA_NodeId and wraps it for easy access
-   *
-   * @param node_id
-   */
-  NodeIDWrapper(const UA_NodeId *node_id);
-  ~NodeIDWrapper();
-
-  std::string getString();
-};
-
 class NodeManager {
-  std::shared_ptr<HaSLL::Logger> logger_;
-  UA_Server *server_; //@TODO: need to wrap this into a smart_ptr
-  std::unordered_map<std::shared_ptr<NodeIDWrapper>,
-                     std::shared_ptr<CallbackWrapper>>
-      node_calbacks_map_;
+  static inline std::shared_ptr<HaSLL::Logger> logger_ =
+      HaSLL::LoggerRepository::getInstance().registerLoger("NodeManager");
+  static inline std::unordered_map<const UA_NodeId *,
+                                   std::shared_ptr<CallbackWrapper>>
+      node_calbacks_map_ = {};
 
   /**
    * @brief Searches the node_calbacks_map_ for a given node id
@@ -69,41 +68,41 @@ class NodeManager {
    * @param node_id
    * @return const CallbackWrapper*
    */
-  std::shared_ptr<CallbackWrapper>
-  findCallbackWrapper(std::shared_ptr<NodeIDWrapper> nodeId);
+  static std::shared_ptr<CallbackWrapper>
+  findCallbackWrapper(const UA_NodeId *node_id);
 
   /**
    * @brief Searches for a given node id within node_calbacks_map_
    * Returns node_calbacks_map_.end() if not found
    *
    * @param nodeId
-   * @return std::unordered_map<std::shared_ptr<NodeIDWrapper>,
+   * @return std::unordered_map<const UA_NodeId *,
    * std::shared_ptr<CallbackWrapper>>::iterator
    */
-  std::unordered_map<std::shared_ptr<NodeIDWrapper>,
-                     std::shared_ptr<CallbackWrapper>>::iterator
-  findIndexPosition(std::shared_ptr<NodeIDWrapper> nodeId);
+  static std::unordered_map<const UA_NodeId *,
+                            std::shared_ptr<CallbackWrapper>>::iterator
+  findIndexPosition(const UA_NodeId *node_id);
 
 public:
-  NodeManager();
-  ~NodeManager();
+  static UA_StatusCode addNode(Information_Model::DataType type,
+                               const UA_NodeId *nodeId,
+                               ReadCallback read_callback);
+  static UA_StatusCode addNode(Information_Model::DataType type,
+                               const UA_NodeId *nodeId,
+                               ReadCallback read_callback,
+                               WriteCallback write_callback);
+  static UA_StatusCode removeNode(const UA_NodeId *nodeId);
 
-  UA_StatusCode addNode(Information_Model::DataType type,
-                        const UA_NodeId *nodeId, ReadCallback read_callback);
-  UA_StatusCode addNode(Information_Model::DataType type,
-                        const UA_NodeId *nodeId, ReadCallback read_callback,
-                        WriteCallback write_callback);
-  UA_StatusCode removeNode(const UA_NodeId *nodeId);
-  UA_StatusCode readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
-                              void *sessionContext, const UA_NodeId *nodeId,
-                              void *nodeContext,
-                              UA_Boolean includeSourceTimeStamp,
-                              const UA_NumericRange *range,
-                              UA_DataValue *value);
-  UA_StatusCode writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
-                               void *sessionContext, const UA_NodeId *nodeId,
-                               void *nodeContext, const UA_NumericRange *range,
-                               const UA_DataValue *value);
+  static UA_StatusCode
+  readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
+                void *sessionContext, const UA_NodeId *nodeId,
+                void *nodeContext, UA_Boolean includeSourceTimeStamp,
+                const UA_NumericRange *range, UA_DataValue *value);
+  static UA_StatusCode
+  writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
+                 void *sessionContext, const UA_NodeId *nodeId,
+                 void *nodeContext, const UA_NumericRange *range,
+                 const UA_DataValue *value);
 };
 } // namespace open62541
 
