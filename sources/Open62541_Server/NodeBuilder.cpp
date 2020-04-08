@@ -288,16 +288,7 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
     status = NodeManager::addNode(metric->getDataType(), &metrid_node_id,
                                   bind(&Metric::getMetricValue, metric));
     UA_DataSource data_source;
-    // auto read_cb = bind(&NodeManager::readNodeValue, manager_,
-    // placeholders::_1,
-    //                     placeholders::_2, placeholders::_3, placeholders::_4,
-    //                     placeholders::_5, placeholders::_6, placeholders::_7,
-    //                     placeholders::_8);
     data_source.read = &NodeManager::readNodeValue;
-    // auto write_cb =
-    //     bind(&NodeManager::writeNodeValue, &manager_, placeholders::_1,
-    //          placeholders::_2, placeholders::_3, placeholders::_4,
-    //          placeholders::_5, placeholders::_6, placeholders::_7);
     data_source.write = &NodeManager::writeNodeValue;
 
     status = UA_Server_addDataSourceVariableNode(
@@ -311,6 +302,62 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
                  "Failed to create a Node for Readable Metric: {}. Status: {}",
                  metric->getElementName(), UA_StatusCode_name(status));
   }
+
+  return status;
+}
+
+UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
+                       UA_VariableAttributes &value_attribute,
+                       shared_ptr<WritableMetric> metric) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+
+  auto metric_value = metric->getMetricValue();
+
+  match(metric_value,
+        [&](bool boolean_value) {
+          UA_Variant_setScalar(&value_attribute.value, &boolean_value,
+                               &UA_TYPES[UA_TYPES_BOOLEAN]);
+        },
+        [&](uint8_t byte_value) {
+          UA_Variant_setScalar(&value_attribute.value, &byte_value,
+                               &UA_TYPES[UA_TYPES_BYTE]);
+        },
+        [&](int16_t short_value) {
+          UA_Variant_setScalar(&value_attribute.value, &short_value,
+                               &UA_TYPES[UA_TYPES_INT16]);
+        },
+        [&](int32_t integer_value) {
+          UA_Variant_setScalar(&value_attribute.value, &integer_value,
+                               &UA_TYPES[UA_TYPES_INT32]);
+        },
+        [&](int64_t long_value) {
+          UA_Variant_setScalar(&value_attribute.value, &long_value,
+                               &UA_TYPES[UA_TYPES_INT64]);
+        },
+        [&](float float_value) {
+          UA_Variant_setScalar(&value_attribute.value, &float_value,
+                               &UA_TYPES[UA_TYPES_FLOAT]);
+        },
+        [&](double double_value) {
+          UA_Variant_setScalar(&value_attribute.value, &double_value,
+                               &UA_TYPES[UA_TYPES_DOUBLE]);
+        },
+        [&](string string_value) {
+          UA_String open62541_string;
+          open62541_string.length = strlen(string_value.c_str());
+          open62541_string.data = (UA_Byte *)malloc(open62541_string.length);
+          memcpy(open62541_string.data, string_value.c_str(),
+                 open62541_string.length);
+          UA_Variant_setScalar(&value_attribute.value, &open62541_string,
+                               &UA_TYPES[UA_TYPES_STRING]);
+        });
+
+  value_attribute.description =
+      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeDescription());
+  value_attribute.displayName =
+      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeName());
+
+  value_attribute.dataType = toNodeId(metric->getDataType());
 
   return status;
 }
@@ -330,17 +377,23 @@ UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  node_attr.dataType = toNodeId(metric->getDataType());
-  node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+  status = setValue(&element_node_info, node_attr, metric);
 
-  node_attr.description =
-      UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeDescription());
-  node_attr.displayName =
-      UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeName());
+  if (status == UA_STATUSCODE_GOOD) {
+    node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+    status = NodeManager::addNode(
+        metric->getDataType(), &metrid_node_id,
+        bind(&WritableMetric::getMetricValue, metric),
+        bind(&WritableMetric::setMetricValue, metric, placeholders::_1));
+    UA_DataSource data_source;
+    data_source.read = &NodeManager::readNodeValue;
+    data_source.write = &NodeManager::writeNodeValue;
 
-  status = UA_Server_addVariableNode(
-      server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
-      metric_browse_name, type_definition, node_attr, NULL, NULL);
+    status = UA_Server_addDataSourceVariableNode(
+        server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
+        metric_browse_name, type_definition, node_attr, data_source, NULL,
+        NULL);
+  }
 
   if (status != UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::ERROR,
