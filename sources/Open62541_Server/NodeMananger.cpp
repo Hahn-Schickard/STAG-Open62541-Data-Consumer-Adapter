@@ -1,87 +1,18 @@
 #include "NodeMananger.hpp"
 #include "LoggerRepository.hpp"
+#include "Utility.hpp"
 
 using namespace std;
 using namespace HaSLL;
 using namespace Information_Model;
 using namespace open62541;
 
-string toString(DataType type) {
-  switch (type) {
-  case DataType::BOOLEAN: {
-    return "BOOLEAN";
-  }
-  case DataType::BYTE: {
-    return "BYTE";
-  }
-  case DataType::SHORT: {
-    return "SHORT";
-  }
-  case DataType::INTEGER: {
-    return "INTEGER";
-  }
-  case DataType::LONG: {
-    return "LONG";
-  }
-  case DataType::FLOAT: {
-    return "FLOAT";
-  }
-  case DataType::DOUBLE: {
-    return "DOUBLE";
-  }
-  case DataType::STRING: {
-    return "STRING";
-  }
-  case DataType::UNKNOWN:
-  default: { return "UNKNOWN"; }
-  }
-}
 NodeIDWrapper::NodeIDWrapper(const UA_NodeId *node_id)
     : node_id_((UA_NodeId *)malloc(sizeof(UA_NodeId))) {
   memcpy(node_id_, node_id, sizeof(*node_id));
 }
 
 NodeIDWrapper::~NodeIDWrapper() { delete (node_id_); }
-
-string makeString(UA_Guid guid) {
-  string result;
-  string string1 = to_string(guid.data1);
-  string string2 = to_string(guid.data2);
-  string string3 = to_string(guid.data3);
-  string string4;
-  for (uint8_t i = 0; i < 8; i++) {
-    string4.push_back(guid.data4[i]);
-  }
-  if (!string1.empty() && !string2.empty() && !string3.empty() &&
-      !string4.empty()) {
-    // find out if it is Bigendian or Littleendian
-    result = string1 + "-" + string2 + "-" + string3 + "-" + string4;
-  }
-  return result;
-}
-
-string NodeIDWrapper::getString() {
-  string result;
-  switch (node_id_->identifierType) {
-  case UA_NodeIdType::UA_NODEIDTYPE_NUMERIC: {
-    result = to_string(node_id_->identifier.numeric);
-    break;
-  }
-  case UA_NodeIdType::UA_NODEIDTYPE_BYTESTRING: {
-  }
-  case UA_NodeIdType::UA_NODEIDTYPE_STRING: {
-    result = string((char *)node_id_->identifier.string.data,
-                    node_id_->identifier.string.length);
-    break;
-  }
-  case UA_NodeIdType::UA_NODEIDTYPE_GUID: {
-    result = makeString(node_id_->identifier.guid);
-    break;
-  }
-  default: { break; }
-  }
-  return result;
-}
 
 NodeManager::NodeManager()
     : logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {}
@@ -352,7 +283,7 @@ NodeManager::writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
         for (uint8_t i = 0; i < 8; i++) {
           ua_guid.data4[i] = ((UA_Guid *)(value->value.data))->data4[i];
         }
-        auto string_value = makeString(ua_guid);
+        auto string_value = toString(ua_guid);
         write_CB(DataVariant(string_value));
         status = UA_STATUSCODE_GOOD;
         break;

@@ -1,6 +1,7 @@
 #include "NodeBuilder.hpp"
-
+#include "DataVariant.hpp"
 #include "LoggerRepository.hpp"
+#include "Utility.hpp"
 
 #include <memory>
 #include <open62541/nodeids.h>
@@ -11,46 +12,6 @@ using namespace std;
 using namespace HaSLL;
 using namespace Information_Model;
 using namespace open62541;
-
-string uaStringToCppString(UA_String input) {
-  string output;
-  for (size_t i = 0; i < input.length; i++) {
-    output.push_back(*input.data);
-  }
-  return output;
-}
-
-string uaGuIdToCppString(UA_Guid input) {
-  string output = to_string(input.data1) + ":" + to_string(input.data2) + ":" +
-                  to_string(input.data3) + ":";
-  for (int i = 0; i < 8; i++) {
-    output.push_back(input.data4[i]);
-  }
-  return output;
-}
-
-string nodeIdToString(UA_NodeId nodeId) {
-  string namespace_index_string = to_string(nodeId.namespaceIndex);
-  string node_id_string;
-  switch (nodeId.identifierType) {
-  case UA_NodeIdType::UA_NODEIDTYPE_NUMERIC: {
-    node_id_string = to_string(nodeId.identifier.numeric);
-    break;
-  }
-  case UA_NodeIdType::UA_NODEIDTYPE_GUID: {
-    node_id_string = uaGuIdToCppString(nodeId.identifier.guid);
-    break;
-  }
-  case UA_NodeIdType::UA_NODEIDTYPE_BYTESTRING: {
-  }
-  case UA_NodeIdType::UA_NODEIDTYPE_STRING: {
-    node_id_string = uaStringToCppString(nodeId.identifier.string);
-    break;
-  }
-  default: { node_id_string = "UNRECOGNIZED"; }
-  }
-  return namespace_index_string + ":" + node_id_string;
-}
 
 class DeviceElementNodeInfo {
   char *node_id_;
@@ -85,8 +46,8 @@ public:
 };
 
 NodeBuilder::NodeBuilder(Open62541Server *server)
-    : server_(server),
-      logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {}
+    : logger_(LoggerRepository::getInstance().registerTypedLoger(this)),
+      server_(server) {}
 
 NodeBuilder::~NodeBuilder() {
   logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
@@ -132,7 +93,7 @@ bool NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
 bool NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
                                        UA_NodeId parent_id) {
   logger_->log(SeverityLevel::INFO, "Adding element {} to node {}",
-               element->getElementName(), nodeIdToString(parent_id));
+               element->getElementName(), toString(parent_id));
   bool status = false;
   switch (element->getElementType()) {
   case GROUP: {
@@ -158,7 +119,7 @@ bool NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
   default: {
     logger_->log(SeverityLevel::ERROR,
                  "Unknown element type, for element {} to node {}",
-                 element->getElementName(), nodeIdToString(parent_id));
+                 element->getElementName(), toString(parent_id));
     break;
   }
   }
@@ -168,8 +129,7 @@ bool NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
 bool NodeBuilder::addGroupNode(
     shared_ptr<DeviceElementGroup> device_element_group, UA_NodeId parent_id) {
   logger_->log(SeverityLevel::TRACE, "Adding group element {} to node {}",
-               device_element_group->getElementName(),
-               nodeIdToString(parent_id));
+               device_element_group->getElementName(), toString(parent_id));
   bool status = false;
 
   DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(
@@ -198,14 +158,14 @@ bool NodeBuilder::addGroupNode(
     logger_->log(SeverityLevel::INFO,
                  "Group element {}:{} contains {} subelements.",
                  device_element_group->getElementName(),
-                 nodeIdToString(group_node_id), elements.size());
+                 toString(group_node_id), elements.size());
     for (auto element : elements) {
       status = addDeviceNodeElement(element, group_node_id);
     }
   } else {
-    logger_->log(
-        SeverityLevel::WARNNING, "Parent's {} group element {} is empty!",
-        nodeIdToString(parent_id), device_element_group->getElementName());
+    logger_->log(SeverityLevel::WARNNING,
+                 "Parent's {} group element {} is empty!", toString(parent_id),
+                 device_element_group->getElementName());
   }
   return status;
 }
@@ -214,7 +174,7 @@ bool NodeBuilder::addFunctionNode(shared_ptr<DeviceElement> function,
                                   UA_NodeId parent_id) {
   bool status = false;
   logger_->log(SeverityLevel::WARNNING, "Method element is not implemented!",
-               nodeIdToString(parent_id), function->getElementName());
+               toString(parent_id), function->getElementName());
   //@TODO: Implement addFunctionNode stub
   return status;
 }
