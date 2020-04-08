@@ -1,10 +1,8 @@
 #include "Open62541Server.hpp"
 
+#include "Config_Serializer.hpp"
 #include "HaSLLLogger.hpp"
 #include "LoggerRepository.hpp"
-#include "ServerConfig.hpp"
-
-#include <open62541/server.h>
 
 using namespace std;
 using namespace HaSLL;
@@ -13,53 +11,39 @@ using namespace open62541;
 
 Open62541Server::Open62541Server()
     : is_running_(false),
+      server_configuration_(make_unique<Configuration>("defaultConfig.json")),
       logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {
   registerLoggers();
-  configure();
-  open62541_server_ = UA_Server_newWithConfig(config_);
+  open62541_server_ =
+      UA_Server_newWithConfig(server_configuration_->getConfig());
   server_namespace_index_ = 1;
 }
 
 Open62541Server::~Open62541Server() {
-  free(config_);
   logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
                logger_->getName());
   LoggerRepository::getInstance().deregisterLoger(logger_->getName());
 }
 
-bool Open62541Server::configure() {
-  logger_->log(SeverityLevel::TRACE,
-               "Setting up configuration file for open62541!");
-  config_ = (UA_ServerConfig *)malloc(sizeof(UA_ServerConfig));
-
-  memset(config_, 0, sizeof(UA_ServerConfig));
-
-  UA_StatusCode status = HS_ServerConfig_setDefault(config_);
-  if (status != UA_STATUSCODE_GOOD) {
-    logger_->log(SeverityLevel::ERROR,
-                 "Failled reading configuration file for open62541!");
-    return false;
-  } else {
-    logger_->log(SeverityLevel::TRACE,
-                 "Configuration file for open62541 configured!");
-    return true;
-  }
-}
-
 bool Open62541Server::start() {
-  logger_->log(SeverityLevel::INFO, "Starting open62541 server!");
-  if (isRunning()) {
-    stop();
-  }
-  is_running_ = true;
-  server_thread_ = thread(&Open62541Server::runnable, this);
+  try {
+    logger_->log(SeverityLevel::INFO, "Starting open62541 server!");
+    if (isRunning()) {
+      stop();
+    }
+    is_running_ = true;
+    server_thread_ = thread(&Open62541Server::runnable, this);
 
-  if (server_thread_.joinable()) {
-    logger_->log(SeverityLevel::TRACE, "Open62541 server thread is running!");
-    return true;
-  } else {
-    logger_->log(SeverityLevel::ERROR,
-                 "Could not start Open62541 server thread!");
+    if (server_thread_.joinable()) {
+      logger_->log(SeverityLevel::TRACE, "Open62541 server thread is running!");
+      return true;
+    } else {
+      logger_->log(SeverityLevel::ERROR,
+                   "Could not start Open62541 server thread!");
+      return false;
+    }
+  } catch (exception &ex) {
+    logger_->log(SeverityLevel::CRITICAL, "Cought an exception: []", ex.what());
     return false;
   }
 }
@@ -86,10 +70,14 @@ bool Open62541Server::stop() {
 }
 
 void Open62541Server::runnable() {
-  UA_StatusCode status = UA_Server_run(open62541_server_, &is_running_);
-  if (status != UA_STATUSCODE_GOOD) {
-    logger_->log(SeverityLevel::ERROR,
-                 "ERROR:{} Failed to start open62541 server thread!", status);
+  try {
+    UA_StatusCode status = UA_Server_run(open62541_server_, &is_running_);
+    if (status != UA_STATUSCODE_GOOD) {
+      logger_->log(SeverityLevel::ERROR,
+                   "ERROR:{} Failed to start open62541 server thread!", status);
+    }
+  } catch (exception &ex) {
+    logger_->log(SeverityLevel::CRITICAL, "Cought an exception: []", ex.what());
   }
 }
 
