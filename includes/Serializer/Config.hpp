@@ -18,6 +18,13 @@ typedef enum SecurityPolicyEnum {
   ALL
 } SecurityPolicy;
 
+// This needs to be hashed and read as a hash code with hash seed set via CMake
+// Argument
+typedef struct {
+  UA_String username;
+  UA_String password;
+} UserCredentials;
+
 typedef struct SecureChannelsLimtsStruct {
   UA_UInt16 max_secure_channels;
   UA_UInt32 max_security_token_lifetime_ms;
@@ -61,6 +68,8 @@ typedef struct MonitoredItemsLimitsStruct {
 } MonitoredItemsLimits;
 
 struct Config {
+  UA_Boolean allow_annonymous_access;
+  UserCredentials access_credentials;
   UA_UInt16 thread_count;
   UA_UInt16 port_nubmer;
   UA_ConnectionConfig networking;

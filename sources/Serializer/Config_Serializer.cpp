@@ -69,8 +69,11 @@ Config makeDefaultConfig() {
       0, 0, initDurationRange(50.0, 24.0 * 3600.0 * 1000.0),
       initUInt32Range(1, 100)};
   UA_ServerConfig_Discovery discovery = {0, false};
+  UserCredentials user_credentials = {};
 
   Config config = {
+      true,
+      user_credentials,
       1,
       8888,
       networking,
@@ -117,8 +120,13 @@ namespace nlohmann {
 static void from_json(const json &j, UA_String &p) {
   try {
     string text = j.get<string>();
-    p.length = strlen(text.c_str());
-    memcpy(p.data, text.c_str(), p.length);
+    if (!text.empty()) {
+      p.length = strlen(text.c_str());
+      p.data = (UA_Byte *)malloc(p.length);
+      memcpy(p.data, text.c_str(), p.length);
+    } else {
+      p = UA_STRING_NULL;
+    }
   } catch (exception &ex) {
     serializer_logger->log(SeverityLevel::ERROR, "Received exception: {}",
                            ex.what());
@@ -173,6 +181,21 @@ static void from_json(const json &j, UA_UInt32Range &p) {
 
 static void to_json(json &j, const UA_UInt32Range &p) {
   j = json{{"min", p.min}, {"max", p.max}};
+}
+
+// ======================== SecureChannelsLimts ============================
+static void from_json(const json &j, UserCredentials &p) {
+  try {
+    p.username = j.at("username").get<UA_String>();
+    p.password = j.at("password").get<UA_String>();
+  } catch (exception &ex) {
+    serializer_logger->log(SeverityLevel::ERROR, "Received exception: {}",
+                           ex.what());
+  }
+}
+
+static void to_json(json &j, const UserCredentials &p) {
+  j = json{{"username", p.username}, {"password", p.password}};
 }
 
 // ======================== SecureChannelsLimts ============================
@@ -251,7 +274,7 @@ static void from_json(const json &j, SubscriptionsLimtis &p) {
     p.max_subscriptions_per_session =
         j.at("max_subscriptions_per_session").get<UA_UInt32>();
     p.publishing_interval_limits_ms =
-        j.at("max_nodes_per_method_call").get<UA_DurationRange>();
+        j.at("publishing_interval_limits_ms").get<UA_DurationRange>();
     p.life_time_count_limits =
         j.at("life_time_count_limits").get<UA_UInt32Range>();
     p.keep_alive_count_limits =
@@ -329,12 +352,12 @@ static void to_json(json &j, const UA_ConnectionConfig &p) {
 // ======================== UA_BuildInfo ===========================
 static void from_json(const json &j, UA_BuildInfo &p) {
   try {
-    p.productUri = j.at("protocolVersion").get<UA_String>();
-    p.manufacturerName = j.at("recvBufferSize").get<UA_String>();
-    p.productName = j.at("sendBufferSize").get<UA_String>();
-    p.softwareVersion = j.at("maxMessageSize").get<UA_String>();
-    p.buildNumber = j.at("maxChunkCount").get<UA_String>();
-    p.buildDate = j.at("maxChunkCount").get<UA_DateTime>();
+    p.productUri = j.at("productUri").get<UA_String>();
+    p.manufacturerName = j.at("manufacturerName").get<UA_String>();
+    p.productName = j.at("productName").get<UA_String>();
+    p.softwareVersion = j.at("softwareVersion").get<UA_String>();
+    p.buildNumber = j.at("buildNumber").get<UA_String>();
+    p.buildDate = j.at("buildDate").get<UA_DateTime>();
   } catch (exception &ex) {
     serializer_logger->log(SeverityLevel::ERROR, "Received exception: {}",
                            ex.what());
@@ -392,8 +415,8 @@ static void to_json(json &j, const UA_MdnsDiscoveryConfiguration &p) {
 // ====================== UA_ServerConfig_Discovery =======================
 static void from_json(const json &j, UA_ServerConfig_Discovery &p) {
   try {
-    p.cleanupTimeout = j.at("applicationUri").get<UA_UInt32>();
-    p.mdnsEnable = j.at("productUri").get<bool>();
+    p.cleanupTimeout = j.at("cleanupTimeout").get<UA_UInt32>();
+    p.mdnsEnable = j.at("mdnsEnable").get<bool>();
   } catch (exception &ex) {
     serializer_logger->log(SeverityLevel::ERROR, "Received exception: {}",
                            ex.what());
@@ -407,6 +430,9 @@ static void to_json(json &j, const UA_ServerConfig_Discovery &p) {
 // ======================== Config ===========================
 static void from_json(const json &j, Config &p) {
   try {
+    p.allow_annonymous_access =
+        j.at("allow_annonymous_access").get<UA_Boolean>();
+    p.access_credentials = j.at("access_credentials").get<UserCredentials>();
     p.thread_count = j.at("thread_count").get<UA_UInt16>();
     p.port_nubmer = j.at("port_nubmer").get<UA_UInt16>();
     p.networking = j.at("networking").get<UA_ConnectionConfig>();
@@ -436,7 +462,9 @@ static void from_json(const json &j, Config &p) {
 }
 
 static void to_json(json &j, const Config &p) {
-  j = json{{"thread_count", p.thread_count},
+  j = json{{"allow_annonymous_access", p.allow_annonymous_access},
+           {"access_credentials", p.access_credentials},
+           {"thread_count", p.thread_count},
            {"port_nubmer", p.port_nubmer},
            {"networking", p.networking},
            {"security_policy", p.security_policy},
@@ -482,4 +510,8 @@ void open62541::serializeConfig(const string &file_path, const Config &config) {
                            "Failled to open file striem for file: {}",
                            file_path);
   }
+}
+
+void open62541::dumpDefaultConfig() {
+  serializeConfig("defaultConfig.json", makeDefaultConfig());
 }
