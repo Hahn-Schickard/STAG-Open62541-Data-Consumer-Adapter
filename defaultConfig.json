@@ -1,4 +1,9 @@
 {
+    "access_credentials": {
+        "password": "user1",
+        "username": "password"
+    },
+    "allow_annonymous_access": true,
     "app_info": {
         "applicationName": {
             "locale": "en",
@@ -11,12 +16,12 @@
         "productUri": "http://open62541.org"
     },
     "build_info": {
-        "buildDate": 132302334966070990,
-        "buildNumber": "Apr  1 2020 18:50:21",
+        "buildDate": 132303066139827310,
+        "buildNumber": "Apr  2 2020 14:52:14",
         "manufacturerName": "open62541",
         "productName": "open62541 OPC UA Server",
         "productUri": "http://open62541.org",
-        "softwareVersion": "\"0\".\"0\".\"0\"-rc"
+        "softwareVersion": "0.0.0-rc"
     },
     "discovery": {
         "cleanupTimeout": 0,
@@ -53,7 +58,7 @@
         "max_nodes_per_translate_browse_paths_to_nodeids": 0,
         "max_nodes_per_write": 0
     },
-    "port_nubmer": 8888,
+    "port_nubmer": 4840,
     "rules_handling": "default",
     "secure_channels_limits": {
         "max_secure_channels": 40,
