@@ -130,3 +130,4 @@ void HaSLL_Logger_clear(void *logContext) {
 }
 
 const UA_Logger HaSLL_Logger_ = {HaSLL_Logger_log, NULL, HaSLL_Logger_clear};
+const UA_Logger *HaSLL_Logger = &HaSLL_Logger_;
