@@ -7,35 +7,40 @@
 #include "Open62541Server.hpp"
 #include "WritableMetric.hpp"
 
+#include <memory>
+
 namespace open62541 {
 class NodeBuilder {
+  std::shared_ptr<HaSLL::Logger> logger_;
+  Open62541Server *server_;
+
 public:
   NodeBuilder(Open62541Server *server);
-
   ~NodeBuilder();
 
-  bool addDeviceNode(std::shared_ptr<Information_Model::Device> device);
+  UA_StatusCode
+  addDeviceNode(std::shared_ptr<Information_Model::Device> device);
 
-  bool addDeviceNodeElement(
+  UA_StatusCode addDeviceNodeElement(
       std::shared_ptr<Information_Model::DeviceElement> device_element,
-      UA_NodeId parent_id);
-  bool addGroupNode(std::shared_ptr<Information_Model::DeviceElementGroup>
-                        device_element_group,
-                    UA_NodeId parent_id);
-  bool
+      const UA_NodeId *parent_id);
+
+  UA_StatusCode
+  addGroupNode(std::shared_ptr<Information_Model::DeviceElementGroup>
+                   device_element_group,
+               const UA_NodeId *parent_id);
+
+  UA_StatusCode
   addFunctionNode(std::shared_ptr<Information_Model::DeviceElement> function,
-                  UA_NodeId parent_id);
-  bool addReadableNode(std::shared_ptr<Information_Model::Metric> metric,
-                       UA_NodeId parent_id);
-  bool
+                  const UA_NodeId *parent_id);
+
+  UA_StatusCode
+  addReadableNode(std::shared_ptr<Information_Model::Metric> metric,
+                  const UA_NodeId *parent_id);
+
+  UA_StatusCode
   addWritableNode(std::shared_ptr<Information_Model::WritableMetric> metric,
-                  UA_NodeId parent_id);
-
-  UA_NodeId getOpcDataType(Information_Model::DataType type);
-
-private:
-  Open62541Server *server_;
-  std::shared_ptr<HaSLL::Logger> logger_;
+                  const UA_NodeId *parent_id);
 };
 } // namespace open62541
 
