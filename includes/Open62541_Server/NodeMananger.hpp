@@ -83,7 +83,8 @@ class NodeManager {
 
 public:
   NodeManager()
-      : logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {}
+      : logger_(
+            HaSLL::LoggerRepository::getInstance().registerTypedLoger(this)) {}
 
   UA_StatusCode addNode(Information_Model::DataType type,
                         const UA_NodeId *nodeId, ReadCallback read_callback);
