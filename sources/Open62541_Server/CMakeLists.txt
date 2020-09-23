@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 set(THIS OPCUA_Server)
 
-list(APPEND PUBLIC_INCLUDES_DIRS
+list(APPEND THIS_INCLUDES_DIRS
             ${INCLUDES_DIR}/Open62541_Server
 )
 
@@ -23,12 +23,6 @@ target_link_libraries(${THIS} PUBLIC
                               HaSLL::HaSLL
                               Config_Serializer
 )
-                            
-if (UNIX)
-    target_link_libraries(${THIS} PRIVATE
-                                  gcov
-    )
-endif()
 
 target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${INCLUDES_DIR}/Open62541_Server>

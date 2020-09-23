@@ -21,7 +21,10 @@ static void stopHandler(int sig) {
 }
 
 int main(int argc, char *argv[]) {
-  LoggerRepository::getInstance().configure(SeverityLevel::TRACE);
+  auto config = HaSLL::Configuration(
+      "./log", "logfile.log", "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$",
+      HaSLL::SeverityLevel::TRACE, false, 8192, 2, 25, 100, 1);
+  HaSLL::LoggerRepository::initialise(config);
   signal(SIGINT, stopHandler);
   signal(SIGTERM, stopHandler);
 

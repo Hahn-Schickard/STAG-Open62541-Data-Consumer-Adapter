@@ -333,8 +333,6 @@ static void from_json(const json &j, UA_ConnectionConfig &p) {
     p.protocolVersion = j.at("protocolVersion").get<UA_UInt32>();
     p.recvBufferSize = j.at("recvBufferSize").get<UA_UInt32>();
     p.sendBufferSize = j.at("sendBufferSize").get<UA_UInt32>();
-    p.maxMessageSize = j.at("maxMessageSize").get<UA_UInt32>();
-    p.maxChunkCount = j.at("maxChunkCount").get<UA_UInt32>();
   } catch (exception &ex) {
     serializer_logger->log(SeverityLevel::ERROR, "Received exception: {}",
                            ex.what());
@@ -344,9 +342,7 @@ static void from_json(const json &j, UA_ConnectionConfig &p) {
 static void to_json(json &j, const UA_ConnectionConfig &p) {
   j = json{{"protocolVersion", p.protocolVersion},
            {"recvBufferSize", p.recvBufferSize},
-           {"sendBufferSize", p.sendBufferSize},
-           {"maxMessageSize", p.maxMessageSize},
-           {"maxChunkCount", p.maxChunkCount}};
+           {"sendBufferSize", p.sendBufferSize}};
 }
 
 // ======================== UA_BuildInfo ===========================

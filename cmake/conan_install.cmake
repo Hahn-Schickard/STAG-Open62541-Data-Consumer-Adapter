@@ -48,7 +48,7 @@ macro(execute_conan_install)
     endif()
     
     if(NOT "${return_code}" STREQUAL "0")
-      message(WARNING "Conan failt to install failed!")
+      message(WARNING "Conan failed to install failed!")
       message("${conan_error}")
       message(WARNING "Trying to build sources locally!")
       execute_process(COMMAND ${conan_command} install ${CONANFILE} --build

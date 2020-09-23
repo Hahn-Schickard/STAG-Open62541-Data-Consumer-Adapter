@@ -55,11 +55,9 @@ struct CallbackWrapper {
 };
 
 class NodeManager {
-  static inline std::shared_ptr<HaSLL::Logger> logger_ =
-      HaSLL::LoggerRepository::getInstance().registerLoger("NodeManager");
-  static inline std::unordered_map<const UA_NodeId *,
-                                   std::shared_ptr<CallbackWrapper>>
-      node_calbacks_map_ = {};
+  std::shared_ptr<HaSLL::Logger> logger_;
+  std::unordered_map<const UA_NodeId *, std::shared_ptr<CallbackWrapper>>
+      node_calbacks_map_;
 
   /**
    * @brief Searches the node_calbacks_map_ for a given node id
@@ -68,7 +66,7 @@ class NodeManager {
    * @param node_id
    * @return const CallbackWrapper*
    */
-  static std::shared_ptr<CallbackWrapper>
+  std::shared_ptr<CallbackWrapper>
   findCallbackWrapper(const UA_NodeId *node_id);
 
   /**
@@ -79,30 +77,31 @@ class NodeManager {
    * @return std::unordered_map<const UA_NodeId *,
    * std::shared_ptr<CallbackWrapper>>::iterator
    */
-  static std::unordered_map<const UA_NodeId *,
-                            std::shared_ptr<CallbackWrapper>>::iterator
+  std::unordered_map<const UA_NodeId *,
+                     std::shared_ptr<CallbackWrapper>>::iterator
   findIndexPosition(const UA_NodeId *node_id);
 
 public:
-  static UA_StatusCode addNode(Information_Model::DataType type,
-                               const UA_NodeId *nodeId,
-                               ReadCallback read_callback);
-  static UA_StatusCode addNode(Information_Model::DataType type,
-                               const UA_NodeId *nodeId,
-                               ReadCallback read_callback,
-                               WriteCallback write_callback);
-  static UA_StatusCode removeNode(const UA_NodeId *nodeId);
+  NodeManager()
+      : logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {}
 
-  static UA_StatusCode
-  readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
-                void *sessionContext, const UA_NodeId *nodeId,
-                void *nodeContext, UA_Boolean includeSourceTimeStamp,
-                const UA_NumericRange *range, UA_DataValue *value);
-  static UA_StatusCode
-  writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
-                 void *sessionContext, const UA_NodeId *nodeId,
-                 void *nodeContext, const UA_NumericRange *range,
-                 const UA_DataValue *value);
+  UA_StatusCode addNode(Information_Model::DataType type,
+                        const UA_NodeId *nodeId, ReadCallback read_callback);
+  UA_StatusCode addNode(Information_Model::DataType type,
+                        const UA_NodeId *nodeId, ReadCallback read_callback,
+                        WriteCallback write_callback);
+  UA_StatusCode removeNode(const UA_NodeId *nodeId);
+
+  UA_StatusCode readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
+                              void *sessionContext, const UA_NodeId *nodeId,
+                              void *nodeContext,
+                              UA_Boolean includeSourceTimeStamp,
+                              const UA_NumericRange *range,
+                              UA_DataValue *value);
+  UA_StatusCode writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
+                               void *sessionContext, const UA_NodeId *nodeId,
+                               void *nodeContext, const UA_NumericRange *range,
+                               const UA_DataValue *value);
 };
 } // namespace open62541
 

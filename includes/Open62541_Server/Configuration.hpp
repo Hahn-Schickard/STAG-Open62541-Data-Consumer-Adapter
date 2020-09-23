@@ -14,31 +14,6 @@ class Configuration {
   Config config_file_;
   UA_ServerConfig *configuration_;
 
-  UA_StatusCode createEndpoint(UA_EndpointDescription *endpoint,
-                               const UA_SecurityPolicy *securityPolicy,
-                               UA_MessageSecurityMode securityMode);
-  void initialiseConfiguration();
-  void setupBasics();
-  void setupMetaInformation();
-  void setupCertificate();
-  void setupSecureChannelLimits();
-  void setupSessionLimits();
-  void setupSubscriptionLimits();
-  void setupMonitoredItemLimits();
-  void setupOperationalLimits();
-  // All of the ones bellow should throw expections on failure and return void
-  UA_StatusCode setupNetowrkingLayer();
-  UA_StatusCode setupSecurityPolicies();
-  UA_StatusCode setupSecurityPolicies_None(); // Review the implementations
-  UA_StatusCode
-  setupSecurityPolicies_BASIC128_RSA15();         // Review the implementations
-  UA_StatusCode setupSecurityPolicies_BASIC256(); // Review the implementations
-  UA_StatusCode
-  setupSecurityPolicies_BASIC256_SHA256(); // Review the implementations
-  UA_StatusCode setupAccessControl();
-  UA_StatusCode setupEndpoint();
-  UA_StatusCode setupEndpoints();
-
 public:
   Configuration(const std::string configuraiton_file_path);
   ~Configuration();

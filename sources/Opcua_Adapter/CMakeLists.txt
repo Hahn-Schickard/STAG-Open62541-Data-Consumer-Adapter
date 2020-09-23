@@ -2,13 +2,11 @@ cmake_minimum_required(VERSION 3.6)
 
 set (THIS OPCUA_Adapter)
 
-list(APPEND PUBLIC_INCLUDES_DIRS
+list(APPEND THIS_INCLUDES_DIRS
             ${INCLUDES_DIR}/Opcua_Adapter
 )
 
 file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
-
-INCLUDE_DIRS_AND_FILES("${PUBLIC_INCLUDES_DIRS}" PUBLIC_INCLUDES)
 
 INCLUDE_DIRS_AND_FILES("${THIS_INCLUDES_DIRS}" THIS_INCLUDES)
 
@@ -24,12 +22,6 @@ target_link_libraries(${THIS} PUBLIC
                               HaSLL::HaSLL                           
                               OPCUA_Server
 )
-                              
-if (UNIX)
-    target_link_libraries(${THIS} PRIVATE
-                                  gcov
-    )
-endif()
 
 target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${INCLUDES_DIR}/Opcua_Adapter>

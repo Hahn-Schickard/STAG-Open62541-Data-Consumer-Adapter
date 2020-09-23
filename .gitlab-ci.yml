@@ -1,216 +1,136 @@
 include: "ci-variables.yml"
- 
+
+cache: &global
+  key: ${CI_PROJECT_ID}_global_cache
+  paths:
+    - ${CI_PROJECT_DIR}/.conan
+  policy: pull
+
 stages:
- - build 
- - test
- - analyze
- - package
- - deploy
- - trigger
- 
-build:debug: 
- stage: build
- script: 
-  - mkdir -p build
-  - cd build
-  - 'cmake -DCMAKE_TOOLCHAIN_FILE=cmake/native-toolchain.cmake -DCMAKE_BUILD_TYPE="Debug" ${CMAKE_VARIABLES} ..'
-  - 'cmake --build . --config Debug --target all --'
- coverage: '/Total:\|(\d+\.?\d+\%)/'
- artifacts: 
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_LINUX_Debug_Build_Binaries"
-  paths: 
-   - build/
- except: 
-  - /Release.*/
- allow_failure: true
+  - build
+  - test
+  - analyze
+  - document
+  - package
+  - deploy
 
-build:release: 
- stage: build
- script: 
-  - 'utility/.do_release.sh build no "${CMAKE_VARIABLES}"'
-  - 'cmake --build ./build --config Release --target all --'
- coverage: '/Total:\|(\d+\.?\d+\%)/'
- artifacts: 
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_LINUX_Release_Build_Binaries"
-  paths: 
-   - build/
- only: 
-  - /Release.*/
- allow_failure: true
+.setup:
+  tags:
+    - conan
+  before_script:
+    - conan config set storage.download_cache="${CI_PROJECT_DIR}/.conan"
+    - conan config set storage.path="${CI_PROJECT_DIR}/.conan/data"
+    - conan config get storage.download_cache
 
-test:release_build: 
- stage: test
- variables: 
-  GIT_STRATEGY: none 
- script: 
-  - cd build
-  - ctest --verbose
- only: 
-  - /Release.*/
+build:
+  extends: .setup
+  stage: build
+  tags:
+    - conan
+  script:
+    - pip3 install --upgrade conan
+    - conan remote add upload_repo ${CONAN_REMOTE}
+    - mkdir build
+    - cd build
+    - cmake ${CMAKE_VARIABLES} ..
+    - cmake --build . --target all --config Debug --
+  cache:
+    <<: *global
+    policy: pull-push
+  artifacts:
+    paths:
+      - build/
 
-test:debug_build: 
- stage: test
- variables: 
-  GIT_STRATEGY: none 
- script: 
-  - cd build
-  - ctest --verbose
- except: 
-  - /Release.*/
+run_tests:
+  extends: .setup
+  stage: test
+  needs: ["build"]
+  tags:
+    - conan
+  script:
+    - cd build
+    - ctest --verbose
+  after_script:
+    - cd ..
+  artifacts:
+    paths:
+      - build/
 
-analyze_memory_usage:debug_build: 
- stage: analyze
- variables: 
-  GIT_STRATEGY: none 
- script: 
-  - echo "Sending ${VALGRIND_EXECUTABLE} as exec and ${VALGRIND_EXECUTABLE_ARGS} as args" 
-  - utility/.run_valgrind.sh -e ${VALGRIND_EXECUTABLE} -a ${VALGRIND_EXECUTABLE_ARGS}
- artifacts:                                                           
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_Debug_Valgrind_Results"
-  paths:
-  - valgrind_results/valgrind-results.log
- only: 
-  variables: 
-   - $RUN_VALGRIND == "true" 
- except: 
-  - /Release.*/
- allow_failure: true
+analyze_memory_usage:
+  extends: .setup
+  stage: analyze
+  needs: ["build"]
+  tags:
+    - conan
+  script:
+    - python3 utility/runValgrind.py ${VALGRIND_TARGET} --nargs ${VALGRIND_TARGET_ARGS}
+  artifacts:
+    name: "Commit:${CI_COMMIT_SHORT_SHA}_Debug_Valgrind_Results"
+    paths:
+      - valgrind-results.log
+  only:
+    variables:
+      - $RUN_VALGRIND == "true"
+  allow_failure: true
 
-analyze_memory_usage:release_build: 
- stage: analyze
- variables: 
-  GIT_STRATEGY: none 
- script: 
-  - utility/.run_valgrind.sh -e ${VALGRIND_EXECUTABLE} -a ${VALGRIND_EXECUTABLE_ARGS}
- artifacts:                                                           
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_Release_Valgrind_Results"
-  paths:
-  - valgrind_results/valgrind-results.log
- only: 
-  variables: 
-   - $RUN_VALGRIND == "true"
-  refs:  
-   - /Release.*/  
- allow_failure: true
+check_code_coverage:
+  extends: .setup
+  stage: analyze
+  needs: ["build", "run_tests"]
+  tags:
+    - conan
+  script:
+    - python3 utility/checkCodeCoverage.py ${RUN_VALGRIND} ${VALGRIND_TARGET} ${VALGRIND_TARGET_ARGS}
+  artifacts:
+    name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Coverage_Results"
+    paths:
+      - code_coverage_report/
 
-check_code_coverage:debug_build: 
- stage: analyze
- variables: 
-  GIT_STRATEGY: none 
- script: 
-  - utility/.check_code_coverage.sh
- artifacts:                                                           
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Coverage_Results"
-  paths:
-  - code_coverage_report/
- except: 
-  - /Release.*/
- allow_failure: true
+generate_autodoc:
+  stage: document
+  tags:
+    - conan
+  script:
+    - doxygen utility/Doxyfile
+  cache: {}
+  artifacts:
+    name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Documentation"
+    paths:
+      - docs/code_documentation/
+    expire_in: 30 days
+  allow_failure: true
 
-check_code_coverage:release_build: 
- stage: analyze
- variables: 
-  GIT_STRATEGY: none 
- script: 
-  - utility/.check_code_coverage.sh
- artifacts:                                                           
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Coverage_Results"
-  paths:
-  - code_coverage_report/
- only: 
-  - /Release.*/
- allow_failure: true
+.package:
+  stage: package
+  variables:
+    GIT_STRATEGY: clone
+  tags:
+    - conan
+  before_script:
+    - pip3 install --upgrade conan
+    - conan remote add upload_repo ${CONAN_REMOTE}
+    - PROJECT_NAME=$(python3 ./utility/getProjectName.py)
+  allow_failure: true
 
-run_linter:release_build:
- stage: analyze
- variables: 
-  GIT_STRATEGY: none
- script: 
-  - utility/.run_linter.sh build ${CI_PROJECT_URL} ${CI_PROJECT_ID} ${CI_API_V4_URL} ${GITLAB_USER_ID} ${CI_COMMIT_REF_NAME}
- artifacts: 
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_Release_Linting_Results"
-  paths: 
-  - linting_results
-  expire_in: 30 days
- except:
-  - code_formating
- only: 
-  - /Release.*/
- allow_failure: true
+package:stable:
+  extends: .package
+  script:
+    - VERSION=$(python3 ./utility/getVersionFromTag.py)
+    - conan create ./conan/ ${VERSION}@hahn-schickard/stable --build
+    - conan upload ${PROJECT_NAME}/${VERSION}@hahn-schickard/stable -r upload_repo
+  only:
+    - /Release_v*/
 
-run_linter:debug_build:
- stage: analyze
- variables: 
-  GIT_STRATEGY: none
- script: 
-  - utility/.run_linter.sh build ${CI_PROJECT_URL} ${CI_PROJECT_ID} ${CI_API_V4_URL} ${GITLAB_USER_ID} ${CI_COMMIT_REF_NAME}
- artifacts: 
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_Debug_Linting_Results"
-  paths: 
-  - linting_results
-  expire_in: 30 days
- except: 
-  - /Release.*/
-  - code_formating 
- allow_failure: true
-
-generate_autodoc: 
- stage: analyze
- variables: 
-  GIT_STRATEGY: none 
- script: 
-  - doxygen utility/Doxyfile 
- artifacts: 
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Documentation"
-  paths: 
-  - docs/code_documentation/
-  expire_in: 30 days
- only: 
-  - /Release.*/
- allow_failure: true
-
-package_tar: 
- stage: package
- variables: 
-  GIT_STRATEGY: none 
- script:
-  - cd build
-  - cpack --verbose
- artifacts: 
-  name: "Commit:${CI_COMMIT_SHORT_SHA}_Package"
-  paths: 
-  - build/cpack_packages/*
-  expire_in: 99 yrs
- only: 
-  - /Release.*/
- allow_failure: true
- 
 pages:
- stage: deploy
- variables: 
-  GIT_STRATEGY: none 
- dependencies:
-    - check_code_coverage:release_build
-    - generate_autodoc 
-    - package_tar
- script:
-    - utility/.make_public.sh -n $CI_PROJECT_NAME -l $CI_PROJECT_URL
- artifacts:
-   paths:
-     - public
- only: 
-  - /Release.*/
- allow_failure: true
-
-update_versioning: 
- stage: trigger
- before_script:
-  - git config --global user.email ${GITLAB_USER_EMAIL}
-  - git config --global user.name ${GITLAB_USER_ID}
- script: 
-  - utility/.update_versioning.sh $CI_REPOSITORY_URL $TRIGGER_RELEASE $RELEASE_TYPE
- only: 
-  - master
- except: 
-  - /Release.*/
- allow_failure: true
+  stage: deploy
+  needs: ["build", "run_tests", "check_code_coverage", "generate_autodoc"]
+  tags:
+    - conan
+  script:
+    - python3 utility/createAmalgamWebsite.py ${CI_PROJECT_URL}
+  cache: {}
+  artifacts:
+    paths:
+      - public
+  only:
+    - /Release_v*/

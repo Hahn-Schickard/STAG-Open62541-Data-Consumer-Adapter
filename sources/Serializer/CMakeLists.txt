@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 set(THIS Config_Serializer)
 
-list(APPEND PUBLIC_INCLUDES_DIRS
+list(APPEND THIS_INCLUDES_DIRS
             ${INCLUDES_DIR}/Serializer
 )
 
@@ -22,12 +22,6 @@ target_link_libraries(${THIS} PUBLIC
                               nlohmann_json::nlohmann_json
                               HaSLL::HaSLL   
 )
-                            
-if (UNIX)
-    target_link_libraries(${THIS} PRIVATE
-                                  gcov
-    )
-endif()
 
 target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${INCLUDES_DIR}/Serializer>

@@ -65,7 +65,7 @@ FUNCTION(FIND_INSTALLED_DEPENDENCIES dependencies)
     endif()
 ENDFUNCTION()
 
-FUNCTION(WRITE_PKG_CONFIG_IN_FILE this_project transitive_dependencies)
+FUNCTION(WRITE_PKG_CONFIG_IN_FILE this_project)
     if(EXISTS ${PROJECT_SOURCE_DIR}/${this_project}Config.cmake.in)
         message(STATUS "Pacakge input file: ${PROJECT_SOURCE_DIR}/${this_project}Config.cmake.in already exists, removing it!")
         file(REMOVE ${PROJECT_SOURCE_DIR}/${this_project}Config.cmake.in)
@@ -74,14 +74,6 @@ FUNCTION(WRITE_PKG_CONFIG_IN_FILE this_project transitive_dependencies)
     file(WRITE ${PROJECT_SOURCE_DIR}/${this_project}Config.cmake.in
         "@PACKAGE_INIT@ 
 include(\"\${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake\")")
-        if(transitive_dependencies)
-            message(STATUS "Adding transitive dependencies!")
-            foreach(dependency ${transitive_dependencies})
-                message(STATUS "Adding ${dependency} dependency!")
-                file(APPEND ${PROJECT_SOURCE_DIR}/${this_project}Config.cmake.in "
-find_package(${dependency} REQUIRED)")
-            endforeach()
-        endif()
         file(APPEND ${PROJECT_SOURCE_DIR}/${this_project}Config.cmake.in
         "
 check_required_components(\"@PROJECT_NAME@\")")

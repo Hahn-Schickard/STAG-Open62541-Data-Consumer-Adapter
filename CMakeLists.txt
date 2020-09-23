@@ -22,8 +22,6 @@ execute_conan_install()
 
 #@+ ======================== User PACKAGES configuration ===========================
 list(APPEND DEPENDENCIES_LIST 
-            GTest
-            GMock
             HaSLL
             Information_Model
             Data_Consumer_Adapter_Interface
