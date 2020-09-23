@@ -1,8 +1,7 @@
-tests/googletest-src/
 build
-libs
-log
+logs
 .vscode/
+json.hpp
 valgrind_results/
 code_coverage_report/ 
 code_coverage.info
@@ -10,3 +9,5 @@ docs/code_documentation/html
 docs/code_documentation/latex
 clang-tidy-suggested-fixes.yml
 *.cmake.in
+utility/__pycache__
+*.log
