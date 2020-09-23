@@ -5,3 +5,4 @@
 
 # Data Consumer Adatper for Open62541 OPC UA Server Implementation
 
+This module implements open62541 server SDK, which confirms with Data Consumer Interface

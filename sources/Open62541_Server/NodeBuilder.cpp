@@ -1,13 +1,24 @@
 #include "NodeBuilder.hpp"
+#include "DataVariant.hpp"
+#include "LoggerRepository.hpp"
+#include "NodeMananger.hpp"
+#include "Utility.hpp"
 
-#include <memory>
 #include <open62541/nodeids.h>
+#include <open62541/statuscodes.h>
+#include <string>
 #include <vector>
 
 using namespace std;
+using namespace HaSLL;
 using namespace Information_Model;
+using namespace open62541;
 
 class DeviceElementNodeInfo {
+  char *node_id_;
+  char *node_name_;
+  char *node_description_;
+
 public:
   DeviceElementNodeInfo(shared_ptr<NamedElement> element) {
     if (element) {
@@ -20,7 +31,7 @@ public:
       strcpy(node_name_, element->getElementName().c_str());
       strcpy(node_description_, element->getElementDescription().c_str());
     } else {
-      //@TODO: throw exception / log error
+      throw runtime_error("Given element is empty!");
     }
   }
 
@@ -31,25 +42,26 @@ public:
   }
 
   char *getNodeId() { return node_id_; }
-
   char *getNodeName() { return node_name_; }
-
   char *getNodeDescription() { return node_description_; }
-
-private:
-  char *node_id_;
-  char *node_name_;
-  char *node_description_;
 };
 
-NodeBuilder::NodeBuilder(Open62541Server *server) : server_(server) {}
+NodeBuilder::NodeBuilder(Open62541Server *server)
+    : logger_(LoggerRepository::getInstance().registerTypedLoger(this)),
+      server_(server) {}
 
-NodeBuilder::~NodeBuilder() {}
+NodeBuilder::~NodeBuilder() {
+  logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
+               logger_->getName());
+  LoggerRepository::getInstance().deregisterLoger(logger_->getName());
+}
 
-bool NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
+UA_StatusCode NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+  logger_->log(SeverityLevel::INFO, "Adding a new Device: {}, with id: {}",
+               device->getElementName(), device->getElementRefId());
 
-  DeviceElementNodeInfo device_node_info =
-      DeviceElementNodeInfo(static_pointer_cast<NamedElement>(device));
+  DeviceElementNodeInfo device_node_info = DeviceElementNodeInfo(device);
 
   UA_NodeId device_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
                                               device_node_info.getNodeId());
@@ -65,54 +77,82 @@ bool NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
   node_attr.displayName =
       UA_LOCALIZEDTEXT("EN_US", device_node_info.getNodeName());
 
-  UA_Server_addObjectNode(server_->getServer(), device_node_id, parent_node_id,
-                          reference_type_id, device_browse_name,
-                          type_definition, node_attr, NULL, NULL);
+  status = UA_Server_addObjectNode(
+      server_->getServer(), device_node_id, parent_node_id, reference_type_id,
+      device_browse_name, type_definition, node_attr, NULL, NULL);
 
-  shared_ptr<DeviceElementGroup> device_element_group =
-      device->getDeviceElementGroup();
-  bool status = false;
-  for (auto device_element : device_element_group->getSubelements()) {
-    status = addDeviceNodeElement(device_element, device_node_id);
+  if (status == UA_STATUSCODE_GOOD) {
+    shared_ptr<DeviceElementGroup> device_element_group =
+        device->getDeviceElementGroup();
+    for (auto device_element : device_element_group->getSubelements()) {
+      status = addDeviceNodeElement(device_element, &device_node_id);
+    }
+  }
+
+  if (status != UA_STATUSCODE_GOOD) {
+    logger_->log(SeverityLevel::ERROR,
+                 "Failed to create a Node for Device: {}. Status: {}",
+                 device->getElementName(), UA_StatusCode_name(status));
   }
 
   return status;
 }
 
-bool NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
-                                       UA_NodeId parent_id) {
-  bool status = false;
+UA_StatusCode
+NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
+                                  const UA_NodeId *parent_id) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+  logger_->log(SeverityLevel::INFO, "Adding element {} to node {}",
+               element->getElementName(), toString(parent_id));
+
   switch (element->getElementType()) {
-  case Group: {
+  case GROUP: {
     status = addGroupNode(static_pointer_cast<DeviceElementGroup>(element),
                           parent_id);
     break;
   }
-  case Function: {
+  case FUNCTION: {
     status = addFunctionNode(element, parent_id);
     break;
   }
-  case Observable:
-  case Writable:
-  case Readonly: {
-    status = addMetricNode(element, parent_id);
+  case OBSERVABLE:
+  case WRITABLE: {
+    status = addWritableNode(static_pointer_cast<WritableMetric>(element),
+                             parent_id);
     break;
   }
-  case Undefined:
+  case READABLE: {
+    status = addReadableNode(static_pointer_cast<Metric>(element), parent_id);
+    break;
+  }
+  case UNDEFINED:
   default: {
-    //@TODO: Handle default behaviour for UNRECOGNIZED_NODE
+    status = UA_STATUSCODE_BADTYPEDEFINITIONINVALID;
+    logger_->log(SeverityLevel::ERROR,
+                 "Unknown element type, for element {} to node {}",
+                 element->getElementName(), toString(parent_id));
     break;
   }
   }
+
+  if (status != UA_STATUSCODE_GOOD) {
+    logger_->log(SeverityLevel::ERROR,
+                 "Failed to create a Node for Device Element: {}. Status: {}",
+                 element->getElementName(), UA_StatusCode_name(status));
+  }
+
   return status;
 }
 
-bool NodeBuilder::addGroupNode(
-    shared_ptr<DeviceElementGroup> device_element_group, UA_NodeId parent_id) {
-  bool status = false;
+UA_StatusCode
+NodeBuilder::addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
+                          const UA_NodeId *parent_id) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+  logger_->log(SeverityLevel::TRACE, "Adding group element {} to node {}",
+               device_element_group->getElementName(), toString(parent_id));
 
-  DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(
-      static_pointer_cast<NamedElement>(device_element_group));
+  DeviceElementNodeInfo element_node_info =
+      DeviceElementNodeInfo(device_element_group);
 
   if (!device_element_group->getSubelements().empty()) {
     UA_NodeId group_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
@@ -128,31 +168,205 @@ bool NodeBuilder::addGroupNode(
     node_attr.displayName =
         UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeName());
 
-    UA_Server_addObjectNode(server_->getServer(), group_node_id, parent_id,
-                            reference_type_id, group_browse_name,
-                            type_definition, node_attr, NULL, NULL);
-    vector<shared_ptr<DeviceElement>> elements =
-        device_element_group->getSubelements();
-    for (auto element : elements) {
-      status = addDeviceNodeElement(element, group_node_id);
+    status = UA_Server_addObjectNode(
+        server_->getServer(), group_node_id, *parent_id, reference_type_id,
+        group_browse_name, type_definition, node_attr, NULL, NULL);
+
+    if (status == UA_STATUSCODE_GOOD) {
+      vector<shared_ptr<DeviceElement>> elements =
+          device_element_group->getSubelements();
+
+      logger_->log(SeverityLevel::INFO,
+                   "Group element {}:{} contains {} subelements.",
+                   device_element_group->getElementName(),
+                   toString(&group_node_id), elements.size());
+      for (auto element : elements) {
+        status = addDeviceNodeElement(element, &group_node_id);
+      }
     }
-  } // LOG that the group was empty!
+  } else {
+    logger_->log(SeverityLevel::WARNNING,
+                 "Parent's {} group element {} is empty!", toString(parent_id),
+                 device_element_group->getElementName());
+  }
+
+  if (status != UA_STATUSCODE_GOOD) {
+    logger_->log(
+        SeverityLevel::ERROR,
+        "Failed to create a Node for Device Element Group: {}. Status: {}",
+        device_element_group->getElementName(), UA_StatusCode_name(status));
+  }
+
   return status;
 }
 
-bool NodeBuilder::addFunctionNode(shared_ptr<DeviceElement> function,
-                                  UA_NodeId parent_id) {
-  bool status = false;
+UA_StatusCode NodeBuilder::addFunctionNode(shared_ptr<DeviceElement> function,
+                                           const UA_NodeId *parent_id) {
+  UA_StatusCode status = UA_STATUSCODE_BADNOTIMPLEMENTED;
+  logger_->log(SeverityLevel::WARNNING, "Method element is not implemented!",
+               toString(parent_id), function->getElementName());
   //@TODO: Implement addFunctionNode stub
   return status;
 }
 
-bool NodeBuilder::addMetricNode(shared_ptr<DeviceElement> metric,
-                                UA_NodeId parent_id) {
-  bool status = false;
+UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
+                       UA_VariableAttributes &value_attribute,
+                       shared_ptr<Metric> metric) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
-  DeviceElementNodeInfo element_node_info =
-      DeviceElementNodeInfo(static_pointer_cast<NamedElement>(metric));
+  auto metric_value = metric->getMetricValue();
+
+  match(metric_value,
+        [&](bool boolean_value) {
+          UA_Variant_setScalar(&value_attribute.value, &boolean_value,
+                               &UA_TYPES[UA_TYPES_BOOLEAN]);
+        },
+        [&](uint8_t byte_value) {
+          UA_Variant_setScalar(&value_attribute.value, &byte_value,
+                               &UA_TYPES[UA_TYPES_BYTE]);
+        },
+        [&](int16_t short_value) {
+          UA_Variant_setScalar(&value_attribute.value, &short_value,
+                               &UA_TYPES[UA_TYPES_INT16]);
+        },
+        [&](int32_t integer_value) {
+          UA_Variant_setScalar(&value_attribute.value, &integer_value,
+                               &UA_TYPES[UA_TYPES_INT32]);
+        },
+        [&](int64_t long_value) {
+          UA_Variant_setScalar(&value_attribute.value, &long_value,
+                               &UA_TYPES[UA_TYPES_INT64]);
+        },
+        [&](float float_value) {
+          UA_Variant_setScalar(&value_attribute.value, &float_value,
+                               &UA_TYPES[UA_TYPES_FLOAT]);
+        },
+        [&](double double_value) {
+          UA_Variant_setScalar(&value_attribute.value, &double_value,
+                               &UA_TYPES[UA_TYPES_DOUBLE]);
+        },
+        [&](string string_value) {
+          UA_String open62541_string;
+          open62541_string.length = strlen(string_value.c_str());
+          open62541_string.data = (UA_Byte *)malloc(open62541_string.length);
+          memcpy(open62541_string.data, string_value.c_str(),
+                 open62541_string.length);
+          UA_Variant_setScalar(&value_attribute.value, &open62541_string,
+                               &UA_TYPES[UA_TYPES_STRING]);
+        });
+
+  value_attribute.description =
+      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeDescription());
+  value_attribute.displayName =
+      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeName());
+
+  value_attribute.dataType = toNodeId(metric->getDataType());
+
+  return status;
+}
+
+UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
+                                           const UA_NodeId *parent_id) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+
+  DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(metric);
+
+  UA_NodeId metrid_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
+                                              element_node_info.getNodeId());
+  UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
+  UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME(
+      server_->getServerNamespace(), element_node_info.getNodeName());
+  UA_NodeId type_definition =
+      UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+
+  UA_VariableAttributes node_attr = UA_VariableAttributes_default;
+
+  status = setValue(&element_node_info, node_attr, metric);
+
+  if (status == UA_STATUSCODE_GOOD) {
+    node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
+    // status = NodeManager::addNode(metric->getDataType(), &metrid_node_id,
+    //                               bind(&Metric::getMetricValue, metric));
+    UA_DataSource data_source;
+    // data_source.read = &NodeManager::readNodeValue;
+    // data_source.write = &NodeManager::writeNodeValue;
+
+    status = UA_Server_addDataSourceVariableNode(
+        server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
+        metric_browse_name, type_definition, node_attr, data_source, NULL,
+        NULL);
+  }
+
+  if (status != UA_STATUSCODE_GOOD) {
+    logger_->log(SeverityLevel::ERROR,
+                 "Failed to create a Node for Readable Metric: {}. Status: {}",
+                 metric->getElementName(), UA_StatusCode_name(status));
+  }
+
+  return status;
+}
+
+UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
+                       UA_VariableAttributes &value_attribute,
+                       shared_ptr<WritableMetric> metric) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+
+  auto metric_value = metric->getMetricValue();
+
+  match(metric_value,
+        [&](bool boolean_value) {
+          UA_Variant_setScalar(&value_attribute.value, &boolean_value,
+                               &UA_TYPES[UA_TYPES_BOOLEAN]);
+        },
+        [&](uint8_t byte_value) {
+          UA_Variant_setScalar(&value_attribute.value, &byte_value,
+                               &UA_TYPES[UA_TYPES_BYTE]);
+        },
+        [&](int16_t short_value) {
+          UA_Variant_setScalar(&value_attribute.value, &short_value,
+                               &UA_TYPES[UA_TYPES_INT16]);
+        },
+        [&](int32_t integer_value) {
+          UA_Variant_setScalar(&value_attribute.value, &integer_value,
+                               &UA_TYPES[UA_TYPES_INT32]);
+        },
+        [&](int64_t long_value) {
+          UA_Variant_setScalar(&value_attribute.value, &long_value,
+                               &UA_TYPES[UA_TYPES_INT64]);
+        },
+        [&](float float_value) {
+          UA_Variant_setScalar(&value_attribute.value, &float_value,
+                               &UA_TYPES[UA_TYPES_FLOAT]);
+        },
+        [&](double double_value) {
+          UA_Variant_setScalar(&value_attribute.value, &double_value,
+                               &UA_TYPES[UA_TYPES_DOUBLE]);
+        },
+        [&](string string_value) {
+          UA_String open62541_string;
+          open62541_string.length = strlen(string_value.c_str());
+          open62541_string.data = (UA_Byte *)malloc(open62541_string.length);
+          memcpy(open62541_string.data, string_value.c_str(),
+                 open62541_string.length);
+          UA_Variant_setScalar(&value_attribute.value, &open62541_string,
+                               &UA_TYPES[UA_TYPES_STRING]);
+        });
+
+  value_attribute.description =
+      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeDescription());
+  value_attribute.displayName =
+      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeName());
+
+  value_attribute.dataType = toNodeId(metric->getDataType());
+
+  return status;
+}
+
+UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
+                                           const UA_NodeId *parent_id) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+
+  DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(metric);
 
   UA_NodeId metrid_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
                                               element_node_info.getNodeId());
@@ -163,69 +377,29 @@ bool NodeBuilder::addMetricNode(shared_ptr<DeviceElement> metric,
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  // TODO: handle data types
-  node_attr.dataType = getOpcDataType(DataType::STRING);
-  node_attr.accessLevel = UA_ACCESSLEVELMASK_READ |
-                          UA_ACCESSLEVELMASK_WRITE; //@TODO: change to a
-                                                    // function that assigns
-                                                    // proper accessLevel
-  node_attr.description =
-      UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeDescription());
-  node_attr.displayName =
-      UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeName());
+  status = setValue(&element_node_info, node_attr, metric);
 
-  UA_Server_addVariableNode(server_->getServer(), metrid_node_id, parent_id,
-                            reference_type_id, metric_browse_name,
-                            type_definition, node_attr, NULL, NULL);
+  if (status == UA_STATUSCODE_GOOD) {
+    node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+    // status = NodeManager::addNode(
+    //     metric->getDataType(), &metrid_node_id,
+    //     bind(&WritableMetric::getMetricValue, metric),
+    //     bind(&WritableMetric::setMetricValue, metric, placeholders::_1));
+    UA_DataSource data_source;
+    // data_source.read = &NodeManager::readNodeValue;
+    // data_source.write = &NodeManager::writeNodeValue;
+
+    status = UA_Server_addDataSourceVariableNode(
+        server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
+        metric_browse_name, type_definition, node_attr, data_source, NULL,
+        NULL);
+  }
+
+  if (status != UA_STATUSCODE_GOOD) {
+    logger_->log(SeverityLevel::ERROR,
+                 "Failed to create a Node for Writable Metric: {}. Status: {}",
+                 metric->getElementName(), UA_StatusCode_name(status));
+  }
+
   return status;
-}
-
-UA_NodeId NodeBuilder::getOpcDataType(DataType type) {
-  //@TODO: set some initial value that would be common for all nodes, string
-  // maybe?
-  UA_NodeId typeId;
-  switch (type) {
-  case UNSIGNED_SHORT: {
-    typeId = UA_TYPES[UA_TYPES_UINT16].typeId;
-    break;
-  }
-  case UNSIGNED_INTEGER: {
-    typeId = UA_TYPES[UA_TYPES_UINT32].typeId;
-    break;
-  }
-  case UNSIGNED_LONG: {
-    typeId = UA_TYPES[UA_TYPES_UINT64].typeId;
-    break;
-  }
-  case SIGNED_SHORT: {
-    typeId = UA_TYPES[UA_TYPES_INT16].typeId;
-    break;
-  }
-  case SIGNED_INTEGER: {
-    typeId = UA_TYPES[UA_TYPES_INT32].typeId;
-    break;
-  }
-  case SIGNED_LONG: {
-    typeId = UA_TYPES[UA_TYPES_INT64].typeId;
-    break;
-  }
-  case DOUBLE: {
-    typeId = UA_TYPES[UA_TYPES_DOUBLE].typeId;
-    break;
-  }
-  case BOOLEAN: {
-    typeId = UA_TYPES[UA_TYPES_BOOLEAN].typeId;
-    break;
-  }
-  case STRING: {
-    typeId = UA_TYPES[UA_TYPES_STRING].typeId;
-    break;
-  }
-  case UNKNOWN:
-  default: {
-    //@TODO: Log unknown data type declarations
-    break;
-  }
-  }
-  return typeId;
 }

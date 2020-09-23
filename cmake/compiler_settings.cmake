@@ -18,15 +18,15 @@ add_definitions(
 )
 
 if (NOT WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage --coverage")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov --coverage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage ")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov")
+    set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
     
     add_definitions(        
         -fprofile-arcs 
         -ftest-coverage
         -fdiagnostics-color=auto
         -lgcov
-        --coverage
     )
 endif()
 
