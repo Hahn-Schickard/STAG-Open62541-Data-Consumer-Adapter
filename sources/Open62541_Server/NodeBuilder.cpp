@@ -285,11 +285,11 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
 
   if (status == UA_STATUSCODE_GOOD) {
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
-    status = NodeManager::addNode(metric->getDataType(), &metrid_node_id,
-                                  bind(&Metric::getMetricValue, metric));
+    // status = NodeManager::addNode(metric->getDataType(), &metrid_node_id,
+    //                               bind(&Metric::getMetricValue, metric));
     UA_DataSource data_source;
-    data_source.read = &NodeManager::readNodeValue;
-    data_source.write = &NodeManager::writeNodeValue;
+    // data_source.read = &NodeManager::readNodeValue;
+    // data_source.write = &NodeManager::writeNodeValue;
 
     status = UA_Server_addDataSourceVariableNode(
         server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
@@ -381,13 +381,13 @@ UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
 
   if (status == UA_STATUSCODE_GOOD) {
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
-    status = NodeManager::addNode(
-        metric->getDataType(), &metrid_node_id,
-        bind(&WritableMetric::getMetricValue, metric),
-        bind(&WritableMetric::setMetricValue, metric, placeholders::_1));
+    // status = NodeManager::addNode(
+    //     metric->getDataType(), &metrid_node_id,
+    //     bind(&WritableMetric::getMetricValue, metric),
+    //     bind(&WritableMetric::setMetricValue, metric, placeholders::_1));
     UA_DataSource data_source;
-    data_source.read = &NodeManager::readNodeValue;
-    data_source.write = &NodeManager::writeNodeValue;
+    // data_source.read = &NodeManager::readNodeValue;
+    // data_source.write = &NodeManager::writeNodeValue;
 
     status = UA_Server_addDataSourceVariableNode(
         server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
