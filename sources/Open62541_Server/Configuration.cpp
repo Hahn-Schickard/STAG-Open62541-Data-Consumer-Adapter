@@ -20,19 +20,8 @@ Configuration::Configuration(const std::string configuraiton_file_path)
       configuration_((UA_ServerConfig *)malloc(sizeof(UA_ServerConfig))) {
   try {
     config_file_ = deserializeConfig(configuraiton_file_path);
-    // initialiseConfiguration();
-    // setupBasics();
-    // setupMetaInformation();
-    // setupCertificate();
-    // setupSecureChannelLimits();
-    // setupSessionLimits();
-    // setupSubscriptionLimits();
-    // setupMonitoredItemLimits();
-    // setupOperationalLimits();
-    // setupNetowrkingLayer();
-    // setupSecurityPolicies();
-    // setupAccessControl();
-    // setupEndpoint();
+    configuration_->logger.log = HaSLL_Logger_.log;
+    configuration_->logger.clear = HaSLL_Logger_.clear;
     UA_ServerConfig_setDefault(configuration_);
   } catch (exception &ex) {
     logger_->log(SeverityLevel::ERROR,
