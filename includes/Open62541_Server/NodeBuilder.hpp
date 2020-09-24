@@ -4,6 +4,7 @@
 #include "Device.hpp"
 #include "Logger.hpp"
 #include "Metric.hpp"
+#include "NodeMananger.hpp"
 #include "Open62541Server.hpp"
 #include "WritableMetric.hpp"
 
@@ -12,6 +13,7 @@
 namespace open62541 {
 class NodeBuilder {
   std::shared_ptr<HaSLL::Logger> logger_;
+  std::unique_ptr<NodeManager> manager_;
   Open62541Server *server_;
 
 public:

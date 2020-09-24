@@ -1,10 +1,15 @@
 #include "NodeMananger.hpp"
+#include "LoggerRepository.hpp"
 #include "Utility.hpp"
 
 using namespace std;
 using namespace HaSLL;
 using namespace Information_Model;
 using namespace open62541;
+
+NodeManager::NodeManager()
+    : logger_(HaSLL::LoggerRepository::getInstance().registerTypedLoger(this)) {
+}
 
 unordered_map<const UA_NodeId *, shared_ptr<CallbackWrapper>>::iterator
 NodeManager::findIndexPosition(const UA_NodeId *node_id) {

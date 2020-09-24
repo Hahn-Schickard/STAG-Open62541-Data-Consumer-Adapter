@@ -48,7 +48,7 @@ public:
 
 NodeBuilder::NodeBuilder(Open62541Server *server)
     : logger_(LoggerRepository::getInstance().registerTypedLoger(this)),
-      server_(server) {}
+      manager_(make_unique<NodeManager>()), server_(server) {}
 
 NodeBuilder::~NodeBuilder() {
   logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
@@ -265,6 +265,20 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
   return status;
 }
 
+typedef UA_StatusCode (*UA_READ_CB)(UA_Server *server,
+                                    const UA_NodeId *sessionId,
+                                    void *sessionContext,
+                                    const UA_NodeId *nodeId, void *nodeContext,
+                                    UA_Boolean includeSourceTimeStamp,
+                                    const UA_NumericRange *range,
+                                    UA_DataValue *value);
+typedef UA_StatusCode (*UA_WRITE_CB)(UA_Server *server,
+                                     const UA_NodeId *sessionId,
+                                     void *sessionContext,
+                                     const UA_NodeId *nodeId, void *nodeContext,
+                                     const UA_NumericRange *range,
+                                     const UA_DataValue *value);
+
 UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
                                            const UA_NodeId *parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
@@ -285,11 +299,15 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
 
   if (status == UA_STATUSCODE_GOOD) {
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
-    // status = NodeManager::addNode(metric->getDataType(), &metrid_node_id,
-    //                               bind(&Metric::getMetricValue, metric));
+    status = manager_->addNode(metric->getDataType(), &metrid_node_id,
+                               bind(&Metric::getMetricValue, metric));
     UA_DataSource data_source;
-    // data_source.read = &NodeManager::readNodeValue;
-    // data_source.write = &NodeManager::writeNodeValue;
+
+    auto read_cb = bind(&NodeManager::readNodeValue, manager_.get(),
+                        placeholders::_1, placeholders::_2, placeholders::_3,
+                        placeholders::_4, placeholders::_5, placeholders::_6,
+                        placeholders::_7, placeholders::_8);
+    data_source.read = (UA_READ_CB)&read_cb;
 
     status = UA_Server_addDataSourceVariableNode(
         server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
@@ -381,13 +399,22 @@ UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
 
   if (status == UA_STATUSCODE_GOOD) {
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
-    // status = NodeManager::addNode(
-    //     metric->getDataType(), &metrid_node_id,
-    //     bind(&WritableMetric::getMetricValue, metric),
-    //     bind(&WritableMetric::setMetricValue, metric, placeholders::_1));
+    status = manager_->addNode(
+        metric->getDataType(), &metrid_node_id,
+        bind(&WritableMetric::getMetricValue, metric),
+        bind(&WritableMetric::setMetricValue, metric, placeholders::_1));
     UA_DataSource data_source;
-    // data_source.read = &NodeManager::readNodeValue;
-    // data_source.write = &NodeManager::writeNodeValue;
+
+    auto read_cb = bind(&NodeManager::readNodeValue, manager_.get(),
+                        placeholders::_1, placeholders::_2, placeholders::_3,
+                        placeholders::_4, placeholders::_5, placeholders::_6,
+                        placeholders::_7, placeholders::_8);
+    data_source.read = (UA_READ_CB)&read_cb;
+    auto write_cb =
+        bind(&NodeManager::writeNodeValue, manager_.get(), placeholders::_1,
+             placeholders::_2, placeholders::_3, placeholders::_4,
+             placeholders::_5, placeholders::_6, placeholders::_7);
+    data_source.write = (UA_WRITE_CB)&write_cb;
 
     status = UA_Server_addDataSourceVariableNode(
         server_->getServer(), metrid_node_id, *parent_id, reference_type_id,

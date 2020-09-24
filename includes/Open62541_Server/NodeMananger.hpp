@@ -2,7 +2,7 @@
 #define __DCAI_OPEN62541_NODE_MANAGER_HPP_
 
 #include "DataVariant.hpp"
-#include "LoggerRepository.hpp"
+#include "Logger.hpp"
 #include "Metric.hpp"
 #include "WritableMetric.hpp"
 
@@ -16,20 +16,6 @@
 namespace open62541 {
 typedef std::function<Information_Model::DataVariant(void)> ReadCallback;
 typedef std::function<void(Information_Model::DataVariant)> WriteCallback;
-
-typedef UA_StatusCode (*UA_READ_CB)(UA_Server *server,
-                                    const UA_NodeId *sessionId,
-                                    void *sessionContext,
-                                    const UA_NodeId *nodeId, void *nodeContext,
-                                    UA_Boolean includeSourceTimeStamp,
-                                    const UA_NumericRange *range,
-                                    UA_DataValue *value);
-typedef UA_StatusCode (*UA_WRITE_CB)(UA_Server *server,
-                                     const UA_NodeId *sessionId,
-                                     void *sessionContext,
-                                     const UA_NodeId *nodeId, void *nodeContext,
-                                     const UA_NumericRange *range,
-                                     const UA_DataValue *value);
 
 struct CallbackWrapper {
   const Information_Model::DataType data_type;
@@ -82,9 +68,7 @@ class NodeManager {
   findIndexPosition(const UA_NodeId *node_id);
 
 public:
-  NodeManager()
-      : logger_(
-            HaSLL::LoggerRepository::getInstance().registerTypedLoger(this)) {}
+  NodeManager();
 
   UA_StatusCode addNode(Information_Model::DataType type,
                         const UA_NodeId *nodeId, ReadCallback read_callback);
