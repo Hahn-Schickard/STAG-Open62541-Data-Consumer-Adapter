@@ -274,12 +274,6 @@ typedef UA_StatusCode (*UA_READ_CB)(UA_Server *server,
                                     UA_Boolean includeSourceTimeStamp,
                                     const UA_NumericRange *range,
                                     UA_DataValue *value);
-typedef UA_StatusCode (*UA_WRITE_CB)(UA_Server *server,
-                                     const UA_NodeId *sessionId,
-                                     void *sessionContext,
-                                     const UA_NodeId *nodeId, void *nodeContext,
-                                     const UA_NumericRange *range,
-                                     const UA_DataValue *value);
 
 UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
                                            const UA_NodeId *parent_id) {
@@ -342,6 +336,13 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
 
   return status;
 }
+
+typedef UA_StatusCode (*UA_WRITE_CB)(UA_Server *server,
+                                     const UA_NodeId *sessionId,
+                                     void *sessionContext,
+                                     const UA_NodeId *nodeId, void *nodeContext,
+                                     const UA_NumericRange *range,
+                                     const UA_DataValue *value);
 
 UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
                                            const UA_NodeId *parent_id) {
