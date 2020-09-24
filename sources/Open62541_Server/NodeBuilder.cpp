@@ -209,14 +209,8 @@ UA_StatusCode NodeBuilder::addFunctionNode(shared_ptr<DeviceElement> function,
   return status;
 }
 
-UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
-                       UA_VariableAttributes &value_attribute,
-                       shared_ptr<Metric> metric) {
-  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-
-  auto metric_value = metric->getMetricValue();
-
-  match(metric_value,
+void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
+  match(variant,
         [&](bool boolean_value) {
           UA_Variant_setScalar(&value_attribute.value, &boolean_value,
                                &UA_TYPES[UA_TYPES_BOOLEAN]);
@@ -254,6 +248,14 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
           UA_Variant_setScalar(&value_attribute.value, &open62541_string,
                                &UA_TYPES[UA_TYPES_STRING]);
         });
+}
+
+UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
+                       UA_VariableAttributes &value_attribute,
+                       shared_ptr<Metric> metric) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+
+  setVariant(value_attribute, metric->getMetricValue());
 
   value_attribute.description =
       UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeDescription());
@@ -329,46 +331,7 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
                        shared_ptr<WritableMetric> metric) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
-  auto metric_value = metric->getMetricValue();
-
-  match(metric_value,
-        [&](bool boolean_value) {
-          UA_Variant_setScalar(&value_attribute.value, &boolean_value,
-                               &UA_TYPES[UA_TYPES_BOOLEAN]);
-        },
-        [&](uint8_t byte_value) {
-          UA_Variant_setScalar(&value_attribute.value, &byte_value,
-                               &UA_TYPES[UA_TYPES_BYTE]);
-        },
-        [&](int16_t short_value) {
-          UA_Variant_setScalar(&value_attribute.value, &short_value,
-                               &UA_TYPES[UA_TYPES_INT16]);
-        },
-        [&](int32_t integer_value) {
-          UA_Variant_setScalar(&value_attribute.value, &integer_value,
-                               &UA_TYPES[UA_TYPES_INT32]);
-        },
-        [&](int64_t long_value) {
-          UA_Variant_setScalar(&value_attribute.value, &long_value,
-                               &UA_TYPES[UA_TYPES_INT64]);
-        },
-        [&](float float_value) {
-          UA_Variant_setScalar(&value_attribute.value, &float_value,
-                               &UA_TYPES[UA_TYPES_FLOAT]);
-        },
-        [&](double double_value) {
-          UA_Variant_setScalar(&value_attribute.value, &double_value,
-                               &UA_TYPES[UA_TYPES_DOUBLE]);
-        },
-        [&](string string_value) {
-          UA_String open62541_string;
-          open62541_string.length = strlen(string_value.c_str());
-          open62541_string.data = (UA_Byte *)malloc(open62541_string.length);
-          memcpy(open62541_string.data, string_value.c_str(),
-                 open62541_string.length);
-          UA_Variant_setScalar(&value_attribute.value, &open62541_string,
-                               &UA_TYPES[UA_TYPES_STRING]);
-        });
+  setVariant(value_attribute, metric->getMetricValue());
 
   value_attribute.description =
       UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeDescription());
