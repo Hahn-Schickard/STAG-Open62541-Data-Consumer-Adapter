@@ -116,7 +116,7 @@ package:stable:
   extends: .package
   script:
     - VERSION=$(python3 ./utility/getVersionFromTag.py)
-    - conan create ./conan/ ${VERSION}@hahn-schickard/stable --build
+    - conan create ./conan/ ${VERSION}@hahn-schickard/stable --build=missing
     - conan upload ${PROJECT_NAME}/${VERSION}@hahn-schickard/stable -r upload_repo
   only:
     - /Release_v*/
