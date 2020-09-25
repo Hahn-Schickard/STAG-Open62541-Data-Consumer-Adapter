@@ -22,7 +22,16 @@ class PackageConan(ConanFile):
     default_options = {"shared": True,
                        "fPIC": True}
     default_user = "Hahn-Schickard"
-    exports_sources = "../*", "!../conan/*", "!../build/*", "!../.vscode/*", "!../.gitlab/*", "!../log/*",
+    exports_sources = [
+        "../*",
+        "!../conan/*",
+        "!../build/*",
+        "!../.vscode/*",
+        "!../.gitlab/*",
+        "!../log/*",
+        "!../utility/*",
+        "!../docs/*",
+    ]
     _cmake = None
 
     def set_name(self):
