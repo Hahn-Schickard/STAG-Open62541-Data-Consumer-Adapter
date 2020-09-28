@@ -13,9 +13,9 @@ class PackageConan(ConanFile):
         "nlohmann_json/3.7.3",
         "open62541/1.1.2@hahn-schickard/stable",
         "HaSLL/0.2.2@hahn-schickard/stable",
-        "Information_Model/0.1.0@hahn-schickard/stable",
-        "Model_Event_Handler/0.1.0@hahn-schickard/stable",
-        "Data_Consumer_Adapter_Interface/0.1.0@hahn-schickard/stable"
+        "Information_Model/0.1.1@hahn-schickard/stable",
+        "Model_Event_Handler/0.1.1@hahn-schickard/stable",
+        "Data_Consumer_Adapter_Interface/0.1.1@hahn-schickard/stable"
     ]
     settings = "cppstd", "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],

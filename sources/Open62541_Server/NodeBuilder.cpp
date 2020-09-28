@@ -22,12 +22,12 @@ class DeviceElementNodeInfo {
 public:
   DeviceElementNodeInfo(shared_ptr<NamedElement> element) {
     if (element) {
-      node_id_ = new char[element->getElementRefId().length() + 1];
+      node_id_ = new char[element->getElementId().length() + 1];
       node_name_ = new char[element->getElementDescription().length() + 1];
       node_description_ =
           new char[element->getElementDescription().length() + 1];
 
-      strcpy(node_id_, element->getElementRefId().c_str());
+      strcpy(node_id_, element->getElementId().c_str());
       strcpy(node_name_, element->getElementName().c_str());
       strcpy(node_description_, element->getElementDescription().c_str());
     } else {
@@ -59,7 +59,7 @@ NodeBuilder::~NodeBuilder() {
 UA_StatusCode NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   logger_->log(SeverityLevel::INFO, "Adding a new Device: {}, with id: {}",
-               device->getElementName(), device->getElementRefId());
+               device->getElementName(), device->getElementId());
 
   DeviceElementNodeInfo device_node_info = DeviceElementNodeInfo(device);
 
