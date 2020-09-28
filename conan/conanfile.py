@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.tools import load
 import re
 import os
+import shutil
 
 
 class PackageConan(ConanFile):
@@ -23,21 +24,26 @@ class PackageConan(ConanFile):
                        "fPIC": True}
     default_user = "Hahn-Schickard"
     exports_sources = [
-        "../*",
-        "!../conan/*",
-        "!../build/*",
-        "!../.vscode/*",
-        "!../.gitlab/*",
-        "!../log/*",
-        "!../utility/*",
-        "!../docs/*",
+        "../cmake*",
+        "../includes*",
+        "../sources*",
+        "../unit_tests*",
+        "../CMakeLists.txt",
+        "../conanfile.txt",
+        "../README.md",
+        "../LICENSE",
+        "../NOTICE",
+        "../AUTHORS",
     ]
     _cmake = None
 
-    def set_name(self):
+    @property
+    def _source_subfolder(self):
         current_file_loc = os.path.dirname(os.path.realpath(__file__))
-        root_dir = os.path.join(current_file_loc, "..")
-        content = load(os.path.join(root_dir, "CMakeLists.txt"))
+        return os.path.join(current_file_loc, "..")
+
+    def set_name(self):
+        content = load(os.path.join(self._source_subfolder, "CMakeLists.txt"))
         name = re.search("set\(THIS (.*)\)", content).group(1)
         self.name = name.strip()
 
@@ -50,7 +56,8 @@ class PackageConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.verbose = True
-        self._cmake.configure()
+        self._cmake.configure(build_dir=os.path.join(
+            self.build_folder, "build"))
         return self._cmake
 
     def build(self):
@@ -61,6 +68,11 @@ class PackageConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
+        self.copy(pattern="NOTICE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="AUTHORS", dst="licenses",
+                  src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = self.name
