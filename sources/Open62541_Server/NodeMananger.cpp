@@ -1,6 +1,7 @@
 #include "NodeMananger.hpp"
 #include "LoggerRepository.hpp"
 #include "Utility.hpp"
+#include "Variant_Visitor.hpp"
 
 using namespace std;
 using namespace HaSLL;
@@ -100,28 +101,8 @@ NodeManager::readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
                                     toString(callbacks->data_type));
               }
             },
-            [&](uint8_t byte_value) {
-              if (callbacks->data_type == DataType::BYTE) {
-                UA_Variant_setScalar(&value->value, &byte_value,
-                                     &UA_TYPES[UA_TYPES_BYTE]);
-              } else {
-                throw runtime_error("Tried to read a Byte data type "
-                                    "when node data type is: " +
-                                    toString(callbacks->data_type));
-              }
-            },
-            [&](int16_t short_value) {
-              if (callbacks->data_type == DataType::SHORT) {
-                UA_Variant_setScalar(&value->value, &short_value,
-                                     &UA_TYPES[UA_TYPES_INT16]);
-              } else {
-                throw runtime_error("Tried to read a Short data type "
-                                    "when node data type is: " +
-                                    toString(callbacks->data_type));
-              }
-            },
-            [&](int32_t integer_value) {
-              if (callbacks->data_type == DataType::INTEGER) {
+            [&](uint64_t integer_value) {
+              if (callbacks->data_type == DataType::UNSIGNED_INTEGER) {
                 UA_Variant_setScalar(&value->value, &integer_value,
                                      &UA_TYPES[UA_TYPES_INT32]);
               } else {
@@ -131,21 +112,11 @@ NodeManager::readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
               }
             },
             [&](int64_t long_value) {
-              if (callbacks->data_type == DataType::LONG) {
+              if (callbacks->data_type == DataType::INTEGER) {
                 UA_Variant_setScalar(&value->value, &long_value,
                                      &UA_TYPES[UA_TYPES_INT64]);
               } else {
                 throw runtime_error("Tried to read a Long data type "
-                                    "when node data type is: " +
-                                    toString(callbacks->data_type));
-              }
-            },
-            [&](float float_value) {
-              if (callbacks->data_type == DataType::FLOAT) {
-                UA_Variant_setScalar(&value->value, &float_value,
-                                     &UA_TYPES[UA_TYPES_FLOAT]);
-              } else {
-                throw runtime_error("Tried to read a Float data type "
                                     "when node data type is: " +
                                     toString(callbacks->data_type));
               }
@@ -159,6 +130,9 @@ NodeManager::readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
                                     "when node data type is:" +
                                     toString(callbacks->data_type));
               }
+            },
+            [&](vector<uint8_t> value) {
+              throw runtime_error("Array type is not supported!");
             },
             [&](string string_value) {
               if (callbacks->data_type == DataType::STRING) {
@@ -210,41 +184,26 @@ NodeManager::writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
         status = UA_STATUSCODE_GOOD;
         break;
       }
-      case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-        uint8_t byte_value = *((uint8_t *)(value->value.data));
-        write_CB(DataVariant(byte_value));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_BYTE:
       case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE:
       case UA_DataTypeKind::UA_DATATYPEKIND_UINT16:
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-        int16_t short_value = *((int16_t *)(value->value.data));
-        write_CB(DataVariant(short_value));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_INT16:
       case UA_DataTypeKind::UA_DATATYPEKIND_UINT32:
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-        int32_t integer_value = *((int32_t *)(value->value.data));
-        write_CB(DataVariant(integer_value));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME:
-      case UA_DataTypeKind::UA_DATATYPEKIND_UINT64:
+      case UA_DataTypeKind::UA_DATATYPEKIND_INT32:
       case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
         int64_t long_value = *((int64_t *)(value->value.data));
         write_CB(DataVariant(long_value));
         status = UA_STATUSCODE_GOOD;
         break;
       }
-      case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-        float float_value = *((float *)(value->value.data));
-        write_CB(DataVariant(float_value));
+      case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME:
+      case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+        uint64_t long_value = *((uint64_t *)(value->value.data));
+        write_CB(DataVariant(long_value));
         status = UA_STATUSCODE_GOOD;
         break;
       }
+      case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT:
       case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
         double double_value = *((double *)(value->value.data));
         write_CB(DataVariant(double_value));

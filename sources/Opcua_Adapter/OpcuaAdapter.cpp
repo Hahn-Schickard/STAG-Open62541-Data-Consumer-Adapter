@@ -21,10 +21,18 @@ OpcuaAdapter::~OpcuaAdapter() {
   LoggerRepository::getInstance().deregisterLoger(adapter_logger_->getName());
 }
 
-void OpcuaAdapter::run() {
-  adapter_logger_->log(SeverityLevel::INFO, "Initialising OPC UA Adapter...");
+void OpcuaAdapter::start() {
   if (server_->start()) {
-    adapter_logger_->log(SeverityLevel::INFO, "OPC UA Adapter is running!");
+    DCAI::DataConsumerAdapterInterface::start();
+  } else {
+    adapter_logger_->log(SeverityLevel::ERROR,
+                         "Failled to initialize OPC UA Adapter!");
+  }
+}
+
+void OpcuaAdapter::stop() {
+  if (server_->stop()) {
+    DCAI::DataConsumerAdapterInterface::stop();
   } else {
     adapter_logger_->log(SeverityLevel::ERROR,
                          "Failled to initialize OPC UA Adapter!");

@@ -16,13 +16,6 @@ class NodeBuilder {
   std::unique_ptr<NodeManager> manager_;
   Open62541Server *server_;
 
-public:
-  NodeBuilder(Open62541Server *server);
-  ~NodeBuilder();
-
-  UA_StatusCode
-  addDeviceNode(std::shared_ptr<Information_Model::Device> device);
-
   UA_StatusCode addDeviceNodeElement(
       std::shared_ptr<Information_Model::DeviceElement> device_element,
       const UA_NodeId *parent_id);
@@ -43,6 +36,13 @@ public:
   UA_StatusCode
   addWritableNode(std::shared_ptr<Information_Model::WritableMetric> metric,
                   const UA_NodeId *parent_id);
+
+public:
+  NodeBuilder(Open62541Server *server);
+  ~NodeBuilder();
+
+  UA_StatusCode
+  addDeviceNode(std::shared_ptr<Information_Model::Device> device);
 };
 } // namespace open62541
 

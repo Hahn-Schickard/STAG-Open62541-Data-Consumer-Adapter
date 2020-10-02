@@ -3,6 +3,7 @@
 #include "LoggerRepository.hpp"
 #include "NodeMananger.hpp"
 #include "Utility.hpp"
+#include "Variant_Visitor.hpp"
 
 #include <open62541/nodeids.h>
 #include <open62541/statuscodes.h>
@@ -211,40 +212,30 @@ UA_StatusCode NodeBuilder::addFunctionNode(shared_ptr<DeviceElement> function,
 
 void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
   match(variant,
-        [&](bool boolean_value) {
-          UA_Variant_setScalar(&value_attribute.value, &boolean_value,
+        [&](bool value) {
+          UA_Variant_setScalar(&value_attribute.value, &value,
                                &UA_TYPES[UA_TYPES_BOOLEAN]);
         },
-        [&](uint8_t byte_value) {
-          UA_Variant_setScalar(&value_attribute.value, &byte_value,
-                               &UA_TYPES[UA_TYPES_BYTE]);
+        [&](uint64_t value) {
+          UA_Variant_setScalar(&value_attribute.value, &value,
+                               &UA_TYPES[UA_TYPES_UINT64]);
         },
-        [&](int16_t short_value) {
-          UA_Variant_setScalar(&value_attribute.value, &short_value,
-                               &UA_TYPES[UA_TYPES_INT16]);
-        },
-        [&](int32_t integer_value) {
-          UA_Variant_setScalar(&value_attribute.value, &integer_value,
-                               &UA_TYPES[UA_TYPES_INT32]);
-        },
-        [&](int64_t long_value) {
-          UA_Variant_setScalar(&value_attribute.value, &long_value,
+        [&](int64_t value) {
+          UA_Variant_setScalar(&value_attribute.value, &value,
                                &UA_TYPES[UA_TYPES_INT64]);
         },
-        [&](float float_value) {
-          UA_Variant_setScalar(&value_attribute.value, &float_value,
-                               &UA_TYPES[UA_TYPES_FLOAT]);
-        },
-        [&](double double_value) {
-          UA_Variant_setScalar(&value_attribute.value, &double_value,
+        [&](double value) {
+          UA_Variant_setScalar(&value_attribute.value, &value,
                                &UA_TYPES[UA_TYPES_DOUBLE]);
         },
-        [&](string string_value) {
+        [&](vector<uint8_t> value) {
+          throw runtime_error("Array type is not supported!");
+        },
+        [&](string value) {
           UA_String open62541_string;
-          open62541_string.length = strlen(string_value.c_str());
+          open62541_string.length = strlen(value.c_str());
           open62541_string.data = (UA_Byte *)malloc(open62541_string.length);
-          memcpy(open62541_string.data, string_value.c_str(),
-                 open62541_string.length);
+          memcpy(open62541_string.data, value.c_str(), open62541_string.length);
           UA_Variant_setScalar(&value_attribute.value, &open62541_string,
                                &UA_TYPES[UA_TYPES_STRING]);
         });

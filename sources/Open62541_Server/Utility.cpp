@@ -10,39 +10,27 @@ namespace open62541 {
 UA_NodeId toNodeId(DataType type) {
   UA_NodeId typeId;
   switch (type) {
-  case BOOLEAN: {
+  case DataType::BOOLEAN: {
     typeId = UA_TYPES[UA_TYPES_BOOLEAN].typeId;
     break;
   }
-  case BYTE: {
-    typeId = UA_TYPES[UA_TYPES_BYTE].typeId;
+  case DataType::UNSIGNED_INTEGER: {
+    typeId = UA_TYPES[UA_TYPES_UINT64].typeId;
     break;
   }
-  case SHORT: {
-    typeId = UA_TYPES[UA_TYPES_INT16].typeId;
-    break;
-  }
-  case INTEGER: {
-    typeId = UA_TYPES[UA_TYPES_INT32].typeId;
-    break;
-  }
-  case LONG: {
+  case DataType::INTEGER: {
     typeId = UA_TYPES[UA_TYPES_INT64].typeId;
     break;
   }
-  case FLOAT: {
-    typeId = UA_TYPES[UA_TYPES_FLOAT].typeId;
-    break;
-  }
-  case DOUBLE: {
+  case DataType::DOUBLE: {
     typeId = UA_TYPES[UA_TYPES_DOUBLE].typeId;
     break;
   }
-  case STRING: {
+  case DataType::STRING: {
     typeId = UA_TYPES[UA_TYPES_STRING].typeId;
     break;
   }
-  case UNKNOWN:
+  case DataType::UNKNOWN:
   default: {
     //@TODO: Log unknown data type declarations
     break;
@@ -56,20 +44,11 @@ string toString(DataType type) {
   case DataType::BOOLEAN: {
     return "BOOLEAN";
   }
-  case DataType::BYTE: {
-    return "BYTE";
-  }
-  case DataType::SHORT: {
-    return "SHORT";
-  }
   case DataType::INTEGER: {
     return "INTEGER";
   }
-  case DataType::LONG: {
-    return "LONG";
-  }
-  case DataType::FLOAT: {
-    return "FLOAT";
+  case DataType::UNSIGNED_INTEGER: {
+    return "UNSIGNED INTEGER";
   }
   case DataType::DOUBLE: {
     return "DOUBLE";

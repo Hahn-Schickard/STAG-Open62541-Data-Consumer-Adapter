@@ -1,3 +1,14 @@
+## [0.1.2] - 2020.10.02
+### Changed 
+ - Information_Model to 0.1.2
+ - Model_Event_Handler to 0.1.2
+ - Data_Consumer_Adapter_Interface to 0.1.2
+ - OpcuaAdapter implementation to conform with Data_Consumer_Adapter_Interface
+ - Variant matchers 
+
+### Added
+ - Variant Visitor 0.1.0
+
 ## [0.1.1] - 2020-09.28
 ### Changed
  - Information_Model to 0.1.1
