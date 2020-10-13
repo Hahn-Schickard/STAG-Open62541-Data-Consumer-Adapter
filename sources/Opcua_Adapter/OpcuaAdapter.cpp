@@ -6,11 +6,11 @@
 
 using namespace Information_Model;
 using namespace Event_Model;
-using namespace DCAI;
 using namespace HaSLL;
 using namespace std;
 using namespace open62541;
 
+namespace DCAI {
 OpcuaAdapter::OpcuaAdapter(
     EventSourceInterfacePtr<ModelRegistryEvent> event_source)
     : DataConsumerAdapterInterface("open62541 adapter", event_source),
@@ -60,3 +60,4 @@ void OpcuaAdapter::handleEvent(shared_ptr<ModelRegistryEvent> event) {
           });
   }
 }
+} // namespace DCAI

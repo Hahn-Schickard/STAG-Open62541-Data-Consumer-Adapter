@@ -8,20 +8,21 @@
 
 #include <memory>
 
-class OpcuaAdapter : public DCAI::DataConsumerAdapterInterface {
+namespace DCAI {
+class OpcuaAdapter : public DataConsumerAdapterInterface {
   open62541::Open62541Server *server_;
   open62541::NodeBuilder *node_builder_;
   std::shared_ptr<HaSLL::Logger> logger_;
 
-  void handleEvent(std::shared_ptr<DCAI::ModelRegistryEvent> event);
+  void handleEvent(std::shared_ptr<ModelRegistryEvent> event);
 
 public:
-  OpcuaAdapter(Event_Model::EventSourceInterfacePtr<DCAI::ModelRegistryEvent>
-                   event_source);
+  OpcuaAdapter(
+      Event_Model::EventSourceInterfacePtr<ModelRegistryEvent> event_source);
   ~OpcuaAdapter();
 
   void start() override;
   void stop() override;
 };
-
+} // namespace DCAI
 #endif //__OPCUA_ADAPTER_HPP

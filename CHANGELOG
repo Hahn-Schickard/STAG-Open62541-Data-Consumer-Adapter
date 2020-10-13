@@ -2,6 +2,7 @@
 ### Added
  - Variant_Visitor to OpcuaAdapter implementation
  - ModelEventSource to the Open62541 Adapter ctor
+ - DCAI namespace to OpcuaAdapter class
 
 ### Changed 
  - Data_Consumer_Adapter_Interface to 0.1.3
