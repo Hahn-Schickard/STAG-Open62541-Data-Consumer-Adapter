@@ -19,6 +19,7 @@ target_sources(${THIS} PRIVATE
 
 target_link_libraries(${THIS} PUBLIC
                               Data_Consumer_Adapter_Interface::Data_Consumer_Adapter_Interface
+                              Variant_Visitor::Variant_Visitor
                               HaSLL::HaSLL                           
                               OPCUA_Server
 )

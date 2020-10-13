@@ -23,7 +23,6 @@ execute_conan_install()
 #@+ ======================== User PACKAGES configuration ===========================
 list(APPEND DEPENDENCIES_LIST 
             HaSLL
-            Information_Model
             Variant_Visitor
             Data_Consumer_Adapter_Interface
             open62541

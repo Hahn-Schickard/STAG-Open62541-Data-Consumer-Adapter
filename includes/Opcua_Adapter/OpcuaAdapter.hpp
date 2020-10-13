@@ -11,11 +11,13 @@
 class OpcuaAdapter : public DCAI::DataConsumerAdapterInterface {
   open62541::Open62541Server *server_;
   open62541::NodeBuilder *node_builder_;
+  std::shared_ptr<HaSLL::Logger> logger_;
 
-  void handleEvent(std::shared_ptr<Model_Event_Handler::NotifierEvent> event);
+  void handleEvent(std::shared_ptr<DCAI::ModelRegistryEvent> event);
 
 public:
-  OpcuaAdapter();
+  OpcuaAdapter(Event_Model::EventSourceInterfacePtr<DCAI::ModelRegistryEvent>
+                   event_source);
   ~OpcuaAdapter();
 
   void start() override;

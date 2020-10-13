@@ -1,3 +1,4 @@
+#include "DataConsumerAdapterInterface.hpp"
 #include "LoggerRepository.hpp"
 #include "OpcuaAdapter.hpp"
 
@@ -6,6 +7,7 @@
 
 using namespace std;
 using namespace HaSLL;
+using namespace DCAI;
 
 OpcuaAdapter *adapter;
 
@@ -20,6 +22,11 @@ static void stopHandler(int sig) {
   exit(0);
 }
 
+class EventSourceFake : public Event_Model::EventSource<ModelRegistryEvent> {
+public:
+  void sendEvent(std::shared_ptr<ModelRegistryEvent> event) { notify(event); }
+};
+
 int main(int argc, char *argv[]) {
   auto config = HaSLL::Configuration(
       "./log", "logfile.log", "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$",
@@ -28,7 +35,7 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, stopHandler);
   signal(SIGTERM, stopHandler);
 
-  adapter = new OpcuaAdapter();
+  adapter = new OpcuaAdapter(make_shared<EventSourceFake>());
   adapter->start();
 
   if (argc > 1) {
