@@ -17,8 +17,10 @@ class OpcuaAdapter : public DataConsumerAdapterInterface {
   void handleEvent(std::shared_ptr<ModelRegistryEvent> event);
 
 public:
-  OpcuaAdapter(
-      Event_Model::EventSourceInterfacePtr<ModelRegistryEvent> event_source);
+  using ModelEventSourcePtr =
+      std::shared_ptr<Event_Model::EventSourceInterface<ModelRegistryEvent>>;
+
+  OpcuaAdapter(ModelEventSourcePtr event_source);
   ~OpcuaAdapter();
 
   void start() override;

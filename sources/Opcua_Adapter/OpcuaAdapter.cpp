@@ -11,8 +11,7 @@ using namespace std;
 using namespace open62541;
 
 namespace DCAI {
-OpcuaAdapter::OpcuaAdapter(
-    EventSourceInterfacePtr<ModelRegistryEvent> event_source)
+OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source)
     : DataConsumerAdapterInterface("open62541 adapter", event_source),
       server_(new Open62541Server()), node_builder_(new NodeBuilder(server_)),
       logger_(getLogger()) {}
