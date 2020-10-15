@@ -14,12 +14,9 @@ class OpcuaAdapter : public DataConsumerAdapterInterface {
   std::unique_ptr<open62541::NodeBuilder> node_builder_;
   std::shared_ptr<HaSLL::Logger> logger_;
 
-  void handleEvent(std::shared_ptr<ModelRegistryEvent> event);
+  void handleEvent(std::shared_ptr<ModelRegistryEvent> event) override;
 
 public:
-  using ModelEventSourcePtr =
-      std::shared_ptr<Event_Model::EventSourceInterface<ModelRegistryEvent>>;
-
   OpcuaAdapter(ModelEventSourcePtr event_source);
   ~OpcuaAdapter();
 
