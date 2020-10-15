@@ -14,7 +14,7 @@ namespace open62541 {
 class NodeBuilder {
   std::shared_ptr<HaSLL::Logger> logger_;
   std::unique_ptr<NodeManager> manager_;
-  Open62541Server *server_;
+  std::shared_ptr<Open62541Server> server_;
 
   UA_StatusCode addDeviceNodeElement(
       std::shared_ptr<Information_Model::DeviceElement> device_element,
@@ -38,7 +38,7 @@ class NodeBuilder {
                   const UA_NodeId *parent_id);
 
 public:
-  NodeBuilder(Open62541Server *server);
+  NodeBuilder(std::shared_ptr<Open62541Server> server);
   ~NodeBuilder();
 
   UA_StatusCode

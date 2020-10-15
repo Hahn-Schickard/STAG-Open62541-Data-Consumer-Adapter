@@ -47,7 +47,7 @@ public:
   char *getNodeDescription() { return node_description_; }
 };
 
-NodeBuilder::NodeBuilder(Open62541Server *server)
+NodeBuilder::NodeBuilder(shared_ptr<Open62541Server> server)
     : logger_(LoggerRepository::getInstance().registerTypedLoger(this)),
       manager_(make_unique<NodeManager>()), server_(server) {}
 

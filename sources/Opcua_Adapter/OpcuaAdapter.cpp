@@ -13,12 +13,10 @@ using namespace open62541;
 namespace DCAI {
 OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source)
     : DataConsumerAdapterInterface("open62541 adapter", event_source),
-      server_(new Open62541Server()), node_builder_(new NodeBuilder(server_)),
-      logger_(getLogger()) {}
+      server_(make_shared<Open62541Server>()),
+      node_builder_(make_unique<NodeBuilder>(server_)), logger_(getLogger()) {}
 
 OpcuaAdapter::~OpcuaAdapter() {
-  delete server_;
-  delete node_builder_;
   logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
                logger_->getName());
   LoggerRepository::getInstance().deregisterLoger(logger_->getName());

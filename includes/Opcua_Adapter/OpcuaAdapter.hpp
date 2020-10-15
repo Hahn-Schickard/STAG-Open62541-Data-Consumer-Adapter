@@ -10,8 +10,8 @@
 
 namespace DCAI {
 class OpcuaAdapter : public DataConsumerAdapterInterface {
-  open62541::Open62541Server *server_;
-  open62541::NodeBuilder *node_builder_;
+  std::shared_ptr<open62541::Open62541Server> server_;
+  std::unique_ptr<open62541::NodeBuilder> node_builder_;
   std::shared_ptr<HaSLL::Logger> logger_;
 
   void handleEvent(std::shared_ptr<ModelRegistryEvent> event);
