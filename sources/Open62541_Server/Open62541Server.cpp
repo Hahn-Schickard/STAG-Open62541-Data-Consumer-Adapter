@@ -10,8 +10,7 @@ using namespace Information_Model;
 using namespace open62541;
 
 Open62541Server::Open62541Server()
-    : is_running_(false),
-      server_configuration_(make_unique<Configuration>("defaultConfig.json")),
+    : is_running_(false), server_configuration_(make_unique<Configuration>()),
       logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {
   registerLoggers();
   open62541_server_ =

@@ -1,32 +1,28 @@
 #include "Configuration.hpp"
-#include "Config_Serializer.hpp"
 #include "HaSLLLogger.hpp"
-#include "LoggerRepository.hpp"
-
-#include <open62541/network_tcp.h>
-#include <open62541/plugin/accesscontrol_default.h>
-#include <open62541/plugin/pki_default.h>
-#include <open62541/plugin/securitypolicy_default.h>
-#include <open62541/server_config.h>
 
 #include <open62541/server_config_default.h>
 
 using namespace std;
-using namespace HaSLL;
 
 namespace open62541 {
-Configuration::Configuration(const std::string configuraiton_file_path)
-    : logger_(LoggerRepository::getInstance().registerTypedLoger(this)),
-      configuration_((UA_ServerConfig *)malloc(sizeof(UA_ServerConfig))) {
+Configuration::Configuration() {
   try {
-    config_file_ = deserializeConfig(configuraiton_file_path);
-    configuration_->logger.log = HaSLL_Logger_.log;
-    configuration_->logger.clear = HaSLL_Logger_.clear;
-    UA_ServerConfig_setDefault(configuration_);
+    if (configuration_ = (UA_ServerConfig *)malloc(sizeof(UA_ServerConfig))) {
+      configuration_->logger.log = HaSLL_Logger_.log;
+      configuration_->logger.clear = HaSLL_Logger_.clear;
+      // @TODO: Implement Config.hpp and Config_Serializer.hpp usage to set
+      // UA_Config
+      UA_ServerConfig_setDefault(configuration_);
+    } else {
+      throw Open62541_Config_Exception(
+          "Failed to allocte Open62541 configuraiton");
+    }
   } catch (exception &ex) {
-    logger_->log(SeverityLevel::ERROR,
-                 "Cought exception when deserializing Configuration file: []",
-                 ex.what());
+    string error_msg =
+        "Cought exception when deserializing Configuration file: " +
+        string(ex.what());
+    throw Open62541_Config_Exception(error_msg);
   }
 }
 
@@ -34,9 +30,10 @@ Configuration::~Configuration() {
   try {
     free(configuration_);
   } catch (exception &ex) {
-    logger_->log(SeverityLevel::ERROR,
-                 "Cought exception during open62541 configuration cleanup: []",
-                 ex.what());
+    string error_msg =
+        "Cought exception during open62541 configuration cleanup: " +
+        string(ex.what());
+    throw Open62541_Config_Exception(error_msg);
   }
 }
 } // namespace open62541

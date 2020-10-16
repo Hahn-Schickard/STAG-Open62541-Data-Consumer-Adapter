@@ -1,21 +1,20 @@
 #ifndef __DCAI_OPEN62541_SERVER_CONFIGURATION_HPP_
 #define __DCAI_OPEN62541_SERVER_CONFIGURATION_HPP_
 
-#include "Config.hpp"
-#include "Logger.hpp"
-
-#include <memory>
 #include <open62541/server.h>
-#include <string>
+#include <stdexcept>
 
 namespace open62541 {
+struct Open62541_Config_Exception : public std::runtime_error {
+  Open62541_Config_Exception(std::string const &message)
+      : std::runtime_error(message) {}
+};
+
 class Configuration {
-  std::shared_ptr<HaSLL::Logger> logger_;
-  Config config_file_;
   UA_ServerConfig *configuration_;
 
 public:
-  Configuration(const std::string configuraiton_file_path);
+  Configuration();
   ~Configuration();
 
   const UA_ServerConfig *getConfig() const { return configuration_; }
