@@ -4,6 +4,7 @@
  - ModelEventSource to the Open62541 Adapter ctor
  - DCAI namespace to OpcuaAdapter class
  - Exception throwing for Configuration.hpp
+ - cpp_compatible option for Open62541
 
 ### Changed 
  - Data_Consumer_Adapter_Interface to 0.1.3

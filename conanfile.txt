@@ -12,3 +12,6 @@ cmake_find_package
 
 [imports]
 ., Find*.cmake -> ./
+
+[options]
+open62541:cpp_compatible=True
