@@ -8,7 +8,8 @@ using namespace std;
 namespace open62541 {
 Configuration::Configuration() {
   try {
-    if (configuration_ = (UA_ServerConfig *)malloc(sizeof(UA_ServerConfig))) {
+    if (configuration_ =
+            (UA_ServerConfig *)calloc(1, sizeof(UA_ServerConfig))) {
       configuration_->logger.log = HaSLL_Logger_.log;
       configuration_->logger.clear = HaSLL_Logger_.clear;
       // @TODO: Implement Config.hpp and Config_Serializer.hpp usage to set
