@@ -24,12 +24,12 @@ NodeManager::findCallbackWrapper(const UA_NodeId *node_id) {
   auto result = make_shared<CallbackWrapper>();
   auto it = findIndexPosition(node_id);
   if (it != node_calbacks_map_.end()) {
-    logger_->log(SeverityLevel::TRACE, "Node [] callbacks found.",
+    logger_->log(SeverityLevel::TRACE, "Node {} callbacks found.",
                  toString(node_id));
     result = it->second;
   } else {
     logger_->log(SeverityLevel::ERROR,
-                 "Node [] does not have any callbacks registered!",
+                 "Node {} does not have any callbacks registered!",
                  toString(node_id));
   }
   return result;
@@ -45,14 +45,14 @@ UA_StatusCode NodeManager::addNode(DataType type, const UA_NodeId *node_id,
                                    WriteCallback write_callback) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTSUPPORTED;
   if (findCallbackWrapper(node_id)) {
-    logger_->log(SeverityLevel::TRACE, "Adding callbacks for Node [].",
+    logger_->log(SeverityLevel::TRACE, "Adding callbacks for Node {}.",
                  toString(node_id));
     node_calbacks_map_.emplace(
         move(node_id),
         make_shared<CallbackWrapper>(type, read_callback, write_callback));
     status = UA_STATUSCODE_GOOD;
   } else {
-    logger_->log(SeverityLevel::ERROR, "Node [] was already registered ealier!",
+    logger_->log(SeverityLevel::ERROR, "Node {} was already registered ealier!",
                  toString(node_id));
     status = UA_STATUSCODE_BADNODEIDEXISTS;
   }
@@ -63,13 +63,13 @@ UA_StatusCode NodeManager::removeNode(const UA_NodeId *node_id) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTSUPPORTED;
   auto it = findIndexPosition(node_id);
   if (it != node_calbacks_map_.end()) {
-    logger_->log(SeverityLevel::TRACE, "Removing callbacks for Node [].",
+    logger_->log(SeverityLevel::TRACE, "Removing callbacks for Node {}.",
                  toString(node_id));
     node_calbacks_map_.erase(it);
     status = UA_STATUSCODE_GOOD;
   } else {
     logger_->log(SeverityLevel::ERROR,
-                 "Node [] does not have any registered callbacks!",
+                 "Node {} does not have any registered callbacks!",
                  toString(node_id));
     status = UA_STATUSCODE_BADNOTFOUND;
   }
@@ -85,7 +85,7 @@ NodeManager::readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
 
   auto it = findIndexPosition(node_id);
   if (it != node_calbacks_map_.end()) {
-    logger_->log(SeverityLevel::TRACE, "Calling read callback for Node [].",
+    logger_->log(SeverityLevel::TRACE, "Calling read callback for Node {}.",
                  toString(node_id));
     auto callbacks = it->second;
     auto variant_value = callbacks->read_callback();
@@ -154,13 +154,13 @@ NodeManager::readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
       status = UA_STATUSCODE_GOOD;
     } catch (const exception &exp) {
       logger_->log(SeverityLevel::ERROR,
-                   "Node [] does not contain the requested data type: []",
+                   "Node {} does not contain the requested data type: {}",
                    toString(node_id), exp.what());
       status = UA_STATUSCODE_BADTYPEMISMATCH;
     }
   } else {
     logger_->log(SeverityLevel::ERROR,
-                 "Node [] does not have any registered read callbacks!",
+                 "Node {} does not have any registered read callbacks!",
                  toString(node_id));
   }
   return status;
@@ -235,7 +235,7 @@ NodeManager::writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
       default: {
         logger_->log(
             SeverityLevel::ERROR,
-            "Node [] does not take [] as its argument for write callback!",
+            "Node {} does not take {} as its argument for write callback!",
             toString(node_id), string(value->value.type->typeName));
         status = UA_STATUSCODE_BADINVALIDARGUMENT;
         break;
@@ -243,12 +243,12 @@ NodeManager::writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
       }
     } else {
       logger_->log(SeverityLevel::ERROR,
-                   "Node [] does not have a registered write callback!",
+                   "Node {} does not have a registered write callback!",
                    toString(node_id));
     }
   } else {
     logger_->log(SeverityLevel::ERROR,
-                 "Node [] does not have any registered callbacks!",
+                 "Node {} does not have any registered callbacks!",
                  toString(node_id));
     status = UA_STATUSCODE_BADNOTFOUND;
   }
