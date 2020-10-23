@@ -229,7 +229,10 @@ void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
                                &UA_TYPES[UA_TYPES_DOUBLE]);
         },
         [&](vector<uint8_t> value) {
-          throw runtime_error("Array type is not supported!");
+          string tmp(value.begin(), value.end());
+          auto byte_string = UA_BYTESTRING_ALLOC(tmp.c_str());
+          UA_Variant_setScalar(&value_attribute.value, &byte_string,
+                               &UA_TYPES[UA_TYPES_BYTESTRING]);
         },
         [&](string value) {
           UA_String open62541_string;

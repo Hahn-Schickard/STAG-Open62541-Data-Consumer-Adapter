@@ -1,6 +1,7 @@
 #include "Utility.hpp"
 
 #include <open62541/types_generated.h>
+#include <stdexcept>
 
 using namespace std;
 using namespace Information_Model;
@@ -8,35 +9,28 @@ using namespace Information_Model;
 namespace open62541 {
 
 UA_NodeId toNodeId(DataType type) {
-  UA_NodeId typeId;
   switch (type) {
   case DataType::BOOLEAN: {
-    typeId = UA_TYPES[UA_TYPES_BOOLEAN].typeId;
-    break;
+    return UA_TYPES[UA_TYPES_BOOLEAN].typeId;
   }
   case DataType::UNSIGNED_INTEGER: {
-    typeId = UA_TYPES[UA_TYPES_UINT64].typeId;
-    break;
+    return UA_TYPES[UA_TYPES_UINT64].typeId;
   }
   case DataType::INTEGER: {
-    typeId = UA_TYPES[UA_TYPES_INT64].typeId;
-    break;
+    return UA_TYPES[UA_TYPES_INT64].typeId;
   }
   case DataType::DOUBLE: {
-    typeId = UA_TYPES[UA_TYPES_DOUBLE].typeId;
-    break;
+    return UA_TYPES[UA_TYPES_DOUBLE].typeId;
+  }
+  case DataType::OPAQUE: {
+    return UA_TYPES[UA_TYPES_BYTESTRING].typeId;
   }
   case DataType::STRING: {
-    typeId = UA_TYPES[UA_TYPES_STRING].typeId;
-    break;
+    return UA_TYPES[UA_TYPES_STRING].typeId;
   }
   case DataType::UNKNOWN:
-  default: {
-    //@TODO: Log unknown data type declarations
-    break;
+  default: { throw runtime_error("Unknown data type!"); }
   }
-  }
-  return typeId;
 }
 
 string toString(DataType type) {
