@@ -1,7 +1,10 @@
 #include "DataConsumerAdapterInterface.hpp"
+#include "DeviceMockBuilder.hpp"
 #include "LoggerRepository.hpp"
+#include "Metric_MOCK.hpp"
 #include "OpcuaAdapter.hpp"
 
+#include <gmock/gmock.h>
 #include <iostream>
 #include <signal.h>
 
@@ -35,8 +38,27 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, stopHandler);
   signal(SIGTERM, stopHandler);
 
-  adapter = new OpcuaAdapter(make_shared<EventSourceFake>());
+  auto event_source = make_shared<EventSourceFake>();
+  adapter = new OpcuaAdapter(event_source);
   adapter->start();
+
+  auto mock_builder =
+      make_shared<Information_Model::testing::DeviceMockBuilder>();
+  mock_builder->buildDeviceBase("1234", "Mocky", "Mocked test device");
+  mock_builder->addDeviceElementGroup("Group 1", "First group");
+  auto readable_ref_id = mock_builder->addReadableMetric(
+      "Readable", "Mocked readable metric",
+      Information_Model::DataType::BOOLEAN, Information_Model::ReadFunctor());
+  auto device = mock_builder->getResult();
+  mock_builder.reset();
+
+  auto readable = static_pointer_cast<Information_Model::testing::MockMetric>(
+      device->getDeviceElement(readable_ref_id));
+  EXPECT_CALL(*readable.get(), getMetricValue())
+      .WillRepeatedly(
+          ::testing::Return(Information_Model::DataVariant((bool)true)));
+
+  event_source->sendEvent(make_shared<ModelRegistryEvent>(device));
 
   if (argc > 1) {
     uint server_lifetime = atoi(argv[1]);
