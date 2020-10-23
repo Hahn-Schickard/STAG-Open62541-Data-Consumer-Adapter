@@ -250,16 +250,23 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   setVariant(value_attribute, metric->getMetricValue());
-
-  value_attribute.description =
-      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeDescription());
-  value_attribute.displayName =
-      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeName());
-
-  value_attribute.dataType = toNodeId(metric->getDataType());
-
+  if (!UA_Variant_isEmpty(&value_attribute.value)) {
+    value_attribute.description =
+        UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeDescription());
+    value_attribute.displayName =
+        UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeName());
+    value_attribute.dataType = toNodeId(metric->getDataType());
+    status = UA_STATUSCODE_GOOD;
+  }
   return status;
 }
+
+typedef std::function<UA_StatusCode(
+    UA_Server *server, const UA_NodeId *sessionId, void *sessionContext,
+    const UA_NodeId *nodeId, void *nodeContext,
+    UA_Boolean includeSourceTimeStamp, const UA_NumericRange *range,
+    UA_DataValue *value)>
+    UA_ReadCallback;
 
 typedef UA_StatusCode (*UA_READ_CB)(UA_Server *server,
                                     const UA_NodeId *sessionId,
@@ -293,14 +300,15 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
                                bind(&Metric::getMetricValue, metric));
     UA_DataSource data_source;
 
-    auto read_cb = bind(&NodeManager::readNodeValue, manager_.get(),
-                        placeholders::_1, placeholders::_2, placeholders::_3,
-                        placeholders::_4, placeholders::_5, placeholders::_6,
-                        placeholders::_7, placeholders::_8);
-    data_source.read = (UA_READ_CB)&read_cb;
+    UA_ReadCallback read_cb = bind(
+        &NodeManager::readNodeValue, manager_.get(), placeholders::_1,
+        placeholders::_2, placeholders::_3, placeholders::_4, placeholders::_5,
+        placeholders::_6, placeholders::_7, placeholders::_8);
+    data_source.read = (UA_READ_CB) & (*read_cb.target<UA_ReadCallback>());
 
+    auto server_ptr = server_->getServer();
     status = UA_Server_addDataSourceVariableNode(
-        server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
+        server_ptr, metrid_node_id, *parent_id, reference_type_id,
         metric_browse_name, type_definition, node_attr, data_source, NULL,
         NULL);
   }
@@ -330,6 +338,12 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
 
   return status;
 }
+
+typedef std::function<UA_StatusCode(
+    UA_Server *server, const UA_NodeId *sessionId, void *sessionContext,
+    const UA_NodeId *nodeId, void *nodeContext, const UA_NumericRange *range,
+    const UA_DataValue *value)>
+    UA_WriteCallback;
 
 typedef UA_StatusCode (*UA_WRITE_CB)(UA_Server *server,
                                      const UA_NodeId *sessionId,
@@ -363,16 +377,17 @@ UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
         bind(&WritableMetric::setMetricValue, metric, placeholders::_1));
     UA_DataSource data_source;
 
-    auto read_cb = bind(&NodeManager::readNodeValue, manager_.get(),
-                        placeholders::_1, placeholders::_2, placeholders::_3,
-                        placeholders::_4, placeholders::_5, placeholders::_6,
-                        placeholders::_7, placeholders::_8);
-    data_source.read = (UA_READ_CB)&read_cb;
-    auto write_cb =
+    UA_ReadCallback read_cb = bind(
+        &NodeManager::readNodeValue, manager_.get(), placeholders::_1,
+        placeholders::_2, placeholders::_3, placeholders::_4, placeholders::_5,
+        placeholders::_6, placeholders::_7, placeholders::_8);
+    data_source.read = (UA_READ_CB) & (*read_cb.target<UA_ReadCallback>());
+
+    UA_WriteCallback write_cb =
         bind(&NodeManager::writeNodeValue, manager_.get(), placeholders::_1,
              placeholders::_2, placeholders::_3, placeholders::_4,
              placeholders::_5, placeholders::_6, placeholders::_7);
-    data_source.write = (UA_WRITE_CB)&write_cb;
+    data_source.write = (UA_WRITE_CB) & (*write_cb.target<UA_WriteCallback>());
 
     status = UA_Server_addDataSourceVariableNode(
         server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
