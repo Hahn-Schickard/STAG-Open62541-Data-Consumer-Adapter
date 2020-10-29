@@ -76,9 +76,9 @@ UA_StatusCode NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
   UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
 
   node_attr.description =
-      UA_LOCALIZEDTEXT("EN_US", device_node_info.getNodeDescription());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", device_node_info.getNodeDescription());
   node_attr.displayName =
-      UA_LOCALIZEDTEXT("EN_US", device_node_info.getNodeName());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", device_node_info.getNodeName());
 
   status = UA_Server_addObjectNode(
       server_->getServer(), device_node_id, parent_node_id, reference_type_id,
@@ -167,9 +167,9 @@ NodeBuilder::addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
     UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
 
     node_attr.description =
-        UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeDescription());
+        UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info.getNodeDescription());
     node_attr.displayName =
-        UA_LOCALIZEDTEXT("EN_US", element_node_info.getNodeName());
+        UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info.getNodeName());
 
     status = UA_Server_addObjectNode(
         server_->getServer(), group_node_id, *parent_id, reference_type_id,
@@ -253,10 +253,10 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
 
   setVariant(value_attribute, metric->getMetricValue());
   if (!UA_Variant_isEmpty(&value_attribute.value)) {
-    value_attribute.description =
-        UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeDescription());
+    value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
+        "EN_US", element_node_info->getNodeDescription());
     value_attribute.displayName =
-        UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeName());
+        UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info->getNodeName());
     value_attribute.dataType = toNodeId(metric->getDataType());
     status = UA_STATUSCODE_GOOD;
   }
@@ -314,9 +314,9 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
   setVariant(value_attribute, metric->getMetricValue());
 
   value_attribute.description =
-      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeDescription());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info->getNodeDescription());
   value_attribute.displayName =
-      UA_LOCALIZEDTEXT("EN_US", element_node_info->getNodeName());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info->getNodeName());
 
   value_attribute.dataType = toNodeId(metric->getDataType());
 
