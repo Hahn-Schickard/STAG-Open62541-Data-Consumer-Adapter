@@ -84,6 +84,10 @@ UA_UInt16 Open62541Server::getServerNamespace() {
   return server_namespace_index_;
 }
 
+const UA_Logger *Open62541Server::getServerLogger() {
+  return &server_configuration_->getConfig()->logger;
+}
+
 UA_Server *Open62541Server::getServer() { return open62541_server_; }
 
 bool Open62541Server::isRunning() {

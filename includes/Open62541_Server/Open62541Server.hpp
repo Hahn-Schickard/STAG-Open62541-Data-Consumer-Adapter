@@ -31,6 +31,7 @@ public:
   bool stop();
   bool isRunning();
   UA_UInt16 getServerNamespace();
+  const UA_Logger *getServerLogger();
   UA_Server *getServer();
 };
 } // namespace open62541
