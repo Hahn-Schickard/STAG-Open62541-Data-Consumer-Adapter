@@ -1,7 +1,6 @@
 #include "NodeBuilder.hpp"
 #include "DataVariant.hpp"
 #include "LoggerRepository.hpp"
-#include "NodeMananger.hpp"
 #include "Utility.hpp"
 #include "Variant_Visitor.hpp"
 
@@ -49,11 +48,14 @@ public:
 
 NodeBuilder::NodeBuilder(shared_ptr<Open62541Server> server)
     : logger_(LoggerRepository::getInstance().registerTypedLoger(this)),
-      manager_(make_unique<NodeManager>()), server_(server) {}
+      server_(server) {
+  NodeCallbackHandler::initialise(server->getServerLogger());
+}
 
 NodeBuilder::~NodeBuilder() {
   logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
                logger_->getName());
+  NodeCallbackHandler::destroy();
   LoggerRepository::getInstance().deregisterLoger(logger_->getName());
 }
 
@@ -261,21 +263,6 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
   return status;
 }
 
-typedef std::function<UA_StatusCode(
-    UA_Server *server, const UA_NodeId *sessionId, void *sessionContext,
-    const UA_NodeId *nodeId, void *nodeContext,
-    UA_Boolean includeSourceTimeStamp, const UA_NumericRange *range,
-    UA_DataValue *value)>
-    UA_ReadCallback;
-
-typedef UA_StatusCode (*UA_READ_CB)(UA_Server *server,
-                                    const UA_NodeId *sessionId,
-                                    void *sessionContext,
-                                    const UA_NodeId *nodeId, void *nodeContext,
-                                    UA_Boolean includeSourceTimeStamp,
-                                    const UA_NumericRange *range,
-                                    UA_DataValue *value);
-
 UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
                                            const UA_NodeId *parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
@@ -296,15 +283,12 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
 
   if (status == UA_STATUSCODE_GOOD) {
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
-    status = manager_->addNode(metric->getDataType(), &metrid_node_id,
-                               bind(&Metric::getMetricValue, metric));
+    status = NodeCallbackHandler::addNodeCallbacks(
+        metrid_node_id,
+        make_shared<CallbackWrapper>(metric->getDataType(),
+                                     bind(&Metric::getMetricValue, metric)));
     UA_DataSource data_source;
-
-    UA_ReadCallback read_cb = bind(
-        &NodeManager::readNodeValue, manager_.get(), placeholders::_1,
-        placeholders::_2, placeholders::_3, placeholders::_4, placeholders::_5,
-        placeholders::_6, placeholders::_7, placeholders::_8);
-    data_source.read = (UA_READ_CB) & (*read_cb.target<UA_ReadCallback>());
+    data_source.read = &NodeCallbackHandler::readNodeValue;
 
     auto server_ptr = server_->getServer();
     status = UA_Server_addDataSourceVariableNode(
@@ -339,19 +323,6 @@ UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
   return status;
 }
 
-typedef std::function<UA_StatusCode(
-    UA_Server *server, const UA_NodeId *sessionId, void *sessionContext,
-    const UA_NodeId *nodeId, void *nodeContext, const UA_NumericRange *range,
-    const UA_DataValue *value)>
-    UA_WriteCallback;
-
-typedef UA_StatusCode (*UA_WRITE_CB)(UA_Server *server,
-                                     const UA_NodeId *sessionId,
-                                     void *sessionContext,
-                                     const UA_NodeId *nodeId, void *nodeContext,
-                                     const UA_NumericRange *range,
-                                     const UA_DataValue *value);
-
 UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
                                            const UA_NodeId *parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
@@ -371,23 +342,15 @@ UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
 
   if (status == UA_STATUSCODE_GOOD) {
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
-    status = manager_->addNode(
-        metric->getDataType(), &metrid_node_id,
-        bind(&WritableMetric::getMetricValue, metric),
-        bind(&WritableMetric::setMetricValue, metric, placeholders::_1));
+    status = NodeCallbackHandler::addNodeCallbacks(
+        metrid_node_id,
+        make_shared<CallbackWrapper>(
+            metric->getDataType(),
+            bind(&WritableMetric::getMetricValue, metric),
+            bind(&WritableMetric::setMetricValue, metric, placeholders::_1)));
     UA_DataSource data_source;
-
-    UA_ReadCallback read_cb = bind(
-        &NodeManager::readNodeValue, manager_.get(), placeholders::_1,
-        placeholders::_2, placeholders::_3, placeholders::_4, placeholders::_5,
-        placeholders::_6, placeholders::_7, placeholders::_8);
-    data_source.read = (UA_READ_CB) & (*read_cb.target<UA_ReadCallback>());
-
-    UA_WriteCallback write_cb =
-        bind(&NodeManager::writeNodeValue, manager_.get(), placeholders::_1,
-             placeholders::_2, placeholders::_3, placeholders::_4,
-             placeholders::_5, placeholders::_6, placeholders::_7);
-    data_source.write = (UA_WRITE_CB) & (*write_cb.target<UA_WriteCallback>());
+    data_source.read = &NodeCallbackHandler::readNodeValue;
+    data_source.write = &NodeCallbackHandler::writeNodeValue;
 
     status = UA_Server_addDataSourceVariableNode(
         server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
