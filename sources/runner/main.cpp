@@ -54,8 +54,8 @@ int main(int argc, char *argv[]) {
 
   auto readable = static_pointer_cast<Information_Model::testing::MockMetric>(
       device->getDeviceElement(readable_ref_id));
-  EXPECT_CALL(*readable.get(), getMetricValue())
-      .WillRepeatedly(
+  ON_CALL(*readable.get(), getMetricValue())
+      .WillByDefault(
           ::testing::Return(Information_Model::DataVariant((bool)true)));
 
   event_source->sendEvent(make_shared<ModelRegistryEvent>(device));
