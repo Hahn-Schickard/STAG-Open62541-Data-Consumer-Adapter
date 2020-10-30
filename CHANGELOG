@@ -10,6 +10,9 @@
  - Data_Consumer_Adapter_Interface to 0.1.3
  - Event model implementation within OpcuaAdapter
  - raw C pointers into smart pointers
+ - NodeManager to static NodeCallbackHandler 
+ - Direct C string usage to reallocation
+ - Direct Variant value usage to copy usage  
 
 ### Removed
  - Information_Model dependency
