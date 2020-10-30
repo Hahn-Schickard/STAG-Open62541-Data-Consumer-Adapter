@@ -1,5 +1,6 @@
 #include "HaSLLLogger.hpp"
 #include "LoggerRepository.hpp"
+#include "Utility.hpp"
 
 using namespace std;
 using namespace HaSLL;
@@ -71,7 +72,7 @@ void removeLoggers() {
   security_policy_logger.reset();
 }
 
-void HaSLL_Logger_log(void *_logContext, UA_LogLevel level,
+void HaSLL_Logger_log(UNUSED(void *_logContext), UA_LogLevel level,
                       UA_LogCategory category, const char *msg, va_list args) {
 
   size_t buffer_size = strlen(msg);
@@ -125,7 +126,7 @@ void HaSLL_Logger_log(void *_logContext, UA_LogLevel level,
   }
 }
 
-void HaSLL_Logger_clear(void *logContext) {
+void HaSLL_Logger_clear(UNUSED(void *logContext)) {
   // Nothing to clear
 }
 
