@@ -10,7 +10,7 @@ file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 
 INCLUDE_DIRS_AND_FILES("${THIS_INCLUDES_DIRS}" THIS_INCLUDES)
 
-add_library(${THIS})
+add_library(${THIS} OBJECT)
 
 target_sources(${THIS} PRIVATE 
                        ${THIS_INCLUDES}
@@ -27,6 +27,8 @@ target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${INCLUDES_DIR}/Serializer>
                            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/>
 )
+
+set_property(TARGET ${THIS} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_compile_features(${THIS} PUBLIC cxx_std_17)
 
