@@ -33,28 +33,6 @@ UA_NodeId toNodeId(DataType type) {
   }
 }
 
-string toString(DataType type) {
-  switch (type) {
-  case DataType::BOOLEAN: {
-    return "BOOLEAN";
-  }
-  case DataType::INTEGER: {
-    return "INTEGER";
-  }
-  case DataType::UNSIGNED_INTEGER: {
-    return "UNSIGNED INTEGER";
-  }
-  case DataType::DOUBLE: {
-    return "DOUBLE";
-  }
-  case DataType::STRING: {
-    return "STRING";
-  }
-  case DataType::UNKNOWN:
-  default: { return "UNKNOWN"; }
-  }
-}
-
 string toString(UA_String input) {
   string output;
   for (size_t i = 0; i < input.length; i++) {
