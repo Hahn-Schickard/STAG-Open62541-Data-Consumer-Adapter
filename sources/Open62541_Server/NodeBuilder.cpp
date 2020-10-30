@@ -66,11 +66,11 @@ UA_StatusCode NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
 
   DeviceElementNodeInfo device_node_info = DeviceElementNodeInfo(device);
 
-  UA_NodeId device_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
-                                              device_node_info.getNodeId());
+  UA_NodeId device_node_id = UA_NODEID_STRING_ALLOC(
+      server_->getServerNamespace(), device_node_info.getNodeId());
   UA_NodeId parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-  UA_QualifiedName device_browse_name = UA_QUALIFIEDNAME(
+  UA_QualifiedName device_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), device_node_info.getNodeName());
   UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
   UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
@@ -158,10 +158,10 @@ NodeBuilder::addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
       DeviceElementNodeInfo(device_element_group);
 
   if (!device_element_group->getSubelements().empty()) {
-    UA_NodeId group_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
-                                               element_node_info.getNodeId());
+    UA_NodeId group_node_id = UA_NODEID_STRING_ALLOC(
+        server_->getServerNamespace(), element_node_info.getNodeId());
     UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-    UA_QualifiedName group_browse_name = UA_QUALIFIEDNAME(
+    UA_QualifiedName group_browse_name = UA_QUALIFIEDNAME_ALLOC(
         server_->getServerNamespace(), element_node_info.getNodeName());
     UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
     UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
@@ -269,10 +269,10 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
 
   DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(metric);
 
-  UA_NodeId metrid_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
-                                              element_node_info.getNodeId());
+  UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
+      server_->getServerNamespace(), element_node_info.getNodeId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-  UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME(
+  UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), element_node_info.getNodeName());
   UA_NodeId type_definition =
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
@@ -329,10 +329,10 @@ UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
 
   DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(metric);
 
-  UA_NodeId metrid_node_id = UA_NODEID_STRING(server_->getServerNamespace(),
-                                              element_node_info.getNodeId());
+  UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
+      server_->getServerNamespace(), element_node_info.getNodeId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-  UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME(
+  UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), element_node_info.getNodeName());
   UA_NodeId type_definition =
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
