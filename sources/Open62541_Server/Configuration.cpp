@@ -8,8 +8,8 @@ using namespace std;
 namespace open62541 {
 Configuration::Configuration() {
   try {
-    if (configuration_ =
-            (UA_ServerConfig *)calloc(1, sizeof(UA_ServerConfig))) {
+    if ((configuration_ =
+             (UA_ServerConfig *)calloc(1, sizeof(UA_ServerConfig)))) {
       configuration_->logger.log = HaSLL_Logger_.log;
       configuration_->logger.clear = HaSLL_Logger_.clear;
       // @TODO: Implement Config.hpp and Config_Serializer.hpp usage to set
@@ -27,14 +27,5 @@ Configuration::Configuration() {
   }
 }
 
-Configuration::~Configuration() {
-  try {
-    free(configuration_);
-  } catch (exception &ex) {
-    string error_msg =
-        "Cought exception during open62541 configuration cleanup: " +
-        string(ex.what());
-    throw Open62541_Config_Exception(error_msg);
-  }
-}
+Configuration::~Configuration() { free(configuration_); }
 } // namespace open62541
