@@ -1,3 +1,12 @@
+## [0.1.4] - 2020.11.16
+### Added
+ - Posix time convertion
+ - Callback handlers for DateTime requests
+ 
+### Changed
+ - valgrind script to use better error detection
+ - Data Consumer Adapter Interface to 0.1.4
+
 ## [0.1.3] - 2020.10.16
 ### Added
  - Variant_Visitor to OpcuaAdapter implementation
