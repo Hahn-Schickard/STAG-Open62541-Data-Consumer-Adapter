@@ -230,6 +230,11 @@ void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
           UA_Variant_setScalar(&value_attribute.value, &value,
                                &UA_TYPES[UA_TYPES_DOUBLE]);
         },
+        [&](DateTime value) {
+          auto date_time = UA_DateTime_toStruct(value.getValue());
+          UA_Variant_setScalar(&value_attribute.value, &date_time,
+                               &UA_TYPES[UA_TYPES_DATETIME]);
+        },
         [&](vector<uint8_t> value) {
           string tmp(value.begin(), value.end());
           auto byte_string = UA_BYTESTRING_ALLOC(tmp.c_str());

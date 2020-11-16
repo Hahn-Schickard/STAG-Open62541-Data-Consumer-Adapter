@@ -150,6 +150,17 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
                                     toString(callback_wrapper->data_type_));
               }
             },
+            [&](DateTime time_value) {
+              if (callback_wrapper->data_type_ == DataType::TIME) {
+                auto date_time = UA_DateTime_toStruct(time_value.getValue());
+                UA_Variant_setScalarCopy(&value->value, &date_time,
+                                         &UA_TYPES[UA_TYPES_DATETIME]);
+              } else {
+                throw runtime_error("Tried to read a String data type "
+                                    "when node data type is: " +
+                                    toString(callback_wrapper->data_type_));
+              }
+            },
             [&](vector<uint8_t> opaque_value) {
               if (callback_wrapper->data_type_ == DataType::OPAQUE) {
                 string tmp(opaque_value.begin(), opaque_value.end());
@@ -228,7 +239,12 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue(
         status = UA_STATUSCODE_GOOD;
         break;
       }
-      case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME:
+      case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
+        int64_t time_value = *((int64_t *)(value->value.data));
+        write_CB(DataVariant(DateTime(time_value)));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
       case UA_DataTypeKind::UA_DATATYPEKIND_BYTE:
       case UA_DataTypeKind::UA_DATATYPEKIND_UINT16:
       case UA_DataTypeKind::UA_DATATYPEKIND_UINT32:
