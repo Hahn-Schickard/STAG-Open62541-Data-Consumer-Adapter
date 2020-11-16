@@ -32,15 +32,16 @@ def log_output(lines: list, filename: str):
     file.close()
 
 
-def count_errors(lines: list, error_marker: str):
-    counter = 0
-    for line in lines:
-        if line.find(error_marker) != -1:
-            counter += 1
-    return counter
+def count_errors(lines: list, error_beggining_marker: str, error_end_marker: str):
+    error_marker_occurances = [i for i in lines if error_beggining_marker in i]
+    error_counter_string = error_marker_occurances.pop()
+    error_marker_index = error_counter_string.find(
+        error_beggining_marker) + len(error_beggining_marker)
+    error_marker_size = error_counter_string.find(error_end_marker)
+    return int(error_counter_string[error_marker_index:error_marker_size])
 
 
-def run_memory_analysis(analyzer: str, settings: list, error_marker: str, target: str, arguments: list):
+def run_memory_analysis(analyzer: str, settings: list, error_beggining_marker: str, error_end_marker: str, target: str, arguments: list):
     if is_installed(analyzer) and file_exists(target):
         try:
             cmd_list = [analyzer]
@@ -53,7 +54,8 @@ def run_memory_analysis(analyzer: str, settings: list, error_marker: str, target
                 cmd_list, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
             result = output.stderr.decode('utf-8').split('\n')
             log_output(result, analyzer+"-results.log")
-            error_count = count_errors(result, error_marker)
+            error_count = count_errors(
+                result, error_beggining_marker, error_end_marker)
             if error_count > 0:
                 print(analyzer, " found ", error_count, " errors!")
                 sys.exit(1)
@@ -75,4 +77,4 @@ arguments = parser.parse_args().arguments
 print("Runing memory analysis with valgrind for target: ",
       target, " with argument list:", arguments)
 run_memory_analysis("valgrind", ["--leak-check=full", "--show-leak-kinds=all",
-                                 "--track-origins=yes", "--verbose"], "ERROR SUMMARY:", target, arguments)
+                                 "--track-origins=yes", "--verbose"], "ERROR SUMMARY: ", "errors", target, arguments)
