@@ -14,38 +14,6 @@ using namespace HaSLL;
 using namespace Information_Model;
 using namespace open62541;
 
-class DeviceElementNodeInfo {
-  char *node_id_;
-  char *node_name_;
-  char *node_description_;
-
-public:
-  DeviceElementNodeInfo(shared_ptr<NamedElement> element) {
-    if (element) {
-      node_id_ = new char[element->getElementId().length() + 1];
-      node_name_ = new char[element->getElementDescription().length() + 1];
-      node_description_ =
-          new char[element->getElementDescription().length() + 1];
-
-      strcpy(node_id_, element->getElementId().c_str());
-      strcpy(node_name_, element->getElementName().c_str());
-      strcpy(node_description_, element->getElementDescription().c_str());
-    } else {
-      throw runtime_error("Given element is empty!");
-    }
-  }
-
-  ~DeviceElementNodeInfo() {
-    delete[] node_id_;
-    delete[] node_name_;
-    delete[] node_description_;
-  }
-
-  char *getNodeId() { return node_id_; }
-  char *getNodeName() { return node_name_; }
-  char *getNodeDescription() { return node_description_; }
-};
-
 NodeBuilder::NodeBuilder(shared_ptr<Open62541Server> server)
     : logger_(LoggerRepository::getInstance().registerTypedLoger(this)),
       server_(server) {
@@ -64,21 +32,27 @@ UA_StatusCode NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
   logger_->log(SeverityLevel::INFO, "Adding a new Device: {}, with id: {}",
                device->getElementName(), device->getElementId());
 
-  DeviceElementNodeInfo device_node_info = DeviceElementNodeInfo(device);
-
   UA_NodeId device_node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), device_node_info.getNodeId());
+      server_->getServerNamespace(), device->getElementId().c_str());
+  logger_->log(SeverityLevel::TRACE,
+               "Assigining {} NodeId to Device: {}, with id: {}",
+               toString(&device_node_id), device->getElementName(),
+               device->getElementId());
   UA_NodeId parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
   UA_QualifiedName device_browse_name = UA_QUALIFIEDNAME_ALLOC(
-      server_->getServerNamespace(), device_node_info.getNodeName());
+      server_->getServerNamespace(), device->getElementName().c_str());
+  logger_->log(SeverityLevel::TRACE,
+               "Assigining browse name: {} to Device: {}, with id: {}",
+               toString(&device_browse_name), device->getElementName(),
+               device->getElementId());
   UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
   UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
 
   node_attr.description =
-      UA_LOCALIZEDTEXT_ALLOC("EN_US", device_node_info.getNodeDescription());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", device->getElementDescription().c_str());
   node_attr.displayName =
-      UA_LOCALIZEDTEXT_ALLOC("EN_US", device_node_info.getNodeName());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", device->getElementName().c_str());
 
   status = UA_Server_addObjectNode(
       server_->getServer(), device_node_id, parent_node_id, reference_type_id,
@@ -151,25 +125,36 @@ UA_StatusCode
 NodeBuilder::addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
                           const UA_NodeId *parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-  logger_->log(SeverityLevel::TRACE, "Adding group element {} to node {}",
-               device_element_group->getElementName(), toString(parent_id));
-
-  DeviceElementNodeInfo element_node_info =
-      DeviceElementNodeInfo(device_element_group);
-
   if (!device_element_group->getSubelements().empty()) {
-    UA_NodeId group_node_id = UA_NODEID_STRING_ALLOC(
-        server_->getServerNamespace(), element_node_info.getNodeId());
+    logger_->log(SeverityLevel::TRACE,
+                 "Adding group element {} with ID {} to node {}",
+                 device_element_group->getElementName(),
+                 device_element_group->getElementId(), toString(parent_id));
+
+    UA_NodeId group_node_id =
+        UA_NODEID_STRING_ALLOC(server_->getServerNamespace(),
+                               device_element_group->getElementId().c_str());
+    logger_->log(SeverityLevel::TRACE,
+                 "Assigining {} NodeId to group element: {}, with id: {}",
+                 toString(&group_node_id),
+                 device_element_group->getElementName(),
+                 device_element_group->getElementId());
     UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-    UA_QualifiedName group_browse_name = UA_QUALIFIEDNAME_ALLOC(
-        server_->getServerNamespace(), element_node_info.getNodeName());
+    UA_QualifiedName group_browse_name =
+        UA_QUALIFIEDNAME_ALLOC(server_->getServerNamespace(),
+                               device_element_group->getElementName().c_str());
+    logger_->log(SeverityLevel::TRACE,
+                 "Assigining browse name: {} to group element: {}, with id: {}",
+                 toString(&group_browse_name),
+                 device_element_group->getElementName(),
+                 device_element_group->getElementId());
     UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
     UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
 
-    node_attr.description =
-        UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info.getNodeDescription());
-    node_attr.displayName =
-        UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info.getNodeName());
+    node_attr.description = UA_LOCALIZEDTEXT_ALLOC(
+        "EN_US", device_element_group->getElementDescription().c_str());
+    node_attr.displayName = UA_LOCALIZEDTEXT_ALLOC(
+        "EN_US", device_element_group->getElementName().c_str());
 
     status = UA_Server_addObjectNode(
         server_->getServer(), group_node_id, *parent_id, reference_type_id,
@@ -189,8 +174,9 @@ NodeBuilder::addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
     }
   } else {
     logger_->log(SeverityLevel::WARNNING,
-                 "Parent's {} group element {} is empty!", toString(parent_id),
-                 device_element_group->getElementName());
+                 "Parent's {} group element {} with id {} is empty!",
+                 toString(parent_id), device_element_group->getElementName(),
+                 device_element_group->getElementId());
   }
 
   if (status != UA_STATUSCODE_GOOD) {
@@ -251,17 +237,16 @@ void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
         });
 }
 
-UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
-                       UA_VariableAttributes &value_attribute,
+UA_StatusCode setValue(UA_VariableAttributes &value_attribute,
                        shared_ptr<Metric> metric) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   setVariant(value_attribute, metric->getMetricValue());
   if (!UA_Variant_isEmpty(&value_attribute.value)) {
     value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
-        "EN_US", element_node_info->getNodeDescription());
+        "EN_US", metric->getElementDescription().c_str());
     value_attribute.displayName =
-        UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info->getNodeName());
+        UA_LOCALIZEDTEXT_ALLOC("EN_US", metric->getElementName().c_str());
     value_attribute.dataType = toNodeId(metric->getDataType());
     status = UA_STATUSCODE_GOOD;
   }
@@ -272,19 +257,25 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
                                            const UA_NodeId *parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
-  DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(metric);
-
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), element_node_info.getNodeId());
+      server_->getServerNamespace(), metric->getElementId().c_str());
+  logger_->log(SeverityLevel::TRACE,
+               "Assigining {} NodeId to metric: {}, with id: {}",
+               toString(&metrid_node_id), metric->getElementName(),
+               metric->getElementId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
-      server_->getServerNamespace(), element_node_info.getNodeName());
+      server_->getServerNamespace(), metric->getElementName().c_str());
+  logger_->log(SeverityLevel::TRACE,
+               "Assigining browse name: {} to metric: {}, with id: {}",
+               toString(&metric_browse_name), metric->getElementName(),
+               metric->getElementId());
   UA_NodeId type_definition =
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
 
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(&element_node_info, node_attr, metric);
+  status = setValue(node_attr, metric);
 
   if (status == UA_STATUSCODE_GOOD) {
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
@@ -311,17 +302,16 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
   return status;
 }
 
-UA_StatusCode setValue(DeviceElementNodeInfo *element_node_info,
-                       UA_VariableAttributes &value_attribute,
+UA_StatusCode setValue(UA_VariableAttributes &value_attribute,
                        shared_ptr<WritableMetric> metric) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   setVariant(value_attribute, metric->getMetricValue());
 
   value_attribute.description =
-      UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info->getNodeDescription());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", metric->getElementDescription().c_str());
   value_attribute.displayName =
-      UA_LOCALIZEDTEXT_ALLOC("EN_US", element_node_info->getNodeName());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", metric->getElementName().c_str());
 
   value_attribute.dataType = toNodeId(metric->getDataType());
 
@@ -332,18 +322,24 @@ UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
                                            const UA_NodeId *parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
-  DeviceElementNodeInfo element_node_info = DeviceElementNodeInfo(metric);
-
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), element_node_info.getNodeId());
+      server_->getServerNamespace(), metric->getElementId().c_str());
+  logger_->log(SeverityLevel::TRACE,
+               "Assigining {} NodeId to metric: {}, with id: {}",
+               toString(&metrid_node_id), metric->getElementName(),
+               metric->getElementId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
-      server_->getServerNamespace(), element_node_info.getNodeName());
+      server_->getServerNamespace(), metric->getElementName().c_str());
+  logger_->log(SeverityLevel::TRACE,
+               "Assigining browse name: {} to metric: {}, with id: {}",
+               toString(&metric_browse_name), metric->getElementName(),
+               metric->getElementId());
   UA_NodeId type_definition =
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(&element_node_info, node_attr, metric);
+  status = setValue(node_attr, metric);
 
   if (status == UA_STATUSCODE_GOOD) {
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
