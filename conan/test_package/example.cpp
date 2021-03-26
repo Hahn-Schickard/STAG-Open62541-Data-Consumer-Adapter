@@ -1,5 +1,6 @@
+#include "Event_Model/EventSource.hpp"
 #include "LoggerRepository.hpp"
-#include "OpcuaAdapter.hpp"
+#include "Open62541_Data_Consumer_Adapter/OpcuaAdapter.hpp"
 
 #include <memory>
 #include <thread>
