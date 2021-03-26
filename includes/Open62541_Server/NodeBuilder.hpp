@@ -1,12 +1,12 @@
 #ifndef __OPEN62541_NODE_BUILDER_HPP
 #define __OPEN62541_NODE_BUILDER_HPP
 
-#include "Device.hpp"
+#include "Information_Model/Device.hpp"
+#include "Information_Model/Metric.hpp"
+#include "Information_Model/WritableMetric.hpp"
 #include "Logger.hpp"
-#include "Metric.hpp"
 #include "NodeCallbackHandler.hpp"
 #include "Open62541Server.hpp"
-#include "WritableMetric.hpp"
 
 #include <memory>
 

@@ -36,25 +36,12 @@ void NodeCallbackHandler::initialise(const UA_Logger *logger) {
 
 void NodeCallbackHandler::destroy() { node_calbacks_map_.clear(); }
 
-NodeCallbackHandler::NodeCalbackMap::iterator
-NodeCallbackHandler::findIndexPosition(const UA_NodeId *node_id) {
-  NodeCalbackMap::iterator it;
-  it = node_calbacks_map_.find(*node_id);
-  return it;
-}
-
 CallbackWrapperPtr
 NodeCallbackHandler::findCallbackWrapper(const UA_NodeId *node_id) {
-  auto result = make_shared<CallbackWrapper>();
-  auto it = findIndexPosition(node_id);
+  CallbackWrapperPtr result;
+  auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
-    string trace_msg = "Node " + toString(node_id) + "callback_wrapper found.";
-    UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     result = it->second;
-  } else {
-    string error_msg =
-        "Node " + toString(node_id) + " does not have any callback registered!";
-    UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
   }
   return result;
 }
@@ -63,7 +50,7 @@ UA_StatusCode
 NodeCallbackHandler::addNodeCallbacks(UA_NodeId node_id,
                                       CallbackWrapperPtr callback_wrapper) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTSUPPORTED;
-  if (findCallbackWrapper(&node_id)) {
+  if (!findCallbackWrapper(&node_id)) {
     string trace_msg = "Adding callback_wrapper for Node " + toString(&node_id);
     UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     node_calbacks_map_.emplace(move(node_id), move(callback_wrapper));
@@ -80,7 +67,7 @@ NodeCallbackHandler::addNodeCallbacks(UA_NodeId node_id,
 UA_StatusCode
 NodeCallbackHandler::removeNodeCallbacks(const UA_NodeId *node_id) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTSUPPORTED;
-  auto it = findIndexPosition(node_id);
+  auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     string trace_msg = "Removing callbacks for Node " + toString(node_id);
     UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
@@ -102,7 +89,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
     UNUSED(const UA_NumericRange *range), UA_DataValue *value) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTREADABLE;
 
-  auto it = findIndexPosition(node_id);
+  auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     string trace_msg = "Calling read callback for Node " + toString(node_id);
     UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
@@ -216,7 +203,7 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue(
     UNUSED(void *nodeContext), UNUSED(const UA_NumericRange *range),
     const UA_DataValue *value) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTWRITABLE;
-  auto it = findIndexPosition(node_id);
+  auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     auto callback_wrapper = it->second;
     if (it->second->writable_.has_value()) {
@@ -278,7 +265,7 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue(
         for (uint8_t i = 0; i < 8; i++) {
           ua_guid.data4[i] = ((UA_Guid *)(value->value.data))->data4[i];
         }
-        auto string_value = toString(ua_guid);
+        auto string_value = toString(&ua_guid);
         write_CB(DataVariant(string_value));
         status = UA_STATUSCODE_GOOD;
         break;

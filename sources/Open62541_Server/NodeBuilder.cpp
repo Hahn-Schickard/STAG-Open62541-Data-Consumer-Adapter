@@ -1,5 +1,4 @@
 #include "NodeBuilder.hpp"
-#include "DataVariant.hpp"
 #include "LoggerRepository.hpp"
 #include "Utility.hpp"
 #include "Variant_Visitor.hpp"
@@ -278,6 +277,9 @@ UA_StatusCode NodeBuilder::addReadableNode(shared_ptr<Metric> metric,
   status = setValue(node_attr, metric);
 
   if (status == UA_STATUSCODE_GOOD) {
+    logger_->log(SeverityLevel::TRACE,
+                 "Assigining {} read callback for {} node",
+                 toString(metric->getDataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
     status = NodeCallbackHandler::addNodeCallbacks(
         metrid_node_id,
@@ -342,6 +344,9 @@ UA_StatusCode NodeBuilder::addWritableNode(shared_ptr<WritableMetric> metric,
   status = setValue(node_attr, metric);
 
   if (status == UA_STATUSCODE_GOOD) {
+    logger_->log(SeverityLevel::TRACE,
+                 "Assigining {} read and write callbacks for {} node",
+                 toString(metric->getDataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
     status = NodeCallbackHandler::addNodeCallbacks(
         metrid_node_id,

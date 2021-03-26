@@ -3,7 +3,7 @@
 
 #include "Config.hpp"
 #include "Configuration.hpp"
-#include "Device.hpp"
+#include "Information_Model/Device.hpp"
 #include "Logger.hpp"
 
 #include <memory>

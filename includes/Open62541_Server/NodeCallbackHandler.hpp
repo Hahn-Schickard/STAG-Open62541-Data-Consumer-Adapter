@@ -1,9 +1,9 @@
 #ifndef __DCAI_OPEN62541_NODE_MANAGER_HPP_
 #define __DCAI_OPEN62541_NODE_MANAGER_HPP_
 
-#include "Metric.hpp"
+#include "Information_Model/Metric.hpp"
+#include "Information_Model/WritableMetric.hpp"
 #include "Open62541Server.hpp"
-#include "WritableMetric.hpp"
 
 #include "open62541/plugin/log.h"
 #include <functional>
@@ -42,8 +42,6 @@ class NodeCallbackHandler {
   static const UA_Logger *logger_;
 
   static CallbackWrapperPtr findCallbackWrapper(const UA_NodeId *node_id);
-
-  static NodeCalbackMap::iterator findIndexPosition(const UA_NodeId *node_id);
 
 public:
   /**
