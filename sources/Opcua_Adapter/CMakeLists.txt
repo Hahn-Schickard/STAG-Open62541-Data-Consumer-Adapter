@@ -27,7 +27,7 @@ target_link_libraries(${THIS} PUBLIC
 target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${INCLUDES_DIR}/Opcua_Adapter>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
 )
 
 target_compile_features(${THIS} PUBLIC cxx_std_17)
@@ -42,5 +42,5 @@ install(
 
 install(
     FILES ${THIS_INCLUDES}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )

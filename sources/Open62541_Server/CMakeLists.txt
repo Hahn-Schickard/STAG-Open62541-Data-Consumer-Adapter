@@ -27,7 +27,7 @@ target_link_libraries(${THIS} PUBLIC
 
 target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${INCLUDES_DIR}/Open62541_Server>
-                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/>
+                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
 )
 
 set_property(TARGET ${THIS} PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -44,5 +44,5 @@ install(
 
 install(
     FILES ${THIS_INCLUDES}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
