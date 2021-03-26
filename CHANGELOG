@@ -1,3 +1,18 @@
+## [0.1.5] - Unreleased
+### Changed
+ - toString(UA_Guid *input);
+ - toString(const UA_String *input);
+ - toString(const UA_NodeId *nodeId);
+ - toString(const UA_QualifiedName *name);
+ - OpcuaAdapter to no longer copy logger from DataConsumerAdapterInterface
+ - Data_Consumer_Adapter_Interface to 0.1.5
+ - include paths to resolve potential header name confilcts
+ - main.cpp mocked Device to return proper Callbacks
+ - NodeBuilder to use string::c_str() method instead of DeviceElementNodeInfo
+
+### Removed
+  - DeviceElementNodeInfo
+
 ## [0.1.4] - 2020.11.16
 ### Added
  - Posix time convertion
