@@ -33,43 +33,30 @@ UA_NodeId toNodeId(DataType type) {
   }
 }
 
-string toString(UA_String input) {
-  string output;
-  for (size_t i = 0; i < input.length; i++) {
-    output.push_back(*input.data);
-  }
-  return output;
+string toString(const UA_String *input) {
+  string result = string((char *)(input->data), input->length);
+  return move(result);
 }
 
-string toString(UA_Guid input) {
-  string output = to_string(input.data1) + ":" + to_string(input.data2) + ":" +
-                  to_string(input.data3) + ":";
-  for (int i = 0; i < 8; i++) {
-    output.push_back(input.data4[i]);
+string toString(UA_Guid *input) {
+  UA_String ua_string = UA_STRING_NULL;
+  if (UA_Guid_parse(input, ua_string) != UA_STATUSCODE_GOOD) {
+    throw runtime_error("Failed to conver UA_Guid to a string!");
   }
-  return output;
+  return toString(&ua_string);
 }
 
-string toString(const UA_NodeId *nodeId) {
-  string namespace_index_string = to_string(nodeId->namespaceIndex);
-  string node_id_string;
-  switch (nodeId->identifierType) {
-  case UA_NodeIdType::UA_NODEIDTYPE_NUMERIC: {
-    node_id_string = to_string(nodeId->identifier.numeric);
-    break;
+string toString(const UA_NodeId *node_id) {
+  UA_String ua_string = UA_STRING_NULL;
+  if (UA_NodeId_print(node_id, &ua_string) != UA_STATUSCODE_GOOD) {
+    throw runtime_error("Failed to conver UA_NodeId to a string!");
   }
-  case UA_NodeIdType::UA_NODEIDTYPE_GUID: {
-    node_id_string = toString(nodeId->identifier.guid);
-    break;
-  }
-  case UA_NodeIdType::UA_NODEIDTYPE_BYTESTRING:
-  case UA_NodeIdType::UA_NODEIDTYPE_STRING: {
-    node_id_string = toString(nodeId->identifier.string);
-    break;
-  }
-  default: { node_id_string = "UNRECOGNIZED"; }
-  }
-  return namespace_index_string + ":" + node_id_string;
+  return toString(&ua_string);
+}
+
+string toString(const UA_QualifiedName *name) {
+  string result = to_string(name->namespaceIndex) + ":" + toString(&name->name);
+  return move(result);
 }
 
 } // namespace open62541
