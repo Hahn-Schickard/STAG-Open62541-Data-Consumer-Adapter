@@ -1,4 +1,4 @@
-## [0.1.5] - Unreleased
+## [0.1.5] - 2021.04.01
 ### Changed
  - toString(UA_Guid *input);
  - toString(const UA_String *input);
