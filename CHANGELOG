@@ -1,4 +1,4 @@
-## [0.1.5] - 2021.04.01
+## [0.1.5] - NOT RELEASED
 ### Changed
  - toString(UA_Guid *input);
  - toString(const UA_String *input);
@@ -9,6 +9,7 @@
  - include paths to resolve potential header name confilcts
  - main.cpp mocked Device to return proper Callbacks
  - NodeBuilder to use string::c_str() method instead of DeviceElementNodeInfo
+ - wrap getMetricValue() calls in try-catch blocks
 
 ### Removed
   - DeviceElementNodeInfo
