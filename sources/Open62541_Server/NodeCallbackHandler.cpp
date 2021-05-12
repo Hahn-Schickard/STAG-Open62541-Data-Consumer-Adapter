@@ -57,7 +57,7 @@ NodeCallbackHandler::addNodeCallbacks(UA_NodeId node_id,
     status = UA_STATUSCODE_GOOD;
   } else {
     string error_msg =
-        "Node " + toString(&node_id) + " was already registered ealier";
+        "Node " + toString(&node_id) + " was already registered earlier";
     UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
     status = UA_STATUSCODE_BADNODEIDEXISTS;
   }
@@ -179,12 +179,12 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
       value->hasValue = true;
       status = UA_STATUSCODE_GOOD;
     } catch (const runtime_error &error) {
-      string error_msg = "Type missmatch error occured while reading Node " +
+      string error_msg = "Type missmatch error occurred while reading Node " +
                          toString(node_id) + " Error message: " + error.what();
       UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
       status = UA_STATUSCODE_BADTYPEMISMATCH;
     } catch (const exception &exp) {
-      string error_msg = "An exception occoured, while reading Node " +
+      string error_msg = "An exception occurred, while reading Node " +
                          toString(node_id) + " exception: " + exp.what();
       UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
       status = UA_STATUSCODE_BADINTERNALERROR;

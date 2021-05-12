@@ -17,11 +17,11 @@ Configuration::Configuration() {
       UA_ServerConfig_setDefault(configuration_);
     } else {
       throw Open62541_Config_Exception(
-          "Failed to allocte Open62541 configuraiton");
+          "Failed to allocate Open62541 configuration");
     }
   } catch (exception &ex) {
     string error_msg =
-        "Cought exception when deserializing Configuration file: " +
+        "Caught exception when deserializing Configuration file: " +
         string(ex.what());
     throw Open62541_Config_Exception(error_msg);
   }

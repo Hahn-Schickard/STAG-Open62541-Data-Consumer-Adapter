@@ -19,7 +19,7 @@ Open62541Server::Open62541Server()
 }
 
 Open62541Server::~Open62541Server() {
-  logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
+  logger_->log(SeverityLevel::INFO, "Removing {} from logger registry",
                logger_->getName());
   LoggerRepository::getInstance().deregisterLoger(logger_->getName());
 }
@@ -42,7 +42,7 @@ bool Open62541Server::start() {
       return false;
     }
   } catch (exception &ex) {
-    logger_->log(SeverityLevel::CRITICAL, "Cought an exception: []", ex.what());
+    logger_->log(SeverityLevel::CRITICAL, "Caught an exception: []", ex.what());
     return false;
   }
 }
@@ -76,7 +76,7 @@ void Open62541Server::runnable() {
                    "ERROR:{} Failed to start open62541 server thread!", status);
     }
   } catch (exception &ex) {
-    logger_->log(SeverityLevel::CRITICAL, "Cought an exception: []", ex.what());
+    logger_->log(SeverityLevel::CRITICAL, "Caught an exception: []", ex.what());
   }
 }
 

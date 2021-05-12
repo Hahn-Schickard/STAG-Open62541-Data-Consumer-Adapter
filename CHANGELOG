@@ -6,7 +6,7 @@
  - toString(const UA_QualifiedName *name);
  - OpcuaAdapter to no longer copy logger from DataConsumerAdapterInterface
  - Data_Consumer_Adapter_Interface to 0.1.5
- - include paths to resolve potential header name confilcts
+ - include paths to resolve potential header name conflicts
  - main.cpp mocked Device to return proper Callbacks
  - NodeBuilder to use string::c_str() method instead of DeviceElementNodeInfo
  - wrap getMetricValue() calls in try-catch blocks
@@ -16,7 +16,7 @@
 
 ## [0.1.4] - 2020.11.16
 ### Added
- - Posix time convertion
+ - Posix time conversion
  - Callback handlers for DateTime requests
  
 ### Changed

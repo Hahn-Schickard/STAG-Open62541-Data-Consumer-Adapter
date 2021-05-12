@@ -20,7 +20,7 @@ NodeBuilder::NodeBuilder(shared_ptr<Open62541Server> server)
 }
 
 NodeBuilder::~NodeBuilder() {
-  logger_->log(SeverityLevel::INFO, "Removing {} from logger registery",
+  logger_->log(SeverityLevel::INFO, "Removing {} from logger registry",
                logger_->getName());
   NodeCallbackHandler::destroy();
   LoggerRepository::getInstance().deregisterLoger(logger_->getName());
@@ -34,7 +34,7 @@ UA_StatusCode NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
   UA_NodeId device_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), device->getElementId().c_str());
   logger_->log(SeverityLevel::TRACE,
-               "Assigining {} NodeId to Device: {}, with id: {}",
+               "Assigning {} NodeId to Device: {}, with id: {}",
                toString(&device_node_id), device->getElementName(),
                device->getElementId());
   UA_NodeId parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
@@ -42,7 +42,7 @@ UA_StatusCode NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
   UA_QualifiedName device_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), device->getElementName().c_str());
   logger_->log(SeverityLevel::TRACE,
-               "Assigining browse name: {} to Device: {}, with id: {}",
+               "Assigning browse name: {} to Device: {}, with id: {}",
                toString(&device_browse_name), device->getElementName(),
                device->getElementId());
   UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
@@ -134,7 +134,7 @@ NodeBuilder::addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
         UA_NODEID_STRING_ALLOC(server_->getServerNamespace(),
                                device_element_group->getElementId().c_str());
     logger_->log(SeverityLevel::TRACE,
-                 "Assigining {} NodeId to group element: {}, with id: {}",
+                 "Assigning {} NodeId to group element: {}, with id: {}",
                  toString(&group_node_id),
                  device_element_group->getElementName(),
                  device_element_group->getElementId());
@@ -143,7 +143,7 @@ NodeBuilder::addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
         UA_QUALIFIEDNAME_ALLOC(server_->getServerNamespace(),
                                device_element_group->getElementName().c_str());
     logger_->log(SeverityLevel::TRACE,
-                 "Assigining browse name: {} to group element: {}, with id: {}",
+                 "Assigning browse name: {} to group element: {}, with id: {}",
                  toString(&group_browse_name),
                  device_element_group->getElementName(),
                  device_element_group->getElementId());
@@ -255,7 +255,7 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
     } catch (exception &ex) {
       logger_->log(
           SeverityLevel::ERROR,
-          "An exception occured while trying to set readable metric value! "
+          "An exception occurred while trying to set readable metric value! "
           "Exception: {}",
           ex.what());
     }
@@ -273,14 +273,14 @@ UA_StatusCode NodeBuilder::addReadableNode(MetricPtr metric,
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), metric->getElementId().c_str());
   logger_->log(SeverityLevel::TRACE,
-               "Assigining {} NodeId to metric: {}, with id: {}",
+               "Assigning {} NodeId to metric: {}, with id: {}",
                toString(&metrid_node_id), metric->getElementName(),
                metric->getElementId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), metric->getElementName().c_str());
   logger_->log(SeverityLevel::TRACE,
-               "Assigining browse name: {} to metric: {}, with id: {}",
+               "Assigning browse name: {} to metric: {}, with id: {}",
                toString(&metric_browse_name), metric->getElementName(),
                metric->getElementId());
   UA_NodeId type_definition =
@@ -291,8 +291,7 @@ UA_StatusCode NodeBuilder::addReadableNode(MetricPtr metric,
   status = setValue(node_attr, metric);
 
   if (status == UA_STATUSCODE_GOOD) {
-    logger_->log(SeverityLevel::TRACE,
-                 "Assigining {} read callback for {} node",
+    logger_->log(SeverityLevel::TRACE, "Assigning {} read callback for {} node",
                  toString(metric->getDataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
     status = NodeCallbackHandler::addNodeCallbacks(
@@ -335,7 +334,7 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
     } catch (exception &ex) {
       logger_->log(
           SeverityLevel::ERROR,
-          "An exception occured while trying to set writable metric value! "
+          "An exception occurred while trying to set writable metric value! "
           "Exception: {}",
           ex.what());
     }
@@ -354,14 +353,14 @@ UA_StatusCode NodeBuilder::addWritableNode(WritableMetricPtr metric,
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), metric->getElementId().c_str());
   logger_->log(SeverityLevel::TRACE,
-               "Assigining {} NodeId to metric: {}, with id: {}",
+               "Assigning {} NodeId to metric: {}, with id: {}",
                toString(&metrid_node_id), metric->getElementName(),
                metric->getElementId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), metric->getElementName().c_str());
   logger_->log(SeverityLevel::TRACE,
-               "Assigining browse name: {} to metric: {}, with id: {}",
+               "Assigning browse name: {} to metric: {}, with id: {}",
                toString(&metric_browse_name), metric->getElementName(),
                metric->getElementId());
   UA_NodeId type_definition =
@@ -372,7 +371,7 @@ UA_StatusCode NodeBuilder::addWritableNode(WritableMetricPtr metric,
 
   if (status == UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::TRACE,
-                 "Assigining {} read and write callbacks for {} node",
+                 "Assigning {} read and write callbacks for {} node",
                  toString(metric->getDataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
     status = NodeCallbackHandler::addNodeCallbacks(

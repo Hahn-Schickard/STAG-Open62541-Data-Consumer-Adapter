@@ -39,7 +39,7 @@ void OpcuaAdapter::handleEvent(shared_ptr<ModelRegistryEvent> event) {
     match(*event,
           [&](string id) {
             this->logger_->log(SeverityLevel::TRACE,
-                               "OPC UA Adapter recieved DEVICE_REMOVED event!");
+                               "OPC UA Adapter received DEVICE_REMOVED event!");
             this->logger_->log(SeverityLevel::WARNNING,
                                "Event handler for DEVICE_REMOVED event is not "
                                "implemented! Device {} will not be removed!",
@@ -48,7 +48,7 @@ void OpcuaAdapter::handleEvent(shared_ptr<ModelRegistryEvent> event) {
           [&](shared_ptr<Device> device) {
             this->logger_->log(
                 SeverityLevel::TRACE,
-                "OPC UA Adapter recieved NEW_DEVICE_REGISTERED event!");
+                "OPC UA Adapter received NEW_DEVICE_REGISTERED event!");
             node_builder_->addDeviceNode(device);
           });
   }

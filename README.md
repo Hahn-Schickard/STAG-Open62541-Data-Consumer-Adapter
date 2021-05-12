@@ -3,7 +3,7 @@
 
 <img src="docs/code_documentation/vendor-logo.png" alt="" width="200"/>
 
-# Data Consumer Adatper for Open62541 OPC UA Server Implementation
+# Data Consumer Adapter for Open62541 OPC UA Server Implementation
 
 This module implements open62541 server SDK, which confirms with Data Consumer Interface
 
@@ -18,4 +18,4 @@ This module implements open62541 server SDK, which confirms with Data Consumer I
 * [C++ TestMate](https://marketplace.visualstudio.com/items?itemName=matepek.vscode-catch2-test-adapter) - provides google-test framework adapter for Test Explorer UI
 
 ### Cmake Integration
-A CMake variant file is provided with this repository for easy cmake configuration setup. This functionallity requires [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) plugin to be installed. After Visual Code has been started Open Controll Panel with *Cntrl + Shift + P* and type in CMake: Select Variant to start configuring your cmake project configuration. 
+A CMake variant file is provided with this repository for easy cmake configuration setup. This functionality requires [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) plugin to be installed. After Visual Code has been started Open Control Panel with *Cntrl + Shift + P* and type in CMake: Select Variant to start configuring your cmake project configuration. 
