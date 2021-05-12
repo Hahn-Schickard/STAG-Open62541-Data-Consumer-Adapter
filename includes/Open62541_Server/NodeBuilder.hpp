@@ -15,22 +15,26 @@ class NodeBuilder {
   std::shared_ptr<HaSLL::Logger> logger_;
   std::shared_ptr<Open62541Server> server_;
 
+  std::pair<UA_StatusCode, UA_NodeId>
+  addObjectNode(Information_Model::NamedElementPtr element,
+                std::optional<UA_NodeId> parent_node_id = std::nullopt);
+
   UA_StatusCode
   addDeviceNodeElement(Information_Model::DeviceElementPtr device_element,
-                       const UA_NodeId *parent_id);
+                       UA_NodeId parent_id);
 
   UA_StatusCode
   addGroupNode(Information_Model::DeviceElementGroupPtr device_element_group,
-               const UA_NodeId *parent_id);
+               UA_NodeId parent_id);
 
   UA_StatusCode addFunctionNode(Information_Model::DeviceElementPtr function,
-                                const UA_NodeId *parent_id);
+                                UA_NodeId parent_id);
 
   UA_StatusCode addReadableNode(Information_Model::MetricPtr metric,
-                                const UA_NodeId *parent_id);
+                                UA_NodeId parent_id);
 
   UA_StatusCode addWritableNode(Information_Model::WritableMetricPtr metric,
-                                const UA_NodeId *parent_id);
+                                UA_NodeId parent_id);
 
   UA_StatusCode setValue(UA_VariableAttributes &value_attribute,
                          Information_Model::MetricPtr metric);

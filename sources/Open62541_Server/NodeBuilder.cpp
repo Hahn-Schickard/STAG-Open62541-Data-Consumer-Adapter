@@ -26,42 +26,57 @@ NodeBuilder::~NodeBuilder() {
   LoggerRepository::getInstance().deregisterLoger(logger_->getName());
 }
 
-UA_StatusCode NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
+pair<UA_StatusCode, UA_NodeId>
+NodeBuilder::addObjectNode(NamedElementPtr element,
+                           optional<UA_NodeId> parent_node_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-  logger_->log(SeverityLevel::INFO, "Adding a new Device: {}, with id: {}",
-               device->getElementName(), device->getElementId());
+  logger_->log(SeverityLevel::INFO, "Adding a new node: {}, with id: {}",
+               element->getElementName(), element->getElementId());
 
-  UA_NodeId device_node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), device->getElementId().c_str());
+  auto node_id = UA_NODEID_STRING_ALLOC(server_->getServerNamespace(),
+                                        element->getElementId().c_str());
+  logger_->log(
+      SeverityLevel::TRACE, "Assigning {} NodeId to element: {}, with id: {}",
+      toString(&node_id), element->getElementName(), element->getElementId());
+
+  // if no parent has been provided, set to root objects folder
+  if (!parent_node_id.has_value()) {
+    parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
+  }
+
+  auto reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
+
+  auto browse_name = UA_QUALIFIEDNAME_ALLOC(server_->getServerNamespace(),
+                                            element->getElementName().c_str());
   logger_->log(SeverityLevel::TRACE,
-               "Assigning {} NodeId to Device: {}, with id: {}",
-               toString(&device_node_id), device->getElementName(),
-               device->getElementId());
-  UA_NodeId parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
-  UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-  UA_QualifiedName device_browse_name = UA_QUALIFIEDNAME_ALLOC(
-      server_->getServerNamespace(), device->getElementName().c_str());
-  logger_->log(SeverityLevel::TRACE,
-               "Assigning browse name: {} to Device: {}, with id: {}",
-               toString(&device_browse_name), device->getElementName(),
-               device->getElementId());
-  UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
+               "Assigning browse name: {} to element: {}, with id: {}",
+               toString(&browse_name), element->getElementName(),
+               element->getElementId());
+
+  auto type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
+
   UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
-
   node_attr.description =
-      UA_LOCALIZEDTEXT_ALLOC("EN_US", device->getElementDescription().c_str());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", element->getElementDescription().c_str());
   node_attr.displayName =
-      UA_LOCALIZEDTEXT_ALLOC("EN_US", device->getElementName().c_str());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", element->getElementName().c_str());
 
   status = UA_Server_addObjectNode(
-      server_->getServer(), device_node_id, parent_node_id, reference_type_id,
-      device_browse_name, type_definition, node_attr, NULL, NULL);
+      server_->getServer(), node_id, parent_node_id.value(), reference_type_id,
+      browse_name, type_definition, node_attr, NULL, NULL);
+  return make_pair(status, node_id);
+}
+
+UA_StatusCode NodeBuilder::addDeviceNode(DevicePtr device) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+  auto result = addObjectNode(device);
+  status = result.first;
 
   if (status == UA_STATUSCODE_GOOD) {
     shared_ptr<DeviceElementGroup> device_element_group =
         device->getDeviceElementGroup();
     for (auto device_element : device_element_group->getSubelements()) {
-      status = addDeviceNodeElement(device_element, &device_node_id);
+      status = addDeviceNodeElement(device_element, result.second);
     }
   }
 
@@ -74,12 +89,11 @@ UA_StatusCode NodeBuilder::addDeviceNode(shared_ptr<Device> device) {
   return status;
 }
 
-UA_StatusCode
-NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
-                                  const UA_NodeId *parent_id) {
+UA_StatusCode NodeBuilder::addDeviceNodeElement(DeviceElementPtr element,
+                                                UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   logger_->log(SeverityLevel::INFO, "Adding element {} to node {}",
-               element->getElementName(), toString(parent_id));
+               element->getElementName(), toString(&parent_id));
 
   switch (element->getElementType()) {
   case GROUP: {
@@ -106,7 +120,7 @@ NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
     status = UA_STATUSCODE_BADTYPEDEFINITIONINVALID;
     logger_->log(SeverityLevel::ERROR,
                  "Unknown element type, for element {} to node {}",
-                 element->getElementName(), toString(parent_id));
+                 element->getElementName(), toString(&parent_id));
     break;
   }
   }
@@ -121,60 +135,28 @@ NodeBuilder::addDeviceNodeElement(shared_ptr<DeviceElement> element,
 }
 
 UA_StatusCode
-NodeBuilder::addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
-                          const UA_NodeId *parent_id) {
+NodeBuilder::addGroupNode(DeviceElementGroupPtr device_element_group,
+                          UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   if (!device_element_group->getSubelements().empty()) {
-    logger_->log(SeverityLevel::TRACE,
-                 "Adding group element {} with ID {} to node {}",
-                 device_element_group->getElementName(),
-                 device_element_group->getElementId(), toString(parent_id));
-
-    UA_NodeId group_node_id =
-        UA_NODEID_STRING_ALLOC(server_->getServerNamespace(),
-                               device_element_group->getElementId().c_str());
-    logger_->log(SeverityLevel::TRACE,
-                 "Assigning {} NodeId to group element: {}, with id: {}",
-                 toString(&group_node_id),
-                 device_element_group->getElementName(),
-                 device_element_group->getElementId());
-    UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-    UA_QualifiedName group_browse_name =
-        UA_QUALIFIEDNAME_ALLOC(server_->getServerNamespace(),
-                               device_element_group->getElementName().c_str());
-    logger_->log(SeverityLevel::TRACE,
-                 "Assigning browse name: {} to group element: {}, with id: {}",
-                 toString(&group_browse_name),
-                 device_element_group->getElementName(),
-                 device_element_group->getElementId());
-    UA_NodeId type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
-    UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
-
-    node_attr.description = UA_LOCALIZEDTEXT_ALLOC(
-        "EN_US", device_element_group->getElementDescription().c_str());
-    node_attr.displayName = UA_LOCALIZEDTEXT_ALLOC(
-        "EN_US", device_element_group->getElementName().c_str());
-
-    status = UA_Server_addObjectNode(
-        server_->getServer(), group_node_id, *parent_id, reference_type_id,
-        group_browse_name, type_definition, node_attr, NULL, NULL);
+    auto result = addObjectNode(device_element_group, parent_id);
+    status = result.first;
 
     if (status == UA_STATUSCODE_GOOD) {
-      vector<shared_ptr<DeviceElement>> elements =
-          device_element_group->getSubelements();
+      auto elements = device_element_group->getSubelements();
 
       logger_->log(SeverityLevel::INFO,
                    "Group element {}:{} contains {} subelements.",
                    device_element_group->getElementName(),
-                   toString(&group_node_id), elements.size());
+                   toString(&result.second), elements.size());
       for (auto element : elements) {
-        status = addDeviceNodeElement(element, &group_node_id);
+        status = addDeviceNodeElement(element, result.second);
       }
     }
   } else {
     logger_->log(SeverityLevel::WARNNING,
                  "Parent's {} group element {} with id {} is empty!",
-                 toString(parent_id), device_element_group->getElementName(),
+                 toString(&parent_id), device_element_group->getElementName(),
                  device_element_group->getElementId());
   }
 
@@ -188,11 +170,11 @@ NodeBuilder::addGroupNode(shared_ptr<DeviceElementGroup> device_element_group,
   return status;
 }
 
-UA_StatusCode NodeBuilder::addFunctionNode(shared_ptr<DeviceElement> function,
-                                           const UA_NodeId *parent_id) {
+UA_StatusCode NodeBuilder::addFunctionNode(DeviceElementPtr function,
+                                           UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTIMPLEMENTED;
   logger_->log(SeverityLevel::WARNNING, "Method element is not implemented!",
-               toString(parent_id), function->getElementName());
+               toString(&parent_id), function->getElementName());
   //@TODO: Implement addFunctionNode stub
   return status;
 }
@@ -267,7 +249,7 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
 }
 
 UA_StatusCode NodeBuilder::addReadableNode(MetricPtr metric,
-                                           const UA_NodeId *parent_id) {
+                                           UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
@@ -303,7 +285,7 @@ UA_StatusCode NodeBuilder::addReadableNode(MetricPtr metric,
 
     auto server_ptr = server_->getServer();
     status = UA_Server_addDataSourceVariableNode(
-        server_ptr, metrid_node_id, *parent_id, reference_type_id,
+        server_ptr, metrid_node_id, parent_id, reference_type_id,
         metric_browse_name, type_definition, node_attr, data_source, NULL,
         NULL);
   }
@@ -347,7 +329,7 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
 }
 
 UA_StatusCode NodeBuilder::addWritableNode(WritableMetricPtr metric,
-                                           const UA_NodeId *parent_id) {
+                                           UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
@@ -385,7 +367,7 @@ UA_StatusCode NodeBuilder::addWritableNode(WritableMetricPtr metric,
     data_source.write = &NodeCallbackHandler::writeNodeValue;
 
     status = UA_Server_addDataSourceVariableNode(
-        server_->getServer(), metrid_node_id, *parent_id, reference_type_id,
+        server_->getServer(), metrid_node_id, parent_id, reference_type_id,
         metric_browse_name, type_definition, node_attr, data_source, NULL,
         NULL);
   }
