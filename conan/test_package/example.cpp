@@ -16,7 +16,7 @@ public:
 int main() {
   auto config = HaSLL::Configuration(
       "./log", "logfile.log", "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$",
-      HaSLL::SeverityLevel::TRACE, false, 8192, 2, 25, 100, 1);
+      HaSLL::SeverityLevel::TRACE, true, 8192, 2, 25, 100, 1);
   HaSLL::LoggerRepository::initialise(config);
   auto adapter = make_unique<OpcuaAdapter>(make_shared<EventSourceFake>());
   adapter->start();
