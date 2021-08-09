@@ -4,7 +4,7 @@ nlohmann_json/3.7.3
 open62541/1.1.2@hahn-schickard/stable
 HaSLL/0.2.2@hahn-schickard/stable
 Variant_Visitor/0.1.0@hahn-schickard/stable
-Data_Consumer_Adapter_Interface/0.1.5@hahn-schickard/stable
+Data_Consumer_Adapter_Interface/0.1.6@hahn-schickard/stable
 
 [generators]
 cmake_paths
