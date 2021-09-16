@@ -3,6 +3,7 @@
 
 #include <open62541/server.h>
 #include <stdexcept>
+#include <memory>
 
 namespace open62541 {
 struct Open62541_Config_Exception : public std::runtime_error {
@@ -10,15 +11,20 @@ struct Open62541_Config_Exception : public std::runtime_error {
       : std::runtime_error(message) {}
 };
 
+struct Double_Use : public std::logic_error {
+  Double_Use();
+};
+
 class Configuration {
-  UA_ServerConfig *configuration_;
+  std::unique_ptr<UA_ServerConfig> configuration_;
 
 public:
   Configuration();
   Configuration(const std::string & filepath);
   ~Configuration();
 
-  const UA_ServerConfig *getConfig() const { return configuration_; }
+  std::unique_ptr<const UA_ServerConfig> getConfig();
+    // may only be called once, throws Double_Use afterwards
 };
 } // namespace open62541
 

@@ -9,19 +9,19 @@
 using namespace std;
 
 namespace open62541 {
+
+Double_Use::Double_Use()
+  : std::logic_error("Double use") {}
+
 Configuration::Configuration() {
   try {
-    if ((configuration_ =
-             (UA_ServerConfig *)calloc(1, sizeof(UA_ServerConfig)))) {
-      configuration_->logger.log = HaSLL_Logger_.log;
-      configuration_->logger.clear = HaSLL_Logger_.clear;
-      // @TODO: Implement Config.hpp and Config_Serializer.hpp usage to set
-      // UA_Config
-      UA_ServerConfig_setDefault(configuration_);
-    } else {
-      throw Open62541_Config_Exception(
-          "Failed to allocate Open62541 configuration");
-    }
+    configuration_ = make_unique<UA_ServerConfig>();
+    *configuration_.get() = {};
+    configuration_->logger.log = HaSLL_Logger_.log;
+    configuration_->logger.clear = HaSLL_Logger_.clear;
+    // @TODO: Implement Config.hpp and Config_Serializer.hpp usage to set
+    // UA_Config
+    UA_ServerConfig_setDefault(configuration_.get());
   } catch (exception &ex) {
     string error_msg =
         "Caught exception when deserializing Configuration file: " +
@@ -46,21 +46,21 @@ Configuration::Configuration(const std::string & filepath)
       // TODO: is TCP correct, or WS?
       config.networking, config.port_nubmer, 0, &configuration_->logger);
 
+/*
     switch (config.security_policy) {
       default:
         case NONE:
           configuration_->securityPoliciesSize = 1;
           configuration_->securityPolicies = new UA_SecurityPolicy;
-/*
           UA_SecurityPolicy_None(
             configuration_->securityPolicies,
             TODO,
             &configuration_->logger);
-*/
           break;
         // TODO: BASIC128_RSA15, BASIC256, BASIC256_SHA256, ALL
         throw Open62541_Config_Exception("Unsupported security policy");
     }
+*/
 
     configuration_->buildInfo = config.build_info;
     configuration_->applicationDescription = config.app_info;
@@ -135,19 +135,18 @@ Configuration::Configuration(const std::string & filepath)
   }
 }
 
+std::unique_ptr<const UA_ServerConfig> Configuration::getConfig() {
+  if (configuration_) {
+    std::unique_ptr<UA_ServerConfig> ret;
+    ret.swap(configuration_);
+    return ret;
+  } else
+    throw Double_Use();
+}
+
 Configuration::~Configuration() {
-  /*
-    In a perfect world, we would also do
-
-      UA_ServerConfig_clean(configuration_);
-
-    here. However, it is already done somewhere in the open62541 library:
-    At some point we pass configuration_ to UA_Server_newWithConfig, which
-    makes a shallow copy and, later, calls UA_ServerConfig_clean on that copy.
-
-    TODO: refactor the present class accordingly
-  */
-  free(configuration_);
+  if (configuration_)
+    UA_ServerConfig_clean(configuration_.get());
 }
 
 } // namespace open62541
