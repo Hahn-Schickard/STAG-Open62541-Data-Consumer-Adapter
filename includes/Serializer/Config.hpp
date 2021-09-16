@@ -25,10 +25,10 @@ typedef struct {
   UA_String password;
 } UserCredentials;
 
-typedef struct SecureChannelsLimtsStruct {
+typedef struct SecureChannelsLimitsStruct {
   UA_UInt16 max_secure_channels;
   UA_UInt32 max_security_token_lifetime_ms;
-} SecureChannelsLimts;
+} SecureChannelsLimits;
 
 typedef struct SessionsLimitsStruct {
   UA_UInt16 max_sessions;
@@ -46,7 +46,7 @@ typedef struct OperationalLimitsStruct {
   UA_UInt32 max_monitored_items_per_call;
 } OperationalLimits;
 
-typedef struct SubscriptionsLimtisStruct {
+typedef struct SubscriptionsLimitsStruct {
   UA_UInt32 max_subscriptions;
   UA_UInt32 max_subscriptions_per_session;
   UA_DurationRange
@@ -57,7 +57,7 @@ typedef struct SubscriptionsLimtisStruct {
   UA_Boolean enable_retransmission_queue;
   UA_UInt32 max_retransmission_queue_size; /* 0 -> unlimited size */
   UA_UInt32 max_events_per_node;           /* 0 -> unlimited size, optional */
-} SubscriptionsLimtis;
+} SubscriptionsLimits;
 
 typedef struct MonitoredItemsLimitsStruct {
   UA_UInt32 max_monitored_items;
@@ -68,7 +68,7 @@ typedef struct MonitoredItemsLimitsStruct {
 } MonitoredItemsLimits;
 
 struct Config {
-  UA_Boolean allow_annonymous_access;
+  UA_Boolean allow_anonymous_access;
   UserCredentials access_credentials;
   UA_UInt16 thread_count;
   UA_UInt16 port_nubmer;
@@ -79,11 +79,11 @@ struct Config {
   UA_ByteString server_certificate;
   UA_Double shutdown_delay_ms;
   UA_RuleHandling rules_handling;
-  SecureChannelsLimts secure_channels_limits;
+  SecureChannelsLimits secure_channels_limits;
   SessionsLimits session_limits;
   OperationalLimits operation_limits;
   UA_UInt32 max_references_per_node;
-  SubscriptionsLimtis subscription_limits;
+  SubscriptionsLimits subscription_limits;
   MonitoredItemsLimits monitored_items_limits;
   UA_UInt32 max_publish_req_per_session;
   UA_ServerConfig_Discovery discovery;

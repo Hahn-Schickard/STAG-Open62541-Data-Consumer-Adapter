@@ -44,14 +44,14 @@ Config makeDefaultConfig() {
       0,
       NULL,
   };
-  SecureChannelsLimts secure_channels_limits = {
+  SecureChannelsLimits secure_channels_limits = {
       40, (10 * 60 * 1000) /* 10 minutes */
   };
   SessionsLimits session_limits = {
       100, (60.0 * 60.0 * 1000.0) /* 1h */
   };
   OperationalLimits operation_limits = {};
-  SubscriptionsLimtis subscription_limits = {
+  SubscriptionsLimits subscription_limits = {
       0,
       0,
       initDurationRange(100.0, (3600.0 * 1000.0)),
@@ -88,7 +88,7 @@ Config makeDefaultConfig() {
       0,
       discovery,
   };
-  return move(config);
+  return config;
 }
 
 NLOHMANN_JSON_SERIALIZE_ENUM(SecurityPolicy,
@@ -170,13 +170,13 @@ static void to_json(json &j, const UserCredentials &p) {
 }
 
 // ======================== SecureChannelsLimts ============================
-static void from_json(const json &j, SecureChannelsLimts &p) {
+static void from_json(const json &j, SecureChannelsLimits &p) {
   p.max_secure_channels = j.at("max_secure_channels").get<UA_UInt16>();
   p.max_security_token_lifetime_ms =
       j.at("max_security_token_lifetime_ms").get<UA_UInt32>();
 }
 
-static void to_json(json &j, const SecureChannelsLimts &p) {
+static void to_json(json &j, const SecureChannelsLimits &p) {
   j = json{
       {"max_secure_channels", p.max_secure_channels},
       {"max_security_token_lifetime_ms", p.max_security_token_lifetime_ms}};
@@ -223,7 +223,7 @@ static void to_json(json &j, const OperationalLimits &p) {
 }
 
 // ======================== SubscriptionsLimtis ===========================
-static void from_json(const json &j, SubscriptionsLimtis &p) {
+static void from_json(const json &j, SubscriptionsLimits &p) {
   p.max_subscriptions = j.at("max_subscriptions").get<UA_UInt32>();
   p.max_subscriptions_per_session =
       j.at("max_subscriptions_per_session").get<UA_UInt32>();
@@ -242,7 +242,7 @@ static void from_json(const json &j, SubscriptionsLimtis &p) {
   p.max_events_per_node = j.at("max_events_per_node").get<UA_UInt32>();
 }
 
-static void to_json(json &j, const SubscriptionsLimtis &p) {
+static void to_json(json &j, const SubscriptionsLimits &p) {
   j = json{{"max_subscriptions", p.max_subscriptions},
            {"max_subscriptions_per_session", p.max_subscriptions_per_session},
            {"publishing_interval_limits_ms", p.publishing_interval_limits_ms},
@@ -345,7 +345,7 @@ static void to_json(json &j, const UA_ServerConfig_Discovery &p) {
 
 // ======================== Config ===========================
 static void from_json(const json &j, Config &p) {
-  p.allow_annonymous_access = j.at("allow_annonymous_access").get<UA_Boolean>();
+  p.allow_anonymous_access = j.at("allow_anonymous_access").get<UA_Boolean>();
   p.access_credentials = j.at("access_credentials").get<UserCredentials>();
   p.thread_count = j.at("thread_count").get<UA_UInt16>();
   p.port_nubmer = j.at("port_nubmer").get<UA_UInt16>();
@@ -357,12 +357,12 @@ static void from_json(const json &j, Config &p) {
   p.shutdown_delay_ms = j.at("shutdown_delay_ms").get<UA_Double>();
   p.rules_handling = j.at("rules_handling").get<UA_RuleHandling>();
   p.secure_channels_limits =
-      j.at("secure_channels_limits").get<SecureChannelsLimts>();
+      j.at("secure_channels_limits").get<SecureChannelsLimits>();
   p.session_limits = j.at("session_limits").get<SessionsLimits>();
   p.operation_limits = j.at("operation_limits").get<OperationalLimits>();
   p.max_references_per_node = j.at("max_references_per_node").get<UA_UInt32>();
   p.subscription_limits =
-      j.at("subscription_limits").get<SubscriptionsLimtis>();
+      j.at("subscription_limits").get<SubscriptionsLimits>();
   p.monitored_items_limits =
       j.at("monitored_items_limits").get<MonitoredItemsLimits>();
   p.max_publish_req_per_session =
@@ -371,7 +371,7 @@ static void from_json(const json &j, Config &p) {
 }
 
 static void to_json(json &j, const Config &p) {
-  j = json{{"allow_annonymous_access", p.allow_annonymous_access},
+  j = json{{"allow_anonymous_access", p.allow_anonymous_access},
            {"access_credentials", p.access_credentials},
            {"thread_count", p.thread_count},
            {"port_nubmer", p.port_nubmer},
@@ -401,7 +401,7 @@ const Config open62541::deserializeConfig(const string &file_path) {
     input_file_stream >> j;
     config = j.get<Config>();
   }
-  return move(config);
+  return config;
 }
 
 void open62541::serializeConfig(const string &file_path, const Config &config) {

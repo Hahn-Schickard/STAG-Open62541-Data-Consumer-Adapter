@@ -34,7 +34,7 @@ Configuration::Configuration(const std::string & filepath)
   try {
     Config config = deserializeConfig(filepath);
 
-    // TODO: allow_annonymous_access
+    // TODO: allow_anonymous_access
     configuration_->nThreads = config.thread_count;
 
     configuration_->networkLayersSize = 1;

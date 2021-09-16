@@ -3,7 +3,7 @@
         "password": "user1",
         "username": "password"
     },
-    "allow_annonymous_access": true,
+    "allow_anonymous_access": true,
     "app_info": {
         "applicationName": {
             "locale": "en",
