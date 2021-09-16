@@ -412,7 +412,3 @@ void open62541::serializeConfig(const string &file_path, const Config &config) {
     output_file_stream << j << endl;
   }
 }
-
-void open62541::dumpDefaultConfig() {
-  serializeConfig("defaultConfig.json", makeDefaultConfig());
-}

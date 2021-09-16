@@ -15,6 +15,7 @@ class Configuration {
 
 public:
   Configuration();
+  Configuration(const std::string & filepath);
   ~Configuration();
 
   const UA_ServerConfig *getConfig() const { return configuration_; }

@@ -25,6 +25,7 @@ class Open62541Server {
 
 public:
   Open62541Server();
+  Open62541Server(std::unique_ptr<Configuration>);
   ~Open62541Server();
 
   bool start();
