@@ -348,7 +348,7 @@ static void from_json(const json &j, Config &p) {
   p.allow_anonymous_access = j.at("allow_anonymous_access").get<UA_Boolean>();
   p.access_credentials = j.at("access_credentials").get<UserCredentials>();
   p.thread_count = j.at("thread_count").get<UA_UInt16>();
-  p.port_nubmer = j.at("port_nubmer").get<UA_UInt16>();
+  p.port_number = j.at("port_number").get<UA_UInt16>();
   p.networking = j.at("networking").get<UA_ConnectionConfig>();
   p.security_policy = j.at("security_policy").get<SecurityPolicy>();
   p.build_info = j.at("build_info").get<UA_BuildInfo>();
@@ -374,7 +374,7 @@ static void to_json(json &j, const Config &p) {
   j = json{{"allow_anonymous_access", p.allow_anonymous_access},
            {"access_credentials", p.access_credentials},
            {"thread_count", p.thread_count},
-           {"port_nubmer", p.port_nubmer},
+           {"port_number", p.port_number},
            {"networking", p.networking},
            {"security_policy", p.security_policy},
            {"build_info", p.build_info},

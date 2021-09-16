@@ -58,7 +58,7 @@
         "max_nodes_per_translate_browse_paths_to_nodeids": 0,
         "max_nodes_per_write": 0
     },
-    "port_nubmer": 4840,
+    "port_number": 4840,
     "rules_handling": "default",
     "secure_channels_limits": {
         "max_secure_channels": 40,

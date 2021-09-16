@@ -40,7 +40,7 @@ Configuration::Configuration(const std::string & filepath)
     configuration_->networkLayersSize = 1;
     configuration_->networkLayers = new UA_ServerNetworkLayer;
     configuration_->networkLayers[0] = UA_ServerNetworkLayerTCP(
-      config.networking, config.port_nubmer, 0, &configuration_->logger);
+      config.networking, config.port_number, 0, &configuration_->logger);
 
     switch (config.security_policy) {
       default:

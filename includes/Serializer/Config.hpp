@@ -71,7 +71,7 @@ struct Config {
   UA_Boolean allow_anonymous_access;
   UserCredentials access_credentials;
   UA_UInt16 thread_count;
-  UA_UInt16 port_nubmer;
+  UA_UInt16 port_number;
   UA_ConnectionConfig networking;
   SecurityPolicy security_policy;
   UA_BuildInfo build_info;
