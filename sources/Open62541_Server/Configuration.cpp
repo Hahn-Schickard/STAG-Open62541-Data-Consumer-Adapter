@@ -19,8 +19,6 @@ Configuration::Configuration() {
     *configuration_.get() = {};
     configuration_->logger.log = HaSLL_Logger_.log;
     configuration_->logger.clear = HaSLL_Logger_.clear;
-    // @TODO: Implement Config.hpp and Config_Serializer.hpp usage to set
-    // UA_Config
     UA_ServerConfig_setDefault(configuration_.get());
   } catch (exception &ex) {
     string error_msg =
@@ -37,30 +35,77 @@ Configuration::Configuration(const std::string & filepath)
     Config config = deserializeConfig(filepath);
 
     // TODO: allow_annonymous_access
-    // TODO: access_credentials
     configuration_->nThreads = config.thread_count;
 
     configuration_->networkLayersSize = 1;
     configuration_->networkLayers = new UA_ServerNetworkLayer;
     configuration_->networkLayers[0] = UA_ServerNetworkLayerTCP(
-      // TODO: is TCP correct, or WS?
       config.networking, config.port_nubmer, 0, &configuration_->logger);
 
-/*
     switch (config.security_policy) {
       default:
         case NONE:
+#ifdef UA_ENABLE_ENCRYPTION
+        case BASIC128_RSA15:
+        case BASIC256:
+        case BASIC256_SHA256:
+#endif
           configuration_->securityPoliciesSize = 1;
-          configuration_->securityPolicies = new UA_SecurityPolicy;
-          UA_SecurityPolicy_None(
-            configuration_->securityPolicies,
-            TODO,
-            &configuration_->logger);
           break;
-        // TODO: BASIC128_RSA15, BASIC256, BASIC256_SHA256, ALL
+        case ALL:
+#ifdef UA_ENABLE_ENCRYPTION
+          configuration_->securityPoliciesSize = 4;
+#else
+          configuration_->securityPoliciesSize = 1;
+#endif
+          break;
         throw Open62541_Config_Exception("Unsupported security policy");
     }
-*/
+    configuration_->securityPolicies
+      = new UA_SecurityPolicy[configuration_->securityPoliciesSize];
+    for (size_t i=0; i<configuration_->securityPoliciesSize; ++i)
+      configuration_->securityPolicies[i] = {};
+    {
+      UA_ByteString empty = {};
+      size_t i=0;
+      if ((config.security_policy==NONE) || (config.security_policy==ALL)) {
+        UA_SecurityPolicy_None(
+          &configuration_->securityPolicies[i],
+          empty,
+          &configuration_->logger);
+        ++i;
+      }
+#ifdef UA_ENABLE_ENCRYPTION
+      if ((config.security_policy==BASIC128_RSA15)
+        || (config.security_policy==ALL))
+      {
+        UA_SecurityPolicy_Basic128Rsa15(
+          &configuration_->securityPolicies[i],
+          empty,
+          config.access_credentials.password,
+          &configuration_->logger);
+        ++i;
+      }
+      if ((config.security_policy==BASIC256) || (config.security_policy==ALL)) {
+        UA_SecurityPolicy_Basic256(
+          &configuration_->securityPolicies[i],
+          empty,
+          config.access_credentials.password,
+          &configuration_->logger);
+        ++i;
+      }
+      if ((config.security_policy==BASIC256_SHA256)
+        || (config.security_policy==ALL))
+      {
+        UA_SecurityPolicy_Basic256Sha256(
+          &configuration_->securityPolicies[i],
+          empty,
+          config.access_credentials.password,
+          &configuration_->logger);
+        ++i;
+      }
+#endif
+    }
 
     configuration_->buildInfo = config.build_info;
     configuration_->applicationDescription = config.app_info;
@@ -112,8 +157,10 @@ Configuration::Configuration(const std::string & filepath)
       = config.subscription_limits.enable_retransmission_queue;
     configuration_->maxRetransmissionQueueSize
       = config.subscription_limits.max_retransmission_queue_size;
-
-    // TODO: subscription_limits.max_events_per_node
+#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
+    configuration_->maxEventsPerNode
+      = config.subscription_limits.max_events_per_node;
+#endif
 
     configuration_->maxMonitoredItems
       = config.monitored_items_limits.max_monitored_items;
