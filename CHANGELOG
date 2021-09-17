@@ -1,3 +1,7 @@
+## [0.1.6] - 2021.09.17
+### Changed
+  - Data_Consumer_Adapter_Interface to v0.1.7
+
 ## [0.1.5] - 2021.08.09
 ### Changed
  - toString(UA_Guid *input);

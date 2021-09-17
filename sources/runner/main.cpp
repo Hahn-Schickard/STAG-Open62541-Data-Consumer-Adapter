@@ -29,7 +29,17 @@ static void stopHandler(int /*sig*/) {
 }
 
 class EventSourceFake : public Event_Model::EventSource<ModelRegistryEvent> {
+  void handleException(exception_ptr eptr) {
+    if (eptr) {
+      std::rethrow_exception(eptr);
+    }
+  }
+
 public:
+  EventSourceFake()
+      : EventSource(
+            bind(&EventSourceFake::handleException, this, placeholders::_1)) {}
+
   void sendEvent(std::shared_ptr<ModelRegistryEvent> event) { notify(event); }
 };
 
