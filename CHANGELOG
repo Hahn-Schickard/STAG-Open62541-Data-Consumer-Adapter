@@ -1,3 +1,13 @@
+### Added
+ - OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source,
+     const std::string & config_filepath);
+ - Configuration::Configuration(const std::string & filepath);
+ - Open62541Server::Open62541Server(std::unique_ptr<Configuration>);
+
+###Changed
+ - Typos in Congig.hpp API
+ - Configuration::getConfig();
+
 ## [0.1.5] - 2021.08.09
 ### Changed
  - toString(UA_Guid *input);
