@@ -14,7 +14,7 @@
 namespace open62541 {
 class Open62541Server {
   volatile bool is_running_;
-  std::unique_ptr<Configuration> server_configuration_;
+  std::unique_ptr<const UA_ServerConfig> server_configuration_;
   UA_Server *open62541_server_;
   UA_UInt16 server_namespace_index_;
   std::thread server_thread_;
@@ -25,6 +25,7 @@ class Open62541Server {
 
 public:
   Open62541Server();
+  Open62541Server(std::unique_ptr<Configuration>);
   ~Open62541Server();
 
   bool start();

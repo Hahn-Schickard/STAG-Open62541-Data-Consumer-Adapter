@@ -40,6 +40,11 @@ void print(MetricPtr element, size_t offset);
 void print(DeviceElementGroupPtr elements, size_t offset);
 
 int main(int argc, char *argv[]) {
+  if (argc != 2) {
+    cerr << "Required CL argument: server config filepath" << endl;
+    return -1;
+  }
+
   try {
     auto config = HaSLL::Configuration(
         "./log", "logfile.log", "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$",
@@ -58,7 +63,7 @@ int main(int argc, char *argv[]) {
     auto event_source = make_shared<EventSourceFake>();
     logger->log(SeverityLevel::TRACE, "Fake event source initialized!");
 
-    adapter = new OpcuaAdapter(event_source);
+    adapter = new OpcuaAdapter(event_source, string(argv[1]));
     logger->log(SeverityLevel::TRACE, "OPC UA Addapter initialized!");
 
     adapter->start();
