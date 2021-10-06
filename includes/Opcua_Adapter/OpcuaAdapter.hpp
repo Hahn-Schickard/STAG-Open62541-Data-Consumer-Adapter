@@ -17,6 +17,8 @@ class OpcuaAdapter : public DataConsumerAdapterInterface {
 
 public:
   OpcuaAdapter(ModelEventSourcePtr event_source);
+  OpcuaAdapter(
+    ModelEventSourcePtr event_source, const std::string & config_filepath);
 
   void start() override;
   void stop() override;

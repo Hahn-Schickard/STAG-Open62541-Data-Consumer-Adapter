@@ -16,6 +16,14 @@ OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source)
       server_(make_shared<Open62541Server>()),
       node_builder_(make_unique<NodeBuilder>(server_)) {}
 
+OpcuaAdapter::OpcuaAdapter(
+    ModelEventSourcePtr event_source, const string & config_filepath)
+    : DataConsumerAdapterInterface(event_source, "Open62541 Adapter"),
+      server_(make_shared<Open62541Server>(
+        make_unique<open62541::Configuration>(config_filepath))),
+      node_builder_(make_unique<NodeBuilder>(server_))
+{}
+
 void OpcuaAdapter::start() {
   if (server_->start()) {
     DataConsumerAdapterInterface::start();

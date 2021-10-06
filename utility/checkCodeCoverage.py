@@ -89,7 +89,7 @@ parser.add_argument("runnable", help="set to True if a geven target is runnable"
                     type=str)
 parser.add_argument("target", help="full path to the binary target that will be analyzed",
                     type=str)
-parser.add_argument('arguments', nargs='?', default=[],
+parser.add_argument('arguments', nargs='*', default=[],
                     help="add an argument to the list of arguments, that are used by the target binary")
 
 runnable = to_bool(parser.parse_args().runnable)

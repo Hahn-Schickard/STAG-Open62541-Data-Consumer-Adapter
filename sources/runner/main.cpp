@@ -50,6 +50,17 @@ void print(MetricPtr element, size_t offset);
 void print(DeviceElementGroupPtr elements, size_t offset);
 
 int main(int argc, char *argv[]) {
+  /*
+    CL format:
+    - First argument (argv[1]): Path of server config file (required)
+    - Second argument: Server lifetime in s (infinite lifetime if omitted)
+  */
+
+  if (argc < 2) {
+    cerr << "Required CL argument: server config filepath" << endl;
+    return -1;
+  }
+
   try {
     auto config = HaSLL::Configuration(
         "./log", "logfile.log", "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$",
@@ -68,7 +79,7 @@ int main(int argc, char *argv[]) {
     auto event_source = make_shared<EventSourceFake>();
     logger->log(SeverityLevel::TRACE, "Fake event source initialized!");
 
-    adapter = new OpcuaAdapter(event_source);
+    adapter = new OpcuaAdapter(event_source, string(argv[1]));
     logger->log(SeverityLevel::TRACE, "OPC UA Addapter initialized!");
 
     adapter->start();
@@ -121,8 +132,8 @@ int main(int argc, char *argv[]) {
       event_source->sendEvent(make_shared<ModelRegistryEvent>(device));
     }
 
-    if (argc > 1) {
-      uint server_lifetime = atoi(argv[1]);
+    if (argc > 2) {
+      uint server_lifetime = atoi(argv[2]);
       cout << "Open62541 server will automatically shut down in "
            << server_lifetime << " seconds." << endl;
       sleep(server_lifetime);

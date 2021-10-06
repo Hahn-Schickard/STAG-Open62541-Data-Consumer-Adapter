@@ -10,11 +10,15 @@ using namespace Information_Model;
 using namespace open62541;
 
 Open62541Server::Open62541Server()
-    : is_running_(false), server_configuration_(make_unique<Configuration>()),
+  : Open62541Server(make_unique<Configuration>())
+{}
+
+Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
+    : is_running_(false), server_configuration_(configuration->getConfig()),
       logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {
   registerLoggers();
   open62541_server_ =
-      UA_Server_newWithConfig(server_configuration_->getConfig());
+      UA_Server_newWithConfig(server_configuration_.get());
   server_namespace_index_ = 1;
 }
 
@@ -85,7 +89,7 @@ UA_UInt16 Open62541Server::getServerNamespace() {
 }
 
 const UA_Logger *Open62541Server::getServerLogger() {
-  return &server_configuration_->getConfig()->logger;
+  return &server_configuration_->logger;
 }
 
 UA_Server *Open62541Server::getServer() { return open62541_server_; }
