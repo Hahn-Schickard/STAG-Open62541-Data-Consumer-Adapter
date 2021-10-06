@@ -40,7 +40,13 @@ void print(MetricPtr element, size_t offset);
 void print(DeviceElementGroupPtr elements, size_t offset);
 
 int main(int argc, char *argv[]) {
-  if (argc != 2) {
+  /*
+    CL format:
+    - First argument (argv[1]): Path of server config file (required)
+    - Second argument: Server lifetime in s (infinite lifetime if omitted)
+  */
+
+  if (argc < 2) {
     cerr << "Required CL argument: server config filepath" << endl;
     return -1;
   }
@@ -116,8 +122,8 @@ int main(int argc, char *argv[]) {
       event_source->sendEvent(make_shared<ModelRegistryEvent>(device));
     }
 
-    if (argc > 1) {
-      uint server_lifetime = atoi(argv[1]);
+    if (argc > 2) {
+      uint server_lifetime = atoi(argv[2]);
       cout << "Open62541 server will automatically shut down in "
            << server_lifetime << " seconds." << endl;
       sleep(server_lifetime);
