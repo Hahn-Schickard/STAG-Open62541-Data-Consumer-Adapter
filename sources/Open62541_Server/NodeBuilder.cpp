@@ -182,30 +182,30 @@ UA_StatusCode NodeBuilder::addFunctionNode(DeviceElementPtr function,
 void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
   match(variant,
         [&](bool value) {
-          UA_Variant_setScalar(&value_attribute.value, &value,
+          UA_Variant_setScalarCopy(&value_attribute.value, &value,
                                &UA_TYPES[UA_TYPES_BOOLEAN]);
         },
         [&](uint64_t value) {
-          UA_Variant_setScalar(&value_attribute.value, &value,
+          UA_Variant_setScalarCopy(&value_attribute.value, &value,
                                &UA_TYPES[UA_TYPES_UINT64]);
         },
         [&](int64_t value) {
-          UA_Variant_setScalar(&value_attribute.value, &value,
+          UA_Variant_setScalarCopy(&value_attribute.value, &value,
                                &UA_TYPES[UA_TYPES_INT64]);
         },
         [&](double value) {
-          UA_Variant_setScalar(&value_attribute.value, &value,
+          UA_Variant_setScalarCopy(&value_attribute.value, &value,
                                &UA_TYPES[UA_TYPES_DOUBLE]);
         },
         [&](DateTime value) {
           auto date_time = UA_DateTime_toStruct(value.getValue());
-          UA_Variant_setScalar(&value_attribute.value, &date_time,
+          UA_Variant_setScalarCopy(&value_attribute.value, &date_time,
                                &UA_TYPES[UA_TYPES_DATETIME]);
         },
         [&](vector<uint8_t> value) {
           string tmp(value.begin(), value.end());
           auto byte_string = UA_BYTESTRING_ALLOC(tmp.c_str());
-          UA_Variant_setScalar(&value_attribute.value, &byte_string,
+          UA_Variant_setScalarCopy(&value_attribute.value, &byte_string,
                                &UA_TYPES[UA_TYPES_BYTESTRING]);
         },
         [&](string value) {
@@ -213,7 +213,7 @@ void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
           open62541_string.length = strlen(value.c_str());
           open62541_string.data = (UA_Byte *)malloc(open62541_string.length);
           memcpy(open62541_string.data, value.c_str(), open62541_string.length);
-          UA_Variant_setScalar(&value_attribute.value, &open62541_string,
+          UA_Variant_setScalarCopy(&value_attribute.value, &open62541_string,
                                &UA_TYPES[UA_TYPES_STRING]);
         });
 }
