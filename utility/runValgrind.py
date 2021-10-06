@@ -68,7 +68,7 @@ def run_memory_analysis(analyzer: str, settings: list, error_beggining_marker: s
 parser = argparse.ArgumentParser()
 parser.add_argument("target", help="full path to the binary target that will be analyzed",
                     type=str)
-parser.add_argument('arguments', nargs='*',
+parser.add_argument('arguments', nargs='*', default=[],
                     help="add an argument to the list of arguments, that are used by the target binary")
 
 target = parser.parse_args().target
