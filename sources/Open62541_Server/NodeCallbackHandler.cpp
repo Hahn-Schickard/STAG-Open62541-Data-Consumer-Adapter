@@ -112,7 +112,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
                 UA_Variant_setScalarCopy(&value->value, &integer_value,
                                          &UA_TYPES[UA_TYPES_INT32]);
               } else {
-                throw runtime_error("Tried to read a Integer data type "
+                throw runtime_error("Tried to read an Integer data type "
                                     "when node data type is:" +
                                     toString(callback_wrapper->data_type_));
               }
@@ -143,7 +143,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
                 UA_Variant_setScalarCopy(&value->value, &date_time,
                                          &UA_TYPES[UA_TYPES_DATETIME]);
               } else {
-                throw runtime_error("Tried to read a String data type "
+                throw runtime_error("Tried to read a Time data type "
                                     "when node data type is: " +
                                     toString(callback_wrapper->data_type_));
               }
@@ -155,7 +155,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
                 UA_Variant_setScalarCopy(&value->value, &byte_string,
                                          &UA_TYPES[UA_TYPES_BYTESTRING]);
               } else {
-                throw runtime_error("Tried to read a String data type "
+                throw runtime_error("Tried to read an Opaque data type "
                                     "when node data type is: " +
                                     toString(callback_wrapper->data_type_));
               }
