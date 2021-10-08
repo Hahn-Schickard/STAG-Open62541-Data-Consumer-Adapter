@@ -232,8 +232,8 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
         value_attribute.displayName =
             UA_LOCALIZEDTEXT_ALLOC("EN_US", metric->getElementName().c_str());
         value_attribute.dataType = toNodeId(metric->getDataType());
-        status = UA_STATUSCODE_GOOD;
       }
+      status = UA_STATUSCODE_GOOD;
     } catch (exception &ex) {
       logger_->log(
           SeverityLevel::ERROR,
