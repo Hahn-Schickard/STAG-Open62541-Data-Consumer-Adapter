@@ -1,3 +1,4 @@
+## [0.1.6] - NOT RELEASED
 ### Added
  - OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source,
      const std::string & config_filepath);
@@ -7,6 +8,7 @@
 ###Changed
  - Typos in Congig.hpp API
  - Configuration::getConfig();
+ - Data_Consumer_Adapter_Interface to v0.1.7
 
 ## [0.1.5] - 2021.08.09
 ### Changed
