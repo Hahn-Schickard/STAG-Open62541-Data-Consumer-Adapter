@@ -28,8 +28,14 @@ UA_NodeId toNodeId(DataType type) {
   case DataType::STRING: {
     return UA_TYPES[UA_TYPES_STRING].typeId;
   }
+  case DataType::TIME: {
+    return UA_TYPES[UA_TYPES_DATETIME].typeId;
+  }
   case DataType::UNKNOWN:
-  default: { throw runtime_error("Unknown data type!"); }
+  default: {
+    throw runtime_error("Could not convert STAG Information Model Data Type to "
+                        "OPC UA data type!");
+  }
   }
 }
 
