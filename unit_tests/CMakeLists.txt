@@ -13,6 +13,7 @@ target_sources(${THIS} PRIVATE
 )
 
 target_link_libraries(${THIS} PUBLIC
+                              OPCUA_Adapter
                               GTest::GTest
 )
 
