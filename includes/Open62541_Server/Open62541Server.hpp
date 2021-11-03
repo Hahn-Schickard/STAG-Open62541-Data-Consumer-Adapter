@@ -24,8 +24,16 @@ class Open62541Server {
   void runnable();
 
 public:
+  /**
+   * @pre HaSLL::LoggerRepository has been initialized
+   */
   Open62541Server();
+
+  /**
+   * @pre HaSLL::LoggerRepository has been initialized
+   */
   Open62541Server(std::unique_ptr<Configuration>);
+
   ~Open62541Server();
 
   bool start();
