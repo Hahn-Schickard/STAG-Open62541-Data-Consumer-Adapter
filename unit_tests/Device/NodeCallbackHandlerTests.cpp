@@ -287,18 +287,37 @@ struct NodeCallbackHandlerDataConversionTests : public NodeCallbackHandlerTests
     static_cast<size_t>(Type::im_type),
     Information_Model::DataVariant>;
 
-  static bool equal(const IM_Type & v, const UA_Variant & ua_v) {
-    return Type::equal(v, *((typename Type::UA_Read_Type *) ua_v.data));
+  UA_NodeId node1,node2;
+
+  Information_Model::DataVariant im_value;
+    // the (single) resource that all callbacks use
+
+  std::shared_ptr<CallbackWrapper> read_only_callbacks =
+    std::make_shared<CallbackWrapper>(
+      Type::im_type,
+      [this]()->Information_Model::DataVariant { return im_value; });
+
+  std::shared_ptr<CallbackWrapper> read_write_callbacks =
+    std::make_shared<CallbackWrapper>(
+      Type::im_type,
+      [this]()->Information_Model::DataVariant { return im_value; },
+      [this](Information_Model::DataVariant value){ im_value = value; });
+
+  NodeCallbackHandlerDataConversionTests() {
+    node1 = UA_NODEID_NULL;
+    EXPECT_EQ(UA_STATUSCODE_GOOD,
+      UA_NodeId_parse(&node2, UA_STRING((char *) "i=13")));
   }
 
-  Information_Model::DataVariant init_im_value(typename Type::Value_Type val) {
+private:
+  Information_Model::DataVariant init_im_value(size_t value_index) {
     return Information_Model::DataVariant(
       std::in_place_index<static_cast<size_t>(Type::im_type)>,
-      Type::Value2IM(val));
+      Type::Value2IM(Type::value(value_index)));
   }
 
-  void init_ua_value(UA_DataValue & dst, typename Type::Value_Type val) {
-    auto ua_val = Type::Value2Write(val);
+  void init_ua_value(UA_DataValue & dst, size_t value_index) {
+    auto ua_val = Type::Value2Write(Type::value(value_index));
     dst.hasValue = true;
     dst.hasStatus = false;
     dst.hasSourceTimestamp = false;
@@ -334,7 +353,7 @@ struct NodeCallbackHandlerDataConversionTests : public NodeCallbackHandlerTests
 
   void check_no_write_callback(const UA_NodeId & node) {
     UA_DataValue ua_value;
-    init_ua_value(ua_value, Type::value(0));
+    init_ua_value(ua_value, 0);
     EXPECT_NE(UA_STATUSCODE_GOOD, invoke_write(node, ua_value));
   }
 
@@ -345,60 +364,114 @@ struct NodeCallbackHandlerDataConversionTests : public NodeCallbackHandlerTests
     EXPECT_TRUE(UA_Variant_hasScalarType(
       &ua_value.value, &UA_TYPES[Type::ua_read_type]));
     for (size_t i=0; i<Type::num_values; ++i)
-      EXPECT_EQ(i == nominal_value,
-        equal(Type::Value2IM(Type::value(i)), ua_value.value));
+      EXPECT_EQ(
+        i == nominal_value,
+        Type::equal(
+          Type::Value2IM(Type::value(i)),
+          *((typename Type::UA_Read_Type *) ua_value.value.data)));
+  }
+
+public:
+  void test_no_callbacks(const UA_NodeId & node) {
+    check_no_read_callback(node);
+    check_no_write_callback(node);
+  }
+
+  void test_read_only_callbacks(const UA_NodeId & node) {
+    for (size_t value=0; value<Type::num_values; ++value) {
+      im_value = init_im_value(value);
+      check_read(node, value);
+    }
+    check_no_write_callback(node);
+  }
+
+  void test_read_write_callbacks(const UA_NodeId & node) {
+    UA_DataValue ua_v;
+
+    for (size_t value=0; value<Type::num_values; ++value) {
+      init_ua_value(ua_v, value);
+      EXPECT_EQ(UA_STATUSCODE_GOOD, invoke_write(node,ua_v));
+
+      EXPECT_EQ(im_value, init_im_value(value));
+      check_read(node, value);
+    }
   }
 };
 TYPED_TEST_SUITE(NodeCallbackHandlerDataConversionTests, AllConversions);
 
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, addNoCallback) {
-  UA_NodeId node = UA_NODEID_NULL;
-  auto callbacks = std::make_shared<CallbackWrapper>();
   EXPECT_EQ(UA_STATUSCODE_GOOD,
-    NodeCallbackHandler::addNodeCallbacks(node, callbacks));
-
-  TestFixture::check_no_read_callback(node);
-  TestFixture::check_no_write_callback(node);
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node1, std::make_shared<CallbackWrapper>()));
+  TestFixture::test_no_callbacks(TestFixture::node1);
+  TestFixture::test_no_callbacks(TestFixture::node2);
 }
 
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, addReadCallback) {
-  UA_NodeId node = UA_NODEID_NULL;
-  Information_Model::DataVariant im_value;
-  auto callbacks = std::make_shared<CallbackWrapper>(
-    TestFixture::Type::im_type,
-    [&im_value]()->Information_Model::DataVariant { return im_value; });
   EXPECT_EQ(UA_STATUSCODE_GOOD,
-    NodeCallbackHandler::addNodeCallbacks(node, callbacks));
-
-  for (size_t value=0; value<TestFixture::Type::num_values; ++value) {
-    im_value = TestFixture::init_im_value(TestFixture::Type::value(value));
-
-    TestFixture::check_read(node, value);
-  }
-
-  TestFixture::check_no_write_callback(node);
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node1, TestFixture::read_only_callbacks));
+  TestFixture::test_read_only_callbacks(TestFixture::node1);
+  TestFixture::test_no_callbacks(TestFixture::node2);
 }
 
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, addRWCallbacks) {
-  UA_NodeId node = UA_NODEID_NULL;
-  Information_Model::DataVariant im_value;
-  auto callbacks = std::make_shared<CallbackWrapper>(
-    TestFixture::Type::im_type,
-    [&im_value]()->Information_Model::DataVariant { return im_value; },
-    [&im_value](Information_Model::DataVariant value){ im_value = value; });
   EXPECT_EQ(UA_STATUSCODE_GOOD,
-    NodeCallbackHandler::addNodeCallbacks(node, callbacks));
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node1, TestFixture::read_write_callbacks));
+  TestFixture::test_read_write_callbacks(TestFixture::node1);
+  TestFixture::test_no_callbacks(TestFixture::node2);
+}
 
-  UA_DataValue ua_v;
+TYPED_TEST(NodeCallbackHandlerDataConversionTests, addTwoCallbacks) {
+  EXPECT_EQ(UA_STATUSCODE_GOOD,
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node1, TestFixture::read_only_callbacks));
+  EXPECT_EQ(UA_STATUSCODE_GOOD,
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node2, TestFixture::read_write_callbacks));
 
-  for (size_t value=0; value<TestFixture::Type::num_values; ++value) {
-    TestFixture::init_ua_value(ua_v, TestFixture::Type::value(value));
-    EXPECT_EQ(UA_STATUSCODE_GOOD, TestFixture::invoke_write(node,ua_v));
+  TestFixture::test_read_only_callbacks(TestFixture::node1);
+  TestFixture::test_read_write_callbacks(TestFixture::node2);
+}
 
-    EXPECT_EQ(im_value,
-      TestFixture::init_im_value(TestFixture::Type::value(value)));
-    TestFixture::check_read(node, value);
-  }
+TYPED_TEST(NodeCallbackHandlerDataConversionTests, addCallbacksTwice) {
+  EXPECT_EQ(UA_STATUSCODE_GOOD,
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node1, TestFixture::read_only_callbacks));
+  EXPECT_NE(UA_STATUSCODE_GOOD,
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node1, TestFixture::read_write_callbacks));
+
+  TestFixture::test_read_only_callbacks(TestFixture::node1);
+}
+
+TYPED_TEST(NodeCallbackHandlerDataConversionTests, removeCallbacks) {
+  EXPECT_EQ(UA_STATUSCODE_GOOD,
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node1, TestFixture::read_only_callbacks));
+  EXPECT_EQ(UA_STATUSCODE_GOOD,
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node2, TestFixture::read_write_callbacks));
+
+  // so far the same situation as in addTwoCallbacks
+
+  UA_NodeId node = TestFixture::node1;
+  EXPECT_EQ(UA_STATUSCODE_GOOD,
+    NodeCallbackHandler::removeNodeCallbacks(&node));
+
+  TestFixture::test_no_callbacks(TestFixture::node1);
+  TestFixture::test_read_write_callbacks(TestFixture::node2);
+}
+
+TYPED_TEST(NodeCallbackHandlerDataConversionTests, removeNonexistingCallbacks) {
+  EXPECT_EQ(UA_STATUSCODE_GOOD,
+    NodeCallbackHandler::addNodeCallbacks(
+      TestFixture::node1, TestFixture::read_only_callbacks));
+
+  UA_NodeId node = TestFixture::node2;
+  EXPECT_NE(UA_STATUSCODE_GOOD,
+    NodeCallbackHandler::removeNodeCallbacks(&node));
 }
 
 } // namespace
