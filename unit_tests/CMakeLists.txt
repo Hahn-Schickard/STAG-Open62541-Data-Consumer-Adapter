@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 set(THIS Unit_Tests_Runner)
 
-file(GLOB Device_Test_Suite "${CMAKE_CURRENT_LIST_DIR}/*")
+file(GLOB Device_Test_Suite "${CMAKE_CURRENT_LIST_DIR}/Device/*")
 
 find_package(GTest REQUIRED)
 
@@ -13,6 +13,7 @@ target_sources(${THIS} PRIVATE
 )
 
 target_link_libraries(${THIS} PUBLIC
+                              OPCUA_Adapter
                               GTest::GTest
 )
 
