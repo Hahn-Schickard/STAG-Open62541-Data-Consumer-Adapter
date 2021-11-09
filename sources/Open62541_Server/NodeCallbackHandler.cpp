@@ -222,19 +222,19 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue(
         break;
       }
       case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE:
-        write_CB(DataVariant(*((UA_SByte *)(value->value.data))));
+        write_CB(DataVariant((int64_t) *((UA_SByte *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_INT16:
-        write_CB(DataVariant(*((UA_Int16 *)(value->value.data))));
+        write_CB(DataVariant((int64_t) *((UA_Int16 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_INT32:
-        write_CB(DataVariant(*((UA_Int32 *)(value->value.data))));
+        write_CB(DataVariant((int64_t) *((UA_Int32 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_INT64:
-        write_CB(DataVariant(*((UA_Int64 *)(value->value.data))));
+        write_CB(DataVariant((int64_t) *((UA_Int64 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
