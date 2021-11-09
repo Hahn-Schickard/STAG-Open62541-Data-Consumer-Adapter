@@ -110,7 +110,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
             [&](uint64_t integer_value) {
               if (callback_wrapper->data_type_ == DataType::UNSIGNED_INTEGER) {
                 UA_Variant_setScalarCopy(&value->value, &integer_value,
-                                         &UA_TYPES[UA_TYPES_INT32]);
+                                         &UA_TYPES[UA_TYPES_UINT64]);
               } else {
                 throw runtime_error("Tried to read an Integer data type "
                                     "when node data type is:" +
@@ -139,7 +139,8 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
             },
             [&](DateTime time_value) {
               if (callback_wrapper->data_type_ == DataType::TIME) {
-                auto date_time = UA_DateTime_toStruct(time_value.getValue());
+                UA_DateTime date_time
+                  = UA_DateTime_fromUnixTime(time_value.getValue());
                 UA_Variant_setScalarCopy(&value->value, &date_time,
                                          &UA_TYPES[UA_TYPES_DATETIME]);
               } else {
@@ -150,8 +151,11 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
             },
             [&](vector<uint8_t> opaque_value) {
               if (callback_wrapper->data_type_ == DataType::OPAQUE) {
-                string tmp(opaque_value.begin(), opaque_value.end());
-                auto byte_string = UA_BYTESTRING_ALLOC(tmp.c_str());
+                UA_ByteString byte_string;
+                byte_string.length = opaque_value.size();
+                byte_string.data = (UA_Byte *)malloc(byte_string.length);
+                memcpy(byte_string.data, opaque_value.data(),
+                       byte_string.length);
                 UA_Variant_setScalarCopy(&value->value, &byte_string,
                                          &UA_TYPES[UA_TYPES_BYTESTRING]);
               } else {
@@ -218,38 +222,62 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue(
         break;
       }
       case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE:
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT16:
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT32:
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-        int64_t long_value = *((int64_t *)(value->value.data));
-        write_CB(DataVariant(long_value));
+        write_CB(DataVariant(*((UA_SByte *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
-      }
+      case UA_DataTypeKind::UA_DATATYPEKIND_INT16:
+        write_CB(DataVariant(*((UA_Int16 *)(value->value.data))));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      case UA_DataTypeKind::UA_DATATYPEKIND_INT32:
+        write_CB(DataVariant(*((UA_Int32 *)(value->value.data))));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      case UA_DataTypeKind::UA_DATATYPEKIND_INT64:
+        write_CB(DataVariant(*((UA_Int64 *)(value->value.data))));
+        status = UA_STATUSCODE_GOOD;
+        break;
       case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-        int64_t time_value = *((int64_t *)(value->value.data));
-        write_CB(DataVariant(DateTime(time_value)));
+        UA_DateTime time_value = *((UA_DateTime *)(value->value.data));
+        write_CB(DataVariant(DateTime(UA_DateTime_toUnixTime(time_value))));
         status = UA_STATUSCODE_GOOD;
         break;
       }
       case UA_DataTypeKind::UA_DATATYPEKIND_BYTE:
+        write_CB(DataVariant((uint64_t) *((UA_Byte *)(value->value.data))));
+        status = UA_STATUSCODE_GOOD;
+        break;
       case UA_DataTypeKind::UA_DATATYPEKIND_UINT16:
+        write_CB(DataVariant((uint64_t) *((UA_UInt16 *)(value->value.data))));
+        status = UA_STATUSCODE_GOOD;
+        break;
       case UA_DataTypeKind::UA_DATATYPEKIND_UINT32:
-      case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-        uint64_t long_value = *((uint64_t *)(value->value.data));
-        write_CB(DataVariant(long_value));
+        write_CB(DataVariant((uint64_t) *((UA_UInt32 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT:
-      case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-        double double_value = *((double *)(value->value.data));
-        write_CB(DataVariant(double_value));
+      case UA_DataTypeKind::UA_DATATYPEKIND_UINT64:
+        write_CB(DataVariant((uint64_t) *((UA_UInt64 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING:
       case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE:
+        write_CB(DataVariant((uint64_t) *((UA_StatusCode *)(value->value.data))));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT:
+        write_CB(DataVariant(*((UA_Float *)(value->value.data))));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE:
+        write_CB(DataVariant(*((UA_Double *)(value->value.data))));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
+        UA_ByteString *bytestring = (UA_ByteString *)(value->value.data);
+        write_CB(DataVariant(std::vector<uint8_t>(
+          bytestring->data, bytestring->data + bytestring->length)));
+        status = UA_STATUSCODE_GOOD;
+        break;
+      }
       case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
         UA_String *ua_string = (UA_String *)(value->value.data);
         auto string_value = string((char *)ua_string->data, ua_string->length);
