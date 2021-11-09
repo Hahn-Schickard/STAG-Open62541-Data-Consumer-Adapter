@@ -57,9 +57,15 @@ public:
    */
   static void destroy();
 
+  /**
+   * @pre There is no callback bound to nodeId.
+   */
   static UA_StatusCode addNodeCallbacks(UA_NodeId nodeId,
                                         CallbackWrapperPtr callback_wrapper);
 
+  /**
+   * @pre There is a callback bound to nodeId.
+   */
   static UA_StatusCode removeNodeCallbacks(const UA_NodeId *nodeId);
 
   /**
