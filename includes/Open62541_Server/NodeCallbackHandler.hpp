@@ -39,6 +39,7 @@ class NodeCallbackHandler {
   using NodeCalbackMap =
       std::unordered_map<UA_NodeId, CallbackWrapperPtr, UA_NodeId_Hasher>;
   static NodeCalbackMap node_calbacks_map_;
+    // Invariant: No CallbackWrapperPtr is empty
   static const UA_Logger *logger_;
 
   static CallbackWrapperPtr findCallbackWrapper(const UA_NodeId *node_id);
@@ -59,6 +60,7 @@ public:
 
   /**
    * @pre There is no callback bound to nodeId.
+   * @pre callback_wrapper is non-empty.
    */
   static UA_StatusCode addNodeCallbacks(UA_NodeId nodeId,
                                         CallbackWrapperPtr callback_wrapper);

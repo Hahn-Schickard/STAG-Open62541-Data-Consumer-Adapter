@@ -50,7 +50,10 @@ UA_StatusCode
 NodeCallbackHandler::addNodeCallbacks(UA_NodeId node_id,
                                       CallbackWrapperPtr callback_wrapper) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTSUPPORTED;
-  if (!findCallbackWrapper(&node_id)) {
+  if (!callback_wrapper) {
+    UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, "Precondition violated");
+    status = UA_STATUSCODE_BADDEVICEFAILURE;
+  } else if (!findCallbackWrapper(&node_id)) {
     string trace_msg = "Adding callback_wrapper for Node " + toString(&node_id);
     UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     node_calbacks_map_.emplace(move(node_id), move(callback_wrapper));
