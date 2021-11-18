@@ -59,24 +59,35 @@ class ParsedDevice : public Information_Model::Device {
       ++spec;
       while (*spec != ')') {
         names.next();
-        Information_Model::ElementTypeEnum type;
         switch(*spec) {
-          case 'U': type = Information_Model::UNDEFINED; break;
-          case 'R': type = Information_Model::READABLE; break;
-          case 'O': type = Information_Model::OBSERVABLE; break;
-          case 'W': type = Information_Model::WRITABLE; break;
-          case 'F': type = Information_Model::FUNCTION; break;
-          case '(': type = Information_Model::GROUP; break;
-          default:
-            throw "illegal spec";
-        }
-        if (type == Information_Model::GROUP)
+        case '(':
           elements.push_back(std::make_shared<ParsedDeviceElementGroup>(
             spec, names));
-        else
+          break;
+        case 'U':
           elements.push_back(std::make_shared<Information_Model::DeviceElement>(
             names.ref_id(), names.name(), names.description(),
-            type));
+            Information_Model::UNDEFINED));
+          break;
+        case 'R':
+          elements.push_back(
+            std::make_shared<Information_Model::testing::MockMetric>(
+              names.ref_id(), names.name(), names.description()));
+          break;
+        case 'W':
+          elements.push_back(
+            std::make_shared<Information_Model::testing::MockWritableMetric>(
+              names.ref_id(), names.name(), names.description()));
+          break;
+        case 'F':
+          elements.push_back(std::make_shared<Information_Model::DeviceElement>(
+            names.ref_id(), names.name(), names.description(),
+            Information_Model::FUNCTION));
+          break;
+        default:
+          throw "illegal spec";
+        }
+
         ++spec;
       }
     }
@@ -338,7 +349,8 @@ INSTANTIATE_TEST_SUITE_P(AddDeviceNodeTestSuite, AddDeviceNodeTest,
     "()",
     "(U)", "(R)", "(O)", "(W)", "(F)",
     "(UROWF)", "(URUROWFOWF)",
-    "(((())))", "((((U)(R))((O)(W)))(((F)())(()())))"
+    "(((())))", "(()(())(()(()))(()(())(()(()))))",
+    "((((U)(R))((O)(W)))(((F)())(()())))"
     ));
 
 } // namespace
