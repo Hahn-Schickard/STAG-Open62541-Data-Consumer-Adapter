@@ -160,7 +160,8 @@ public:
     browse_description.nodeClassMask = 65535;
     browse_description.resultMask = 65535;
     result = UA_Server_browse(ua_server, max_references, &browse_description);
-    EXPECT_EQ(result.statusCode, UA_STATUSCODE_GOOD);
+    EXPECT_EQ(result.statusCode, UA_STATUSCODE_GOOD)
+      << UA_StatusCode_name(result.statusCode);
     EXPECT_LT(result.referencesSize, max_references);
 
     for (size_t i=0; i<result.referencesSize; ++i)
@@ -296,7 +297,8 @@ struct NodeBuilderTests : public ::testing::Test {
     root_before.expect_all();
 
     // Make the call
-    EXPECT_EQ(node_builder.addDeviceNode(device), UA_STATUSCODE_GOOD);
+    auto status = node_builder.addDeviceNode(device);
+    EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
 
     Browse root_after(ua_server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER));
 
@@ -344,7 +346,7 @@ class AddDeviceNodeTest
 TEST_P(AddDeviceNodeTest, addDeviceNode) {
   testAddDeviceNode(GetParam());
 }
-INSTANTIATE_TEST_SUITE_P(AddDeviceNodeTestSuite, AddDeviceNodeTest,
+INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeTestSuite, AddDeviceNodeTest,
   ::testing::Values(
     "()",
     "(U)", "(R)", "(O)", "(W)", "(F)",
