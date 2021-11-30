@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-#include "Information_Model/mocks/Device_MOCK.hpp"
+#include "Information_Model/mocks/DeviceMockBuilder.hpp"
 #include "NodeBuilder.hpp"
 #include "Utility.hpp"
 
@@ -13,6 +13,40 @@ using namespace open62541;
 std::string to_string(const UA_ExpandedNodeId & id) {
   return std::to_string(id.serverIndex) + ":" + toString(&id.namespaceUri)
     + ":" + toString(&id.nodeId);
+}
+
+std::string to_string(UA_Server * server, const UA_ReferenceDescription & ref) {
+  UA_QualifiedName type_name;
+  auto statuscode =
+    UA_Server_readBrowseName(server, ref.referenceTypeId, &type_name);
+  EXPECT_EQ(statuscode, UA_STATUSCODE_GOOD)
+    << UA_StatusCode_name(statuscode);
+
+  std::string typedef_name;
+  {
+    UA_QualifiedName typedef_name_;
+    statuscode = UA_Server_readBrowseName(
+      server, ref.typeDefinition.nodeId, &typedef_name_);
+    switch (statuscode) {
+    case UA_STATUSCODE_GOOD:
+      typedef_name = toString(&typedef_name_);
+      break;
+    case UA_STATUSCODE_BADNODEIDUNKNOWN:
+      typedef_name = "?";
+      break;
+    default:
+      ADD_FAILURE() << UA_StatusCode_name(statuscode);
+    }
+  }
+
+  return "{referenceTypeID=" + toString(&ref.referenceTypeId)
+      + "(" + toString(&type_name)
+    + "); isForward=" + (ref.isForward ? "true" : "false")
+    + "; nodeId=" + to_string(ref.nodeId)
+    + "; browseName=\"" + toString(&ref.browseName)
+    + "\"; nodeClass=" + std::to_string(ref.nodeClass)
+    + "; typeDefinition=" + to_string(ref.typeDefinition) + "(" + typedef_name
+    + ")}";
 }
 
 /**
@@ -30,99 +64,77 @@ public:
   void next() { ++counter; }
 };
 
+// helper for parseDevice below
+void parseDeviceGroup(
+  Information_Model::DeviceBuilderInterface & builder,
+  NameGenerator & names,
+  const char *& spec,
+  std::optional<std::string> group)
+{
+  // precondition: *spec == '('
+  // postcondition: *spec == ')'
+
+  ++spec;
+  while (*spec != ')') {
+    names.next();
+    auto name = names.name();
+    auto description = names.description();
+
+    switch(*spec) {
+    case '(':
+      parseDeviceGroup(builder,names,spec,
+        (group.has_value()
+          ? builder.addDeviceElementGroup(group.value(), name, description)
+          : builder.addDeviceElementGroup(name, description)));
+      break;
+    case 'R':
+      (group.has_value()
+        ? builder.addReadableMetric(group.value(), name, description,
+          Information_Model::DataType::BOOLEAN,
+          []()->Information_Model::DataVariant{ return false; })
+        : builder.addReadableMetric(name, description,
+          Information_Model::DataType::BOOLEAN,
+          []()->Information_Model::DataVariant{ return false; }));
+      break;
+    case 'W':
+      (group.has_value()
+        ? builder.addWritableMetric(group.value(), name, description,
+          Information_Model::DataType::BOOLEAN,
+          []()->Information_Model::DataVariant{ return false; },
+          [](Information_Model::DataVariant){})
+        : builder.addWritableMetric(name, description,
+          Information_Model::DataType::BOOLEAN,
+          []()->Information_Model::DataVariant{ return false; },
+          [](Information_Model::DataVariant){}));
+      break;
+    default:
+      throw "illegal spec";
+    }
+
+    ++spec;
+  }
+}
+
 /**
- * @brief Helper class for parsing Information_Model objects from string specs
+ * @brief Create a Device from a string spec.
  *
  * The spec format is:
- * - "U" for an UNDEFINED element
  * - "R" for a READABLE element
- * - "O" for an OBSERVABLE element
  * - "W" for a WRITABLE element
- * - "F" for a FUNCTION element
  * - For a GROUP element: The concatenation of its children's specs enclosed
  *   between "(" and ")"
- * - For a Device: Its ElementGroup's spec
+ * - For the Device: Its ElementGroup's spec
  */
-class ParsedDevice : public Information_Model::Device {
+Information_Model::DevicePtr parseDevice(const char * spec) {
+  Information_Model::testing::DeviceMockBuilder builder;
+  NameGenerator names;
 
-  class ParsedDeviceElementGroup : public Information_Model::DeviceElementGroup {
+  builder.buildDeviceBase(
+    names.ref_id(), names.name(), names.description());
+  parseDeviceGroup(builder, names, spec, std::optional<std::string>());
 
-    DeviceElements elements;
-
-  public:
-    ParsedDeviceElementGroup(const char *& spec, NameGenerator & names)
-      : DeviceElementGroup(names.ref_id(), names.name(), names.description())
-    {
-      // precondition: *spec == '('
-      // postcondition: *spec == ')'
-
-      ++spec;
-      while (*spec != ')') {
-        names.next();
-        switch(*spec) {
-        case '(':
-          elements.push_back(std::make_shared<ParsedDeviceElementGroup>(
-            spec, names));
-          break;
-        case 'U':
-          elements.push_back(std::make_shared<Information_Model::DeviceElement>(
-            names.ref_id(), names.name(), names.description(),
-            Information_Model::UNDEFINED));
-          break;
-        case 'R':
-          elements.push_back(
-            std::make_shared<Information_Model::testing::MockMetric>(
-              names.ref_id(), names.name(), names.description()));
-          break;
-        case 'W':
-          elements.push_back(
-            std::make_shared<Information_Model::testing::MockWritableMetric>(
-              names.ref_id(), names.name(), names.description()));
-          break;
-        case 'F':
-          elements.push_back(std::make_shared<Information_Model::DeviceElement>(
-            names.ref_id(), names.name(), names.description(),
-            Information_Model::FUNCTION));
-          break;
-        default:
-          throw "illegal spec";
-        }
-
-        ++spec;
-      }
-    }
-
-    virtual DeviceElements getSubelements() { return elements; }
-    virtual Information_Model::DeviceElementPtr getSubelement(
-      const std::string &ref_id)
-    {
-      for (auto element : elements)
-        if (element->getElementId() == ref_id)
-          return element;
-      throw "not found";
-    }
-  };
-
-  std::shared_ptr<ParsedDeviceElementGroup> elements;
-
-public:
-  ParsedDevice(NameGenerator & names, const char * spec)
-    : Device(names.ref_id(), names.name(), names.description())
-  {
-    names.next();
-    ParsedDeviceElementGroup elements_(spec, names);
-    elements = std::make_shared<ParsedDeviceElementGroup>(elements_);
-  }
-
-  virtual Information_Model::DeviceElementGroupPtr getDeviceElementGroup() {
-    return elements;
-  }
-  virtual Information_Model::DeviceElementPtr getDeviceElement(
-    const std::string &ref_id)
-  {
-    return elements->getSubelement(ref_id);
-  }
-};
+  return builder.getResult();
+}
 
 /**
  * @brief Helper class for comparing browsed with expected state
@@ -133,8 +145,10 @@ public:
 class Browse {
   static constexpr size_t max_references = 1000;
 
+  UA_Server * ua_server;
   UA_BrowseResult result;
   std::set<size_t> unexpected;
+  size_t num_children_;
 
 public:
   class iterator {
@@ -151,7 +165,9 @@ public:
 
   Browse() = delete;
 
-  Browse(UA_Server * ua_server, const UA_NodeId & node_id) {
+  Browse(UA_Server * ua_server_, const UA_NodeId & node_id)
+    : ua_server(ua_server_)
+  {
     UA_BrowseDescription browse_description;
     browse_description.nodeId = node_id;
     browse_description.browseDirection = UA_BROWSEDIRECTION_FORWARD;
@@ -164,7 +180,9 @@ public:
       << UA_StatusCode_name(result.statusCode);
     EXPECT_LT(result.referencesSize, max_references);
 
-    for (size_t i=0; i<result.referencesSize; ++i)
+    num_children_ = result.referencesSize;
+
+    for (size_t i=0; i<num_children_; ++i)
       unexpected.insert(i);
   }
 
@@ -172,8 +190,7 @@ public:
     for (auto i : unexpected) {
       auto & ref = result.references[i];
       ADD_FAILURE()
-        << "unexpected reference " << to_string(ref.nodeId)
-        << " (" << toString(&ref.browseName) << ")";
+        << "unexpected reference " << to_string(ua_server,ref);
     }
   }
 
@@ -203,6 +220,10 @@ public:
       }
     ADD_FAILURE() << filter_description << " not found";
   }
+
+  size_t num_children() const {
+    return num_children_;
+  }
 };
 
 
@@ -221,7 +242,7 @@ struct NodeBuilderTests : public ::testing::Test {
     const UA_ReferenceDescription & ref_desc,
     Information_Model::NamedElementPtr element)
   {
-    SCOPED_TRACE("NamedElement " + to_string(ref_desc.nodeId));
+    SCOPED_TRACE("NamedElement " + to_string(ua_server,ref_desc));
     ASSERT_TRUE(element) << "null pointer";
 
     // check browseName
@@ -245,11 +266,13 @@ struct NodeBuilderTests : public ::testing::Test {
     const UA_ReferenceDescription & ref_desc,
     Information_Model::DeviceElementGroupPtr group)
   {
-    SCOPED_TRACE("DeviceElementGroup " + to_string(ref_desc.nodeId));
+    ASSERT_TRUE(group) << "null pointer";
+    SCOPED_TRACE("DeviceElementGroup " + to_string(ua_server,ref_desc));
     compareNamedElement(ref_desc, group);
 
     // check children
     Browse ua_elements(ua_server, ref_desc.nodeId.nodeId);
+    EXPECT_EQ(ua_elements.num_children(), group->getSubelements().size());
     auto im_elements = group->getSubelements();
     for (auto & im_element : im_elements) {
       ASSERT_TRUE(im_element) << "null pointer";
@@ -261,14 +284,15 @@ struct NodeBuilderTests : public ::testing::Test {
           ADD_FAILURE() << "TODO (" << to_string(elem_ref.nodeId) << ")";
         });
     }
-    ua_elements.expect_all(); // accept additional elements on UA side
+//    ua_elements.expect_all(); // accept additional elements on UA side
   }
 
   void compareDevice(
     const UA_ReferenceDescription & ref_desc,
     Information_Model::DevicePtr device)
   {
-    SCOPED_TRACE("Device " + to_string(ref_desc.nodeId));
+    SCOPED_TRACE("Device " + to_string(ua_server,ref_desc)
+      + toString(&ref_desc.nodeId.nodeId));
     compareNamedElement(ref_desc, device);
 
     EXPECT_EQ(ref_desc.nodeId.namespaceUri.length, 0);
@@ -324,9 +348,7 @@ struct NodeBuilderTests : public ::testing::Test {
   }
 
   void testAddDeviceNode(const char * spec) {
-    NameGenerator names;
-    auto device = std::make_shared<ParsedDevice>(names,spec);
-    testAddDeviceNode(device);
+    testAddDeviceNode(parseDevice(spec));
   }
 };
 
@@ -349,10 +371,10 @@ TEST_P(AddDeviceNodeTest, addDeviceNode) {
 INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeTestSuite, AddDeviceNodeTest,
   ::testing::Values(
     "()",
-    "(U)", "(R)", "(O)", "(W)", "(F)",
-    "(UROWF)", "(URUROWFOWF)",
-    "(((())))", "(()(())(()(()))(()(())(()(()))))",
-    "((((U)(R))((O)(W)))(((F)())(()())))"
+    "(R)", "(W)",
+    "(RW)", "(RRRWRWWW)",
+    "((((((((R))))))))", "((R)((W))((R)((W)))((R)((W))((R)((W)))))",
+    "((((R)(R))((R)(W)))(((W)(R))((W)(W))))"
     ));
 
 } // namespace
