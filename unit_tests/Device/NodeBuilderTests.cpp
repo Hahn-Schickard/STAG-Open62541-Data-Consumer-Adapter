@@ -238,6 +238,13 @@ struct NodeBuilderTests : public ::testing::Test {
       node_builder(server)
   {}
 
+  bool compareId(const UA_NodeId & ua, std::string im) {
+    if (ua.identifierType != UA_NODEIDTYPE_STRING)
+      return false;
+    auto im_ = UA_STRING((char *) im.c_str());
+    return UA_String_equal(&ua.identifier.string, &im_);
+  }
+
   void compareNamedElement(
     const UA_ReferenceDescription & ref_desc,
     Information_Model::NamedElementPtr element)
@@ -277,14 +284,28 @@ struct NodeBuilderTests : public ::testing::Test {
     for (auto & im_element : im_elements) {
       ASSERT_TRUE(im_element) << "null pointer";
       ua_elements.expect(im_element->getElementName(),
-        [](const UA_ReferenceDescription & elem_ref)->bool {
-          return true;
+        [&](const UA_ReferenceDescription & elem_ref)->bool {
+          return compareId(elem_ref.nodeId.nodeId, im_element->getElementId());
         },
-        [](const UA_ReferenceDescription & elem_ref) {
-          ADD_FAILURE() << "TODO (" << to_string(elem_ref.nodeId) << ")";
+        [&](const UA_ReferenceDescription & elem_ref) {
+          compareNamedElement(elem_ref, im_element);
+          switch (im_element->getElementType()) {
+          case Information_Model::GROUP:
+            compareDeviceElementGroup(elem_ref,
+              std::dynamic_pointer_cast<Information_Model::DeviceElementGroup>(
+                im_element));
+            break;
+          case Information_Model::READABLE:
+            ADD_FAILURE() << "TODO";
+            break;
+          case Information_Model::WRITABLE:
+            ADD_FAILURE() << "TODO";
+            break;
+          default:
+            ADD_FAILURE() << im_element->getElementType();
+          }
         });
     }
-//    ua_elements.expect_all(); // accept additional elements on UA side
   }
 
   void compareDevice(
@@ -302,16 +323,7 @@ struct NodeBuilderTests : public ::testing::Test {
     EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_OBJECT);
 
     // check child(ren)
-    Browse device_children(ua_server, ref_desc.nodeId.nodeId);
-    device_children.expect(
-      "device group",
-      [](const UA_ReferenceDescription &)->bool {
-        return true;
-        // we expect only one element (the group), hence accept whatever
-      },
-      [&](const UA_ReferenceDescription & group_ref) {
-        compareDeviceElementGroup(group_ref, device->getDeviceElementGroup());
-      });
+    compareDeviceElementGroup(ref_desc, device->getDeviceElementGroup());
 
     ADD_FAILURE() << "TODO?: check typeDefinition";
   }
