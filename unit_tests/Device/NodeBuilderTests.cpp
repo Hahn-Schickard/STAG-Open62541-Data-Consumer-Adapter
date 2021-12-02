@@ -50,6 +50,60 @@ std::string to_string(UA_Server * server, const UA_ReferenceDescription & ref) {
 }
 
 /**
+ * @brief Helper class for relating Information_Model::DataType to UA_DataType
+ */
+class Types {
+
+  std::vector<Information_Model::DataType> im_types;
+  std::map<Information_Model::DataType, const UA_DataType *> ua_types;
+  std::map<Information_Model::DataType, Information_Model::ReadFunctor> reads;
+
+  template <Information_Model::DataType im>
+  void add_type(size_t ua) {
+    im_types.push_back(im);
+    ua_types.insert(std::pair(im, &UA_TYPES[ua]));
+    reads.insert(std::pair(im, []()->Information_Model::DataVariant{
+      return Information_Model::DataVariant(std::in_place_index<(size_t) im>);
+    }));
+  }
+
+public:
+  class iterator {
+    size_t i = 0;
+    Types & types;
+  public:
+    iterator(Types & types_) : types(types_) {}
+
+    void operator ++() { ++i; }
+    Information_Model::DataType operator *() {
+      return types.im_types[i % types.im_types.size()];
+    }
+  };
+
+  Types() {
+    add_type<Information_Model::DataType::BOOLEAN>(UA_TYPES_BOOLEAN);
+    add_type<Information_Model::DataType::INTEGER>(UA_TYPES_INT64);
+    add_type<Information_Model::DataType::UNSIGNED_INTEGER>(UA_TYPES_UINT64);
+    add_type<Information_Model::DataType::DOUBLE>(UA_TYPES_DOUBLE);
+    add_type<Information_Model::DataType::TIME>(UA_TYPES_DATETIME);
+    add_type<Information_Model::DataType::OPAQUE>(UA_TYPES_BYTESTRING);
+    add_type<Information_Model::DataType::STRING>(UA_TYPES_STRING);
+  }
+
+  iterator begin() {
+    return iterator(*this);
+  }
+
+  const UA_DataType * ua_type(Information_Model::DataType im) {
+    return ua_types[im];
+  }
+
+  Information_Model::ReadFunctor read(Information_Model::DataType im) {
+    return reads[im];
+  }
+};
+
+/**
  * @brief Helper class for inventing Information_Model::NamedElement data
  */
 class NameGenerator {
@@ -68,6 +122,8 @@ public:
 void parseDeviceGroup(
   Information_Model::DeviceBuilderInterface & builder,
   NameGenerator & names,
+  Types & types,
+  Types::iterator & r_type, Types::iterator & w_type,
   const char *& spec,
   std::optional<std::string> group)
 {
@@ -82,7 +138,7 @@ void parseDeviceGroup(
 
     switch(*spec) {
     case '(':
-      parseDeviceGroup(builder,names,spec,
+      parseDeviceGroup(builder,names,types,r_type,w_type,spec,
         (group.has_value()
           ? builder.addDeviceElementGroup(group.value(), name, description)
           : builder.addDeviceElementGroup(name, description)));
@@ -90,22 +146,20 @@ void parseDeviceGroup(
     case 'R':
       (group.has_value()
         ? builder.addReadableMetric(group.value(), name, description,
-          Information_Model::DataType::BOOLEAN,
-          []()->Information_Model::DataVariant{ return false; })
+          *r_type, types.read(*r_type))
         : builder.addReadableMetric(name, description,
-          Information_Model::DataType::BOOLEAN,
-          []()->Information_Model::DataVariant{ return false; }));
+          *r_type, types.read(*r_type)));
+      ++r_type;
       break;
     case 'W':
       (group.has_value()
         ? builder.addWritableMetric(group.value(), name, description,
-          Information_Model::DataType::BOOLEAN,
-          []()->Information_Model::DataVariant{ return false; },
+          *w_type, types.read(*w_type),
           [](Information_Model::DataVariant){})
         : builder.addWritableMetric(name, description,
-          Information_Model::DataType::BOOLEAN,
-          []()->Information_Model::DataVariant{ return false; },
+          *w_type, types.read(*w_type),
           [](Information_Model::DataVariant){}));
+      ++w_type;
       break;
     default:
       throw "illegal spec";
@@ -128,10 +182,14 @@ void parseDeviceGroup(
 Information_Model::DevicePtr parseDevice(const char * spec) {
   Information_Model::testing::DeviceMockBuilder builder;
   NameGenerator names;
+  Types types;
+  auto r_type = types.begin();
+  auto w_type = types.begin();
 
   builder.buildDeviceBase(
     names.ref_id(), names.name(), names.description());
-  parseDeviceGroup(builder, names, spec, std::optional<std::string>());
+  parseDeviceGroup(
+    builder, names, types, r_type, w_type, spec, std::optional<std::string>());
 
   return builder.getResult();
 }
@@ -231,6 +289,7 @@ struct NodeBuilderTests : public ::testing::Test {
   std::shared_ptr<Open62541Server> server;
   UA_Server * ua_server;
   NodeBuilder node_builder;
+  Types types;
 
   NodeBuilderTests()
     : server(std::make_shared<Open62541Server>()),
@@ -252,6 +311,8 @@ struct NodeBuilderTests : public ::testing::Test {
     SCOPED_TRACE("NamedElement " + to_string(ua_server,ref_desc));
     ASSERT_TRUE(element) << "null pointer";
 
+    EXPECT_TRUE(ref_desc.isForward);
+
     // check browseName
     auto expected_browse_name
       = UA_String_fromChars(element->getElementName().c_str());
@@ -269,13 +330,65 @@ struct NodeBuilderTests : public ::testing::Test {
       << " vs " << toString(&expected_display_name);
   }
 
+  void compareDeviceElement(
+    const UA_ReferenceDescription & ref_desc,
+    Information_Model::DeviceElementPtr element)
+  {
+    SCOPED_TRACE("DeviceElement " + to_string(ua_server,ref_desc));
+    compareNamedElement(ref_desc, element);
+
+    switch (element->getElementType()) {
+    case Information_Model::GROUP:
+      EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_OBJECT);
+
+      compareDeviceElementGroup(ref_desc,
+        std::dynamic_pointer_cast<Information_Model::DeviceElementGroup>(
+          element));
+      break;
+
+    case Information_Model::READABLE: {
+      EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
+
+      UA_Variant value;
+      auto status =
+        UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
+      EXPECT_EQ(status, UA_STATUSCODE_GOOD)
+        << UA_StatusCode_name(status);
+      auto metric =
+        std::dynamic_pointer_cast<Information_Model::Metric>(element);
+      EXPECT_EQ(value.type, types.ua_type(metric->getDataType()));
+    } break;
+
+    case Information_Model::WRITABLE: {
+      EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
+
+      UA_Variant value;
+      auto status =
+        UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
+      EXPECT_EQ(status, UA_STATUSCODE_GOOD)
+        << UA_StatusCode_name(status);
+      auto writable_metric
+        = std::dynamic_pointer_cast<Information_Model::WritableMetric>(element);
+      EXPECT_EQ(value.type, types.ua_type(writable_metric->getDataType()));
+
+      status = UA_Server_writeValue(ua_server, ref_desc.nodeId.nodeId, value);
+      EXPECT_EQ(status, UA_STATUSCODE_GOOD)
+        << UA_StatusCode_name(status);
+      } break;
+
+    default:
+      ADD_FAILURE() << element->getElementType();
+    }
+
+    ADD_FAILURE() << "TODO: check referenceTypeId and typeDefinition";
+  }
+
   void compareDeviceElementGroup(
     const UA_ReferenceDescription & ref_desc,
     Information_Model::DeviceElementGroupPtr group)
   {
     ASSERT_TRUE(group) << "null pointer";
     SCOPED_TRACE("DeviceElementGroup " + to_string(ua_server,ref_desc));
-    compareNamedElement(ref_desc, group);
 
     // check children
     Browse ua_elements(ua_server, ref_desc.nodeId.nodeId);
@@ -288,22 +401,7 @@ struct NodeBuilderTests : public ::testing::Test {
           return compareId(elem_ref.nodeId.nodeId, im_element->getElementId());
         },
         [&](const UA_ReferenceDescription & elem_ref) {
-          compareNamedElement(elem_ref, im_element);
-          switch (im_element->getElementType()) {
-          case Information_Model::GROUP:
-            compareDeviceElementGroup(elem_ref,
-              std::dynamic_pointer_cast<Information_Model::DeviceElementGroup>(
-                im_element));
-            break;
-          case Information_Model::READABLE:
-            ADD_FAILURE() << "TODO";
-            break;
-          case Information_Model::WRITABLE:
-            ADD_FAILURE() << "TODO";
-            break;
-          default:
-            ADD_FAILURE() << im_element->getElementType();
-          }
+          compareDeviceElement(elem_ref,im_element);
         });
     }
   }
@@ -325,7 +423,7 @@ struct NodeBuilderTests : public ::testing::Test {
     // check child(ren)
     compareDeviceElementGroup(ref_desc, device->getDeviceElementGroup());
 
-    ADD_FAILURE() << "TODO?: check typeDefinition";
+    ADD_FAILURE() << "TODO: check referenceTypeId and typeDefinition";
   }
 
   void testAddDeviceNode(Information_Model::DevicePtr device) {
@@ -384,7 +482,7 @@ INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeTestSuite, AddDeviceNodeTest,
   ::testing::Values(
     "()",
     "(R)", "(W)",
-    "(RW)", "(RRRWRWWW)",
+    "(RW)", "(RRWWWWRWWRRRRWRW)",
     "((((((((R))))))))", "((R)((W))((R)((W)))((R)((W))((R)((W)))))",
     "((((R)(R))((R)(W)))(((W)(R))((W)(W))))"
     ));
