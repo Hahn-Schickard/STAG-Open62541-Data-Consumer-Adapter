@@ -19,8 +19,7 @@ std::string to_string(UA_Server * server, const UA_ReferenceDescription & ref) {
   UA_QualifiedName type_name;
   auto statuscode =
     UA_Server_readBrowseName(server, ref.referenceTypeId, &type_name);
-  EXPECT_EQ(statuscode, UA_STATUSCODE_GOOD)
-    << UA_StatusCode_name(statuscode);
+  EXPECT_EQ(statuscode, UA_STATUSCODE_GOOD) << UA_StatusCode_name(statuscode);
 
   std::string typedef_name;
   {
@@ -256,10 +255,16 @@ public:
   iterator end() { return iterator(*this, result.referencesSize); }
 
   /*
-    @brief Marks all elements as expected
+    @brief Marks some elements as expected
   */
-  void expect_all() {
-    unexpected.clear();
+  void ignore(std::function<bool (const UA_ReferenceDescription &)> filter) {
+    auto i = unexpected.begin();
+    while (i != unexpected.end()) {
+      auto next = i; ++next;
+      if (filter(result.references[*i]))
+        unexpected.erase(i);
+      i = next;
+    }
   }
 
   /*
@@ -304,6 +309,13 @@ struct NodeBuilderTests : public ::testing::Test {
     return UA_String_equal(&ua.identifier.string, &im_);
   }
 
+  void compareType(UA_NodeId type_node, UA_NodeClass expected_class) {
+    UA_NodeClass actual_class;
+    auto status = UA_Server_readNodeClass(ua_server, type_node, &actual_class);
+    EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
+    EXPECT_EQ(actual_class, expected_class);
+  }
+
   void compareNamedElement(
     const UA_ReferenceDescription & ref_desc,
     Information_Model::NamedElementPtr element)
@@ -336,24 +348,32 @@ struct NodeBuilderTests : public ::testing::Test {
   {
     SCOPED_TRACE("DeviceElement " + to_string(ua_server,ref_desc));
     compareNamedElement(ref_desc, element);
+    Browse children(ua_server, ref_desc.nodeId.nodeId);
 
     switch (element->getElementType()) {
     case Information_Model::GROUP:
       EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_OBJECT);
+      compareType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_OBJECTTYPE);
+      children.ignore([](const UA_ReferenceDescription & child)->bool{
+        return (child.nodeClass == UA_NODECLASS_OBJECTTYPE);
+      });
 
-      compareDeviceElementGroup(ref_desc,
+      compareDeviceElementGroup(ref_desc, children,
         std::dynamic_pointer_cast<Information_Model::DeviceElementGroup>(
           element));
       break;
 
     case Information_Model::READABLE: {
       EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
+      compareType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
+      children.ignore([](const UA_ReferenceDescription & child)->bool{
+        return (child.nodeClass == UA_NODECLASS_VARIABLETYPE);
+      });
 
       UA_Variant value;
       auto status =
         UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
-      EXPECT_EQ(status, UA_STATUSCODE_GOOD)
-        << UA_StatusCode_name(status);
+      EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
       auto metric =
         std::dynamic_pointer_cast<Information_Model::Metric>(element);
       EXPECT_EQ(value.type, types.ua_type(metric->getDataType()));
@@ -361,42 +381,42 @@ struct NodeBuilderTests : public ::testing::Test {
 
     case Information_Model::WRITABLE: {
       EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
+      compareType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
+      children.ignore([](const UA_ReferenceDescription & child)->bool{
+        return (child.nodeClass == UA_NODECLASS_VARIABLETYPE);
+      });
 
       UA_Variant value;
       auto status =
         UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
-      EXPECT_EQ(status, UA_STATUSCODE_GOOD)
-        << UA_StatusCode_name(status);
+      EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
       auto writable_metric
         = std::dynamic_pointer_cast<Information_Model::WritableMetric>(element);
       EXPECT_EQ(value.type, types.ua_type(writable_metric->getDataType()));
 
       status = UA_Server_writeValue(ua_server, ref_desc.nodeId.nodeId, value);
-      EXPECT_EQ(status, UA_STATUSCODE_GOOD)
-        << UA_StatusCode_name(status);
+      EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
       } break;
 
     default:
       ADD_FAILURE() << element->getElementType();
     }
 
-    ADD_FAILURE() << "TODO: check referenceTypeId and typeDefinition";
+    ADD_FAILURE() << "TODO: check referenceTypeId";
   }
 
   void compareDeviceElementGroup(
     const UA_ReferenceDescription & ref_desc,
+    Browse & children,
     Information_Model::DeviceElementGroupPtr group)
   {
-    ASSERT_TRUE(group) << "null pointer";
     SCOPED_TRACE("DeviceElementGroup " + to_string(ua_server,ref_desc));
 
     // check children
-    Browse ua_elements(ua_server, ref_desc.nodeId.nodeId);
-    EXPECT_EQ(ua_elements.num_children(), group->getSubelements().size());
     auto im_elements = group->getSubelements();
     for (auto & im_element : im_elements) {
       ASSERT_TRUE(im_element) << "null pointer";
-      ua_elements.expect(im_element->getElementName(),
+      children.expect(im_element->getElementName(),
         [&](const UA_ReferenceDescription & elem_ref)->bool {
           return compareId(elem_ref.nodeId.nodeId, im_element->getElementId());
         },
@@ -413,22 +433,28 @@ struct NodeBuilderTests : public ::testing::Test {
     SCOPED_TRACE("Device " + to_string(ua_server,ref_desc)
       + toString(&ref_desc.nodeId.nodeId));
     compareNamedElement(ref_desc, device);
+    Browse children(ua_server, ref_desc.nodeId.nodeId);
+    children.ignore([](const UA_ReferenceDescription & child)->bool{
+      return (child.nodeClass == UA_NODECLASS_OBJECTTYPE);
+    });
 
     EXPECT_EQ(ref_desc.nodeId.namespaceUri.length, 0);
     EXPECT_EQ(ref_desc.nodeId.serverIndex, 0);
     EXPECT_EQ(ref_desc.browseName.namespaceIndex, 1);
 
     EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_OBJECT);
+    compareType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_OBJECTTYPE);
 
     // check child(ren)
-    compareDeviceElementGroup(ref_desc, device->getDeviceElementGroup());
+    compareDeviceElementGroup(
+      ref_desc, children, device->getDeviceElementGroup());
 
-    ADD_FAILURE() << "TODO: check referenceTypeId and typeDefinition";
+    ADD_FAILURE() << "TODO: check referenceTypeId";
   }
 
   void testAddDeviceNode(Information_Model::DevicePtr device) {
     Browse root_before(ua_server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER));
-    root_before.expect_all();
+    root_before.ignore([](const UA_ReferenceDescription &)->bool {return true;});
 
     // Make the call
     auto status = node_builder.addDeviceNode(device);
