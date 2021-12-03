@@ -309,6 +309,15 @@ struct NodeBuilderTests : public ::testing::Test {
     return UA_String_equal(&ua.identifier.string, &im_);
   }
 
+  void compareReferenceType(
+    const UA_ReferenceDescription & ref_desc,
+    UA_UInt32 type_id)
+  {
+    auto expected_type = UA_NODEID_NUMERIC(0, type_id);
+    EXPECT_TRUE(UA_NodeId_equal(&ref_desc.referenceTypeId, &expected_type))
+      << toString(&ref_desc.referenceTypeId);
+  }
+
   void compareType(UA_NodeId type_node, UA_NodeClass expected_class) {
     UA_NodeClass actual_class;
     auto status = UA_Server_readNodeClass(ua_server, type_node, &actual_class);
@@ -348,6 +357,7 @@ struct NodeBuilderTests : public ::testing::Test {
   {
     SCOPED_TRACE("DeviceElement " + to_string(ua_server,ref_desc));
     compareNamedElement(ref_desc, element);
+    compareReferenceType(ref_desc, UA_NS0ID_HASCOMPONENT);
     Browse children(ua_server, ref_desc.nodeId.nodeId);
 
     switch (element->getElementType()) {
@@ -401,8 +411,6 @@ struct NodeBuilderTests : public ::testing::Test {
     default:
       ADD_FAILURE() << element->getElementType();
     }
-
-    ADD_FAILURE() << "TODO: check referenceTypeId";
   }
 
   void compareDeviceElementGroup(
@@ -433,6 +441,7 @@ struct NodeBuilderTests : public ::testing::Test {
     SCOPED_TRACE("Device " + to_string(ua_server,ref_desc)
       + toString(&ref_desc.nodeId.nodeId));
     compareNamedElement(ref_desc, device);
+    compareReferenceType(ref_desc, UA_NS0ID_ORGANIZES);
     Browse children(ua_server, ref_desc.nodeId.nodeId);
     children.ignore([](const UA_ReferenceDescription & child)->bool{
       return (child.nodeClass == UA_NODECLASS_OBJECTTYPE);
@@ -448,8 +457,6 @@ struct NodeBuilderTests : public ::testing::Test {
     // check child(ren)
     compareDeviceElementGroup(
       ref_desc, children, device->getDeviceElementGroup());
-
-    ADD_FAILURE() << "TODO: check referenceTypeId";
   }
 
   void testAddDeviceNode(Information_Model::DevicePtr device) {
