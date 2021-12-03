@@ -44,7 +44,10 @@ NodeBuilder::addObjectNode(NamedElementPtr element,
     parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
   }
 
-  auto reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
+  auto reference_type_id = UA_NODEID_NUMERIC(0,
+    (parent_node_id.has_value()
+    ? UA_NS0ID_HASCOMPONENT
+    : UA_NS0ID_ORGANIZES));
 
   auto browse_name = UA_QUALIFIEDNAME_ALLOC(server_->getServerNamespace(),
                                             element->getElementName().c_str());
@@ -258,7 +261,7 @@ UA_StatusCode NodeBuilder::addReadableNode(MetricPtr metric,
                "Assigning {} NodeId to metric: {}, with id: {}",
                toString(&metrid_node_id), metric->getElementName(),
                metric->getElementId());
-  UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
+  UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), metric->getElementName().c_str());
   logger_->log(SeverityLevel::TRACE,
@@ -340,7 +343,7 @@ UA_StatusCode NodeBuilder::addWritableNode(WritableMetricPtr metric,
                "Assigning {} NodeId to metric: {}, with id: {}",
                toString(&metrid_node_id), metric->getElementName(),
                metric->getElementId());
-  UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
+  UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), metric->getElementName().c_str());
   logger_->log(SeverityLevel::TRACE,
