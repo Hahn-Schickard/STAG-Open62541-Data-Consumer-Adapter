@@ -39,15 +39,15 @@ NodeBuilder::addObjectNode(NamedElementPtr element,
       SeverityLevel::TRACE, "Assigning {} NodeId to element: {}, with id: {}",
       toString(&node_id), element->getElementName(), element->getElementId());
 
-  // if no parent has been provided, set to root objects folder
-  if (!parent_node_id.has_value()) {
-    parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
-  }
-
   auto reference_type_id = UA_NODEID_NUMERIC(0,
     (parent_node_id.has_value()
     ? UA_NS0ID_HASCOMPONENT
     : UA_NS0ID_ORGANIZES));
+
+  // if no parent has been provided, set to root objects folder
+  if (!parent_node_id.has_value()) {
+    parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
+  }
 
   auto browse_name = UA_QUALIFIEDNAME_ALLOC(server_->getServerNamespace(),
                                             element->getElementName().c_str());
