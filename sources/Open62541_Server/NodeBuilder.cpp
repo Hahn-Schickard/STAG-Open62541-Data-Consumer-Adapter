@@ -29,6 +29,8 @@ NodeBuilder::~NodeBuilder() {
 pair<UA_StatusCode, UA_NodeId>
 NodeBuilder::addObjectNode(NamedElementPtr element,
                            optional<UA_NodeId> parent_node_id) {
+  bool is_root = !parent_node_id.has_value();
+
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   logger_->log(SeverityLevel::INFO, "Adding a new node: {}, with id: {}",
                element->getElementName(), element->getElementId());
@@ -40,12 +42,12 @@ NodeBuilder::addObjectNode(NamedElementPtr element,
       toString(&node_id), element->getElementName(), element->getElementId());
 
   auto reference_type_id = UA_NODEID_NUMERIC(0,
-    (parent_node_id.has_value()
-    ? UA_NS0ID_HASCOMPONENT
-    : UA_NS0ID_ORGANIZES));
+    (is_root
+    ? UA_NS0ID_ORGANIZES
+    : UA_NS0ID_HASCOMPONENT));
 
   // if no parent has been provided, set to root objects folder
-  if (!parent_node_id.has_value()) {
+  if (is_root) {
     parent_node_id = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
   }
 
