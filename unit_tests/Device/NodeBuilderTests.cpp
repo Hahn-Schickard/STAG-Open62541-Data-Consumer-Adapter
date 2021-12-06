@@ -51,55 +51,15 @@ std::string to_string(UA_Server * server, const UA_ReferenceDescription & ref) {
 /**
  * @brief Helper class for relating Information_Model::DataType to UA_DataType
  */
-class Types {
-
-  std::vector<Information_Model::DataType> im_types;
-  std::map<Information_Model::DataType, const UA_DataType *> ua_types;
-  std::map<Information_Model::DataType, Information_Model::ReadFunctor> reads;
-
-  template <Information_Model::DataType im>
-  void add_type(size_t ua) {
-    im_types.push_back(im);
-    ua_types.insert(std::pair(im, &UA_TYPES[ua]));
-    reads.insert(std::pair(im, []()->Information_Model::DataVariant{
-      return Information_Model::DataVariant(std::in_place_index<(size_t) im>);
-    }));
+template <Information_Model::DataType im, size_t ua>
+struct DataTypes {
+  static constexpr Information_Model::DataType im_index = im;
+  static constexpr size_t ua_index = ua;
+  static constexpr const UA_DataType * ua_type = &UA_TYPES[ua_index];
+  static Information_Model::DataVariant read() {
+    return Information_Model::DataVariant(std::in_place_index<(size_t) im_index>);
   }
-
-public:
-  class iterator {
-    size_t i = 0;
-    Types & types;
-  public:
-    iterator(Types & types_) : types(types_) {}
-
-    void operator ++() { ++i; }
-    Information_Model::DataType operator *() {
-      return types.im_types[i % types.im_types.size()];
-    }
-  };
-
-  Types() {
-    add_type<Information_Model::DataType::BOOLEAN>(UA_TYPES_BOOLEAN);
-    add_type<Information_Model::DataType::INTEGER>(UA_TYPES_INT64);
-    add_type<Information_Model::DataType::UNSIGNED_INTEGER>(UA_TYPES_UINT64);
-    add_type<Information_Model::DataType::DOUBLE>(UA_TYPES_DOUBLE);
-    add_type<Information_Model::DataType::TIME>(UA_TYPES_DATETIME);
-    add_type<Information_Model::DataType::OPAQUE>(UA_TYPES_BYTESTRING);
-    add_type<Information_Model::DataType::STRING>(UA_TYPES_STRING);
-  }
-
-  iterator begin() {
-    return iterator(*this);
-  }
-
-  const UA_DataType * ua_type(Information_Model::DataType im) {
-    return ua_types[im];
-  }
-
-  Information_Model::ReadFunctor read(Information_Model::DataType im) {
-    return reads[im];
-  }
+  static void write(Information_Model::DataVariant) {}
 };
 
 /**
@@ -118,11 +78,10 @@ public:
 };
 
 // helper for parseDevice below
+template <class Types>
 void parseDeviceGroup(
   Information_Model::DeviceBuilderInterface & builder,
   NameGenerator & names,
-  Types & types,
-  Types::iterator & r_type, Types::iterator & w_type,
   const char *& spec,
   std::optional<std::string> group)
 {
@@ -137,7 +96,7 @@ void parseDeviceGroup(
 
     switch(*spec) {
     case '(':
-      parseDeviceGroup(builder,names,types,r_type,w_type,spec,
+      parseDeviceGroup<Types>(builder,names,spec,
         (group.has_value()
           ? builder.addDeviceElementGroup(group.value(), name, description)
           : builder.addDeviceElementGroup(name, description)));
@@ -145,20 +104,16 @@ void parseDeviceGroup(
     case 'R':
       (group.has_value()
         ? builder.addReadableMetric(group.value(), name, description,
-          *r_type, types.read(*r_type))
+          Types::im_index, Types::read)
         : builder.addReadableMetric(name, description,
-          *r_type, types.read(*r_type)));
-      ++r_type;
+          Types::im_index, Types::read));
       break;
     case 'W':
       (group.has_value()
         ? builder.addWritableMetric(group.value(), name, description,
-          *w_type, types.read(*w_type),
-          [](Information_Model::DataVariant){})
+          Types::im_index, Types::read, Types::write)
         : builder.addWritableMetric(name, description,
-          *w_type, types.read(*w_type),
-          [](Information_Model::DataVariant){}));
-      ++w_type;
+          Types::im_index, Types::read, Types::write));
       break;
     default:
       throw "illegal spec";
@@ -178,17 +133,14 @@ void parseDeviceGroup(
  *   between "(" and ")"
  * - For the Device: Its ElementGroup's spec
  */
+template <class Types>
 Information_Model::DevicePtr parseDevice(const char * spec) {
   Information_Model::testing::DeviceMockBuilder builder;
   NameGenerator names;
-  Types types;
-  auto r_type = types.begin();
-  auto w_type = types.begin();
 
   builder.buildDeviceBase(
     names.ref_id(), names.name(), names.description());
-  parseDeviceGroup(
-    builder, names, types, r_type, w_type, spec, std::optional<std::string>());
+  parseDeviceGroup<Types>(builder, names, spec, std::optional<std::string>());
 
   return builder.getResult();
 }
@@ -290,11 +242,11 @@ public:
 };
 
 
+template <class Types>
 struct NodeBuilderTests : public ::testing::Test {
   std::shared_ptr<Open62541Server> server;
   UA_Server * ua_server;
   NodeBuilder node_builder;
-  Types types;
 
   NodeBuilderTests()
     : server(std::make_shared<Open62541Server>()),
@@ -386,7 +338,7 @@ struct NodeBuilderTests : public ::testing::Test {
       EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
       auto metric =
         std::dynamic_pointer_cast<Information_Model::Metric>(element);
-      EXPECT_EQ(value.type, types.ua_type(metric->getDataType()));
+      EXPECT_EQ(value.type, Types::ua_type);
     } break;
 
     case Information_Model::WRITABLE: {
@@ -402,7 +354,7 @@ struct NodeBuilderTests : public ::testing::Test {
       EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
       auto writable_metric
         = std::dynamic_pointer_cast<Information_Model::WritableMetric>(element);
-      EXPECT_EQ(value.type, types.ua_type(writable_metric->getDataType()));
+      EXPECT_EQ(value.type, Types::ua_type);
 
       status = UA_Server_writeValue(ua_server, ref_desc.nodeId.nodeId, value);
       EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
@@ -491,33 +443,51 @@ struct NodeBuilderTests : public ::testing::Test {
   }
 
   void testAddDeviceNode(const char * spec) {
-    testAddDeviceNode(parseDevice(spec));
+    testAddDeviceNode(parseDevice<Types>(spec));
   }
 };
 
-TEST_F(NodeBuilderTests, fixtureWorksByItself) {
+using BooleanNodeBuilderTests = NodeBuilderTests
+  <DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>>;
+
+TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {
 }
 
-TEST_F(NodeBuilderTests, addMockDeviceNode) {
+TEST_F(BooleanNodeBuilderTests, addMockDeviceNode) {
   auto device = std::make_shared<Information_Model::testing::MockDevice>(
     "the_ref_id", "the name", "the description");
   testAddDeviceNode(device);
 }
 
-class AddDeviceNodeTest
-  : public NodeBuilderTests,
+class AddDeviceNodeParameterizedTest
+  : public BooleanNodeBuilderTests,
     public ::testing::WithParamInterface<const char *>
 {};
-TEST_P(AddDeviceNodeTest, addDeviceNode) {
+TEST_P(AddDeviceNodeParameterizedTest, addDeviceNodeStructures) {
   testAddDeviceNode(GetParam());
 }
-INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeTestSuite, AddDeviceNodeTest,
+INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeParameterizedTestSuite,
+  AddDeviceNodeParameterizedTest,
   ::testing::Values(
     "()",
     "(R)", "(W)",
-    "(RW)", "(RRWWWWRWWRRRRWRW)",
+    "(RRWWWWRWWRRRRWRW)",
     "((((((((R))))))))", "((R)((W))((R)((W)))((R)((W))((R)((W)))))",
     "((((R)(R))((R)(W)))(((W)(R))((W)(W))))"
     ));
+
+using AllTypes = ::testing::Types<
+  DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>,
+  DataTypes<Information_Model::DataType::INTEGER, UA_TYPES_INT64>,
+  DataTypes<Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_UINT64>,
+  DataTypes<Information_Model::DataType::DOUBLE, UA_TYPES_DOUBLE>,
+  DataTypes<Information_Model::DataType::TIME, UA_TYPES_DATETIME>,
+  DataTypes<Information_Model::DataType::OPAQUE, UA_TYPES_BYTESTRING>,
+  DataTypes<Information_Model::DataType::STRING, UA_TYPES_STRING>
+  >;
+TYPED_TEST_SUITE(NodeBuilderTests, AllTypes);
+TYPED_TEST(NodeBuilderTests, addDeviceNodeTypes) {
+  TestFixture::testAddDeviceNode("(RW)");
+}
 
 } // namespace
