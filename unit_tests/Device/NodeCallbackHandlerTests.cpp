@@ -214,22 +214,27 @@ struct ByteStringConversion {
   }
 
   static constexpr Information_Model::DataType im_type
-    = Information_Model::DataType::STRING;
+    = Information_Model::DataType::OPAQUE;
 
-  using UA_Read_Type = UA_String;
+  using UA_Read_Type = UA_ByteString;
   using UA_Write_Type = UA_ByteString;
-  static constexpr size_t ua_read_type = UA_TYPES_STRING;
+  static constexpr size_t ua_read_type = UA_TYPES_BYTESTRING;
   static constexpr size_t ua_write_type = UA_TYPES_BYTESTRING;
 
-  static std::string Value2IM(Value_Type x) { return x; }
+  static std::vector<uint8_t> Value2IM(Value_Type x) {
+    std::vector<uint8_t> ret;
+    for (size_t i=0; i<x.length(); ++i)
+      ret.push_back(x[i]);
+    return ret;
+  }
   static UA_Write_Type Value2Write(Value_Type s) {
     UA_ByteString ret;
     EXPECT_EQ(UA_STATUSCODE_GOOD, UA_ByteString_allocBuffer(&ret, s.length()));
     memcpy(ret.data, s.data(), s.length());
     return ret;
   }
-  static bool equal(const std::string & v1, const UA_Read_Type & v2) {
-    return (v1.length() == v2.length)
+  static bool equal(const std::vector<uint8_t> & v1, const UA_Read_Type & v2) {
+    return (v1.size() == v2.length)
       && (0 == memcmp(v1.data(), v2.data, v2.length));
   }
 };
