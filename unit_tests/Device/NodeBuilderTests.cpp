@@ -39,17 +39,19 @@ std::string to_string(UA_Server * server, const UA_ReferenceDescription & ref) {
   }
 
   return "{referenceTypeID=" + toString(&ref.referenceTypeId)
-      + "(" + toString(&type_name)
-    + "); isForward=" + (ref.isForward ? "true" : "false")
-    + "; nodeId=" + to_string(ref.nodeId)
-    + "; browseName=\"" + toString(&ref.browseName)
-    + "\"; nodeClass=" + std::to_string(ref.nodeClass)
-    + "; typeDefinition=" + to_string(ref.typeDefinition) + "(" + typedef_name
-    + ")}";
+      + "(" + toString(&type_name) + "); "
+    + "isForward=" + (ref.isForward ? "true" : "false") + "; "
+    + "nodeId=" + to_string(ref.nodeId) + "; "
+    + "browseName=\"" + toString(&ref.browseName) + "\"; "
+    + "nodeClass=" + std::to_string(ref.nodeClass) + "; "
+    + "typeDefinition=" + to_string(ref.typeDefinition)
+      + "(" + typedef_name + ")}";
 }
 
 /**
  * @brief Helper class for relating Information_Model::DataType to UA_DataType
+ *
+ * Specializations of this class are used as parameter types for tests.
  */
 template <Information_Model::DataType im, size_t ua>
 struct DataTypes {
@@ -77,7 +79,7 @@ public:
   void next() { ++counter; }
 };
 
-// helper for parseDevice below
+// Helper (semantically a sub-function) for parseDevice below
 template <class Types>
 void parseDeviceGroup(
   Information_Model::DeviceBuilderInterface & builder,
@@ -163,17 +165,21 @@ public:
   class iterator {
     Browse & browse;
     size_t index;
-  public:
     iterator(Browse & browse_, size_t index_) : browse(browse_), index(index_) {}
+  public:
     bool operator !=(const iterator & other) { return index != other.index; }
     iterator & operator ++() { ++index; return *this; }
     UA_ReferenceDescription & operator *() {
       return browse.result.references[index];
     }
+  friend class Browse;
   };
 
   Browse() = delete;
 
+  /**
+   * @brief Initialize with a node's references
+   */
   Browse(UA_Server * ua_server_, const UA_NodeId & node_id)
     : ua_server(ua_server_)
   {
@@ -241,7 +247,9 @@ public:
   }
 };
 
-
+/**
+ * @brief Fixture for testing NodeBuilder::addDevice
+ */
 template <class Types>
 struct NodeBuilderTests : public ::testing::Test {
   std::shared_ptr<Open62541Server> server;
@@ -254,6 +262,7 @@ struct NodeBuilderTests : public ::testing::Test {
       node_builder(server)
   {}
 
+  // For use as a filter predicate
   bool compareId(const UA_NodeId & ua, std::string im) {
     if (ua.identifierType != UA_NODEIDTYPE_STRING)
       return false;
@@ -261,7 +270,7 @@ struct NodeBuilderTests : public ::testing::Test {
     return UA_String_equal(&ua.identifier.string, &im_);
   }
 
-  void compareReferenceType(
+  void checkReferenceType(
     const UA_ReferenceDescription & ref_desc,
     UA_UInt32 type_id)
   {
@@ -270,14 +279,14 @@ struct NodeBuilderTests : public ::testing::Test {
       << toString(&ref_desc.referenceTypeId);
   }
 
-  void compareType(UA_NodeId type_node, UA_NodeClass expected_class) {
+  void checkType(UA_NodeId type_node, UA_NodeClass expected_class) {
     UA_NodeClass actual_class;
     auto status = UA_Server_readNodeClass(ua_server, type_node, &actual_class);
     EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
     EXPECT_EQ(actual_class, expected_class);
   }
 
-  void compareNamedElement(
+  void checkNamedElement(
     const UA_ReferenceDescription & ref_desc,
     Information_Model::NamedElementPtr element)
   {
@@ -303,31 +312,31 @@ struct NodeBuilderTests : public ::testing::Test {
       << " vs " << toString(&expected_display_name);
   }
 
-  void compareDeviceElement(
+  void checkDeviceElement(
     const UA_ReferenceDescription & ref_desc,
     Information_Model::DeviceElementPtr element)
   {
     SCOPED_TRACE("DeviceElement " + to_string(ua_server,ref_desc));
-    compareNamedElement(ref_desc, element);
-    compareReferenceType(ref_desc, UA_NS0ID_HASCOMPONENT);
+    checkNamedElement(ref_desc, element);
+    checkReferenceType(ref_desc, UA_NS0ID_HASCOMPONENT);
     Browse children(ua_server, ref_desc.nodeId.nodeId);
 
     switch (element->getElementType()) {
     case Information_Model::GROUP:
       EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_OBJECT);
-      compareType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_OBJECTTYPE);
+      checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_OBJECTTYPE);
       children.ignore([](const UA_ReferenceDescription & child)->bool{
         return (child.nodeClass == UA_NODECLASS_OBJECTTYPE);
       });
 
-      compareDeviceElementGroup(ref_desc, children,
+      checkDeviceElementGroup(ref_desc, children,
         std::dynamic_pointer_cast<Information_Model::DeviceElementGroup>(
           element));
       break;
 
     case Information_Model::READABLE: {
       EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
-      compareType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
+      checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
       children.ignore([](const UA_ReferenceDescription & child)->bool{
         return (child.nodeClass == UA_NODECLASS_VARIABLETYPE);
       });
@@ -343,7 +352,7 @@ struct NodeBuilderTests : public ::testing::Test {
 
     case Information_Model::WRITABLE: {
       EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
-      compareType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
+      checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
       children.ignore([](const UA_ReferenceDescription & child)->bool{
         return (child.nodeClass == UA_NODECLASS_VARIABLETYPE);
       });
@@ -365,7 +374,19 @@ struct NodeBuilderTests : public ::testing::Test {
     }
   }
 
-  void compareDeviceElementGroup(
+  /**
+   * All aspects of DeviceElementGroup that are inherited from DeviceElement
+   * are ignored. Only the subelements are checked. This is in contrast to the
+   * other check* methods, each of which checks the full respective state.
+   */
+  /*
+   * In the overall procedure, the remaining aspects of DeviceElementGroup are
+   * checked as part of checkDeviceElement, if the  DeviceElementGroup appears
+   * as a specialization of a DeviceElement. If, on the other hand, the
+   * DeviceElementGroup appears as the result of Device::getDeviceElementGroup,
+   * then there is nothing on the UA side to check against the missing aspects.
+   */
+  void checkDeviceElementGroup(
     const UA_ReferenceDescription & ref_desc,
     Browse & children,
     Information_Model::DeviceElementGroupPtr group)
@@ -381,19 +402,19 @@ struct NodeBuilderTests : public ::testing::Test {
           return compareId(elem_ref.nodeId.nodeId, im_element->getElementId());
         },
         [&](const UA_ReferenceDescription & elem_ref) {
-          compareDeviceElement(elem_ref,im_element);
+          checkDeviceElement(elem_ref,im_element);
         });
     }
   }
 
-  void compareDevice(
+  void checkDevice(
     const UA_ReferenceDescription & ref_desc,
     Information_Model::DevicePtr device)
   {
     SCOPED_TRACE("Device " + to_string(ua_server,ref_desc)
       + toString(&ref_desc.nodeId.nodeId));
-    compareNamedElement(ref_desc, device);
-    compareReferenceType(ref_desc, UA_NS0ID_ORGANIZES);
+    checkNamedElement(ref_desc, device);
+    checkReferenceType(ref_desc, UA_NS0ID_ORGANIZES);
     Browse children(ua_server, ref_desc.nodeId.nodeId);
     children.ignore([](const UA_ReferenceDescription & child)->bool{
       return (child.nodeClass == UA_NODECLASS_OBJECTTYPE);
@@ -404,10 +425,10 @@ struct NodeBuilderTests : public ::testing::Test {
     EXPECT_EQ(ref_desc.browseName.namespaceIndex, 1);
 
     EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_OBJECT);
-    compareType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_OBJECTTYPE);
+    checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_OBJECTTYPE);
 
     // check child(ren)
-    compareDeviceElementGroup(
+    checkDeviceElementGroup(
       ref_desc, children, device->getDeviceElementGroup());
   }
 
@@ -438,7 +459,7 @@ struct NodeBuilderTests : public ::testing::Test {
         return UA_NodeId_equal(&ref_desc.nodeId.nodeId, &expected_id);
       },
       [&](const UA_ReferenceDescription & ref_desc) {
-        compareDevice(ref_desc, device);
+        checkDevice(ref_desc, device);
       });
   }
 
@@ -450,8 +471,7 @@ struct NodeBuilderTests : public ::testing::Test {
 using BooleanNodeBuilderTests = NodeBuilderTests
   <DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>>;
 
-TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {
-}
+TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {}
 
 TEST_F(BooleanNodeBuilderTests, addMockDeviceNode) {
   auto device = std::make_shared<Information_Model::testing::MockDevice>(
@@ -459,6 +479,9 @@ TEST_F(BooleanNodeBuilderTests, addMockDeviceNode) {
   testAddDeviceNode(device);
 }
 
+/**
+ * @brief Test addDeviceNode with differently structured Device
+ */
 class AddDeviceNodeParameterizedTest
   : public BooleanNodeBuilderTests,
     public ::testing::WithParamInterface<const char *>
@@ -476,6 +499,9 @@ INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeParameterizedTestSuite,
     "((((R)(R))((R)(W)))(((W)(R))((W)(W))))"
     ));
 
+/**
+ * @brief Test addDeviceNode with differently typed variables
+ */
 using AllTypes = ::testing::Types<
   DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>,
   DataTypes<Information_Model::DataType::INTEGER, UA_TYPES_INT64>,
