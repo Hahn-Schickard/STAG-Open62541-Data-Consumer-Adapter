@@ -206,7 +206,7 @@ struct ByteStringConversion {
   static Value_Type value(size_t i) {
     switch (i) {
       case 0: return std::string();
-      case 1: return std::string("");
+      case 1: return std::string("", 1);
       case 2: return std::string("\000\377", 2);
       case 3: return std::string("\377", 1);
       default: throw "internal";
@@ -221,10 +221,10 @@ struct ByteStringConversion {
   static constexpr size_t ua_read_type = UA_TYPES_BYTESTRING;
   static constexpr size_t ua_write_type = UA_TYPES_BYTESTRING;
 
-  static std::vector<uint8_t> Value2IM(Value_Type x) {
+  static std::vector<uint8_t> Value2IM(Value_Type s) {
     std::vector<uint8_t> ret;
-    for (size_t i=0; i<x.length(); ++i)
-      ret.push_back(x[i]);
+    for (auto c:s)
+      ret.push_back(c);
     return ret;
   }
   static UA_Write_Type Value2Write(Value_Type s) {
@@ -272,11 +272,11 @@ using AllConversions = ::testing::Types<
     UA_TYPES_UINT64, UA_TYPES_UINT64,
     13, 91>,
   FloatConversion<float, UA_TYPES_FLOAT>,
-  FloatConversion<float, UA_TYPES_DOUBLE>,
+  FloatConversion<double, UA_TYPES_DOUBLE>,
   IntegralConversion<uint64_t, UA_StatusCode,
     Information_Model::DataType::UNSIGNED_INTEGER,
     UA_TYPES_UINT64, UA_TYPES_STATUSCODE,
-    13, 91>,
+    UA_STATUSCODE_GOOD, UA_STATUSCODE_BADOUTOFMEMORY>,
   StringConversion,
   TimeConversion,
   GuidConversion,
@@ -373,7 +373,8 @@ private:
         i == nominal_value,
         Type::equal(
           Type::Value2IM(Type::value(i)),
-          *((typename Type::UA_Read_Type *) ua_value.value.data)));
+          *((typename Type::UA_Read_Type *) ua_value.value.data))
+        ) << i << "," << nominal_value;
   }
 
 public:
