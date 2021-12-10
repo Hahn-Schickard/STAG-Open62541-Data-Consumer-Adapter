@@ -289,18 +289,10 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue(
         break;
       }
       case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
-        UA_Guid ua_guid;
-        ua_guid.data1 = ((UA_Guid *)(value->value.data))->data1;
-        ua_guid.data2 = ((UA_Guid *)(value->value.data))->data2;
-        ua_guid.data3 = ((UA_Guid *)(value->value.data))->data3;
-        for (uint8_t i = 0; i < 8; i++) {
-          ua_guid.data4[i] = ((UA_Guid *)(value->value.data))->data4[i];
-        }
-        auto string_value = toString(&ua_guid);
-        write_CB(DataVariant(string_value));
-        status = UA_STATUSCODE_GOOD;
-        break;
+        string error_msg = "GUID to Object Link conversion is not implemented";
+        UA_LOG_WARNING(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
       }
+      // fall-through
       default: {
         string error_msg = "Node " + toString(node_id) + " does not take " +
                            string(value->value.type->typeName) +

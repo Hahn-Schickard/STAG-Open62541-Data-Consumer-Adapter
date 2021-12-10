@@ -41,15 +41,7 @@ UA_NodeId toNodeId(DataType type) {
 
 string toString(const UA_String *input) {
   string result = string((char *)(input->data), input->length);
-  return move(result);
-}
-
-string toString(UA_Guid *input) {
-  UA_String ua_string = UA_STRING_NULL;
-  if (UA_Guid_parse(input, ua_string) != UA_STATUSCODE_GOOD) {
-    throw runtime_error("Failed to conver UA_Guid to a string!");
-  }
-  return toString(&ua_string);
+  return result;
 }
 
 string toString(const UA_NodeId *node_id) {
@@ -62,7 +54,7 @@ string toString(const UA_NodeId *node_id) {
 
 string toString(const UA_QualifiedName *name) {
   string result = to_string(name->namespaceIndex) + ":" + toString(&name->name);
-  return move(result);
+  return result;
 }
 
 } // namespace open62541
