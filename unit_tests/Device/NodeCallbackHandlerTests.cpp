@@ -168,38 +168,6 @@ struct TimeConversion {
   }
 };
 
-struct GuidConversion {
-  using Value_Type = UA_Guid;
-  static constexpr size_t num_values = 8;
-  static Value_Type value(size_t i) {
-    switch (i) {
-      case 0: return { 0,0,0, {0,0,0,0,0,0,0,0} };
-      case 1: return { 1,0,0, {0,0,0,0,0,0,0,0} };
-      case 2: return { 0,1,0, {0,0,0,0,0,0,0,0} };
-      case 3: return { 0,0,1, {0,0,0,0,0,0,0,0} };
-      case 4: return { 0,0,0, {1,0,0,0,0,0,0,0} };
-      case 5: return { 0,0,0, {0,1,0,0,0,0,0,0} };
-      case 6: return { 0,0,0, {0,0,0,0,0,0,0,1} };
-      case 7: return { 1,2,3, {11,12,13,14,15,16,17,18} };
-      default: throw "internal";
-    }
-  }
-
-  static constexpr Information_Model::DataType im_type
-    = Information_Model::DataType::STRING;
-
-  using UA_Read_Type = UA_String;
-  using UA_Write_Type = UA_Guid;
-  static constexpr size_t ua_read_type = UA_TYPES_STRING;
-  static constexpr size_t ua_write_type = UA_TYPES_GUID;
-
-  static std::string Value2IM(Value_Type id) { return open62541::toString(&id); }
-  static UA_Write_Type Value2Write(Value_Type id) { return id; }
-  static bool equal(const std::string & v1, const UA_Read_Type & v2) {
-    return StringConversion::equal(v1,v2);
-  }
-};
-
 struct ByteStringConversion {
   using Value_Type = std::string;
   static constexpr size_t num_values = 4;
@@ -279,7 +247,6 @@ using AllConversions = ::testing::Types<
     UA_STATUSCODE_GOOD, UA_STATUSCODE_BADOUTOFMEMORY>,
   StringConversion,
   TimeConversion,
-  GuidConversion,
   ByteStringConversion
   >;
 
