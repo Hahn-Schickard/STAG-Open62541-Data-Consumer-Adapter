@@ -310,6 +310,15 @@ struct NodeBuilderTests : public ::testing::Test {
         &ref_desc.displayName.text, &expected_display_name))
       << toString(&ref_desc.displayName.text)
       << " vs " << toString(&expected_display_name);
+
+    // check description
+    auto expected_description
+      = UA_String_fromChars(element->getElementDescription().c_str());
+    UA_LocalizedText description;
+    auto status = UA_Server_readDescription(
+      ua_server, ref_desc.nodeId.nodeId, &description);
+    EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
+    EXPECT_TRUE(UA_String_equal(&description.text, &expected_description));
   }
 
   void checkDeviceElement(
