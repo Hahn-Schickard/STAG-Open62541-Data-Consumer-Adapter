@@ -331,7 +331,7 @@ struct NodeBuilderTests : public ::testing::Test {
     Browse children(ua_server, ref_desc.nodeId.nodeId);
 
     switch (element->getElementType()) {
-    case Information_Model::GROUP:
+    case Information_Model::ElementType::GROUP:
       EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_OBJECT);
       checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_OBJECTTYPE);
       children.ignore([](const UA_ReferenceDescription & child)->bool{
@@ -343,7 +343,7 @@ struct NodeBuilderTests : public ::testing::Test {
           element));
       break;
 
-    case Information_Model::READABLE: {
+    case Information_Model::ElementType::READABLE: {
       EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
       checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
       children.ignore([](const UA_ReferenceDescription & child)->bool{
@@ -359,7 +359,7 @@ struct NodeBuilderTests : public ::testing::Test {
       EXPECT_EQ(value.type, Types::ua_type);
     } break;
 
-    case Information_Model::WRITABLE: {
+    case Information_Model::ElementType::WRITABLE: {
       EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
       checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
       children.ignore([](const UA_ReferenceDescription & child)->bool{
@@ -379,7 +379,7 @@ struct NodeBuilderTests : public ::testing::Test {
       } break;
 
     default:
-      ADD_FAILURE() << element->getElementType();
+      ADD_FAILURE() << toString(element->getElementType());
     }
   }
 
