@@ -110,20 +110,20 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(
                                     toString(callback_wrapper->data_type_));
               }
             },
-            [&](uint64_t integer_value) {
+            [&](uintmax_t integer_value) {
               if (callback_wrapper->data_type_ == DataType::UNSIGNED_INTEGER) {
                 UA_Variant_setScalarCopy(&value->value, &integer_value,
-                                         &UA_TYPES[UA_TYPES_UINT64]);
+                                         &UA_TYPES[UA_TYPES_uintmax]);
               } else {
                 throw runtime_error("Tried to read an Integer data type "
                                     "when node data type is:" +
                                     toString(callback_wrapper->data_type_));
               }
             },
-            [&](int64_t long_value) {
+            [&](intmax_t long_value) {
               if (callback_wrapper->data_type_ == DataType::INTEGER) {
                 UA_Variant_setScalarCopy(&value->value, &long_value,
-                                         &UA_TYPES[UA_TYPES_INT64]);
+                                         &UA_TYPES[UA_TYPES_intmax]);
               } else {
                 throw runtime_error("Tried to read a Long data type "
                                     "when node data type is: " +
@@ -225,19 +225,19 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue(
         break;
       }
       case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE:
-        write_CB(DataVariant((int64_t) *((UA_SByte *)(value->value.data))));
+        write_CB(DataVariant((intmax_t) *((UA_SByte *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_INT16:
-        write_CB(DataVariant((int64_t) *((UA_Int16 *)(value->value.data))));
+        write_CB(DataVariant((intmax_t) *((UA_Int16 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_INT32:
-        write_CB(DataVariant((int64_t) *((UA_Int32 *)(value->value.data))));
+        write_CB(DataVariant((intmax_t) *((UA_Int32 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_INT64:
-        write_CB(DataVariant((int64_t) *((UA_Int64 *)(value->value.data))));
+        write_CB(DataVariant((intmax_t) *((UA_Int64 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
@@ -247,23 +247,24 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue(
         break;
       }
       case UA_DataTypeKind::UA_DATATYPEKIND_BYTE:
-        write_CB(DataVariant((uint64_t) *((UA_Byte *)(value->value.data))));
+        write_CB(DataVariant((uintmax_t) *((UA_Byte *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_UINT16:
-        write_CB(DataVariant((uint64_t) *((UA_UInt16 *)(value->value.data))));
+        write_CB(DataVariant((uintmax_t) *((UA_UInt16 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_UINT32:
-        write_CB(DataVariant((uint64_t) *((UA_UInt32 *)(value->value.data))));
+        write_CB(DataVariant((uintmax_t) *((UA_UInt32 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_UINT64:
-        write_CB(DataVariant((uint64_t) *((UA_UInt64 *)(value->value.data))));
+        write_CB(DataVariant((uintmax_t) *((UA_UInt64 *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE:
-        write_CB(DataVariant((uint64_t) *((UA_StatusCode *)(value->value.data))));
+        write_CB(
+          DataVariant((uintmax_t) *((UA_StatusCode *)(value->value.data))));
         status = UA_STATUSCODE_GOOD;
         break;
       case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT:

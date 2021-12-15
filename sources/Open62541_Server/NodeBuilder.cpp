@@ -101,26 +101,26 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(DeviceElementPtr element,
                element->getElementName(), toString(&parent_id));
 
   switch (element->getElementType()) {
-  case GROUP: {
+  case ElementType::GROUP: {
     status = addGroupNode(static_pointer_cast<DeviceElementGroup>(element),
                           parent_id);
     break;
   }
-  case FUNCTION: {
+  case ElementType::FUNCTION: {
     status = addFunctionNode(element, parent_id);
     break;
   }
-  case OBSERVABLE:
-  case WRITABLE: {
+  case ElementType::OBSERVABLE:
+  case ElementType::WRITABLE: {
     status = addWritableNode(static_pointer_cast<WritableMetric>(element),
                              parent_id);
     break;
   }
-  case READABLE: {
+  case ElementType::READABLE: {
     status = addReadableNode(static_pointer_cast<Metric>(element), parent_id);
     break;
   }
-  case UNDEFINED:
+  case ElementType::UNDEFINED:
   default: {
     status = UA_STATUSCODE_BADTYPEDEFINITIONINVALID;
     logger_->log(SeverityLevel::ERROR,
