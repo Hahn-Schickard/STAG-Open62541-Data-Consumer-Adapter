@@ -57,7 +57,7 @@ void OpcuaAdapter::handleEvent(shared_ptr<ModelRegistryEvent> event) {
             this->logger_->log(
                 SeverityLevel::TRACE,
                 "OPC UA Adapter received NEW_DEVICE_REGISTERED event!");
-            node_builder_->addDeviceNode(device);
+            node_builder_->addDeviceNode(NonemptyDevicePtr(device));
           });
   }
 }

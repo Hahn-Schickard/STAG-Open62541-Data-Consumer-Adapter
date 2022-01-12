@@ -43,11 +43,11 @@ public:
   void sendEvent(std::shared_ptr<ModelRegistryEvent> event) { notify(event); }
 };
 
-void print(DevicePtr device);
-void print(DeviceElementPtr element, size_t offset);
-void print(WritableMetricPtr element, size_t offset);
-void print(MetricPtr element, size_t offset);
-void print(DeviceElementGroupPtr elements, size_t offset);
+void print(NonemptyDevicePtr device);
+void print(NonemptyDeviceElementPtr element, size_t offset);
+void print(NonemptyWritableMetricPtr element, size_t offset);
+void print(NonemptyMetricPtr element, size_t offset);
+void print(NonemptyDeviceElementGroupPtr elements, size_t offset);
 
 int main(int argc, char *argv[]) {
   /*
@@ -127,7 +127,8 @@ int main(int argc, char *argv[]) {
 
       mock_builder.reset();
 
-      print(device);
+      if (device)
+        print(NonemptyDevicePtr(device));
 
       event_source->sendEvent(make_shared<ModelRegistryEvent>(device));
     }
@@ -147,7 +148,7 @@ int main(int argc, char *argv[]) {
   }
 }
 
-void print(DeviceElementGroupPtr elements, size_t offset) {
+void print(NonemptyDeviceElementGroupPtr elements, size_t offset) {
   cout << string(offset, ' ') << "Group contains elements:" << endl;
   cout << string(offset, ' ') << "[" << endl;
   for (auto element : elements->getSubelements()) {
@@ -156,19 +157,19 @@ void print(DeviceElementGroupPtr elements, size_t offset) {
   cout << string(offset, ' ') << "]" << endl;
 }
 
-void print(MetricPtr element, size_t offset) {
+void print(NonemptyMetricPtr element, size_t offset) {
   cout << string(offset, ' ') << "Reads " << toString(element->getDataType())
        << " value: " << toString(element->getMetricValue()) << endl;
 }
 
-void print(WritableMetricPtr element, size_t offset) {
+void print(NonemptyWritableMetricPtr element, size_t offset) {
   cout << string(offset, ' ') << "Reads " << toString(element->getDataType())
        << " value: " << toString(element->getMetricValue()) << endl;
   cout << string(offset, ' ') << "Writes " << toString(element->getDataType())
        << " value type" << endl;
 }
 
-void print(DeviceElementPtr element, size_t offset) {
+void print(NonemptyDeviceElementPtr element, size_t offset) {
   cout << string(offset - 1, ' ') << "{" << endl;
   cout << string(offset, ' ') << "Element name: " << element->getElementName()
        << endl;
@@ -176,42 +177,17 @@ void print(DeviceElementPtr element, size_t offset) {
        << endl;
   cout << string(offset, ' ')
        << "Described as: " << element->getElementDescription() << endl;
-  cout << string(offset, ' ')
-       << "Element type: " << toString(element->getElementType()) << endl;
 
-  switch (element->getElementType()) {
-  case ElementType::GROUP: {
-    print(static_pointer_cast<DeviceElementGroup>(element), offset);
-    break;
-  }
-  case ElementType::READABLE: {
-    print(static_pointer_cast<Metric>(element), offset);
-    break;
-  }
-  case ElementType::WRITABLE: {
-    print(static_pointer_cast<WritableMetric>(element), offset);
-    break;
-  }
-  case ElementType::FUNCTION: {
-    cerr << string(offset, ' ') << "Function element types are not implemented!"
-         << endl;
-    break;
-  }
-  case ElementType::OBSERVABLE: {
-    cerr << string(offset, ' ')
-         << "Observable elements types are not implemented!" << endl;
-    break;
-  }
-  case ElementType::UNDEFINED:
-  default: {
-    cerr << string(offset, ' ') << "Is not a valid element type!" << endl;
-    break;
-  }
-  }
+  match(element->specific_interface,
+    [offset](NonemptyDeviceElementGroupPtr interface){print(interface,offset);},
+    [offset](NonemptyMetricPtr interface){print(interface,offset);},
+    [offset](NonemptyWritableMetricPtr interface){print(interface,offset);}
+    );
+
   cout << string(offset - 1, ' ') << "}" << endl;
 }
 
-void print(DevicePtr device) {
+void print(NonemptyDevicePtr device) {
   cout << "Device name: " << device->getElementName() << endl;
   cout << "Device id: " << device->getElementId() << endl;
   cout << "Described as: " << device->getElementDescription() << endl;

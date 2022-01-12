@@ -16,37 +16,44 @@ class NodeBuilder {
   std::shared_ptr<Open62541Server> server_;
 
   std::pair<UA_StatusCode, UA_NodeId>
-  addObjectNode(Information_Model::NamedElementPtr element,
+  addObjectNode(Information_Model::NonemptyNamedElementPtr element,
                 std::optional<UA_NodeId> parent_node_id = std::nullopt);
 
   UA_StatusCode
-  addDeviceNodeElement(Information_Model::DeviceElementPtr device_element,
+  addDeviceNodeElement(Information_Model::NonemptyDeviceElementPtr device_element,
                        UA_NodeId parent_id);
 
-  UA_StatusCode
-  addGroupNode(Information_Model::DeviceElementGroupPtr device_element_group,
-               UA_NodeId parent_id);
+  UA_StatusCode addGroupNode(
+    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyDeviceElementGroupPtr device_element_group,
+    UA_NodeId parent_id);
 
   UA_StatusCode addFunctionNode(Information_Model::DeviceElementPtr function,
                                 UA_NodeId parent_id);
 
-  UA_StatusCode addReadableNode(Information_Model::MetricPtr metric,
-                                UA_NodeId parent_id);
+  UA_StatusCode addReadableNode(
+    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyMetricPtr metric,
+    UA_NodeId parent_id);
 
-  UA_StatusCode addWritableNode(Information_Model::WritableMetricPtr metric,
-                                UA_NodeId parent_id);
+  UA_StatusCode addWritableNode(
+    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyWritableMetricPtr metric,
+    UA_NodeId parent_id);
 
   UA_StatusCode setValue(UA_VariableAttributes &value_attribute,
-                         Information_Model::MetricPtr metric);
+    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyMetricPtr metric);
 
   UA_StatusCode setValue(UA_VariableAttributes &value_attribute,
-                         Information_Model::WritableMetricPtr metric);
+    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyWritableMetricPtr metric);
 
 public:
   NodeBuilder(std::shared_ptr<Open62541Server> server);
   ~NodeBuilder();
 
-  UA_StatusCode addDeviceNode(Information_Model::DevicePtr device);
+  UA_StatusCode addDeviceNode(Information_Model::NonemptyDevicePtr device);
 };
 } // namespace open62541
 
