@@ -24,7 +24,7 @@ class NodeBuilder {
                        UA_NodeId parent_id);
 
   UA_StatusCode addGroupNode(
-    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyNamedElementPtr meta_info,
     Information_Model::NonemptyDeviceElementGroupPtr device_element_group,
     UA_NodeId parent_id);
 

@@ -119,13 +119,13 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(NonemptyDeviceElementPtr element
 
 UA_StatusCode
 NodeBuilder::addGroupNode(
-  NonemptyNamedElementPtr names,
+  NonemptyNamedElementPtr meta_info,
   NonemptyDeviceElementGroupPtr device_element_group,
   UA_NodeId parent_id)
 {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   if (!device_element_group->getSubelements().empty()) {
-    auto result = addObjectNode(names, parent_id);
+    auto result = addObjectNode(meta_info, parent_id);
     status = result.first;
 
     if (status == UA_STATUSCODE_GOOD) {
@@ -133,7 +133,7 @@ NodeBuilder::addGroupNode(
 
       logger_->log(SeverityLevel::INFO,
                    "Group element {}:{} contains {} subelements.",
-                   names->getElementName(),
+                   meta_info->getElementName(),
                    toString(&result.second), elements.size());
       for (auto element : elements) {
         status = addDeviceNodeElement(element, result.second);
@@ -142,15 +142,15 @@ NodeBuilder::addGroupNode(
   } else {
     logger_->log(SeverityLevel::WARNNING,
                  "Parent's {} group element {} with id {} is empty!",
-                 toString(&parent_id), names->getElementName(),
-                 names->getElementId());
+                 toString(&parent_id), meta_info->getElementName(),
+                 meta_info->getElementId());
   }
 
   if (status != UA_STATUSCODE_GOOD) {
     logger_->log(
         SeverityLevel::ERROR,
         "Failed to create a Node for Device Element Group: {}. Status: {}",
-        names->getElementName(), UA_StatusCode_name(status));
+        meta_info->getElementName(), UA_StatusCode_name(status));
   }
 
   return status;
