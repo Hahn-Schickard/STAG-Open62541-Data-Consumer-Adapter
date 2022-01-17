@@ -32,21 +32,21 @@ class NodeBuilder {
                                 UA_NodeId parent_id);
 
   UA_StatusCode addReadableNode(
-    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyNamedElementPtr meta_info,
     Information_Model::NonemptyMetricPtr metric,
     UA_NodeId parent_id);
 
   UA_StatusCode addWritableNode(
-    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyNamedElementPtr meta_info,
     Information_Model::NonemptyWritableMetricPtr metric,
     UA_NodeId parent_id);
 
   UA_StatusCode setValue(UA_VariableAttributes &value_attribute,
-    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyNamedElementPtr meta_info,
     Information_Model::NonemptyMetricPtr metric);
 
   UA_StatusCode setValue(UA_VariableAttributes &value_attribute,
-    Information_Model::NonemptyNamedElementPtr names,
+    Information_Model::NonemptyNamedElementPtr meta_info,
     Information_Model::NonemptyWritableMetricPtr metric);
 
 public:

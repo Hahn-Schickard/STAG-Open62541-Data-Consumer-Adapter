@@ -205,7 +205,7 @@ void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
 }
 
 UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
-                                    NonemptyNamedElementPtr names,
+                                    NonemptyNamedElementPtr meta_info,
                                     NonemptyMetricPtr metric) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
@@ -214,9 +214,9 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
     setVariant(value_attribute, variant);
     if (!UA_Variant_isEmpty(&value_attribute.value)) {
       value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
-          "EN_US", names->getElementDescription().c_str());
+          "EN_US", meta_info->getElementDescription().c_str());
       value_attribute.displayName =
-          UA_LOCALIZEDTEXT_ALLOC("EN_US", names->getElementName().c_str());
+          UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->getElementName().c_str());
       value_attribute.dataType = toNodeId(metric->getDataType());
     }
     status = UA_STATUSCODE_GOOD;
@@ -231,30 +231,30 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
   return status;
 }
 
-UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr names,
+UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
                                            NonemptyMetricPtr metric,
                                            UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), names->getElementId().c_str());
+      server_->getServerNamespace(), meta_info->getElementId().c_str());
   logger_->log(SeverityLevel::TRACE,
                "Assigning {} NodeId to metric: {}, with id: {}",
-               toString(&metrid_node_id), names->getElementName(),
-               names->getElementId());
+               toString(&metrid_node_id), meta_info->getElementName(),
+               meta_info->getElementId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
-      server_->getServerNamespace(), names->getElementName().c_str());
+      server_->getServerNamespace(), meta_info->getElementName().c_str());
   logger_->log(SeverityLevel::TRACE,
                "Assigning browse name: {} to metric: {}, with id: {}",
-               toString(&metric_browse_name), names->getElementName(),
-               names->getElementId());
+               toString(&metric_browse_name), meta_info->getElementName(),
+               meta_info->getElementId());
   UA_NodeId type_definition =
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
 
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(node_attr, names, metric);
+  status = setValue(node_attr, meta_info, metric);
 
   if (status == UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::TRACE, "Assigning {} read callback for {} node",
@@ -276,14 +276,14 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr names,
   if (status != UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::ERROR,
                  "Failed to create a Node for Readable Metric: {}. Status: {}",
-                 names->getElementName(), UA_StatusCode_name(status));
+                 meta_info->getElementName(), UA_StatusCode_name(status));
   }
 
   return status;
 }
 
 UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
-                                    NonemptyNamedElementPtr names,
+                                    NonemptyNamedElementPtr meta_info,
                                     NonemptyWritableMetricPtr metric) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
@@ -292,9 +292,9 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
     setVariant(value_attribute, variant);
 
     value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
-        "EN_US", names->getElementDescription().c_str());
+        "EN_US", meta_info->getElementDescription().c_str());
     value_attribute.displayName =
-        UA_LOCALIZEDTEXT_ALLOC("EN_US", names->getElementName().c_str());
+        UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->getElementName().c_str());
 
     value_attribute.dataType = toNodeId(metric->getDataType());
 
@@ -310,29 +310,29 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
   return status;
 }
 
-UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr names,
+UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
                                            NonemptyWritableMetricPtr metric,
                                            UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), names->getElementId().c_str());
+      server_->getServerNamespace(), meta_info->getElementId().c_str());
   logger_->log(SeverityLevel::TRACE,
                "Assigning {} NodeId to metric: {}, with id: {}",
-               toString(&metrid_node_id), names->getElementName(),
-               names->getElementId());
+               toString(&metrid_node_id), meta_info->getElementName(),
+               meta_info->getElementId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
-      server_->getServerNamespace(), names->getElementName().c_str());
+      server_->getServerNamespace(), meta_info->getElementName().c_str());
   logger_->log(SeverityLevel::TRACE,
                "Assigning browse name: {} to metric: {}, with id: {}",
-               toString(&metric_browse_name), names->getElementName(),
-               names->getElementId());
+               toString(&metric_browse_name), meta_info->getElementName(),
+               meta_info->getElementId());
   UA_NodeId type_definition =
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(node_attr, names, metric);
+  status = setValue(node_attr, meta_info, metric);
 
   if (status == UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::TRACE,
@@ -358,7 +358,7 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr names,
   if (status != UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::ERROR,
                  "Failed to create a Node for Writable Metric: {}. Status: {}",
-                 names->getElementName(), UA_StatusCode_name(status));
+                 meta_info->getElementName(), UA_StatusCode_name(status));
   }
 
   return status;
