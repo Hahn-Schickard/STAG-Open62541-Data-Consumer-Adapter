@@ -224,8 +224,10 @@ void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
         });
 }
 
+template <class MetricType>
 UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
-                                    MetricPtr metric) {
+                                    std::shared_ptr<MetricType> metric,
+                                    std::string metric_type_description) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   if (metric) {
@@ -241,13 +243,15 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
     } catch (exception &ex) {
       logger_->log(
           SeverityLevel::ERROR,
-          "An exception occurred while trying to set readable metric value! "
+          "An exception occurred while trying to set "
+          + metric_type_description + " value! "
           "Exception: {}",
           ex.what());
     }
   } else {
     logger_->log(SeverityLevel::ERROR,
-                 "Can not set a value for non existant readable metric!");
+                 "Can not set a value for non existant "
+                 + metric_type_description + "!");
   }
   return status;
 }
@@ -274,7 +278,7 @@ UA_StatusCode NodeBuilder::addReadableNode(MetricPtr metric,
 
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(node_attr, metric);
+  status = setValue(node_attr, metric, "readable metric");
 
   if (status == UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::TRACE, "Assigning {} read callback for {} node",
@@ -302,38 +306,6 @@ UA_StatusCode NodeBuilder::addReadableNode(MetricPtr metric,
   return status;
 }
 
-UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
-                                    WritableMetricPtr metric) {
-  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-
-  if (metric) {
-    try {
-      auto variant = metric->getMetricValue();
-      setVariant(value_attribute, variant);
-
-      value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
-          "EN_US", metric->getElementDescription().c_str());
-      value_attribute.displayName =
-          UA_LOCALIZEDTEXT_ALLOC("EN_US", metric->getElementName().c_str());
-
-      value_attribute.dataType = toNodeId(metric->getDataType());
-
-      status = UA_STATUSCODE_GOOD;
-    } catch (exception &ex) {
-      logger_->log(
-          SeverityLevel::ERROR,
-          "An exception occurred while trying to set writable metric value! "
-          "Exception: {}",
-          ex.what());
-    }
-  } else {
-    logger_->log(SeverityLevel::ERROR,
-                 "Can not set a value for non existant writable metric!");
-  }
-
-  return status;
-}
-
 UA_StatusCode NodeBuilder::addWritableNode(WritableMetricPtr metric,
                                            UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
@@ -355,7 +327,7 @@ UA_StatusCode NodeBuilder::addWritableNode(WritableMetricPtr metric,
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(node_attr, metric);
+  status = setValue(node_attr, metric, "writable metric");
 
   if (status == UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::TRACE,
