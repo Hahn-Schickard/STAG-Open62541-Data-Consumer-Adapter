@@ -208,7 +208,7 @@ void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
 template <class MetricType>
 UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
     Information_Model::NonemptyNamedElementPtr meta_info,
-    Nonempty_Pointer::NonemptyPtr<std::shared_ptr<MetricType>> metric,
+    NonemptyPointer::NonemptyPtr<std::shared_ptr<MetricType>> metric,
     std::string metric_type_description)
 {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
