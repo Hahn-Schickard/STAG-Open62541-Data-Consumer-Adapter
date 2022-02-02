@@ -166,6 +166,7 @@ UA_StatusCode NodeBuilder::addFunctionNode(DeviceElementPtr function,
 }
 
 void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
+// Postcondition: value_attribute.value is non-empty
   match(variant,
         [&](bool value) {
           UA_Variant_setScalarCopy(&value_attribute.value, &value,
@@ -204,26 +205,28 @@ void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
         });
 }
 
+template <class MetricType>
 UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
-                                    NonemptyNamedElementPtr meta_info,
-                                    NonemptyMetricPtr metric) {
+    Information_Model::NonemptyNamedElementPtr meta_info,
+    Nonempty_Pointer::NonemptyPtr<std::shared_ptr<MetricType>> metric,
+    std::string metric_type_description)
+{
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   try {
     auto variant = metric->getMetricValue();
     setVariant(value_attribute, variant);
-    if (!UA_Variant_isEmpty(&value_attribute.value)) {
-      value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
-          "EN_US", meta_info->getElementDescription().c_str());
-      value_attribute.displayName =
-          UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->getElementName().c_str());
-      value_attribute.dataType = toNodeId(metric->getDataType());
-    }
+    value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
+        "EN_US", meta_info->getElementDescription().c_str());
+    value_attribute.displayName =
+        UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->getElementName().c_str());
+    value_attribute.dataType = toNodeId(metric->getDataType());
     status = UA_STATUSCODE_GOOD;
   } catch (exception &ex) {
     logger_->log(
         SeverityLevel::ERROR,
-        "An exception occurred while trying to set readable metric value! "
+        "An exception occurred while trying to set "
+        + metric_type_description + " value! "
         "Exception: {}",
         ex.what());
   }
@@ -254,7 +257,7 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
 
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(node_attr, meta_info, metric);
+  status = setValue(node_attr, meta_info, metric, "readable metric");
 
   if (status == UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::TRACE, "Assigning {} read callback for {} node",
@@ -282,34 +285,6 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
   return status;
 }
 
-UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
-                                    NonemptyNamedElementPtr meta_info,
-                                    NonemptyWritableMetricPtr metric) {
-  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-
-  try {
-    auto variant = metric->getMetricValue();
-    setVariant(value_attribute, variant);
-
-    value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
-        "EN_US", meta_info->getElementDescription().c_str());
-    value_attribute.displayName =
-        UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->getElementName().c_str());
-
-    value_attribute.dataType = toNodeId(metric->getDataType());
-
-    status = UA_STATUSCODE_GOOD;
-  } catch (exception &ex) {
-    logger_->log(
-        SeverityLevel::ERROR,
-        "An exception occurred while trying to set writable metric value! "
-        "Exception: {}",
-        ex.what());
-  }
-
-  return status;
-}
-
 UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
                                            NonemptyWritableMetricPtr metric,
                                            UA_NodeId parent_id) {
@@ -332,7 +307,7 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(node_attr, meta_info, metric);
+  status = setValue(node_attr, meta_info, metric, "writable metric");
 
   if (status == UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::TRACE,
