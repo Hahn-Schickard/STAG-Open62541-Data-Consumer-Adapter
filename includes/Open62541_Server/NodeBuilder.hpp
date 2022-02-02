@@ -36,11 +36,10 @@ class NodeBuilder {
   UA_StatusCode addWritableNode(Information_Model::WritableMetricPtr metric,
                                 UA_NodeId parent_id);
 
+  template <class MetricType> // either Metric or WritableMetric
   UA_StatusCode setValue(UA_VariableAttributes &value_attribute,
-                         Information_Model::MetricPtr metric);
-
-  UA_StatusCode setValue(UA_VariableAttributes &value_attribute,
-                         Information_Model::WritableMetricPtr metric);
+                                      std::shared_ptr<MetricType> metric,
+                                      std::string metric_type_description);
 
 public:
   NodeBuilder(std::shared_ptr<Open62541Server> server);
