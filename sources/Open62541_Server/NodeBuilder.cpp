@@ -185,6 +185,7 @@ UA_StatusCode NodeBuilder::addFunctionNode(DeviceElementPtr function,
 }
 
 void setVariant(UA_VariableAttributes &value_attribute, DataVariant variant) {
+// Postcondition: value_attribute.value is non-empty
   match(variant,
         [&](bool value) {
           UA_Variant_setScalarCopy(&value_attribute.value, &value,
@@ -231,13 +232,11 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes &value_attribute,
     try {
       auto variant = metric->getMetricValue();
       setVariant(value_attribute, variant);
-      if (!UA_Variant_isEmpty(&value_attribute.value)) {
-        value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
-            "EN_US", metric->getElementDescription().c_str());
-        value_attribute.displayName =
-            UA_LOCALIZEDTEXT_ALLOC("EN_US", metric->getElementName().c_str());
-        value_attribute.dataType = toNodeId(metric->getDataType());
-      }
+      value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
+          "EN_US", metric->getElementDescription().c_str());
+      value_attribute.displayName =
+          UA_LOCALIZEDTEXT_ALLOC("EN_US", metric->getElementName().c_str());
+      value_attribute.dataType = toNodeId(metric->getDataType());
       status = UA_STATUSCODE_GOOD;
     } catch (exception &ex) {
       logger_->log(
