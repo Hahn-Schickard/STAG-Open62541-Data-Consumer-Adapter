@@ -130,7 +130,8 @@ int main(int argc, char *argv[]) {
       if (device)
         print(NonemptyDevicePtr(device));
 
-      event_source->sendEvent(make_shared<ModelRegistryEvent>(device));
+      event_source->sendEvent(
+          std::make_shared<ModelRegistryEvent>(NonemptyDevicePtr(device)));
     }
 
     if (argc > 2) {
