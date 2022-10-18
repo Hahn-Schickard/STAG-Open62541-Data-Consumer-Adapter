@@ -1,136 +1,122 @@
-include: "ci-variables.yml"
+include:
+ - local: "ci-variables.yml"
+ - local: ".gitlab-ci-templates.yml"
 
-cache: &global
-  key: ${CI_PROJECT_ID}_global_cache
-  paths:
-    - ${CI_PROJECT_DIR}/.conan
-  policy: pull
+variables:
+  ARTIFACT_COMPRESSION_LEVEL: "slow"
 
-stages:
-  - build
-  - test
-  - analyze
-  - document
-  - package
-  - deploy
+build:debian-buster:
+  extends: .build
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
 
-.setup:
-  tags:
-    - conan
-  before_script:
-    - conan config set storage.download_cache="${CI_PROJECT_DIR}/.conan"
-    - conan config set storage.path="${CI_PROJECT_DIR}/.conan/data"
-    - conan config get storage.download_cache
+build:debian-bullseye:
+  extends: .build
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
 
-build:
-  extends: .setup
-  stage: build
-  tags:
-    - conan
-  script:
-    - pip3 install --upgrade conan
-    - conan remote add upload_repo ${CONAN_REMOTE}
-    - mkdir build
-    - cd build
-    - cmake ${CMAKE_VARIABLES} ..
-    - cmake --build . --target all --config Debug --
-  cache:
-    <<: *global
-    policy: pull-push
-  artifacts:
-    paths:
-      - build/
+build:ubuntu-18.04:
+  extends: .build
+  image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-18.04:latest
 
-run_tests:
-  extends: .setup
-  stage: test
-  needs: ["build"]
-  tags:
-    - conan
-  script:
-    - cd build
-    - ctest --verbose
-  after_script:
-    - cd ..
-  artifacts:
-    paths:
-      - build/
+build:ubuntu-20.04:
+  extends: .build
+  image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-20.04:latest
 
-analyze_memory_usage:
-  extends: .setup
-  stage: analyze
-  needs: ["build"]
-  tags:
-    - conan
-  script:
-    - python3 utility/runValgrind.py ${VALGRIND_TARGET} ${VALGRIND_TARGET_ARGS}
-  artifacts:
-    name: "Commit:${CI_COMMIT_SHORT_SHA}_Debug_Valgrind_Results"
-    paths:
-      - valgrind-results.log
-  only:
-    variables:
-      - $RUN_VALGRIND == "true"
-  allow_failure: true
+build:fedora-32:
+  extends: .build
+  image: ${DOCKER_REGISTRY}/hs-conan-fedora-32:latest
 
-check_code_coverage:
-  extends: .setup
-  stage: analyze
-  needs: ["build", "run_tests"]
-  tags:
-    - conan
-  script:
-    - python3 utility/checkCodeCoverage.py ${RUN_VALGRIND} ${VALGRIND_TARGET} ${VALGRIND_TARGET_ARGS}
-  artifacts:
-    name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Coverage_Results"
-    paths:
-      - code_coverage_report/
-
-generate_autodoc:
-  stage: document
-  tags:
-    - conan
-  script:
-    - doxygen utility/Doxyfile
-  cache: {}
-  artifacts:
-    name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Documentation"
-    paths:
-      - docs/code_documentation/
-    expire_in: 30 days
-  allow_failure: true
-
-.package:
-  stage: package
+build:fedora-34:
+  extends: .build
+  image:
+    name: ${DOCKER_REGISTRY}/hs-conan-fedora-34:latest
+    entrypoint: ["/bin/sh", "-c"]
   variables:
-    GIT_STRATEGY: clone
-  tags:
-    - conan
-  before_script:
-    - pip3 install --upgrade conan
-    - conan remote add upload_repo ${CONAN_REMOTE}
-    - PROJECT_NAME=$(python3 ./utility/getProjectName.py)
-  allow_failure: true
+    CMAKE_VARIABLES: "-DSTATIC_CODE_ANALYSIS=OFF"
+
+test:debian-buster:
+  extends: .test
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
+  needs: ["build:debian-buster"]
+
+test:debian-bullseye:
+  extends: .test
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
+  needs: ["build:debian-bullseye"]
+
+test:ubuntu-18.04:
+  extends: .test
+  image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-18.04:latest
+  needs: ["build:ubuntu-18.04"]
+
+test:ubuntu-20.04:
+  extends: .test
+  image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-20.04:latest
+  needs: ["build:ubuntu-20.04"]
+
+test:fedora-32:
+  extends: .test
+  image: ${DOCKER_REGISTRY}/hs-conan-fedora-32:latest
+  needs: ["build:fedora-32"]
+
+test:fedora-34:
+  extends: .test
+  image:
+    name: ${DOCKER_REGISTRY}/hs-conan-fedora-34:latest
+    entrypoint: ["/bin/sh", "-c"]
+  needs: ["build:fedora-34"]
+
+analyze_memory_usage:debian-buster:
+  extends: .analyze_memory_usage
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
+  needs: ["build:debian-buster"]
+
+analyze_memory_usage:debian-bullseye:
+  extends: .analyze_memory_usage
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
+  needs: ["build:debian-bullseye"]
+
+analyze_memory_usage:ubuntu-18.04:
+  extends: .analyze_memory_usage
+  image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-18.04:latest
+  needs: ["build:ubuntu-18.04"]
+
+analyze_memory_usage:ubuntu-20.04:
+  extends: .analyze_memory_usage
+  image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-20.04:latest
+  needs: ["build:ubuntu-20.04"]
+
+analyze_memory_usage:fedora-32:
+  extends: .analyze_memory_usage
+  image: ${DOCKER_REGISTRY}/hs-conan-fedora-32:latest
+  needs: ["build:fedora-32"]
+
+analyze_memory_usage:fedora-34:
+  extends: .analyze_memory_usage
+  image:
+    name: ${DOCKER_REGISTRY}/hs-conan-fedora-34:latest
+    entrypoint: ["/bin/sh", "-c"]
+  needs: ["build:fedora-34"]
+
+check_code_coverage:debian-bullseye:
+  extends: .check_code_coverage
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
+  needs: ["build:debian-bullseye", "test:debian-bullseye"]
+
+lint:debian-bullseye:
+  extends: .lint
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
+  needs: ["build:debian-bullseye"]
+
+document:debian-buster:
+  extends: .document
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
+  needs: ["build:debian-bullseye"]
 
 package:stable:
   extends: .package
-  script:
-    - VERSION=$(python3 ./utility/getVersionFromTag.py)
-    - conan create ./conan/ ${VERSION}@hahn-schickard/stable --build=missing
-    - conan upload ${PROJECT_NAME}/${VERSION}@hahn-schickard/stable -r upload_repo
-  only:
-    - /Release_v*/
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
 
 pages:
-  stage: deploy
-  needs: ["build", "run_tests", "check_code_coverage", "generate_autodoc"]
-  tags:
-    - conan
-  script:
-    - python3 utility/createAmalgamWebsite.py ${CI_PROJECT_URL}
-  cache: {}
-  artifacts:
-    paths:
-      - public
-  only:
-    - /Release_v*/
+  extends: .pages
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
+  needs: ["build:debian-bullseye", "check_code_coverage:debian-bullseye", "document:debian-buster"]

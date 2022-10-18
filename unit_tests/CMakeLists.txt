@@ -7,7 +7,7 @@ file(GLOB Device_Test_Suite "${CMAKE_CURRENT_LIST_DIR}/Device/*")
 find_package(GTest REQUIRED)
 
 add_executable(${THIS})
-target_sources(${THIS} PRIVATE 
+target_sources(${THIS} PRIVATE
                        "testRunner.cpp"
                        ${Device_Test_Suite}
 )

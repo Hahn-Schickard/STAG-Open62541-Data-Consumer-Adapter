@@ -21,3 +21,17 @@ build_type:
       short: Release
       long: Optimize debug information out from the binaries
       buildType: Release
+
+linting:
+ default: On
+ choices:
+    On:
+      short: On
+      long: Runs Code Linter during build
+      settings:
+        STATIC_CODE_ANALYSIS: ON
+    Off:
+      short: Off
+      long: Disables code linting while building
+      settings:
+        STATIC_CODE_ANALYSIS: OFF
