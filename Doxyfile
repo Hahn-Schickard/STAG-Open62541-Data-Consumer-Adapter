@@ -4,9 +4,9 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Information Model"
+PROJECT_NAME           = "Data Consumer Adapter Open62541"
 PROJECT_NUMBER         =
-PROJECT_BRIEF          = "Information Model for STAG project"
+PROJECT_BRIEF          = ""
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = docs/code_documentation
 CREATE_SUBDIRS         = YES
@@ -98,7 +98,7 @@ SHOW_USED_FILES        = YES
 SHOW_FILES             = NO
 SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
-LAYOUT_FILE            = 
+LAYOUT_FILE            =
 CITE_BIB_FILES         =
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -167,15 +167,13 @@ EXCLUDE               += sources/
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = */unit_tests/*
 EXCLUDE_PATTERNS      += */utility/*
-EXCLUDE_PATTERNS      += */conan/*
-EXCLUDE_PATTERNS      += */conanfile.txt
 EXCLUDE_PATTERNS      += */README.md
 EXCLUDE_PATTERNS      += */CONTRIBUTING.md
-EXCLUDE_SYMBOLS        = 
+EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           =
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO
-IMAGE_PATH             = 
+IMAGE_PATH             = "docs/images"
 INPUT_FILTER           =
 FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = YES
@@ -207,12 +205,12 @@ HTML_OUTPUT            = html/
 HTML_FILE_EXTENSION    = .html
 HTML_HEADER            = docs/code_documentation/header.html
 HTML_FOOTER            =
-HTML_STYLESHEET        = 
+HTML_STYLESHEET        =
 HTML_EXTRA_STYLESHEET  = docs/code_documentation/stylesheet.css
-HTML_EXTRA_FILES       = docs/code_documentation/vendor-logo.png
-HTML_COLORSTYLE_HUE    = 
-HTML_COLORSTYLE_SAT    = 
-HTML_COLORSTYLE_GAMMA  = 
+HTML_EXTRA_FILES       = docs/images/vendor-logo.png
+HTML_COLORSTYLE_HUE    =
+HTML_COLORSTYLE_SAT    =
+HTML_COLORSTYLE_GAMMA  =
 HTML_TIMESTAMP         = NO
 HTML_DYNAMIC_MENUS     = YES
 HTML_DYNAMIC_SECTIONS  = YES
