@@ -134,7 +134,7 @@ UA_StatusCode NodeBuilder::addGroupNode(NonemptyNamedElementPtr meta_info,
       }
     }
   } else {
-    logger_->log(SeverityLevel::WARNNING,
+    logger_->log(SeverityLevel::WARNING,
         "Parent's {} group element {} with id {} is empty!",
         toString(&parent_id), meta_info->getElementName(),
         meta_info->getElementId());
@@ -152,7 +152,7 @@ UA_StatusCode NodeBuilder::addGroupNode(NonemptyNamedElementPtr meta_info,
 UA_StatusCode NodeBuilder::addFunctionNode(
     DeviceElementPtr function, UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTIMPLEMENTED;
-  logger_->log(SeverityLevel::WARNNING, "Method element is not implemented!",
+  logger_->log(SeverityLevel::WARNING, "Method element is not implemented!",
       toString(&parent_id), function->getElementName());
   //@TODO: Implement addFunctionNode stub
   return status;

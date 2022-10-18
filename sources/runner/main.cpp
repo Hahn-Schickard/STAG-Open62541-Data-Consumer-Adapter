@@ -42,7 +42,7 @@ public:
       : EventSource(
             bind(&EventSourceFake::handleException, this, placeholders::_1)) {}
 
-  void sendEvent(std::shared_ptr<ModelRegistryEvent> event) { notify(event); }
+  void sendEvent(ModelRegistryEventPtr event) { notify(event); }
 };
 
 void print(NonemptyDevicePtr device);
@@ -64,10 +64,7 @@ int main(int argc, char* argv[]) {
   }
 
   try {
-    auto config = make_shared<SPD_Configuration>("./log", "logfile.log",
-        "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$",
-        HaSLL::SeverityLevel::TRACE, false, 8192, 2, 25, 100, 1);
-    auto repo = make_shared<SPD_LoggerRepository>(config);
+    auto repo = make_shared<SPD_LoggerRepository>("loggerConfig.json");
     LoggerManager::initialise(repo);
     auto logger = HaSLL::LoggerManager::registerLogger("Main");
     logger->log(SeverityLevel::TRACE, "Logging completed initialization!");

@@ -4,7 +4,7 @@
 
 using namespace Information_Model;
 using namespace Event_Model;
-using namespace HaSLL;
+using namespace HaSLI;
 using namespace std;
 using namespace open62541;
 
@@ -26,7 +26,7 @@ void OpcuaAdapter::start() {
     DataConsumerAdapterInterface::start();
   } else {
     this->logger_->log(
-        SeverityLevel::ERROR, "Failled to initialize OPC UA Adapter!");
+        SeverityLevel::ERROR, "Failed to initialize OPC UA Adapter!");
   }
 }
 

@@ -1,5 +1,6 @@
 #include "Event_Model/EventSource.hpp"
-#include "LoggerRepository.hpp"
+#include "HaSLL/LoggerManager.hpp"
+#include "HaSLL/SPD_LoggerRepository.hpp"
 #include "Open62541_Data_Consumer_Adapter/OpcuaAdapter.hpp"
 
 #include <memory>
@@ -20,14 +21,14 @@ public:
       : EventSource(
             bind(&EventSourceFake::handleException, this, placeholders::_1)) {}
 
-  void sendEvent(std::shared_ptr<ModelRegistryEvent> event) { notify(event); }
+  void sendEvent(ModelRegistryEventPtr event) { notify(event); }
 };
 
 int main() {
-  auto config = HaSLL::Configuration("./log", "logfile.log",
-      "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$", HaSLL::SeverityLevel::TRACE,
-      true, 8192, 2, 25, 100, 1);
-  HaSLL::LoggerRepository::initialise(config);
+  auto repo =
+      std::make_shared<HaSLL::SPD_LoggerRepository>("loggerConfig.json");
+  HaSLL::LoggerManager::initialise(repo);
+
   auto adapter = make_unique<OpcuaAdapter>(make_shared<EventSourceFake>());
   adapter->start();
   this_thread::sleep_for(chrono::seconds(2));
