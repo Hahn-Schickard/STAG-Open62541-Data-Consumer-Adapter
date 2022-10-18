@@ -52,19 +52,8 @@ void print(NonemptyMetricPtr element, size_t offset);
 void print(NonemptyDeviceElementGroupPtr elements, size_t offset);
 
 int main(int argc, char* argv[]) {
-  /*
-    CL format:
-    - First argument (argv[1]): Path of server config file (required)
-    - Second argument: Server lifetime in s (infinite lifetime if omitted)
-  */
-
-  if (argc < 2) {
-    cerr << "Required CL argument: server config filepath" << endl;
-    return -1;
-  }
-
   try {
-    auto repo = make_shared<SPD_LoggerRepository>("loggerConfig.json");
+    auto repo = make_shared<SPD_LoggerRepository>("config/loggerConfig.json");
     LoggerManager::initialise(repo);
     auto logger = HaSLL::LoggerManager::registerLogger("Main");
     logger->log(SeverityLevel::TRACE, "Logging completed initialization!");
@@ -78,7 +67,7 @@ int main(int argc, char* argv[]) {
     auto event_source = make_shared<EventSourceFake>();
     logger->log(SeverityLevel::TRACE, "Fake event source initialized!");
 
-    adapter = new OpcuaAdapter(event_source, string(argv[1]));
+    adapter = new OpcuaAdapter(event_source, "config/defaultConfig.json");
     logger->log(SeverityLevel::TRACE, "OPC UA Adapter initialized!");
 
     adapter->start();

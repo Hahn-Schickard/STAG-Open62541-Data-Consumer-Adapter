@@ -16,3 +16,11 @@ set_target_properties(example PROPERTIES
                               CXX_STANDARD 17
                               CXX_STANDARD_REQUIRED ON
 )
+
+add_custom_command(TARGET ${THIS} POST_BUILD 
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        ${PROJECT_SOURCE_DIR}/config
+                        $<TARGET_FILE_DIR:${THIS}>/config 
+                    COMMENT "Copying configuration files."
+                        VERBATIM
+)

@@ -26,10 +26,11 @@ public:
 
 int main() {
   auto repo =
-      std::make_shared<HaSLL::SPD_LoggerRepository>("loggerConfig.json");
+      std::make_shared<HaSLL::SPD_LoggerRepository>("config/loggerConfig.json");
   HaSLL::LoggerManager::initialise(repo);
 
-  auto adapter = make_unique<OpcuaAdapter>(make_shared<EventSourceFake>());
+  auto adapter = make_unique<OpcuaAdapter>(
+      make_shared<EventSourceFake>(), "config/defaultConfig.json");
   adapter->start();
   this_thread::sleep_for(chrono::seconds(2));
   adapter->stop();

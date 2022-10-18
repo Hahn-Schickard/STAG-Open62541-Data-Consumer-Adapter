@@ -18,3 +18,11 @@ target_link_libraries(${THIS} PRIVATE
 )
 
 target_compile_features(${THIS} PUBLIC cxx_std_17)
+
+add_custom_command(TARGET ${THIS} POST_BUILD 
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        ${PROJECT_SOURCE_DIR}/config
+                        $<TARGET_FILE_DIR:${THIS}>/config 
+                    COMMENT "Copying configuration files."
+                        VERBATIM
+)
