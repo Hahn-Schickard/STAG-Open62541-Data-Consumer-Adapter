@@ -2,8 +2,6 @@
 
 #include "Variant_Visitor.hpp"
 
-#include "LoggerRepository.hpp"
-
 using namespace Information_Model;
 using namespace Event_Model;
 using namespace HaSLL;
@@ -17,19 +15,18 @@ OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source)
       node_builder_(make_unique<NodeBuilder>(server_)) {}
 
 OpcuaAdapter::OpcuaAdapter(
-    ModelEventSourcePtr event_source, const string & config_filepath)
+    ModelEventSourcePtr event_source, const string& config_filepath)
     : DataConsumerAdapterInterface(event_source, "Open62541 Adapter"),
       server_(make_shared<Open62541Server>(
-        make_unique<open62541::Configuration>(config_filepath))),
-      node_builder_(make_unique<NodeBuilder>(server_))
-{}
+          make_unique<open62541::Configuration>(config_filepath))),
+      node_builder_(make_unique<NodeBuilder>(server_)) {}
 
 void OpcuaAdapter::start() {
   if (server_->start()) {
     DataConsumerAdapterInterface::start();
   } else {
-    this->logger_->log(SeverityLevel::ERROR,
-                       "Failled to initialize OPC UA Adapter!");
+    this->logger_->log(
+        SeverityLevel::ERROR, "Failled to initialize OPC UA Adapter!");
   }
 }
 
@@ -37,28 +34,28 @@ void OpcuaAdapter::stop() {
   if (server_->stop()) {
     DataConsumerAdapterInterface::stop();
   } else {
-    this->logger_->log(SeverityLevel::ERROR,
-                       "Failled to initialize OPC UA Adapter!");
+    this->logger_->log(
+        SeverityLevel::ERROR, "Failled to initialize OPC UA Adapter!");
   }
 }
 
 void OpcuaAdapter::handleEvent(shared_ptr<ModelRegistryEvent> event) {
   if (event) {
-    match(*event,
-          [&](string id) {
-            this->logger_->log(SeverityLevel::TRACE,
-                               "OPC UA Adapter received DEVICE_REMOVED event!");
-            this->logger_->log(SeverityLevel::WARNNING,
-                               "Event handler for DEVICE_REMOVED event is not "
-                               "implemented! Device {} will not be removed!",
-                               id);
-          },
-          [&](shared_ptr<Device> device) {
-            this->logger_->log(
-                SeverityLevel::TRACE,
-                "OPC UA Adapter received NEW_DEVICE_REGISTERED event!");
-            node_builder_->addDeviceNode(device);
-          });
+    match(
+        *event,
+        [&](string id) {
+          this->logger_->log(SeverityLevel::TRACE,
+              "OPC UA Adapter received DEVICE_REMOVED event!");
+          this->logger_->log(SeverityLevel::WARNNING,
+              "Event handler for DEVICE_REMOVED event is not "
+              "implemented! Device {} will not be removed!",
+              id);
+        },
+        [&](shared_ptr<Device> device) {
+          this->logger_->log(SeverityLevel::TRACE,
+              "OPC UA Adapter received NEW_DEVICE_REGISTERED event!");
+          node_builder_->addDeviceNode(device);
+        });
   }
 }
 } // namespace DCAI

@@ -3,8 +3,8 @@
 
 #include "Config.hpp"
 #include "Configuration.hpp"
+#include "HaSLL/Logger.hpp"
 #include "Information_Model/Device.hpp"
-#include "Logger.hpp"
 
 #include <memory>
 #include <mutex>
@@ -15,10 +15,10 @@ namespace open62541 {
 class Open62541Server {
   volatile bool is_running_;
   std::unique_ptr<const UA_ServerConfig> server_configuration_;
-  UA_Server *open62541_server_;
+  UA_Server* open62541_server_;
   UA_UInt16 server_namespace_index_;
   std::thread server_thread_;
-  std::shared_ptr<HaSLL::Logger> logger_;
+  HaSLI::LoggerPtr logger_;
   std::mutex status_mutex_;
 
   void runnable();
@@ -40,8 +40,8 @@ public:
   bool stop();
   bool isRunning();
   UA_UInt16 getServerNamespace();
-  const UA_Logger *getServerLogger();
-  UA_Server *getServer();
+  const UA_Logger* getServerLogger();
+  UA_Server* getServer();
 };
 } // namespace open62541
 #endif //_OPEN62541_SERVER_H_

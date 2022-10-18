@@ -1,33 +1,27 @@
-#include "HaSLLLogger.hpp"
-#include "LoggerRepository.hpp"
+#include "HaSLL_Logger.hpp"
+#include "HaSLL/LoggerManager.hpp"
 #include "Utility.hpp"
 
 using namespace std;
-using namespace HaSLL;
+using namespace HaSLI;
 
-shared_ptr<HaSLL::Logger> network_logger;
-shared_ptr<HaSLL::Logger> channel_logger;
-shared_ptr<HaSLL::Logger> session_logger;
-shared_ptr<HaSLL::Logger> server_logger;
-shared_ptr<HaSLL::Logger> client_logger;
-shared_ptr<HaSLL::Logger> userland_logger;
-shared_ptr<HaSLL::Logger> security_policy_logger;
+LoggerPtr network_logger;
+LoggerPtr channel_logger;
+LoggerPtr session_logger;
+LoggerPtr server_logger;
+LoggerPtr client_logger;
+LoggerPtr userland_logger;
+LoggerPtr security_policy_logger;
 
 void registerLoggers() {
-  network_logger =
-      LoggerRepository::getInstance().registerLoger("Open62541 Network Layer");
-  channel_logger =
-      LoggerRepository::getInstance().registerLoger("Open62541 Channel Layer");
-  session_logger =
-      LoggerRepository::getInstance().registerLoger("Open62541 Session Layer");
-  server_logger =
-      LoggerRepository::getInstance().registerLoger("Open62541 Server Layer");
-  client_logger =
-      LoggerRepository::getInstance().registerLoger("Open62541 Client Layer");
-  userland_logger =
-      LoggerRepository::getInstance().registerLoger("Open62541 User Layer");
+  network_logger = LoggerManager::registerLogger("Open62541 Network Layer");
+  channel_logger = LoggerManager::registerLogger("Open62541 Channel Layer");
+  session_logger = LoggerManager::registerLogger("Open62541 Session Layer");
+  server_logger = LoggerManager::registerLogger("Open62541 Server Layer");
+  client_logger = LoggerManager::registerLogger("Open62541 Client Layer");
+  userland_logger = LoggerManager::registerLogger("Open62541 User Layer");
   security_policy_logger =
-      LoggerRepository::getInstance().registerLoger("Open62541 Security Layer");
+      LoggerManager::registerLogger("Open62541 Security Layer");
 }
 
 SeverityLevel getLoggingLevel(UA_LogLevel level) {
@@ -48,20 +42,22 @@ SeverityLevel getLoggingLevel(UA_LogLevel level) {
     return SeverityLevel::TRACE;
   }
   case UA_LogLevel::UA_LOGLEVEL_WARNING: {
-    return SeverityLevel::WARNNING;
+    return SeverityLevel::WARNING;
   }
-  default: { return SeverityLevel::ERROR; }
+  default: {
+    return SeverityLevel::ERROR;
+  }
   }
 }
 
 void removeLoggers() {
-  LoggerRepository::getInstance().deregisterLoger("Open62541 Network Layer");
-  LoggerRepository::getInstance().deregisterLoger("Open62541 Channel Layer");
-  LoggerRepository::getInstance().deregisterLoger("Open62541 Session Layer");
-  LoggerRepository::getInstance().deregisterLoger("Open62541 Server Layer");
-  LoggerRepository::getInstance().deregisterLoger("Open62541 Client Layer");
-  LoggerRepository::getInstance().deregisterLoger("Open62541 User Layer");
-  LoggerRepository::getInstance().deregisterLoger("Open62541 Security Layer");
+  LoggerManager::deregisterLogger("Open62541 Network Layer");
+  LoggerManager::deregisterLogger("Open62541 Channel Layer");
+  LoggerManager::deregisterLogger("Open62541 Session Layer");
+  LoggerManager::deregisterLogger("Open62541 Server Layer");
+  LoggerManager::deregisterLogger("Open62541 Client Layer");
+  LoggerManager::deregisterLogger("Open62541 User Layer");
+  LoggerManager::deregisterLogger("Open62541 Security Layer");
 
   network_logger.reset();
   channel_logger.reset();
@@ -72,11 +68,11 @@ void removeLoggers() {
   security_policy_logger.reset();
 }
 
-void HaSLL_Logger_log(UNUSED(void *_logContext), UA_LogLevel level,
-                      UA_LogCategory category, const char *msg, va_list args) {
+void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
+    UA_LogCategory category, const char* msg, va_list args) {
 
   size_t buffer_size = strlen(msg);
-  char *buffer = (char *)(malloc(sizeof(char) * buffer_size));
+  char* buffer = (char*)(malloc(sizeof(char) * buffer_size));
   vsnprintf(buffer, buffer_size + 1, msg, args);
   string message = string(buffer);
 
@@ -126,9 +122,9 @@ void HaSLL_Logger_log(UNUSED(void *_logContext), UA_LogLevel level,
   }
 }
 
-void HaSLL_Logger_clear(UNUSED(void *logContext)) {
+void HaSLL_Logger_clear(UNUSED(void* logContext)) {
   // Nothing to clear
 }
 
 const UA_Logger HaSLL_Logger_ = {HaSLL_Logger_log, NULL, HaSLL_Logger_clear};
-const UA_Logger *HaSLL_Logger = &HaSLL_Logger_;
+const UA_Logger* HaSLL_Logger = &HaSLL_Logger_;

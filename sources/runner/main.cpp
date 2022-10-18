@@ -1,7 +1,9 @@
 #include "Event_Model/EventSource.hpp"
+#include "HaSLL/LoggerManager.hpp"
+#include "HaSLL/SPD_LoggerRepository.hpp"
 #include "Information_Model/mocks/DeviceMockBuilder.hpp"
 #include "Information_Model/mocks/Metric_MOCK.hpp"
-#include "LoggerRepository.hpp"
+
 #include "OpcuaAdapter.hpp"
 
 #include <gmock/gmock.h>
@@ -15,7 +17,7 @@ using namespace DCAI;
 
 using ::testing::NiceMock;
 
-OpcuaAdapter *adapter;
+OpcuaAdapter* adapter;
 
 void stopServer() {
   adapter->stop();
@@ -49,7 +51,7 @@ void print(WritableMetricPtr element, size_t offset);
 void print(MetricPtr element, size_t offset);
 void print(DeviceElementGroupPtr elements, size_t offset);
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   /*
     CL format:
     - First argument (argv[1]): Path of server config file (required)
@@ -62,25 +64,25 @@ int main(int argc, char *argv[]) {
   }
 
   try {
-    auto config = HaSLL::Configuration(
-        "./log", "logfile.log", "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$",
+    auto config = make_shared<SPD_Configuration>("./log", "logfile.log",
+        "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$",
         HaSLL::SeverityLevel::TRACE, false, 8192, 2, 25, 100, 1);
-    HaSLL::LoggerRepository::initialise(config);
-    auto logger = HaSLL::LoggerRepository::getInstance().registerLoger("Main");
+    auto repo = make_shared<SPD_LoggerRepository>(config);
+    LoggerManager::initialise(repo);
+    auto logger = HaSLL::LoggerManager::registerLogger("Main");
     logger->log(SeverityLevel::TRACE, "Logging completed initialization!");
 
     signal(SIGINT, stopHandler);
     signal(SIGTERM, stopHandler);
 
-    logger->log(
-        SeverityLevel::TRACE,
-        "Termination and Interuption signals assigned to stop handler!");
+    logger->log(SeverityLevel::TRACE,
+        "Termination and Interruption signals assigned to stop handler!");
 
     auto event_source = make_shared<EventSourceFake>();
     logger->log(SeverityLevel::TRACE, "Fake event source initialized!");
 
     adapter = new OpcuaAdapter(event_source, string(argv[1]));
-    logger->log(SeverityLevel::TRACE, "OPC UA Addapter initialized!");
+    logger->log(SeverityLevel::TRACE, "OPC UA Adapter initialized!");
 
     adapter->start();
 
@@ -94,34 +96,30 @@ int main(int argc, char *argv[]) {
       auto subgroup_1_ref_id =
           mock_builder->addDeviceElementGroup("Group 1", "First group");
       logger->log(SeverityLevel::TRACE,
-                  "Adding a Subgroup element with id {} to Mock Device.",
-                  subgroup_1_ref_id);
+          "Adding a Subgroup element with id {} to Mock Device.",
+          subgroup_1_ref_id);
 
-      auto boolean_ref_id = mock_builder->addReadableMetric(
-          subgroup_1_ref_id, "Boolean", "Mocked readable metric",
-          Information_Model::DataType::BOOLEAN,
-          []() -> DataVariant { return true; });
-      logger->log(
-          SeverityLevel::TRACE,
+      auto boolean_ref_id =
+          mock_builder->addReadableMetric(subgroup_1_ref_id, "Boolean",
+              "Mocked readable metric", Information_Model::DataType::BOOLEAN,
+              []() -> DataVariant { return true; });
+      logger->log(SeverityLevel::TRACE,
           "Adding a Boolean readable element with id {} to Mock Device.",
           boolean_ref_id);
 
-      auto integer_ref_id = mock_builder->addReadableMetric(
-          "Integer", "Mocked readable metric",
-          Information_Model::DataType::INTEGER,
+      auto integer_ref_id = mock_builder->addReadableMetric("Integer",
+          "Mocked readable metric", Information_Model::DataType::INTEGER,
           []() -> DataVariant { return (int64_t)48; });
-      logger->log(
-          SeverityLevel::TRACE,
+      logger->log(SeverityLevel::TRACE,
           "Adding an Integer readable element with id {} to Mock Device.",
           integer_ref_id);
 
-      auto string_ref_id = mock_builder->addReadableMetric(
-          "String", "Mocked readable metric",
-          Information_Model::DataType::STRING,
+      auto string_ref_id = mock_builder->addReadableMetric("String",
+          "Mocked readable metric", Information_Model::DataType::STRING,
           []() -> DataVariant { return string("Hello World!"); });
       logger->log(SeverityLevel::TRACE,
-                  "Adding a String readable element with id {} to Mock Device.",
-                  string_ref_id);
+          "Adding a String readable element with id {} to Mock Device.",
+          string_ref_id);
 
       auto device = mock_builder->getResult();
 
@@ -142,7 +140,7 @@ int main(int argc, char *argv[]) {
       while (true)
         ;
     }
-  } catch (exception &ex) {
+  } catch (exception& ex) {
     cerr << ex.what() << endl;
   }
 }
@@ -202,7 +200,6 @@ void print(DeviceElementPtr element, size_t offset) {
          << "Observable elements types are not implemented!" << endl;
     break;
   }
-  case ElementType::UNDEFINED:
   default: {
     cerr << string(offset, ' ') << "Is not a valid element type!" << endl;
     break;

@@ -2,7 +2,6 @@
 #define __OPCUA_ADAPTER_HPP
 
 #include "Data_Consumer_Adapter_Interface/DataConsumerAdapterInterface.hpp"
-#include "Logger.hpp"
 #include "NodeBuilder.hpp"
 #include "Open62541Server.hpp"
 
@@ -18,7 +17,7 @@ class OpcuaAdapter : public DataConsumerAdapterInterface {
 public:
   OpcuaAdapter(ModelEventSourcePtr event_source);
   OpcuaAdapter(
-    ModelEventSourcePtr event_source, const std::string & config_filepath);
+      ModelEventSourcePtr event_source, const std::string& config_filepath);
 
   void start() override;
   void stop() override;

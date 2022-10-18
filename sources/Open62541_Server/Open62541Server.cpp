@@ -1,31 +1,28 @@
 #include "Open62541Server.hpp"
 
 #include "Config_Serializer.hpp"
-#include "HaSLLLogger.hpp"
-#include "LoggerRepository.hpp"
+#include "HaSLL/LoggerManager.hpp"
+#include "HaSLL_Logger.hpp"
 
 using namespace std;
-using namespace HaSLL;
+using namespace HaSLI;
 using namespace Information_Model;
 using namespace open62541;
 
 Open62541Server::Open62541Server()
-  : Open62541Server(make_unique<Configuration>())
-{}
+    : Open62541Server(make_unique<Configuration>()) {}
 
 Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
     : is_running_(false), server_configuration_(configuration->getConfig()),
-      logger_(LoggerRepository::getInstance().registerTypedLoger(this)) {
+      logger_(LoggerManager::registerTypedLogger(this)) {
   registerLoggers();
-  open62541_server_ =
-      UA_Server_newWithConfig(server_configuration_.get());
+  open62541_server_ = UA_Server_newWithConfig(server_configuration_.get());
   server_namespace_index_ = 1;
 }
 
 Open62541Server::~Open62541Server() {
   logger_->log(SeverityLevel::INFO, "Removing {} from logger registry",
-               logger_->getName());
-  LoggerRepository::getInstance().deregisterLoger(logger_->getName());
+      logger_->getName());
 }
 
 bool Open62541Server::start() {
@@ -41,11 +38,11 @@ bool Open62541Server::start() {
       logger_->log(SeverityLevel::TRACE, "Open62541 server thread is running!");
       return true;
     } else {
-      logger_->log(SeverityLevel::ERROR,
-                   "Could not start Open62541 server thread!");
+      logger_->log(
+          SeverityLevel::ERROR, "Could not start Open62541 server thread!");
       return false;
     }
-  } catch (exception &ex) {
+  } catch (exception& ex) {
     logger_->log(SeverityLevel::CRITICAL, "Caught an exception: []", ex.what());
     return false;
   }
@@ -64,8 +61,8 @@ bool Open62541Server::stop() {
       logger_->log(SeverityLevel::TRACE, "Cleaned up open62541 server!");
       return true;
     } else {
-      logger_->log(SeverityLevel::ERROR,
-                   "Could not clean up open62541 server!");
+      logger_->log(
+          SeverityLevel::ERROR, "Could not clean up open62541 server!");
     }
   }
   logger_->log(SeverityLevel::INFO, "Stopped open62541 server!");
@@ -77,9 +74,9 @@ void Open62541Server::runnable() {
     UA_StatusCode status = UA_Server_run(open62541_server_, &is_running_);
     if (status != UA_STATUSCODE_GOOD) {
       logger_->log(SeverityLevel::ERROR,
-                   "ERROR:{} Failed to start open62541 server thread!", status);
+          "ERROR:{} Failed to start open62541 server thread!", status);
     }
-  } catch (exception &ex) {
+  } catch (exception& ex) {
     logger_->log(SeverityLevel::CRITICAL, "Caught an exception: []", ex.what());
   }
 }
@@ -88,11 +85,11 @@ UA_UInt16 Open62541Server::getServerNamespace() {
   return server_namespace_index_;
 }
 
-const UA_Logger *Open62541Server::getServerLogger() {
+const UA_Logger* Open62541Server::getServerLogger() {
   return &server_configuration_->logger;
 }
 
-UA_Server *Open62541Server::getServer() { return open62541_server_; }
+UA_Server* Open62541Server::getServer() { return open62541_server_; }
 
 bool Open62541Server::isRunning() {
   lock_guard<mutex> lock(status_mutex_);
