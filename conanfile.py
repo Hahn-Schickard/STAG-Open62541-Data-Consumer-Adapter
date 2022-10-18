@@ -19,7 +19,8 @@ class PackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
-    default_options = {"shared": True,
+    default_options = {"open62541:cpp_compatible": True,
+                       "shared": True,
                        "fPIC": True}
     default_user = "Hahn-Schickard"
     exports_sources = [
