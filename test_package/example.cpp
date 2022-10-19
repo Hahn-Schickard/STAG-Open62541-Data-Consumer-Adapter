@@ -1,4 +1,4 @@
-#include "Data_Consumer_Adapter_Open62541/OpcuaAdapter.hpp"
+#include "Open62541_Data_Consumer_Adapter/OpcuaAdapter.hpp"
 #include "Event_Model/EventSource.hpp"
 #include "HaSLL/LoggerManager.hpp"
 #include "HaSLL/SPD_LoggerRepository.hpp"
