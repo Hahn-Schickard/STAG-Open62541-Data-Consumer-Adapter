@@ -446,8 +446,8 @@ struct NodeBuilderTests : public ::testing::Test {
         },
         [](const UA_ReferenceDescription &){});
 
-    auto expected_id
-      = UA_NODEID_STRING(1, (char *) device->getElementId().c_str());
+    std::string device_id = device->getElementId();
+    auto expected_id = UA_NODEID_STRING(1, (char *) device_id.c_str());
     root_after.expect(
       toString(&expected_id),
       [&](const UA_ReferenceDescription & ref_desc)->bool {
