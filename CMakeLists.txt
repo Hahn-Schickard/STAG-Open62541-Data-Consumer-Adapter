@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 
 #@+ ======================== User PROJECT_NAME configuration ============================
-set(THIS Data_Consumer_Adapter_pen62541)
+set(THIS Open62541_Data_Consumer_Adapter)
 #@- =========================== END OF USER CONFIGURATION ===============================
 
 project(${THIS} CXX)

@@ -42,32 +42,18 @@ public:
       : EventSource(
             bind(&EventSourceFake::handleException, this, placeholders::_1)) {}
 
-  void sendEvent(std::shared_ptr<ModelRegistryEvent> event) { notify(event); }
+  void sendEvent(ModelRegistryEventPtr event) { notify(event); }
 };
 
-void print(DevicePtr device);
-void print(DeviceElementPtr element, size_t offset);
-void print(WritableMetricPtr element, size_t offset);
-void print(MetricPtr element, size_t offset);
-void print(DeviceElementGroupPtr elements, size_t offset);
+void print(NonemptyDevicePtr device);
+void print(NonemptyDeviceElementPtr element, size_t offset);
+void print(NonemptyWritableMetricPtr element, size_t offset);
+void print(NonemptyMetricPtr element, size_t offset);
+void print(NonemptyDeviceElementGroupPtr elements, size_t offset);
 
 int main(int argc, char* argv[]) {
-  /*
-    CL format:
-    - First argument (argv[1]): Path of server config file (required)
-    - Second argument: Server lifetime in s (infinite lifetime if omitted)
-  */
-
-  if (argc < 2) {
-    cerr << "Required CL argument: server config filepath" << endl;
-    return -1;
-  }
-
   try {
-    auto config = make_shared<SPD_Configuration>("./log", "logfile.log",
-        "[%Y-%m-%d-%H:%M:%S:%F %z][%n]%^[%l]: %v%$",
-        HaSLL::SeverityLevel::TRACE, false, 8192, 2, 25, 100, 1);
-    auto repo = make_shared<SPD_LoggerRepository>(config);
+    auto repo = make_shared<SPD_LoggerRepository>("config/loggerConfig.json");
     LoggerManager::initialise(repo);
     auto logger = HaSLL::LoggerManager::registerLogger("Main");
     logger->log(SeverityLevel::TRACE, "Logging completed initialization!");
@@ -81,7 +67,7 @@ int main(int argc, char* argv[]) {
     auto event_source = make_shared<EventSourceFake>();
     logger->log(SeverityLevel::TRACE, "Fake event source initialized!");
 
-    adapter = new OpcuaAdapter(event_source, string(argv[1]));
+    adapter = new OpcuaAdapter(event_source, "config/defaultConfig.json");
     logger->log(SeverityLevel::TRACE, "OPC UA Adapter initialized!");
 
     adapter->start();
@@ -125,9 +111,11 @@ int main(int argc, char* argv[]) {
 
       mock_builder.reset();
 
-      print(device);
+      if (device)
+        print(NonemptyDevicePtr(device));
 
-      event_source->sendEvent(make_shared<ModelRegistryEvent>(device));
+      event_source->sendEvent(
+          std::make_shared<ModelRegistryEvent>(NonemptyDevicePtr(device)));
     }
 
     if (argc > 2) {
@@ -145,7 +133,7 @@ int main(int argc, char* argv[]) {
   }
 }
 
-void print(DeviceElementGroupPtr elements, size_t offset) {
+void print(NonemptyDeviceElementGroupPtr elements, size_t offset) {
   cout << string(offset, ' ') << "Group contains elements:" << endl;
   cout << string(offset, ' ') << "[" << endl;
   for (auto element : elements->getSubelements()) {
@@ -154,19 +142,19 @@ void print(DeviceElementGroupPtr elements, size_t offset) {
   cout << string(offset, ' ') << "]" << endl;
 }
 
-void print(MetricPtr element, size_t offset) {
+void print(NonemptyMetricPtr element, size_t offset) {
   cout << string(offset, ' ') << "Reads " << toString(element->getDataType())
        << " value: " << toString(element->getMetricValue()) << endl;
 }
 
-void print(WritableMetricPtr element, size_t offset) {
+void print(NonemptyWritableMetricPtr element, size_t offset) {
   cout << string(offset, ' ') << "Reads " << toString(element->getDataType())
        << " value: " << toString(element->getMetricValue()) << endl;
   cout << string(offset, ' ') << "Writes " << toString(element->getDataType())
        << " value type" << endl;
 }
 
-void print(DeviceElementPtr element, size_t offset) {
+void print(NonemptyDeviceElementPtr element, size_t offset) {
   cout << string(offset - 1, ' ') << "{" << endl;
   cout << string(offset, ' ') << "Element name: " << element->getElementName()
        << endl;
@@ -174,41 +162,20 @@ void print(DeviceElementPtr element, size_t offset) {
        << endl;
   cout << string(offset, ' ')
        << "Described as: " << element->getElementDescription() << endl;
-  cout << string(offset, ' ')
-       << "Element type: " << toString(element->getElementType()) << endl;
 
-  switch (element->getElementType()) {
-  case ElementType::GROUP: {
-    print(static_pointer_cast<DeviceElementGroup>(element), offset);
-    break;
-  }
-  case ElementType::READABLE: {
-    print(static_pointer_cast<Metric>(element), offset);
-    break;
-  }
-  case ElementType::WRITABLE: {
-    print(static_pointer_cast<WritableMetric>(element), offset);
-    break;
-  }
-  case ElementType::FUNCTION: {
-    cerr << string(offset, ' ') << "Function element types are not implemented!"
-         << endl;
-    break;
-  }
-  case ElementType::OBSERVABLE: {
-    cerr << string(offset, ' ')
-         << "Observable elements types are not implemented!" << endl;
-    break;
-  }
-  default: {
-    cerr << string(offset, ' ') << "Is not a valid element type!" << endl;
-    break;
-  }
-  }
+  match(
+      element->specific_interface,
+      [offset](NonemptyDeviceElementGroupPtr interface) {
+        print(interface, offset);
+      },
+      [offset](NonemptyMetricPtr interface) { print(interface, offset); },
+      [offset](
+          NonemptyWritableMetricPtr interface) { print(interface, offset); });
+
   cout << string(offset - 1, ' ') << "}" << endl;
 }
 
-void print(DevicePtr device) {
+void print(NonemptyDevicePtr device) {
   cout << "Device name: " << device->getElementName() << endl;
   cout << "Device id: " << device->getElementId() << endl;
   cout << "Described as: " << device->getElementDescription() << endl;

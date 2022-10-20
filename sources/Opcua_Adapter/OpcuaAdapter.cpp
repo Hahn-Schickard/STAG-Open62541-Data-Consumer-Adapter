@@ -4,7 +4,7 @@
 
 using namespace Information_Model;
 using namespace Event_Model;
-using namespace HaSLL;
+using namespace HaSLI;
 using namespace std;
 using namespace open62541;
 
@@ -26,7 +26,7 @@ void OpcuaAdapter::start() {
     DataConsumerAdapterInterface::start();
   } else {
     this->logger_->log(
-        SeverityLevel::ERROR, "Failled to initialize OPC UA Adapter!");
+        SeverityLevel::ERROR, "Failed to initialize OPC UA Adapter!");
   }
 }
 
@@ -46,12 +46,12 @@ void OpcuaAdapter::handleEvent(shared_ptr<ModelRegistryEvent> event) {
         [&](string id) {
           this->logger_->log(SeverityLevel::TRACE,
               "OPC UA Adapter received DEVICE_REMOVED event!");
-          this->logger_->log(SeverityLevel::WARNNING,
+          this->logger_->log(SeverityLevel::WARNING,
               "Event handler for DEVICE_REMOVED event is not "
               "implemented! Device {} will not be removed!",
               id);
         },
-        [&](shared_ptr<Device> device) {
+        [&](NonemptyDevicePtr device) {
           this->logger_->log(SeverityLevel::TRACE,
               "OPC UA Adapter received NEW_DEVICE_REGISTERED event!");
           node_builder_->addDeviceNode(device);

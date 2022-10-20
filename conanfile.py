@@ -11,7 +11,7 @@ class PackageConan(ConanFile):
     build_requires = 'gtest/1.10.0'
     requires = [
         "nlohmann_json/3.11.1",
-        "open62541/1.1.2@hahn-schickard/stable",
+        "open62541/1.1.3",
         "HaSLL/0.3.1@hahn-schickard/stable",
         "Variant_Visitor/0.1.0@hahn-schickard/stable",
         "Data_Consumer_Adapter_Interface/0.1.9@hahn-schickard/stable"
@@ -19,7 +19,8 @@ class PackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
-    default_options = {"shared": True,
+    default_options = {"open62541:cpp_compatible": True,
+                       "shared": True,
                        "fPIC": True}
     default_user = "Hahn-Schickard"
     exports_sources = [
@@ -57,6 +58,7 @@ class PackageConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.verbose = True
         self._cmake.definitions['STATIC_CODE_ANALYSIS'] = False
+        self._cmake.definitions['RUN_TESTS'] = False
         self._cmake.definitions['USE_CONAN'] = True
         self._cmake.configure()
         return self._cmake

@@ -16,34 +16,40 @@ class NodeBuilder {
   std::shared_ptr<Open62541Server> server_;
 
   std::pair<UA_StatusCode, UA_NodeId> addObjectNode(
-      Information_Model::NamedElementPtr element,
+      Information_Model::NonemptyNamedElementPtr element,
       std::optional<UA_NodeId> parent_node_id = std::nullopt);
 
   UA_StatusCode addDeviceNodeElement(
-      Information_Model::DeviceElementPtr device_element, UA_NodeId parent_id);
+      Information_Model::NonemptyDeviceElementPtr device_element,
+      UA_NodeId parent_id);
 
   UA_StatusCode addGroupNode(
-      Information_Model::DeviceElementGroupPtr device_element_group,
+      Information_Model::NonemptyNamedElementPtr meta_info,
+      Information_Model::NonemptyDeviceElementGroupPtr device_element_group,
       UA_NodeId parent_id);
 
   UA_StatusCode addFunctionNode(
       Information_Model::DeviceElementPtr function, UA_NodeId parent_id);
 
   UA_StatusCode addReadableNode(
-      Information_Model::MetricPtr metric, UA_NodeId parent_id);
+      Information_Model::NonemptyNamedElementPtr meta_info,
+      Information_Model::NonemptyMetricPtr metric, UA_NodeId parent_id);
 
   UA_StatusCode addWritableNode(
-      Information_Model::WritableMetricPtr metric, UA_NodeId parent_id);
+      Information_Model::NonemptyNamedElementPtr meta_info,
+      Information_Model::NonemptyWritableMetricPtr metric, UA_NodeId parent_id);
 
   template <class MetricType> // either Metric or WritableMetric
   UA_StatusCode setValue(UA_VariableAttributes& value_attribute,
-      std::shared_ptr<MetricType> metric, std::string metric_type_description);
+      Information_Model::NonemptyNamedElementPtr meta_info,
+      NonemptyPointer::NonemptyPtr<std::shared_ptr<MetricType>> metric,
+      std::string metric_type_description);
 
 public:
   NodeBuilder(std::shared_ptr<Open62541Server> server);
   ~NodeBuilder();
 
-  UA_StatusCode addDeviceNode(Information_Model::DevicePtr device);
+  UA_StatusCode addDeviceNode(Information_Model::NonemptyDevicePtr device);
 };
 } // namespace open62541
 
