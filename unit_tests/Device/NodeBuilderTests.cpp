@@ -437,7 +437,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
     root_before.ignore([](const UA_ReferenceDescription &)->bool {return true;});
 
     // Make the call
-    auto status = node_builder.addDeviceNode(device);
+    auto status = node_builder->addDeviceNode(device);
     EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
 
     Browse root_after(ua_server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER));
