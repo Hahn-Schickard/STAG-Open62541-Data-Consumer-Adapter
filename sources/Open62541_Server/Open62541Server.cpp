@@ -59,10 +59,8 @@ bool Open62541Server::stop() {
       logger_->log(SeverityLevel::TRACE, "open62541 server shutdown!");
       return true;
     } else {
-      logger_->log(SeverityLevel::ERROR,
-                   "Could not shutdown open62541 server!");
       logger_->log(
-          SeverityLevel::ERROR, "Could not clean up open62541 server!");
+          SeverityLevel::ERROR, "Could not shutdown open62541 server!");
     }
   }
   logger_->log(SeverityLevel::INFO, "Stopped open62541 server!");
