@@ -56,9 +56,9 @@ bool Open62541Server::stop() {
     logger_->log(SeverityLevel::TRACE, "Joined open62541 server thread!");
     UA_StatusCode status = UA_Server_run_shutdown(open62541_server_);
     if (status == UA_STATUSCODE_GOOD) {
-      UA_Server_delete(open62541_server_);
-      removeLoggers();
-      logger_->log(SeverityLevel::TRACE, "Cleaned up open62541 server!");
+      logger_->log(SeverityLevel::TRACE, "open62541 server shutdown!");
+      return true;
+    } else {
       logger_->log(SeverityLevel::ERROR,
                    "Could not shutdown open62541 server!");
       logger_->log(
