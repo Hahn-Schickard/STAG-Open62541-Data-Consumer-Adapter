@@ -51,13 +51,13 @@ SeverityLevel getLoggingLevel(UA_LogLevel level) {
 }
 
 void removeLoggers() {
-  LoggerManager::deregisterLogger("Open62541 Network Layer");
-  LoggerManager::deregisterLogger("Open62541 Channel Layer");
-  LoggerManager::deregisterLogger("Open62541 Session Layer");
-  LoggerManager::deregisterLogger("Open62541 Server Layer");
-  LoggerManager::deregisterLogger("Open62541 Client Layer");
-  LoggerManager::deregisterLogger("Open62541 User Layer");
-  LoggerManager::deregisterLogger("Open62541 Security Layer");
+  network_logger->deregister();
+  channel_logger->deregister();
+  session_logger->deregister();
+  server_logger->deregister();
+  client_logger->deregister();
+  userland_logger->deregister();
+  security_policy_logger->deregister();
 
   network_logger.reset();
   channel_logger.reset();
