@@ -8,13 +8,13 @@ using namespace open62541;
 
 struct Open62541ServerTests : public ::testing::Test {};
 
-TEST_F(Open62541ServerTests, defaultConstructorWorks) {
-  Open62541Server server;
-}
+// TEST_F(Open62541ServerTests, defaultConstructorWorks) {
+//   Open62541Server server;
+// }
 
-TEST_F(Open62541ServerTests, defaultConfigurationValid) {
-  auto config = std::make_unique<Configuration>();
-  Open62541Server server(std::move(config));
-}
+// TEST_F(Open62541ServerTests, defaultConfigurationValid) {
+//   auto config = std::make_unique<Configuration>();
+//   Open62541Server server(std::move(config));
+// }
 
-} // namespace
+} // namespace Open62541ServerTests
