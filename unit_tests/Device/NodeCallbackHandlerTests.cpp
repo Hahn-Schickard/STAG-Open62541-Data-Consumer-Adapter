@@ -3,22 +3,29 @@
 #include "NodeCallbackHandler.hpp"
 #include "Utility.hpp"
 
+#include "../SharedTestResources.hpp"
+
 namespace NodeCallbackHandlerTests {
 
 using namespace open62541;
 
 struct NodeCallbackHandlerTests : public ::testing::Test {
-  std::shared_ptr<Open62541Server> server;
+  Open62541ServerPtr server;
   CallbackWrapperPtr null_callback;
 
-  NodeCallbackHandlerTests()
-    : server(std::make_shared<Open62541Server>())
-  {
-    NodeCallbackHandler::initialise(server->getServerLogger());
+  void SetUp() {
+    if (shared_server) {
+      server = shared_server;
+      NodeCallbackHandler::initialise(server->getServerLogger());
+    } else {
+      throw std::logic_error(
+          "NodeCallbackHandlerTests can not use nullptr shared test results!");
+    }
   }
 
-  ~NodeCallbackHandlerTests() {
+  void TearDown() {
     NodeCallbackHandler::destroy();
+    server.reset();
   }
 };
 

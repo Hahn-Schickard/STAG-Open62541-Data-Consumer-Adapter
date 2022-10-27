@@ -252,19 +252,27 @@ public:
  * @brief Fixture for testing NodeBuilder::addDevice
  */
 template <class Types> struct NodeBuilderTests : public ::testing::Test {
-  static std::shared_ptr<Open62541Server> server;
-  static std::shared_ptr<NodeBuilder> node_builder;
-  UA_Server* ua_server = nullptr;
+  Open62541ServerPtr server;
+  NodeBuilderPtr node_builder;
+  UA_Server *ua_server = nullptr;
 
-  void SetUp() {
-    if (server) {
-      if (ua_server == nullptr) {
-        ua_server = server->getServer();
+  void SetUp() override {
+    if (shared_server && shared_node_builder) {
+      server = shared_server;
+      node_builder = shared_node_builder;
+      ua_server = server->getServer();
       }
     } else {
-      throw std::logic_error("Open62541Server can not be nullptr when used as "
-                             "a shared test resource");
+      throw std::logic_error(
+          "NodeBuilderTests can not use nullptr shared test results!");
     }
+  }
+
+  void TearDown() override {
+    node_builder->cleanup();
+    ua_server = nullptr;
+    node_builder.reset();
+    server.reset();
   }
 
   // For use as a filter predicate
@@ -472,13 +480,6 @@ using Boolean =
     DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>;
 using BooleanNodeBuilderTests = NodeBuilderTests<Boolean>;
 
-template <>
-std::shared_ptr<Open62541Server> BooleanNodeBuilderTests::server =
-    shared_server;
-template <>
-std::shared_ptr<NodeBuilder> BooleanNodeBuilderTests::node_builder =
-    shared_node_builder;
-
 TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {}
 
 TEST_F(BooleanNodeBuilderTests, addMockDeviceNode) {
@@ -521,42 +522,6 @@ using Opaque =
 using String = DataTypes<Information_Model::DataType::STRING, UA_TYPES_STRING>;
 using AllTypes = ::testing::Types<Boolean, SignedInteger, UnsignedInteger,
     Double, Time, Opaque, String>;
-
-template <>
-std::shared_ptr<Open62541Server> NodeBuilderTests<SignedInteger>::server =
-    shared_server;
-template <>
-std::shared_ptr<NodeBuilder> NodeBuilderTests<SignedInteger>::node_builder =
-    shared_node_builder;
-template <>
-std::shared_ptr<Open62541Server> NodeBuilderTests<UnsignedInteger>::server =
-    shared_server;
-template <>
-std::shared_ptr<NodeBuilder> NodeBuilderTests<UnsignedInteger>::node_builder =
-    shared_node_builder;
-template <>
-std::shared_ptr<Open62541Server> NodeBuilderTests<Double>::server =
-    shared_server;
-template <>
-std::shared_ptr<NodeBuilder> NodeBuilderTests<Double>::node_builder =
-    shared_node_builder;
-template <>
-std::shared_ptr<Open62541Server> NodeBuilderTests<Time>::server = shared_server;
-template <>
-std::shared_ptr<NodeBuilder> NodeBuilderTests<Time>::node_builder =
-    shared_node_builder;
-template <>
-std::shared_ptr<Open62541Server> NodeBuilderTests<Opaque>::server =
-    shared_server;
-template <>
-std::shared_ptr<NodeBuilder> NodeBuilderTests<Opaque>::node_builder =
-    shared_node_builder;
-template <>
-std::shared_ptr<Open62541Server> NodeBuilderTests<String>::server =
-    shared_server;
-template <>
-std::shared_ptr<NodeBuilder> NodeBuilderTests<String>::node_builder =
-    shared_node_builder;
 
 TYPED_TEST_SUITE(NodeBuilderTests, AllTypes);
 TYPED_TEST(NodeBuilderTests, addDeviceNodeTypes) {
