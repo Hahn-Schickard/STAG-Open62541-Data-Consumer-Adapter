@@ -18,11 +18,9 @@ NodeBuilder::NodeBuilder(shared_ptr<Open62541Server> server)
   NodeCallbackHandler::initialise(server->getServerLogger());
 }
 
-NodeBuilder::~NodeBuilder() {
-  logger_->log(SeverityLevel::INFO, "Removing {} from logger registry",
-      logger_->getName());
-  NodeCallbackHandler::destroy();
-}
+NodeBuilder::~NodeBuilder() { cleanup(); }
+
+void NodeBuilder::cleanup() { NodeCallbackHandler::destroy(); }
 
 pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
     NonemptyNamedElementPtr element, optional<UA_NodeId> parent_node_id) {
