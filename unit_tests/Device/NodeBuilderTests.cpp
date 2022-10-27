@@ -261,7 +261,6 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
       server = shared_server;
       node_builder = shared_node_builder;
       ua_server = server->getServer();
-      }
     } else {
       throw std::logic_error(
           "NodeBuilderTests can not use nullptr shared test results!");
