@@ -1,6 +1,5 @@
 #include <functional>
 
-#include "../SharedTestResources.hpp"
 #include "gtest/gtest.h"
 
 #include "Information_Model/mocks/DeviceMockBuilder.hpp"
@@ -251,28 +250,17 @@ public:
 /**
  * @brief Fixture for testing NodeBuilder::addDevice
  */
-template <class Types> struct NodeBuilderTests : public ::testing::Test {
-  Open62541ServerPtr server;
-  NodeBuilderPtr node_builder;
-  UA_Server *ua_server = nullptr;
+template <class Types>
+struct NodeBuilderTests : public ::testing::Test {
+  std::shared_ptr<Open62541Server> server;
+  UA_Server * ua_server;
+  NodeBuilder node_builder;
 
-  void SetUp() override {
-    if (shared_server && shared_node_builder) {
-      server = shared_server;
-      node_builder = shared_node_builder;
-      ua_server = server->getServer();
-    } else {
-      throw std::logic_error(
-          "NodeBuilderTests can not use nullptr shared test results!");
-    }
-  }
-
-  void TearDown() override {
-    node_builder->cleanup();
-    ua_server = nullptr;
-    node_builder.reset();
-    server.reset();
-  }
+  NodeBuilderTests()
+    : server(std::make_shared<Open62541Server>()),
+      ua_server(server->getServer()),
+      node_builder(server)
+  {}
 
   // For use as a filter predicate
   bool compareId(const UA_NodeId & ua, std::string im) {
@@ -444,7 +432,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
     root_before.ignore([](const UA_ReferenceDescription &)->bool {return true;});
 
     // Make the call
-    auto status = node_builder->addDeviceNode(device);
+    auto status = node_builder.addDeviceNode(device);
     EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
 
     Browse root_after(ua_server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER));
@@ -475,9 +463,8 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
   }
 };
 
-using Boolean =
-    DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>;
-using BooleanNodeBuilderTests = NodeBuilderTests<Boolean>;
+using BooleanNodeBuilderTests = NodeBuilderTests
+  <DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>>;
 
 TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {}
 
@@ -510,18 +497,15 @@ INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeParameterizedTestSuite,
 /**
  * @brief Test addDeviceNode with differently typed variables
  */
-using SignedInteger =
-    DataTypes<Information_Model::DataType::INTEGER, UA_TYPES_INT64>;
-using UnsignedInteger =
-    DataTypes<Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_UINT64>;
-using Double = DataTypes<Information_Model::DataType::DOUBLE, UA_TYPES_DOUBLE>;
-using Time = DataTypes<Information_Model::DataType::TIME, UA_TYPES_DATETIME>;
-using Opaque =
-    DataTypes<Information_Model::DataType::OPAQUE, UA_TYPES_BYTESTRING>;
-using String = DataTypes<Information_Model::DataType::STRING, UA_TYPES_STRING>;
-using AllTypes = ::testing::Types<Boolean, SignedInteger, UnsignedInteger,
-    Double, Time, Opaque, String>;
-
+using AllTypes = ::testing::Types<
+  DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>,
+  DataTypes<Information_Model::DataType::INTEGER, UA_TYPES_INT64>,
+  DataTypes<Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_UINT64>,
+  DataTypes<Information_Model::DataType::DOUBLE, UA_TYPES_DOUBLE>,
+  DataTypes<Information_Model::DataType::TIME, UA_TYPES_DATETIME>,
+  DataTypes<Information_Model::DataType::OPAQUE, UA_TYPES_BYTESTRING>,
+  DataTypes<Information_Model::DataType::STRING, UA_TYPES_STRING>
+  >;
 TYPED_TEST_SUITE(NodeBuilderTests, AllTypes);
 TYPED_TEST(NodeBuilderTests, addDeviceNodeTypes) {
   TestFixture::testAddDeviceNode("(RW)");
