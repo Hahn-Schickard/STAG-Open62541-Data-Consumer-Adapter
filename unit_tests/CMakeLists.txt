@@ -3,12 +3,13 @@ cmake_minimum_required(VERSION 3.6)
 set(THIS Unit_Tests_Runner)
 
 file(GLOB Device_Test_Suite "${CMAKE_CURRENT_LIST_DIR}/Device/*")
+file(GLOB Shared_Resources "${CMAKE_CURRENT_LIST_DIR}/*.?pp")
 
 find_package(GTest REQUIRED)
 
 add_executable(${THIS})
 target_sources(${THIS} PRIVATE
-                       "testRunner.cpp"
+                       ${Shared_Resources}
                        ${Device_Test_Suite}
 )
 

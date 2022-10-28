@@ -17,4 +17,4 @@ TEST_F(Open62541ServerTests, defaultConfigurationValid) {
   Open62541Server server(std::move(config));
 }
 
-} // namespace
+} // namespace Open62541ServerTests

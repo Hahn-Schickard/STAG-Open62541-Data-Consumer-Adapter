@@ -50,6 +50,7 @@ public:
   ~NodeBuilder();
 
   UA_StatusCode addDeviceNode(Information_Model::NonemptyDevicePtr device);
+  void cleanup();
 };
 } // namespace open62541
 
