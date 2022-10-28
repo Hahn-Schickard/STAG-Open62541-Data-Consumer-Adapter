@@ -1,15 +1,29 @@
-## [0.1.6] - NOT RELEASED
+## [0.1.6] - 2022.10.28
 ### Added
  - OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source,
      const std::string & config_filepath);
  - Configuration::Configuration(const std::string & filepath);
  - Open62541Server::Open62541Server(std::unique_ptr<Configuration>);
+ - ARCHIVE Destination to CMakeLists targets
+ - NodeBuilderTests
+ - NodeCallbackHandlerTests
+ - Open62541ServerTests
 
-###Changed
- - Typos in Congig.hpp API
+### Changed
  - Configuration::getConfig();
  - Data_Consumer_Adapter_Interface to v0.1.9
+ - HaSLL to v0.3.1
+ - nlohmann_json to v3.11.1
  - NodeBuilder::addDeviceNode argument from DevicePtr to NonemptyDevicePtr
+ - Contribution guide
+ - Code formatting rules
+ - Logger deregistration to be done in the Open62541 Server dtor
+ - NodeBuilder to work with NonemptyPtr implementation of Information Model
+ - NodeBuilder to work with Information Model v0.2.0
+ - removeLoggers() function to use HaSLL v0.3.1 deregistration mechanism
+
+### Fixed
+  - Typos in Congig.hpp API
 
 ## [0.1.5] - 2021.08.09
 ### Changed
