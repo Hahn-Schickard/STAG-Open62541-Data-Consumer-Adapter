@@ -39,12 +39,12 @@ UA_NodeId toNodeId(DataType type) {
   }
 }
 
-string toString(const UA_String *input) {
-  string result = string((char *)(input->data), input->length);
+string toString(const UA_String* input) {
+  string result = string((char*)(input->data), input->length);
   return result;
 }
 
-string toString(const UA_NodeId *node_id) {
+string toString(const UA_NodeId* node_id) {
   UA_String ua_string = UA_STRING_NULL;
   if (UA_NodeId_print(node_id, &ua_string) != UA_STATUSCODE_GOOD) {
     throw runtime_error("Failed to conver UA_NodeId to a string!");
@@ -52,7 +52,7 @@ string toString(const UA_NodeId *node_id) {
   return toString(&ua_string);
 }
 
-string toString(const UA_QualifiedName *name) {
+string toString(const UA_QualifiedName* name) {
   string result = to_string(name->namespaceIndex) + ":" + toString(&name->name);
   return result;
 }

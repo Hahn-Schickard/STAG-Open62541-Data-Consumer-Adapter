@@ -56,14 +56,14 @@ typedef struct SubscriptionsLimitsStruct {
   UA_UInt32 max_notifications_per_publish;
   UA_Boolean enable_retransmission_queue;
   UA_UInt32 max_retransmission_queue_size; /* 0 -> unlimited size */
-  UA_UInt32 max_events_per_node;           /* 0 -> unlimited size, optional */
+  UA_UInt32 max_events_per_node; /* 0 -> unlimited size, optional */
 } SubscriptionsLimits;
 
 typedef struct MonitoredItemsLimitsStruct {
   UA_UInt32 max_monitored_items;
   UA_UInt32 max_monitored_items_per_subscription;
   UA_DurationRange
-      sampling_interval_limits_ms;  /* in ms (must not be less than 5) */
+      sampling_interval_limits_ms; /* in ms (must not be less than 5) */
   UA_UInt32Range queue_size_limits; /* Negotiated with the client */
 } MonitoredItemsLimits;
 

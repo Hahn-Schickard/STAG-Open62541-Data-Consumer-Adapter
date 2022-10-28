@@ -25,12 +25,12 @@ struct CallbackWrapper {
   CallbackWrapper();
   CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback);
   CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback,
-                  WriteCallback write_callback);
+      WriteCallback write_callback);
 };
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 
 struct UA_NodeId_Hasher {
-  size_t operator()(UA_NodeId const &node_id) const noexcept {
+  size_t operator()(UA_NodeId const& node_id) const noexcept {
     return UA_NodeId_hash(&node_id);
   }
 };
@@ -39,10 +39,10 @@ class NodeCallbackHandler {
   using NodeCalbackMap =
       std::unordered_map<UA_NodeId, CallbackWrapperPtr, UA_NodeId_Hasher>;
   static NodeCalbackMap node_calbacks_map_;
-    // Invariant: No CallbackWrapperPtr is empty
-  static const UA_Logger *logger_;
+  // Invariant: No CallbackWrapperPtr is empty
+  static const UA_Logger* logger_;
 
-  static CallbackWrapperPtr findCallbackWrapper(const UA_NodeId *node_id);
+  static CallbackWrapperPtr findCallbackWrapper(const UA_NodeId* node_id);
 
 public:
   /**
@@ -51,7 +51,7 @@ public:
    *
    * @param logger
    */
-  static void initialise(const UA_Logger *logger);
+  static void initialise(const UA_Logger* logger);
   /**
    * @brief Cleans up the callback map
    *
@@ -62,13 +62,13 @@ public:
    * @pre There is no callback bound to nodeId.
    * @pre callback_wrapper is non-empty.
    */
-  static UA_StatusCode addNodeCallbacks(UA_NodeId nodeId,
-                                        CallbackWrapperPtr callback_wrapper);
+  static UA_StatusCode addNodeCallbacks(
+      UA_NodeId nodeId, CallbackWrapperPtr callback_wrapper);
 
   /**
    * @pre There is a callback bound to nodeId.
    */
-  static UA_StatusCode removeNodeCallbacks(const UA_NodeId *nodeId);
+  static UA_StatusCode removeNodeCallbacks(const UA_NodeId* nodeId);
 
   /**
    * @brief Read callback used by OPC UA Clients to read the current value of a
@@ -84,11 +84,10 @@ public:
    * @param value
    * @return UA_StatusCode
    */
-  static UA_StatusCode
-  readNodeValue(UA_Server *server, const UA_NodeId *sessionId,
-                void *sessionContext, const UA_NodeId *nodeId,
-                void *nodeContext, UA_Boolean includeSourceTimeStamp,
-                const UA_NumericRange *range, UA_DataValue *value);
+  static UA_StatusCode readNodeValue(UA_Server* server,
+      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
+      void* nodeContext, UA_Boolean includeSourceTimeStamp,
+      const UA_NumericRange* range, UA_DataValue* value);
 
   /**
    * @brief Write callback used by OPC UA Clients to write a specified value to
@@ -103,11 +102,10 @@ public:
    * @param value
    * @return UA_StatusCode
    */
-  static UA_StatusCode
-  writeNodeValue(UA_Server *server, const UA_NodeId *sessionId,
-                 void *sessionContext, const UA_NodeId *nodeId,
-                 void *nodeContext, const UA_NumericRange *range,
-                 const UA_DataValue *value);
+  static UA_StatusCode writeNodeValue(UA_Server* server,
+      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
+      void* nodeContext, const UA_NumericRange* range,
+      const UA_DataValue* value);
 };
 } // namespace open62541
 
