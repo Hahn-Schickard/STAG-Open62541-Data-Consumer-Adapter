@@ -456,9 +456,9 @@ using BooleanNodeBuilderTests = NodeBuilderTests<
 TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {}
 
 TEST_F(BooleanNodeBuilderTests, addMockDeviceNode) {
-  auto device =
-      NonemptyPointer::make_shared<Information_Model::testing::MockDevice>(
-          "the_ref_id", "the name", "the description");
+  auto device = NonemptyPointer::make_shared<
+      ::testing::NiceMock<Information_Model::testing::MockDevice>>(
+      "the_ref_id", "the name", "the description");
   testAddDeviceNode(device);
 }
 
