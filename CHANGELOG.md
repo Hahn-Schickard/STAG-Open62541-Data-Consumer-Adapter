@@ -1,3 +1,4 @@
+# Changelog
 ## [0.1.6] - 2022.10.28
 ### Added
  - OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source,
