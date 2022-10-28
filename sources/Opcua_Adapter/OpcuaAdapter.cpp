@@ -10,13 +10,13 @@ using namespace open62541;
 
 namespace DCAI {
 OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source)
-    : DataConsumerAdapterInterface(event_source, "Open62541 Adapter"),
+    : DataConsumerAdapterInterface(event_source, "Open62541 Adapter"), // NOLINT
       server_(make_shared<Open62541Server>()),
       node_builder_(make_unique<NodeBuilder>(server_)) {}
 
 OpcuaAdapter::OpcuaAdapter(
     ModelEventSourcePtr event_source, const string& config_filepath)
-    : DataConsumerAdapterInterface(event_source, "Open62541 Adapter"),
+    : DataConsumerAdapterInterface(event_source, "Open62541 Adapter"), // NOLINT
       server_(make_shared<Open62541Server>(
           make_unique<open62541::Configuration>(config_filepath))),
       node_builder_(make_unique<NodeBuilder>(server_)) {}
@@ -35,7 +35,7 @@ void OpcuaAdapter::stop() {
     DataConsumerAdapterInterface::stop();
   } else {
     this->logger_->log(
-        SeverityLevel::ERROR, "Failled to initialize OPC UA Adapter!");
+        SeverityLevel::ERROR, "Failed to initialize OPC UA Adapter!");
   }
 }
 
@@ -43,7 +43,7 @@ void OpcuaAdapter::handleEvent(shared_ptr<ModelRegistryEvent> event) {
   if (event) {
     match(
         *event,
-        [&](string id) {
+        [&](const string& id) {
           this->logger_->log(SeverityLevel::TRACE,
               "OPC UA Adapter received DEVICE_REMOVED event!");
           this->logger_->log(SeverityLevel::WARNING,

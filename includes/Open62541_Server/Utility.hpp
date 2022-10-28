@@ -18,7 +18,7 @@ namespace open62541 {
 
 UA_NodeId toNodeId(Information_Model::DataType type);
 std::string toString(const UA_String* input);
-std::string toString(const UA_NodeId* nodeId);
+std::string toString(const UA_NodeId* node_id);
 std::string toString(const UA_QualifiedName* name);
 
 /** The UA_TYPES constant that corresponds to intmax_t */

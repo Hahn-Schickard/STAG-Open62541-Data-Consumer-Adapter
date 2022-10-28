@@ -61,7 +61,7 @@ pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
 
   status = UA_Server_addObjectNode(server_->getServer(), node_id,
       parent_node_id.value(), reference_type_id, browse_name, type_definition,
-      node_attr, NULL, NULL);
+      node_attr, nullptr, nullptr);
   return make_pair(status, node_id);
 }
 
@@ -187,7 +187,7 @@ void setVariant(UA_VariableAttributes& value_attribute, DataVariant variant) {
         UA_Variant_setScalarCopy(&value_attribute.value, &byte_string,
             &UA_TYPES[UA_TYPES_BYTESTRING]);
       },
-      [&](string value) {
+      [&](const string& value) {
         UA_String open62541_string;
         open62541_string.length = strlen(value.c_str());
         open62541_string.data = (UA_Byte*)malloc(open62541_string.length);
@@ -258,10 +258,10 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
     UA_DataSource data_source;
     data_source.read = &NodeCallbackHandler::readNodeValue;
 
-    auto server_ptr = server_->getServer();
+    auto* server_ptr = server_->getServer();
     status = UA_Server_addDataSourceVariableNode(server_ptr, metrid_node_id,
         parent_id, reference_type_id, metric_browse_name, type_definition,
-        node_attr, data_source, NULL, NULL);
+        node_attr, data_source, nullptr, nullptr);
   }
   if (status != UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::ERROR,
@@ -311,7 +311,7 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
 
     status = UA_Server_addDataSourceVariableNode(server_->getServer(),
         metrid_node_id, parent_id, reference_type_id, metric_browse_name,
-        type_definition, node_attr, data_source, NULL, NULL);
+        type_definition, node_attr, data_source, nullptr, nullptr);
   }
 
   if (status != UA_STATUSCODE_GOOD) {

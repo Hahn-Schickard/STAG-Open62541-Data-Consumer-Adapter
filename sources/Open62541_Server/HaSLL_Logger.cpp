@@ -72,9 +72,9 @@ void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
     UA_LogCategory category, const char* msg, va_list args) {
 
   size_t buffer_size = strlen(msg);
-  char* buffer = (char*)(malloc(sizeof(char) * buffer_size));
+  auto* buffer = (char*)(malloc(sizeof(char) * buffer_size));
   vsnprintf(buffer, buffer_size + 1, msg, args);
-  string message = string(buffer);
+  auto message = string(buffer);
 
   switch (category) {
   case UA_LogCategory::UA_LOGCATEGORY_NETWORK: {
@@ -126,5 +126,5 @@ void HaSLL_Logger_clear(UNUSED(void* logContext)) {
   // Nothing to clear
 }
 
-const UA_Logger HaSLL_Logger_ = {HaSLL_Logger_log, NULL, HaSLL_Logger_clear};
+const UA_Logger HaSLL_Logger_ = {HaSLL_Logger_log, nullptr, HaSLL_Logger_clear};
 const UA_Logger* HaSLL_Logger = &HaSLL_Logger_;

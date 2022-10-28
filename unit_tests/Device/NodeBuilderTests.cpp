@@ -54,12 +54,12 @@ std::string to_string(UA_Server* server, const UA_ReferenceDescription& ref) {
  * Specializations of this class are used as parameter types for tests.
  */
 template <Information_Model::DataType im, size_t ua> struct DataTypes {
-  static constexpr Information_Model::DataType im_index = im;
-  static constexpr size_t ua_index = ua;
-  static constexpr const UA_DataType* ua_type = &UA_TYPES[ua_index];
+  static constexpr Information_Model::DataType IM_INDEX = im;
+  static constexpr size_t UA_INDEX = ua;
+  static constexpr const UA_DataType* UA_TYPE = &UA_TYPES[UA_INDEX];
   static Information_Model::DataVariant read() {
     return Information_Model::DataVariant(
-        std::in_place_index<(size_t)im_index>);
+        std::in_place_index<(size_t)IM_INDEX>);
   }
   static void write(Information_Model::DataVariant) {}
 };
@@ -68,16 +68,16 @@ template <Information_Model::DataType im, size_t ua> struct DataTypes {
  * @brief Helper class for inventing Information_Model::NamedElement data
  */
 class NameGenerator {
-  size_t counter = 0;
+  size_t counter_ = 0;
   std::string make(const char* prefix) const {
-    return std::string(prefix) + std::to_string(counter);
+    return std::string(prefix) + std::to_string(counter_);
   }
 
 public:
   std::string ref_id() const { return make("ref_id_"); }
   std::string name() const { return make("name "); }
   std::string description() const { return make("description "); }
-  void next() { ++counter; }
+  void next() { ++counter_; }
 };
 
 // Helper (semantically a sub-function) for parseDevice below
@@ -103,15 +103,15 @@ void parseDeviceGroup(Information_Model::DeviceBuilderInterface& builder,
       break;
     case 'R':
       (group.has_value() ? builder.addReadableMetric(group.value(), name,
-                               description, Types::im_index, Types::read)
+                               description, Types::IM_INDEX, Types::read)
                          : builder.addReadableMetric(name, description,
-                               Types::im_index, Types::read));
+                               Types::IM_INDEX, Types::read));
       break;
     case 'W':
       (group.has_value()
               ? builder.addWritableMetric(group.value(), name, description,
-                    Types::im_index, Types::read, Types::write)
-              : builder.addWritableMetric(name, description, Types::im_index,
+                    Types::IM_INDEX, Types::read, Types::write)
+              : builder.addWritableMetric(name, description, Types::IM_INDEX,
                     Types::read, Types::write));
       break;
     default:
@@ -150,27 +150,27 @@ Information_Model::NonemptyDevicePtr parseDevice(const char* spec) {
  * expected until then.
  */
 class Browse {
-  static constexpr size_t max_references = 1000;
+  static constexpr size_t MAX_REFERENCES = 1000;
 
-  UA_Server* ua_server;
-  UA_BrowseResult result;
-  std::set<size_t> unexpected;
+  UA_Server* ua_server_;
+  UA_BrowseResult result_;
+  std::set<size_t> unexpected_;
   size_t num_children_;
 
 public:
-  class iterator {
-    Browse& browse;
-    size_t index;
-    iterator(Browse& browse_, size_t index_) : browse(browse_), index(index_) {}
+  class Iterator {
+    Browse& browse_;
+    size_t index_;
+    Iterator(Browse& browse, size_t index) : browse_(browse), index_(index) {}
 
   public:
-    bool operator!=(const iterator& other) { return index != other.index; }
-    iterator& operator++() {
-      ++index;
+    bool operator!=(const Iterator& other) { return index_ != other.index_; }
+    Iterator& operator++() {
+      ++index_;
       return *this;
     }
     UA_ReferenceDescription& operator*() {
-      return browse.result.references[index];
+      return browse_.result_.references[index_];
     }
     friend class Browse;
   };
@@ -180,8 +180,8 @@ public:
   /**
    * @brief Initialize with a node's references
    */
-  Browse(UA_Server* ua_server_, const UA_NodeId& node_id)
-      : ua_server(ua_server_) {
+  Browse(UA_Server* ua_server, const UA_NodeId& node_id)
+      : ua_server_(ua_server) {
     UA_BrowseDescription browse_description;
     browse_description.nodeId = node_id;
     browse_description.browseDirection = UA_BROWSEDIRECTION_FORWARD;
@@ -189,37 +189,37 @@ public:
     browse_description.includeSubtypes = UA_TRUE;
     browse_description.nodeClassMask = 65535;
     browse_description.resultMask = 65535;
-    result = UA_Server_browse(ua_server, max_references, &browse_description);
-    EXPECT_EQ(result.statusCode, UA_STATUSCODE_GOOD)
-        << UA_StatusCode_name(result.statusCode);
-    EXPECT_LT(result.referencesSize, max_references);
+    result_ = UA_Server_browse(ua_server_, MAX_REFERENCES, &browse_description);
+    EXPECT_EQ(result_.statusCode, UA_STATUSCODE_GOOD)
+        << UA_StatusCode_name(result_.statusCode);
+    EXPECT_LT(result_.referencesSize, MAX_REFERENCES);
 
-    num_children_ = result.referencesSize;
+    num_children_ = result_.referencesSize;
 
     for (size_t i = 0; i < num_children_; ++i)
-      unexpected.insert(i);
+      unexpected_.insert(i);
   }
 
   ~Browse() {
-    for (auto i : unexpected) {
-      auto& ref = result.references[i];
-      ADD_FAILURE() << "unexpected reference " << to_string(ua_server, ref);
+    for (auto i : unexpected_) {
+      auto& ref = result_.references[i];
+      ADD_FAILURE() << "unexpected reference " << to_string(ua_server_, ref);
     }
   }
 
-  iterator begin() { return iterator(*this, 0); }
-  iterator end() { return iterator(*this, result.referencesSize); }
+  Iterator begin() { return Iterator(*this, 0); }
+  Iterator end() { return Iterator(*this, result_.referencesSize); }
 
   /*
     @brief Marks some elements as expected
   */
   void ignore(std::function<bool(const UA_ReferenceDescription&)> filter) {
-    auto i = unexpected.begin();
-    while (i != unexpected.end()) {
+    auto i = unexpected_.begin();
+    while (i != unexpected_.end()) {
       auto next = i;
       ++next;
-      if (filter(result.references[*i]))
-        unexpected.erase(i);
+      if (filter(result_.references[*i]))
+        unexpected_.erase(i);
       i = next;
     }
   }
@@ -230,10 +230,10 @@ public:
   void expect(std::string filter_description,
       std::function<bool(const UA_ReferenceDescription&)> filter,
       std::function<void(const UA_ReferenceDescription&)> test) {
-    for (auto i : unexpected)
-      if (filter(result.references[i])) {
-        unexpected.erase(i);
-        test(result.references[i]);
+    for (auto i : unexpected_)
+      if (filter(result_.references[i])) {
+        unexpected_.erase(i);
+        test(result_.references[i]);
         return;
       }
     ADD_FAILURE() << filter_description << " not found";
@@ -337,7 +337,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
           auto status =
               UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
-          EXPECT_EQ(value.type, Types::ua_type);
+          EXPECT_EQ(value.type, Types::UA_TYPE);
         },
         [&](Information_Model::NonemptyWritableMetricPtr) {
           EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
@@ -350,7 +350,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
           auto status =
               UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
-          EXPECT_EQ(value.type, Types::ua_type);
+          EXPECT_EQ(value.type, Types::UA_TYPE);
 
           status =
               UA_Server_writeValue(ua_server, ref_desc.nodeId.nodeId, value);
@@ -425,13 +425,14 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
     Browse root_after(ua_server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER));
 
     // Move everything from root_before out of the way
-    for (auto old_ref : root_before)
+    for (auto old_ref : root_before) {
       root_after.expect(
           to_string(old_ref.nodeId) + " (old)",
           [&](const UA_ReferenceDescription& ref_desc) -> bool {
             return UA_ExpandedNodeId_equal(&ref_desc.nodeId, &old_ref.nodeId);
           },
           [](const UA_ReferenceDescription&) {});
+    }
 
     std::string device_id = device->getElementId();
     auto expected_id = UA_NODEID_STRING(1, (char*)device_id.c_str());
@@ -453,8 +454,10 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
 using BooleanNodeBuilderTests = NodeBuilderTests<
     DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>>;
 
+// NOLINTNEXTLINE
 TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {}
 
+// NOLINTNEXTLINE
 TEST_F(BooleanNodeBuilderTests, addMockDeviceNode) {
   auto device = NonemptyPointer::make_shared<
       ::testing::NiceMock<Information_Model::testing::MockDevice>>(
@@ -468,9 +471,13 @@ TEST_F(BooleanNodeBuilderTests, addMockDeviceNode) {
 class AddDeviceNodeParameterizedTest
     : public BooleanNodeBuilderTests,
       public ::testing::WithParamInterface<const char*> {};
+
+// NOLINTNEXTLINE
 TEST_P(AddDeviceNodeParameterizedTest, addDeviceNodeStructures) {
   testAddDeviceNode(GetParam());
 }
+
+// NOLINTNEXTLINE
 INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeParameterizedTestSuite,
     AddDeviceNodeParameterizedTest,
     ::testing::Values("()", "(R)", "(W)", "(RRWWWWRWWRRRRWRW)",
@@ -488,7 +495,11 @@ using AllTypes = ::testing::Types<
     DataTypes<Information_Model::DataType::TIME, UA_TYPES_DATETIME>,
     DataTypes<Information_Model::DataType::OPAQUE, UA_TYPES_BYTESTRING>,
     DataTypes<Information_Model::DataType::STRING, UA_TYPES_STRING>>;
+
+// NOLINTNEXTLINE
 TYPED_TEST_SUITE(NodeBuilderTests, AllTypes);
+
+// NOLINTNEXTLINE
 TYPED_TEST(NodeBuilderTests, addDeviceNodeTypes) {
   TestFixture::testAddDeviceNode("(RW)");
 }

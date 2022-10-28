@@ -15,12 +15,16 @@ struct NodeCallbackHandlerTests : public ::testing::Test {
     NodeCallbackHandler::initialise(server->getServerLogger());
   }
 
-  ~NodeCallbackHandlerTests() { NodeCallbackHandler::destroy(); }
+  ~NodeCallbackHandlerTests() override { NodeCallbackHandler::destroy(); }
 };
 
+// NOLINTNEXTLINE
 TEST_F(NodeCallbackHandlerTests, initialiseAndDestroy) {}
+
+// NOLINTNEXTLINE
 TEST_F(NodeCallbackHandlerTests, initialiseAndDestroyOnceMore) {}
 
+// NOLINTNEXTLINE
 TEST_F(NodeCallbackHandlerTests, addCallbackNull) {
   EXPECT_NE(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(UA_NODEID_NULL, null_callback));
@@ -182,8 +186,9 @@ struct ByteStringConversion {
 
   static std::vector<uint8_t> Value2IM(Value_Type s) {
     std::vector<uint8_t> ret;
-    for (auto c : s)
+    for (auto c : s) {
       ret.push_back(c);
+    }
     return ret;
   }
   static UA_Write_Type Value2Write(Value_Type s) {
@@ -305,11 +310,12 @@ private:
     EXPECT_TRUE(ua_value.hasValue);
     EXPECT_TRUE(UA_Variant_hasScalarType(
         &ua_value.value, &UA_TYPES[Type::ua_read_type]));
-    for (size_t i = 0; i < Type::num_values; ++i)
+    for (size_t i = 0; i < Type::num_values; ++i) {
       EXPECT_EQ(i == nominal_value,
           Type::equal(Type::Value2IM(Type::value(i)),
               *((typename Type::UA_Read_Type*)ua_value.value.data)))
           << i << "," << nominal_value;
+    }
   }
 
 public:
@@ -338,8 +344,11 @@ public:
     }
   }
 };
+
+// NOLINTNEXTLINE
 TYPED_TEST_SUITE(NodeCallbackHandlerDataConversionTests, AllConversions);
 
+// NOLINTNEXTLINE
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, addNoCallback) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(
@@ -348,6 +357,7 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addNoCallback) {
   TestFixture::test_no_callbacks(TestFixture::node2);
 }
 
+// NOLINTNEXTLINE
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, addReadCallback) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(
@@ -356,6 +366,7 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addReadCallback) {
   TestFixture::test_no_callbacks(TestFixture::node2);
 }
 
+// NOLINTNEXTLINE
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, addRWCallbacks) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(
@@ -364,6 +375,7 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addRWCallbacks) {
   TestFixture::test_no_callbacks(TestFixture::node2);
 }
 
+// NOLINTNEXTLINE
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, addTwoCallbacks) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(
@@ -376,6 +388,7 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addTwoCallbacks) {
   TestFixture::test_read_write_callbacks(TestFixture::node2);
 }
 
+// NOLINTNEXTLINE
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, addCallbacksTwice) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(
@@ -387,6 +400,7 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addCallbacksTwice) {
   TestFixture::test_read_only_callbacks(TestFixture::node1);
 }
 
+// NOLINTNEXTLINE
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, removeCallbacks) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(
@@ -405,6 +419,7 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, removeCallbacks) {
   TestFixture::test_read_write_callbacks(TestFixture::node2);
 }
 
+// NOLINTNEXTLINE
 TYPED_TEST(NodeCallbackHandlerDataConversionTests, removeNonexistingCallbacks) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(

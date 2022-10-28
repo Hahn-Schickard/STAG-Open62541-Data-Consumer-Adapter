@@ -6,9 +6,9 @@
 
 #include "OpcuaAdapter.hpp"
 
+#include <csignal>
 #include <gmock/gmock.h>
 #include <iostream>
-#include <signal.h>
 
 using namespace std;
 using namespace HaSLL;
@@ -31,7 +31,7 @@ static void stopHandler(int /*sig*/) {
 }
 
 class EventSourceFake : public Event_Model::EventSource<ModelRegistryEvent> {
-  void handleException(exception_ptr eptr) {
+  void handleException(exception_ptr eptr) { // NOLINT
     if (eptr) {
       std::rethrow_exception(eptr);
     }
@@ -42,7 +42,7 @@ public:
       : EventSource(
             bind(&EventSourceFake::handleException, this, placeholders::_1)) {}
 
-  void sendEvent(ModelRegistryEventPtr event) { notify(event); }
+  void sendEvent(ModelRegistryEventPtr event) { notify(event); } // NOLINT
 };
 
 void print(NonemptyDevicePtr device);
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 
       auto integer_ref_id = mock_builder->addReadableMetric("Integer",
           "Mocked readable metric", Information_Model::DataType::INTEGER,
-          []() -> DataVariant { return (int64_t)48; });
+          []() -> DataVariant { return (int64_t)48; }); // NOLINT
       logger->log(SeverityLevel::TRACE,
           "Adding an Integer readable element with id {} to Mock Device.",
           integer_ref_id);
@@ -111,8 +111,9 @@ int main(int argc, char* argv[]) {
 
       mock_builder.reset();
 
-      if (device)
+      if (device) {
         print(NonemptyDevicePtr(device));
+      }
 
       event_source->sendEvent(
           std::make_shared<ModelRegistryEvent>(NonemptyDevicePtr(device)));
@@ -125,8 +126,9 @@ int main(int argc, char* argv[]) {
       sleep(server_lifetime);
       stopServer();
     } else {
-      while (true)
+      while (true) {
         ;
+      }
     }
   } catch (exception& ex) {
     cerr << ex.what() << endl;

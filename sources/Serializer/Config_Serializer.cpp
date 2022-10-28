@@ -79,22 +79,26 @@ Config makeDefaultConfig() {
   return config;
 }
 
+// NOLINTNEXTLINE
 NLOHMANN_JSON_SERIALIZE_ENUM(SecurityPolicy,
     {{NONE, "none"}, {BASIC128_RSA15, "Basic128_RSA15"}, {BASIC256, "Basic256"},
         {BASIC256_SHA256, "Basic256_Sha256"}, {ALL, "All"}})
 
+// NOLINTNEXTLINE
 NLOHMANN_JSON_SERIALIZE_ENUM(UA_ApplicationType,
     {{UA_APPLICATIONTYPE_SERVER, "Server"},
         {UA_APPLICATIONTYPE_CLIENT, "Client"},
         {UA_APPLICATIONTYPE_CLIENTANDSERVER, "Client and Server"},
         {UA_APPLICATIONTYPE_DISCOVERYSERVER, "Discovery Server"}})
 
+// NOLINTNEXTLINE
 NLOHMANN_JSON_SERIALIZE_ENUM(UA_RuleHandling,
     {{UA_RULEHANDLING_DEFAULT, "default"}, {UA_RULEHANDLING_ABORT, "abort"},
         {UA_RULEHANDLING_WARN, "warn"}, {UA_RULEHANDLING_ACCEPT, "accept"}})
 
 namespace nlohmann {
 // ======================== UA_String ============================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UA_String& p) {
   string text = j.get<string>();
   if (!text.empty()) {
@@ -106,75 +110,89 @@ static void from_json(const json& j, UA_String& p) {
   }
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UA_String& p) {
   string text = string((char*)p.data, p.length);
   j = text;
 }
 
 // ======================== UA_LocalizedText ============================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UA_LocalizedText& p) {
   p.locale = j.at("locale").get<UA_String>();
   p.text = j.at("text").get<UA_String>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UA_LocalizedText& p) {
   j = json{{"locale", p.locale}, {"text", p.text}};
 }
 
 // ======================== UA_DurationRange ============================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UA_DurationRange& p) {
   p.min = j.at("min").get<UA_Duration>();
   p.max = j.at("max").get<UA_Duration>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UA_DurationRange& p) {
   j = json{{"min", p.min}, {"max", p.max}};
 }
 
 // ======================== UA_UInt32Range ============================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UA_UInt32Range& p) {
   p.min = j.at("min").get<UA_UInt32>();
   p.max = j.at("max").get<UA_UInt32>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UA_UInt32Range& p) {
   j = json{{"min", p.min}, {"max", p.max}};
 }
 
 // ======================== SecureChannelsLimts ============================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UserCredentials& p) {
   p.username = j.at("username").get<UA_String>();
   p.password = j.at("password").get<UA_String>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UserCredentials& p) {
   j = json{{"username", p.username}, {"password", p.password}};
 }
 
 // ======================== SecureChannelsLimts ============================
+// NOLINTNEXTLINE
 static void from_json(const json& j, SecureChannelsLimits& p) {
   p.max_secure_channels = j.at("max_secure_channels").get<UA_UInt16>();
   p.max_security_token_lifetime_ms =
       j.at("max_security_token_lifetime_ms").get<UA_UInt32>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const SecureChannelsLimits& p) {
   j = json{{"max_secure_channels", p.max_secure_channels},
       {"max_security_token_lifetime_ms", p.max_security_token_lifetime_ms}};
 }
 
 // ============================ SessionsLimits ===============================
+// NOLINTNEXTLINE
 static void from_json(const json& j, SessionsLimits& p) {
   p.max_sessions = j.at("max_sessions").get<UA_UInt16>();
   p.max_session_timeout_ms = j.at("max_session_timeout_ms").get<UA_Double>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const SessionsLimits& p) {
   j = json{{"max_sessions", p.max_sessions},
       {"max_session_timeout_ms", p.max_session_timeout_ms}};
 }
 
 // ======================== OperationalLimits ===========================
+// NOLINTNEXTLINE
 static void from_json(const json& j, OperationalLimits& p) {
   p.max_nodes_per_read = j.at("max_nodes_per_read").get<UA_UInt32>();
   p.max_nodes_per_write = j.at("max_nodes_per_write").get<UA_UInt32>();
@@ -191,6 +209,7 @@ static void from_json(const json& j, OperationalLimits& p) {
       j.at("max_monitored_items_per_call").get<UA_UInt32>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const OperationalLimits& p) {
   j = json{{"max_nodes_per_read", p.max_nodes_per_read},
       {"max_nodes_per_write", p.max_nodes_per_write},
@@ -204,6 +223,7 @@ static void to_json(json& j, const OperationalLimits& p) {
 }
 
 // ======================== SubscriptionsLimtis ===========================
+// NOLINTNEXTLINE
 static void from_json(const json& j, SubscriptionsLimits& p) {
   p.max_subscriptions = j.at("max_subscriptions").get<UA_UInt32>();
   p.max_subscriptions_per_session =
@@ -223,6 +243,7 @@ static void from_json(const json& j, SubscriptionsLimits& p) {
   p.max_events_per_node = j.at("max_events_per_node").get<UA_UInt32>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const SubscriptionsLimits& p) {
   j = json{{"max_subscriptions", p.max_subscriptions},
       {"max_subscriptions_per_session", p.max_subscriptions_per_session},
@@ -236,6 +257,7 @@ static void to_json(json& j, const SubscriptionsLimits& p) {
 }
 
 // ======================== MonitoredItemsLimits ===========================
+// NOLINTNEXTLINE
 static void from_json(const json& j, MonitoredItemsLimits& p) {
   p.max_monitored_items = j.at("max_monitored_items").get<UA_UInt32>();
   p.max_monitored_items_per_subscription =
@@ -245,6 +267,7 @@ static void from_json(const json& j, MonitoredItemsLimits& p) {
   p.queue_size_limits = j.at("queue_size_limits").get<UA_UInt32Range>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const MonitoredItemsLimits& p) {
   j = json{{"max_monitored_items", p.max_monitored_items},
       {"max_monitored_items_per_subscription",
@@ -254,12 +277,14 @@ static void to_json(json& j, const MonitoredItemsLimits& p) {
 }
 
 // ======================== UA_ConnectionConfig ===========================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UA_ConnectionConfig& p) {
   p.protocolVersion = j.at("protocolVersion").get<UA_UInt32>();
   p.recvBufferSize = j.at("recvBufferSize").get<UA_UInt32>();
   p.sendBufferSize = j.at("sendBufferSize").get<UA_UInt32>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UA_ConnectionConfig& p) {
   j = json{{"protocolVersion", p.protocolVersion},
       {"recvBufferSize", p.recvBufferSize},
@@ -267,6 +292,7 @@ static void to_json(json& j, const UA_ConnectionConfig& p) {
 }
 
 // ======================== UA_BuildInfo ===========================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UA_BuildInfo& p) {
   p.productUri = j.at("productUri").get<UA_String>();
   p.manufacturerName = j.at("manufacturerName").get<UA_String>();
@@ -276,6 +302,7 @@ static void from_json(const json& j, UA_BuildInfo& p) {
   p.buildDate = j.at("buildDate").get<UA_DateTime>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UA_BuildInfo& p) {
   j = json{{"productUri", p.productUri},
       {"manufacturerName", p.manufacturerName}, {"productName", p.productName},
@@ -284,6 +311,7 @@ static void to_json(json& j, const UA_BuildInfo& p) {
 }
 
 // ====================== UA_ApplicationDescription =======================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UA_ApplicationDescription& p) {
   p.applicationUri = j.at("applicationUri").get<UA_String>();
   p.productUri = j.at("productUri").get<UA_String>();
@@ -295,6 +323,7 @@ static void from_json(const json& j, UA_ApplicationDescription& p) {
   p.discoveryUrls = nullptr;
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UA_ApplicationDescription& p) {
   j = json{{"applicationUri", p.applicationUri}, {"productUri", p.productUri},
       {"applicationName", p.applicationName},
@@ -304,26 +333,31 @@ static void to_json(json& j, const UA_ApplicationDescription& p) {
 }
 
 // ==================== UA_MdnsDiscoveryConfiguration =====================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UA_MdnsDiscoveryConfiguration& p) {
   p.mdnsServerName = j.at("mdnsServerName").get<UA_String>();
   //@TODO: handle server capabilities list
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UA_MdnsDiscoveryConfiguration& p) {
   j = json{{"mdnsServerName", p.mdnsServerName}};
 }
 
 // ====================== UA_ServerConfig_Discovery =======================
+// NOLINTNEXTLINE
 static void from_json(const json& j, UA_ServerConfig_Discovery& p) {
   p.cleanupTimeout = j.at("cleanupTimeout").get<UA_UInt32>();
   p.mdnsEnable = j.at("mdnsEnable").get<bool>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const UA_ServerConfig_Discovery& p) {
   j = json{{"cleanupTimeout", p.cleanupTimeout}, {"mdnsEnable", p.mdnsEnable}};
 }
 
 // ======================== Config ===========================
+// NOLINTNEXTLINE
 static void from_json(const json& j, Config& p) {
   p.allow_anonymous_access = j.at("allow_anonymous_access").get<UA_Boolean>();
   p.access_credentials = j.at("access_credentials").get<UserCredentials>();
@@ -350,6 +384,7 @@ static void from_json(const json& j, Config& p) {
   p.discovery = j.at("discovery").get<UA_ServerConfig_Discovery>();
 }
 
+// NOLINTNEXTLINE
 static void to_json(json& j, const Config& p) {
   j = json{{"allow_anonymous_access", p.allow_anonymous_access},
       {"access_credentials", p.access_credentials},

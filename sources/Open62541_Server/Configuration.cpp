@@ -60,8 +60,9 @@ Configuration::Configuration(const std::string& filepath) : Configuration() {
     }
     configuration_->securityPolicies =
         new UA_SecurityPolicy[configuration_->securityPoliciesSize];
-    for (size_t i = 0; i < configuration_->securityPoliciesSize; ++i)
+    for (size_t i = 0; i < configuration_->securityPoliciesSize; ++i) {
       configuration_->securityPolicies[i] = {};
+    }
     {
       UA_ByteString empty = {};
       size_t i = 0;
@@ -172,13 +173,15 @@ std::unique_ptr<const UA_ServerConfig> Configuration::getConfig() {
     std::unique_ptr<UA_ServerConfig> ret;
     ret.swap(configuration_);
     return ret;
-  } else
+  } else {
     throw Double_Use();
+  }
 }
 
 Configuration::~Configuration() {
-  if (configuration_)
+  if (configuration_) {
     UA_ServerConfig_clean(configuration_.get());
+  }
 }
 
 } // namespace open62541

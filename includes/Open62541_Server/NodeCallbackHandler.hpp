@@ -63,12 +63,12 @@ public:
    * @pre callback_wrapper is non-empty.
    */
   static UA_StatusCode addNodeCallbacks(
-      UA_NodeId nodeId, CallbackWrapperPtr callback_wrapper);
+      UA_NodeId node_id, CallbackWrapperPtr callback_wrapper);
 
   /**
    * @pre There is a callback bound to nodeId.
    */
-  static UA_StatusCode removeNodeCallbacks(const UA_NodeId* nodeId);
+  static UA_StatusCode removeNodeCallbacks(const UA_NodeId* node_id);
 
   /**
    * @brief Read callback used by OPC UA Clients to read the current value of a
@@ -85,9 +85,10 @@ public:
    * @return UA_StatusCode
    */
   static UA_StatusCode readNodeValue(UA_Server* server,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      void* nodeContext, UA_Boolean includeSourceTimeStamp,
-      const UA_NumericRange* range, UA_DataValue* value);
+      const UA_NodeId* session_id, void* sessionContext,
+      const UA_NodeId* nodeId, void* nodeContext,
+      UA_Boolean includeSourceTimeStamp, const UA_NumericRange* range,
+      UA_DataValue* value);
 
   /**
    * @brief Write callback used by OPC UA Clients to write a specified value to
@@ -103,8 +104,8 @@ public:
    * @return UA_StatusCode
    */
   static UA_StatusCode writeNodeValue(UA_Server* server,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      void* nodeContext, const UA_NumericRange* range,
+      const UA_NodeId* sessionId, void* sessionContext,
+      const UA_NodeId* node_id, void* nodeContext, const UA_NumericRange* range,
       const UA_DataValue* value);
 };
 } // namespace open62541
