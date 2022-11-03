@@ -7,6 +7,7 @@
 #include "OpcuaAdapter.hpp"
 
 #include <csignal>
+#include <exception>
 #include <gmock/gmock.h>
 #include <iostream>
 
@@ -27,7 +28,17 @@ void stopServer() {
 static void stopHandler(int /*sig*/) {
   cout << "Received stop signal!" << endl;
   stopServer();
-  exit(0);
+  exit(EXIT_SUCCESS);
+}
+
+void printException(const exception& e, int level = 0) {
+  cerr << string(level, ' ') << "Exception: " << e.what() << endl;
+  try {
+    rethrow_if_nested(e);
+  } catch (const exception& nested_exception) {
+    printException(nested_exception, level + 1);
+  } catch (...) {
+  }
 }
 
 class EventSourceFake : public Event_Model::EventSource<ModelRegistryEvent> {
@@ -130,8 +141,12 @@ int main(int argc, char* argv[]) {
         ;
       }
     }
-  } catch (exception& ex) {
-    cerr << ex.what() << endl;
+  } catch (const exception& ex) {
+    printException(ex);
+    exit(EXIT_FAILURE);
+  } catch (...) {
+    cerr << "Unknown error occurred during program execution" << endl;
+    exit(EXIT_FAILURE);
   }
 }
 
