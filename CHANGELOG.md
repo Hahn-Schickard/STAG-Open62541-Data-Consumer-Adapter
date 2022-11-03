@@ -1,5 +1,5 @@
 # Changelog
-## [0.1.6] - 2022.10.28
+## [0.1.6] - 2022.11.03
 ### Added
  - OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source,
      const std::string & config_filepath);
@@ -13,7 +13,7 @@
 ### Changed
  - Configuration::getConfig();
  - Data_Consumer_Adapter_Interface to v0.1.9
- - HaSLL to v0.3.1
+ - HaSLL to v0.3.2
  - nlohmann_json to v3.11.1
  - NodeBuilder::addDeviceNode argument from DevicePtr to NonemptyDevicePtr
  - Contribution guide
