@@ -130,8 +130,8 @@ int main(int argc, char* argv[]) {
           std::make_shared<ModelRegistryEvent>(NonemptyDevicePtr(device)));
     }
 
-    if (argc > 2) {
-      uint server_lifetime = atoi(argv[2]);
+    if (argc > 1) {
+      uint server_lifetime = atoi(argv[1]);
       cout << "Open62541 server will automatically shut down in "
            << server_lifetime << " seconds." << endl;
       sleep(server_lifetime);
