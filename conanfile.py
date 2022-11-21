@@ -6,7 +6,7 @@ import os
 
 class PackageConan(ConanFile):
     license = "Apache 2.0"
-    topics = ('lwm2m', 'server', 'coap')
+    topics = ('stag', 'dca', 'open62541')
     build_requires = 'gtest/1.10.0'
     requires = [
         "nlohmann_json/3.11.1",
