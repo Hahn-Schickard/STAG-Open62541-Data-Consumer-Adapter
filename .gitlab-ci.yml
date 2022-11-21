@@ -100,20 +100,18 @@ analyze_memory_usage:fedora-34:
     entrypoint: ["/bin/sh", "-c"]
   needs: ["build:fedora-34"]
 
-check_code_coverage:debian-buster:
+check_code_coverag:
   extends: .check_code_coverage
   image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
   needs: ["build:debian-buster", "test:debian-buster"]
 
-lint:debian-bullseye:
+lint:
   extends: .lint
   image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
-  needs: ["build:debian-bullseye"]
 
-document:debian-buster:
+document:
   extends: .document
   image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
-  needs: ["build:debian-bullseye"]
 
 package:debian-buster:
   extends: .package
@@ -146,4 +144,4 @@ package:fedora-34:
 pages:
   extends: .pages
   image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
-  needs: ["build:debian-buster", "check_code_coverage:debian-buster", "document:debian-buster"]
+  needs: ["check_code_coverage", "document"]
