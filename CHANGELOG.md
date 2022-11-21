@@ -1,4 +1,12 @@
 # Changelog
+## [0.1.7] - 2022.11.21
+### Changed
+ - conan packaging recipe
+ - gtest dependency to fuzzy v1.11
+ - HaSLL dependency to fuzzy v0.3
+ - Variant_Visitor dependency to fuzzy v0.1
+ - Data_Consumer_Adapter_Interface dependency to fuzzy v0.1
+
 ## [0.1.6] - 2022.11.03
 ### Added
  - OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source,
