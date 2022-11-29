@@ -67,6 +67,15 @@ typedef struct MonitoredItemsLimitsStruct {
   UA_UInt32Range queue_size_limits; /* Negotiated with the client */
 } MonitoredItemsLimits;
 
+typedef struct {
+  UA_UInt32 discoveryCleanupTimeout;
+  UA_Boolean mdnsEnabled;
+  UA_MdnsDiscoveryConfiguration mdnsConfig;
+  UA_String mdnsInterfaceIP;
+  size_t mdnsIpAddressListSize;
+  UA_UInt32* mdnsIpAddressList;
+} UA_ServerConfig_Discovery;
+
 struct Config {
   UA_Boolean allow_anonymous_access;
   UserCredentials access_credentials;
