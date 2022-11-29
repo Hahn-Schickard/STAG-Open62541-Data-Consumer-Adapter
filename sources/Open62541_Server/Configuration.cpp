@@ -168,7 +168,7 @@ Configuration::Configuration(const std::string& filepath) : Configuration() {
   }
 }
 
-std::unique_ptr<const UA_ServerConfig> Configuration::getConfig() {
+std::unique_ptr<UA_ServerConfig> Configuration::getConfig() {
   if (configuration_) {
     std::unique_ptr<UA_ServerConfig> ret;
     ret.swap(configuration_);

@@ -23,7 +23,7 @@ public:
   Configuration(const std::string& filepath);
   ~Configuration();
 
-  std::unique_ptr<const UA_ServerConfig> getConfig();
+  std::unique_ptr<UA_ServerConfig> getConfig();
   // may only be called once, throws Double_Use afterwards
 };
 } // namespace open62541
