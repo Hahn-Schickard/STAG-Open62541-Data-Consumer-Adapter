@@ -361,7 +361,6 @@ static void to_json(json& j, const UA_ServerConfig_Discovery& p) {
 static void from_json(const json& j, Config& p) {
   p.allow_anonymous_access = j.at("allow_anonymous_access").get<UA_Boolean>();
   p.access_credentials = j.at("access_credentials").get<UserCredentials>();
-  p.thread_count = j.at("thread_count").get<UA_UInt16>();
   p.port_number = j.at("port_number").get<UA_UInt16>();
   p.networking = j.at("networking").get<UA_ConnectionConfig>();
   p.security_policy = j.at("security_policy").get<SecurityPolicy>();
@@ -388,10 +387,9 @@ static void from_json(const json& j, Config& p) {
 static void to_json(json& j, const Config& p) {
   j = json{{"allow_anonymous_access", p.allow_anonymous_access},
       {"access_credentials", p.access_credentials},
-      {"thread_count", p.thread_count}, {"port_number", p.port_number},
-      {"networking", p.networking}, {"security_policy", p.security_policy},
-      {"build_info", p.build_info}, {"app_info", p.app_info},
-      {"server_certificate", p.server_certificate},
+      {"port_number", p.port_number}, {"networking", p.networking},
+      {"security_policy", p.security_policy}, {"build_info", p.build_info},
+      {"app_info", p.app_info}, {"server_certificate", p.server_certificate},
       {"shutdown_delay_ms", p.shutdown_delay_ms},
       {"rules_handling", p.rules_handling},
       {"secure_channels_limits", p.secure_channels_limits},

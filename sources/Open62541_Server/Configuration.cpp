@@ -31,8 +31,6 @@ Configuration::Configuration(const std::string& filepath) : Configuration() {
     Config config = deserializeConfig(filepath);
 
     // TODO: allow_anonymous_access
-    configuration_->nThreads = config.thread_count;
-
     configuration_->networkLayersSize = 1;
     configuration_->networkLayers = new UA_ServerNetworkLayer;
     configuration_->networkLayers[0] = UA_ServerNetworkLayerTCP(
