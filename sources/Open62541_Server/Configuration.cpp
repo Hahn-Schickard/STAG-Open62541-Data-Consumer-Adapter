@@ -33,8 +33,8 @@ Configuration::Configuration(const std::string& filepath) : Configuration() {
     // TODO: allow_anonymous_access
     configuration_->networkLayersSize = 1;
     configuration_->networkLayers = new UA_ServerNetworkLayer;
-    configuration_->networkLayers[0] = UA_ServerNetworkLayerTCP(
-        config.networking, config.port_number, 0, &configuration_->logger);
+    configuration_->networkLayers[0] =
+        UA_ServerNetworkLayerTCP(config.networking, config.port_number, 0);
 
     switch (config.security_policy) {
     default:
