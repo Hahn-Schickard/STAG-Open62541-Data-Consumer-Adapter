@@ -347,13 +347,14 @@ static void to_json(json& j, const UA_MdnsDiscoveryConfiguration& p) {
 // ====================== UA_ServerConfig_Discovery =======================
 // NOLINTNEXTLINE
 static void from_json(const json& j, UA_ServerConfig_Discovery& p) {
-  p.cleanupTimeout = j.at("cleanupTimeout").get<UA_UInt32>();
-  p.mdnsEnable = j.at("mdnsEnable").get<bool>();
+  p.discoveryCleanupTimeout = j.at("cleanupTimeout").get<UA_UInt32>();
+  p.mdnsEnabled = j.at("mdnsEnable").get<bool>();
 }
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_ServerConfig_Discovery& p) {
-  j = json{{"cleanupTimeout", p.cleanupTimeout}, {"mdnsEnable", p.mdnsEnable}};
+  j = json{{"cleanupTimeout", p.discoveryCleanupTimeout},
+      {"mdnsEnable", p.mdnsEnabled}};
 }
 
 // ======================== Config ===========================

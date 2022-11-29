@@ -156,7 +156,20 @@ Configuration::Configuration(const std::string& filepath) : Configuration() {
 
     configuration_->maxPublishReqPerSession =
         config.max_publish_req_per_session;
-    configuration_->discovery = config.discovery;
+#ifdef UA_ENABLE_DISCOVERY
+    configuration_->discoveryCleanupTimeout =
+        config.discovery.discoveryCleanupTimeout;
+#ifdef UA_ENABLE_DISCOVERY_MULTICAST
+    configuration_->mdnsEnabled = config.discovery.mdnsEnabled;
+    configuration_->mdnsConfig = config.discovery.mdnsConfig;
+    configuration_->mdnsInterfaceIP = config.discovery.mdnsInterfaceIP;
+#if !defined(UA_HAS_GETIFADDR)
+    configuration_->mdnsIpAddressListSize =
+        config.discovery.mdnsIpAddressListSize;
+    configuration_->mdnsIpAddressList = config.discovery.mdnsIpAddressList;
+#endif //! UA_HAS_GETIFADDR
+#endif // UA_ENABLE_DISCOVERY_MULTICAST
+#endif // UA_ENABLE_DISCOVERY
   } catch (exception& ex) {
     string error_msg =
         "Caught exception when deserializing Configuration file: " +
