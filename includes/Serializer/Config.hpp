@@ -1,7 +1,7 @@
 #ifndef __DCA_OPEN62541_CONFIG_HS_HPP
 #define __DCA_OPEN62541_CONFIG_HS_HPP
 
-#include <open62541/server_config.h>
+#include <open62541/server.h>
 
 #define ADAPTER_VERSION_MAJOR "0"
 #define ADAPTER_VERSION_MINOR "0"
