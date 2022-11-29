@@ -15,7 +15,6 @@ Double_Use::Double_Use() : std::logic_error("Double use") {}
 Configuration::Configuration() {
   try {
     configuration_ = make_unique<UA_ServerConfig>();
-    *configuration_.get() = {};
     configuration_->logger.log = HaSLL_Logger_.log;
     configuration_->logger.clear = HaSLL_Logger_.clear;
     UA_ServerConfig_setDefault(configuration_.get());
