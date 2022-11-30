@@ -2,26 +2,40 @@
 #include "HaSLL/LoggerManager.hpp"
 #include "Utility.hpp"
 
+#include <map>
+
 using namespace std;
 using namespace HaSLI;
 
-LoggerPtr network_logger;
-LoggerPtr channel_logger;
-LoggerPtr session_logger;
-LoggerPtr server_logger;
-LoggerPtr client_logger;
-LoggerPtr userland_logger;
-LoggerPtr security_policy_logger;
+enum class Open62541_Logger {
+  NETWORK,
+  CHANNEL,
+  SESSION,
+  SERVER,
+  CLIENT,
+  USER,
+  SECURITY
+};
+
+map<Open62541_Logger, LoggerPtr> loggers;
 
 void registerLoggers() {
-  network_logger = LoggerManager::registerLogger("Open62541 Network Layer");
-  channel_logger = LoggerManager::registerLogger("Open62541 Channel Layer");
-  session_logger = LoggerManager::registerLogger("Open62541 Session Layer");
-  server_logger = LoggerManager::registerLogger("Open62541 Server Layer");
-  client_logger = LoggerManager::registerLogger("Open62541 Client Layer");
-  userland_logger = LoggerManager::registerLogger("Open62541 User Layer");
-  security_policy_logger =
-      LoggerManager::registerLogger("Open62541 Security Layer");
+  if (loggers.empty()) {
+    loggers.emplace(Open62541_Logger::NETWORK,
+        LoggerManager::registerLogger("Open62541 Network Layer"));
+    loggers.emplace(Open62541_Logger::CHANNEL,
+        LoggerManager::registerLogger("Open62541 Channel Layer"));
+    loggers.emplace(Open62541_Logger::SESSION,
+        LoggerManager::registerLogger("Open62541 Session Layer"));
+    loggers.emplace(Open62541_Logger::SERVER,
+        LoggerManager::registerLogger("Open62541 Server Layer"));
+    loggers.emplace(Open62541_Logger::CLIENT,
+        LoggerManager::registerLogger("Open62541 Client Layer"));
+    loggers.emplace(Open62541_Logger::USER,
+        LoggerManager::registerLogger("Open62541 User Layer"));
+    loggers.emplace(Open62541_Logger::SECURITY,
+        LoggerManager::registerLogger("Open62541 Security Layer"));
+  }
 }
 
 SeverityLevel getLoggingLevel(UA_LogLevel level) {
@@ -51,21 +65,11 @@ SeverityLevel getLoggingLevel(UA_LogLevel level) {
 }
 
 void removeLoggers() {
-  network_logger->deregister();
-  channel_logger->deregister();
-  session_logger->deregister();
-  server_logger->deregister();
-  client_logger->deregister();
-  userland_logger->deregister();
-  security_policy_logger->deregister();
-
-  network_logger.reset();
-  channel_logger.reset();
-  session_logger.reset();
-  server_logger.reset();
-  client_logger.reset();
-  userland_logger.reset();
-  security_policy_logger.reset();
+  try {
+    loggers.clear();
+  } catch (...) {
+    // surpress any exceptions thrown from logger dtors
+  }
 }
 
 void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
@@ -78,44 +82,51 @@ void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
 
   switch (category) {
   case UA_LogCategory::UA_LOGCATEGORY_NETWORK: {
-    if (network_logger) {
-      network_logger->log(getLoggingLevel(level), message);
+    auto network_logger = loggers.find(Open62541_Logger::NETWORK);
+    if (network_logger != loggers.end()) {
+      network_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SECURECHANNEL: {
-    if (channel_logger) {
-      channel_logger->log(getLoggingLevel(level), message);
+    auto channel_logger = loggers.find(Open62541_Logger::CHANNEL);
+    if (channel_logger != loggers.end()) {
+      channel_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SESSION: {
-    if (session_logger) {
-      session_logger->log(getLoggingLevel(level), message);
+    auto session_logger = loggers.find(Open62541_Logger::SESSION);
+    if (session_logger != loggers.end()) {
+      session_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SERVER: {
-    if (server_logger) {
-      server_logger->log(getLoggingLevel(level), message);
+    auto server_logger = loggers.find(Open62541_Logger::SERVER);
+    if (server_logger != loggers.end()) {
+      server_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_CLIENT: {
-    if (server_logger) {
-      client_logger->log(getLoggingLevel(level), message);
+    auto client_logger = loggers.find(Open62541_Logger::CLIENT);
+    if (client_logger != loggers.end()) {
+      client_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_USERLAND: {
-    if (userland_logger) {
-      userland_logger->log(getLoggingLevel(level), message);
+    auto userland_logger = loggers.find(Open62541_Logger::USER);
+    if (userland_logger != loggers.end()) {
+      userland_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SECURITYPOLICY: {
-    if (security_policy_logger) {
-      security_policy_logger->log(getLoggingLevel(level), message);
+    auto security_policy_logger = loggers.find(Open62541_Logger::SECURITY);
+    if (security_policy_logger != loggers.end()) {
+      security_policy_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
