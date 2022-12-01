@@ -3,6 +3,7 @@
 #include "Utility.hpp"
 
 #include <map>
+#include <mutex>
 
 using namespace std;
 using namespace HaSLI;
@@ -18,6 +19,7 @@ enum class Open62541_Logger {
 };
 
 map<Open62541_Logger, LoggerPtr> loggers;
+std::mutex logger_mutex;
 
 void registerLoggers() {
   if (loggers.empty()) {
@@ -74,6 +76,7 @@ void removeLoggers() {
 
 void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
     UA_LogCategory category, const char* msg, va_list args) {
+  const std::lock_guard<std::mutex> lock(logger_mutex);
 
   /*
    * Kudos to Chris Dodd @stackoverflow
@@ -148,5 +151,5 @@ void HaSLL_Logger_clear(UNUSED(void* logContext)) {
   // Nothing to clear
 }
 
-const UA_Logger HaSLL_Logger_ = {HaSLL_Logger_log, nullptr, HaSLL_Logger_clear};
+const UA_Logger HaSLL_Logger_ = {HaSLL_Logger_log, NULL, HaSLL_Logger_clear};
 const UA_Logger* HaSLL_Logger = &HaSLL_Logger_;
