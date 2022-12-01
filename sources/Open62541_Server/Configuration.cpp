@@ -13,8 +13,7 @@ namespace open62541 {
 Configuration::Configuration() {
   try {
     memset(&configuration_, 0, sizeof(UA_ServerConfig));
-    configuration_.logger.log = HaSLL_Logger_.log;
-    configuration_.logger.clear = HaSLL_Logger_.clear;
+    configuration_.logger = HaSLL_Logger_;
     UA_ServerConfig_setDefault(&configuration_);
   } catch (exception& ex) {
     string error_msg =
