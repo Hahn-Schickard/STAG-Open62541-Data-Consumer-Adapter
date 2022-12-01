@@ -13,10 +13,11 @@ Open62541Server::Open62541Server()
     : Open62541Server(make_unique<Configuration>()) {}
 
 Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
-    : is_running_(false), server_configuration_(configuration->getConfig()),
-      logger_(LoggerManager::registerTypedLogger(this)) {
+    : logger_(LoggerManager::registerTypedLogger(this)) {
   registerLoggers();
-  open62541_server_ = UA_Server_newWithConfig(server_configuration_.get());
+  auto config = configuration->getConfig();
+  // Config is consumed, so no need to save it
+  open62541_server_ = UA_Server_newWithConfig(config);
   server_namespace_index_ = 1;
 }
 
@@ -84,7 +85,8 @@ UA_UInt16 Open62541Server::getServerNamespace() {
 }
 
 const UA_Logger* Open62541Server::getServerLogger() {
-  return &server_configuration_->logger;
+  auto config = UA_Server_getConfig(open62541_server_);
+  return &config->logger;
 }
 
 UA_Server* Open62541Server::getServer() { return open62541_server_; }
