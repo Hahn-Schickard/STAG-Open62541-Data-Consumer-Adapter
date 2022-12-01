@@ -11,19 +11,15 @@ struct Open62541_Config_Exception : public std::runtime_error {
       : std::runtime_error(message) {}
 };
 
-struct Double_Use : public std::logic_error {
-  Double_Use();
-};
-
 class Configuration {
-  std::unique_ptr<UA_ServerConfig> configuration_;
+  UA_ServerConfig configuration_;
 
 public:
   Configuration();
   Configuration(const std::string& filepath);
   ~Configuration();
 
-  std::unique_ptr<UA_ServerConfig> getConfig();
+  UA_ServerConfig* getConfig();
   // may only be called once, throws Double_Use afterwards
 };
 } // namespace open62541
