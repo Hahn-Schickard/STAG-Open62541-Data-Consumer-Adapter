@@ -128,6 +128,9 @@ int main(int argc, char* argv[]) {
 
       event_source->sendEvent(
           std::make_shared<ModelRegistryEvent>(NonemptyDevicePtr(device)));
+      sleep(60);
+      event_source->sendEvent(
+          std::make_shared<ModelRegistryEvent>(device->getElementId()));
     }
 
     if (argc > 1) {
