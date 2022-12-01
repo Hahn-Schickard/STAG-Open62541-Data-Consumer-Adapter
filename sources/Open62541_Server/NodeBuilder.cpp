@@ -86,6 +86,13 @@ UA_StatusCode NodeBuilder::addDeviceNode(NonemptyDevicePtr device) {
   return status;
 }
 
+UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
+  auto node_id =
+      UA_NODEID_STRING_ALLOC(server_->getServerNamespace(), device_id.c_str());
+  logger_->log(SeverityLevel::TRACE, "Removing Node {}", toString(&node_id));
+  return UA_Server_deleteNode(server_->getServer(), node_id, true);
+}
+
 UA_StatusCode NodeBuilder::addDeviceNodeElement(
     NonemptyDeviceElementPtr element, UA_NodeId parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
