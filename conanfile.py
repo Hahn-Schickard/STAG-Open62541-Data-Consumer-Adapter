@@ -19,6 +19,7 @@ class PackageConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {"open62541:cpp_compatible": True,
+                       "open62541:multithreading": "Threadsafe",
                        "shared": True,
                        "fPIC": True}
     default_user = "Hahn-Schickard"
