@@ -75,10 +75,21 @@ void removeLoggers() {
 void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
     UA_LogCategory category, const char* msg, va_list args) {
 
-  size_t buffer_size = strlen(msg);
-  auto* buffer = (char*)(malloc(sizeof(char) * buffer_size));
-  vsnprintf(buffer, buffer_size + 1, msg, args);
-  auto message = string(buffer);
+  /*
+   * Kudos to Chris Dodd @stackoverflow
+   * https://stackoverflow.com/a/70749935
+   */
+  std::string message;
+  va_list args_copy;
+  va_copy(args_copy, args); // make a copy for the buffer size calculation
+  auto len = vsnprintf(
+      0, 0, msg, args_copy); // get the amount of bytes needed to write
+  // vsnprintf returns a negative value if an error occurred
+  if (len > 0) {
+    message.resize(len + 1); // Add space for NULL terminator
+    vsnprintf(&message[0], len + 1, msg, args); // write args into the message
+    message.resize(len); // Remove the NULL terminator
+  } // else -> message will be empty
 
   switch (category) {
   case UA_LogCategory::UA_LOGCATEGORY_NETWORK: {
