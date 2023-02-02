@@ -41,6 +41,7 @@ list(APPEND DEPENDENCIES_LIST
             Data_Consumer_Adapter_Interface
             open62541
             nlohmann_json
+            nanodbc
             Threads
 )
 #@- ========================= END OF USER CONFIGURATION ============================
