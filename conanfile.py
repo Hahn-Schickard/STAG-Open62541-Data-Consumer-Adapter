@@ -11,6 +11,7 @@ class PackageConan(ConanFile):
     requires = [
         "nlohmann_json/3.11.1",
         "open62541/1.3.1",
+        "nanodbc/2.14.0",
         "HaSLL/[~0.3]@hahn-schickard/stable",
         "Variant_Visitor/[~0.1]@hahn-schickard/stable",
         "Data_Consumer_Adapter_Interface/[~0.1]@hahn-schickard/stable"
@@ -20,6 +21,7 @@ class PackageConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {"open62541:cpp_compatible": True,
                        "open62541:multithreading": "Threadsafe",
+                       "open62541:historize": True,
                        "shared": True,
                        "fPIC": True}
     default_user = "Hahn-Schickard"
