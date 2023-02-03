@@ -99,8 +99,7 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(
   logger_->log(SeverityLevel::INFO, "Adding element {} to node {}",
       element->getElementName(), toString(&parent_id));
 
-  match(
-      element->specific_interface,
+  match(element->specific_interface,
       [&](NonemptyDeviceElementGroupPtr group) {
         status = addGroupNode(element, group, parent_id);
       },
@@ -165,8 +164,7 @@ UA_StatusCode NodeBuilder::addFunctionNode(
 
 void setVariant(UA_VariableAttributes& value_attribute, DataVariant variant) {
   // Postcondition: value_attribute.value is non-empty
-  match(
-      variant,
+  match(variant,
       [&](bool value) {
         UA_Variant_setScalarCopy(
             &value_attribute.value, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
