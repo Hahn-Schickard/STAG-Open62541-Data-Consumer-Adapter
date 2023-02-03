@@ -1,226 +1,87 @@
 #ifndef __OPCUA_HISTORIZER_HPP
 #define __OPCUA_HISTORIZER_HPP
 
-#include "open62541/plugin/historydata/history_data_backend.h"
-#include "open62541/plugin/historydatabase.h" // low level api, is
+#include "open62541/plugin/historydatabase.h"
 
 struct Historizer {
+  /**
+   * @brief Create UA_MonitoredItem for a given node ide and use the data change
+   * callback to as a historization call for the database
+   *
+   * @see
+   * https://github.com/open62541/open62541/blob/master/plugins/historydata/ua_history_data_gathering_default.c#L59
+   *
+   */
+  UA_StatusCode registerNodeId(UA_Server* server, const UA_NodeId* nodeId);
 
-  UA_HistoryDataBackend crateBackend();
+  /**
+   * @brief UA_HistoryDatabase constructor
+   *
+   * @return UA_HistoryDatabase
+   */
+  UA_HistoryDatabase createDatabase();
 
 private:
   /**
-   * UA_HistoryDataBackend destructor implementation
+   * @brief Used as destructor for the UA_HistoryDatabase struct by UA_Server
+   * instance
+   *
+   * @param database
    */
-  void deleteMembers(UA_HistoryDataBackend* backend);
+  void clear(UA_HistoryDatabase* database);
 
   /**
-   * @brief Stores given Node data value in the historization data storage
+   * @brief Called when a given node receives new data value.
    *
+   * @param server - the parent server, that node exists on
+   * @param hdbContext - not used
+   * @param sessionId - used to identify the session the value is set for
+   * @param sessionContext - used to get session context if needed
+   * @param nodeId - target node id for which the new data value is set
+   * @param historizing - nodes historization setting flag, if it false the
+   * new value is ignored
+   * @param value - new node value to historize
    */
-  UA_StatusCode setData(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      UA_Boolean historizing, const UA_DataValue* value);
-
-  /**
-   * @brief Fetches raw node data value from the historization data storage.
-   *
-   * Abstraction of ReadRaw low level operation.
-   *
-   */
-  UA_StatusCode getData(UA_Server* server, const UA_NodeId* sessionId,
-      void* sessionContext, const UA_HistoryDataBackend* backend,
-      const UA_DateTime start, const UA_DateTime end, const UA_NodeId* nodeId,
-      size_t maxSizePerResponse, UA_UInt32 numValuesPerNode,
-      UA_Boolean returnBounds, UA_TimestampsToReturn timestampsToReturn,
-      UA_NumericRange range, UA_Boolean releaseContinuationPoints,
-      const UA_ByteString* continuationPoint,
-      UA_ByteString* outContinuationPoint, UA_HistoryData* result);
-
-  /**
-   * @brief Returns the index of a value in the database based on a given
-   * timestamp match criteria for a given node id.
-   *
-   * Low level API implementation.
-   *
-   * Supported match criteria:
-   * @code
-   * MATCH_EQUAL
-   * MATCH_AFTER
-   * MATCH_EQUAL_OR_AFTER
-   * MATCH_BEFORE
-   * MATCH_EQUAL_OR_BEFORE
-   * @endcode
-   */
-  size_t getTimestampData(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      const UA_DateTime timestamp, const MatchStrategy strategy);
-
-  /**
-   * @brief Returns the index of the element after the last valid entry in the
-   * database for a given node.
-   *
-   * Low level API implementation.
-   *
-   */
-  size_t getEndIndex(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_NodeId* nodeId);
-
-  /**
-   * @brief Returns the index of the element after the last valid entry in the
-   * database for a given node.
-   *
-   * Low level API implementation.
-   *
-   */
-  size_t getLastIndex(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_NodeId* nodeId);
-
-  /**
-   * @brief Returns the index of the first element in the database for a node.
-   *
-   * Low level API implementation.
-   *
-   */
-  size_t getFirstIndex(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_NodeId* nodeId);
-
-  /**
-   * @brief Returns the number of elements between startIndex and endIndex
-   * including both.
-   *
-   * Low level API implementation.
-   *
-   */
-  size_t getResultSize(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      size_t startIndex, size_t endIndex);
-
-  /**
-   * @brief Copies data values of a given range into a buffer.
-   *
-   * Low level API implementation.
-   *
-   */
-  UA_StatusCode copyDataValues(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      size_t startIndex, size_t endIndex, UA_Boolean reverse, size_t valueSize,
-      UA_NumericRange range, UA_Boolean releaseContinuationPoints,
-      const UA_ByteString* continuationPoint,
-      UA_ByteString* outContinuationPoint, size_t* providedValues,
-      UA_DataValue* values);
-
-  /**
-   * @brief Returns the data value stored at a given index in the database.
-   *
-   * Low level API implementation.
-   *
-   */
-  const UA_DataValue* getDataValue(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      size_t index);
-
-  /**
-   * @brief Returns UA_TRUE if the backend supports returning bounding
-   * values for a node.
-   *
-   */
-  UA_Boolean isBoundSupported(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_NodeId* nodeId);
-
-  /**
-   * @brief Returns UA_TRUE if the backend supports returning the requested
-   * timestamps for a node.
-   *
-   */
-  UA_Boolean isTimestampReturnSupported(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      const UA_TimestampsToReturn timestampsToReturn);
-
-  UA_StatusCode insertDataValue(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
+  void setValue(UA_Server* server, void* hdbContext, const UA_NodeId* sessionId,
+      void* sessionContext, const UA_NodeId* nodeId, UA_Boolean historizing,
       const UA_DataValue* value);
 
-  UA_StatusCode replaceDataValue(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      const UA_DataValue* value);
-
-  UA_StatusCode updateDataValue(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      const UA_DataValue* value);
-
-  UA_StatusCode removeDataValue(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      UA_DateTime startTimestamp, UA_DateTime endTimestamp);
-};
-
-struct HistorizerLowLevelAPI {
-
   /**
-   * @brief UA_HistoryDatabase struct destructor definition
+   * @brief Called when an event was triggered
    *
-   * @param this
+   * @param server - the parent server, that node exists on
+   * @param hdbContext - not used
+   * @param originId - event origins id
+   * @param emitterId - event emitters id
+   * @param historicalEventFilter - historical event filter of the emitter as
+   * specified by OPC UA Part 11, 5.3.2. Can be set to NULL if this property
+   * does not exist
+   * @param fieldList - event value
    */
-  static void clear(UA_HistoryDatabase* this);
-
-  /**
-   * @brief Called by UA Server instance when a new node value is set.
-   * UA Server uses this method to insert new data-points into the database
-   *
-   * @param server
-   * @param hdbContext
-   * @param sessionId
-   * @param sessionContext
-   * @param nodeId
-   * @param historizing
-   * @param value
-   */
-  static void setValue(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      UA_Boolean historizing, const UA_DataValue* value);
-
-  /**
-   * @brief Called by UA Server instance when an event is triggered.
-   * UA Server uses this method to insert new data-points into the database
-   *
-   * @todo: what is an event in this context?
-   *
-   * @param server
-   * @param hdbContext
-   * @param originId
-   * @param emitterId
-   * @param historicalEventFilter
-   * @param fieldList
-   */
-  static void setEvent(UA_Server* server, void* hdbContext,
-      const UA_NodeId* originId, const UA_NodeId* emitterId,
-      const UA_EventFilter* historicalEventFilter,
+  void setEvent(UA_Server* server, void* hdbContext, const UA_NodeId* originId,
+      const UA_NodeId* emitterId, const UA_EventFilter* historicalEventFilter,
       UA_EventFieldList* fieldList);
 
   /**
-   * @brief Called by UA Server instance to get historical information from a
-   * database when history read is called with isRawReadModified = false
+   * @brief Called by UA_Server instance when a history read is requested with
+   * isRawReadModified set to false
    *
-   * @param server
-   * @param hdbContext
-   * @param sessionId
-   * @param sessionContext
-   * @param requestHeader
-   * @param historyReadDetails
-   * @param timestampsToReturn
-   * @param releaseContinuationPoints
-   * @param nodesToReadSize
-   * @param nodesToRead
-   * @param response
-   * @param historyData
+   * @param server - the parent server, that node exists on
+   * @param hdbContext - not used
+   * @param sessionId - used to identify the session
+   * @param sessionContext - used to get session context if needed
+   * @param requestHeader - ua client request header
+   * @param historyReadDetails - specifies how to format the read result
+   * @param timestampsToReturn - specifies which timestamps to return
+   * @param releaseContinuationPoints - god fucking knows, open62541 does not
+   * document it @todo: figure this out
+   * @param nodesToReadSize - how many node ids to read
+   * @param nodesToRead - array of node ids to read
+   * @param response - used to indicate request failure
+   * @param historyData - history result
    */
-  static void readRaw(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_RequestHeader* requestHeader,
+  void readRaw(UA_Server* server, void* hdbContext, const UA_NodeId* sessionId,
+      void* sessionContext, const UA_RequestHeader* requestHeader,
       const UA_ReadRawModifiedDetails* historyReadDetails,
       UA_TimestampsToReturn timestampsToReturn,
       UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
@@ -229,25 +90,24 @@ struct HistorizerLowLevelAPI {
       UA_HistoryData* const* const historyData);
 
   /**
-   * @brief Called by UA Server instance to get historical information from a
-   * database
+   * @brief Called by UA_Server instance when a history read is requested with
+   * isRawReadModified set to true
    *
-   * @todo: what is the difference between this and readRaw?
-   *
-   * @param server
-   * @param hdbContext
-   * @param sessionId
-   * @param sessionContext
-   * @param requestHeader
-   * @param historyReadDetails
-   * @param timestampsToReturn
-   * @param releaseContinuationPoints
-   * @param nodesToReadSize
-   * @param nodesToRead
-   * @param response
-   * @param historyData
+   * @param server - the parent server, that node exists on
+   * @param hdbContext - not used
+   * @param sessionId - used to identify the session
+   * @param sessionContext - used to get session context if needed
+   * @param requestHeader - ua client request header
+   * @param historyReadDetails - specifies how to format the read result
+   * @param timestampsToReturn - specifies which timestamps to return
+   * @param releaseContinuationPoints - god fucking knows, open62541 does not
+   * document it @todo: figure this out
+   * @param nodesToReadSize - how many node ids to read
+   * @param nodesToRead - array of node ids to read
+   * @param response - used to indicate request failure
+   * @param historyData - history result
    */
-  static void readModified(UA_Server* server, void* hdbContext,
+  void readModified(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_ReadRawModifiedDetails* historyReadDetails,
@@ -258,25 +118,22 @@ struct HistorizerLowLevelAPI {
       UA_HistoryModifiedData* const* const historyData);
 
   /**
-   * @brief Called by UA Server instance to get historical information from a
-   * database
+   * @brief Not documented and not implemented by open62541
    *
-   * @todo: what is the difference between this and readRaw and readModified?
-   *
-   * @param server
-   * @param hdbContext
-   * @param sessionId
-   * @param sessionContext
-   * @param requestHeader
-   * @param historyReadDetails
-   * @param timestampsToReturn
-   * @param releaseContinuationPoints
-   * @param nodesToReadSize
-   * @param nodesToRead
-   * @param response
-   * @param historyData
+   * @param server - the parent server, that node exists on
+   * @param hdbContext - not used
+   * @param sessionId - used to identify the session
+   * @param sessionContext - used to get session context if needed
+   * @param requestHeader - ua client request header
+   * @param historyReadDetails - specifies how to format the read result
+   * @param timestampsToReturn - specifies which timestamps to return
+   * @param releaseContinuationPoints - unknown @todo: figure this out
+   * @param nodesToReadSize - how many node ids to read
+   * @param nodesToRead - array of node ids to read
+   * @param response - used to indicate request failure
+   * @param historyData - history result
    */
-  static void readEvent(UA_Server* server, void* hdbContext,
+  void readEvent(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_ReadEventDetails* historyReadDetails,
@@ -287,26 +144,22 @@ struct HistorizerLowLevelAPI {
       UA_HistoryEvent* const* const historyData);
 
   /**
-   * @brief Called by UA Server instance to get historical information from a
-   * database
+   * @brief Not documented and not implemented by open62541
    *
-   * @todo: what is the difference between this and readRaw, readModified and
-   * readEvent?
-   *
-   * @param server
-   * @param hdbContext
-   * @param sessionId
-   * @param sessionContext
-   * @param requestHeader
-   * @param historyReadDetails
-   * @param timestampsToReturn
-   * @param releaseContinuationPoints
-   * @param nodesToReadSize
-   * @param nodesToRead
-   * @param response
-   * @param historyData
+   * @param server - the parent server, that node exists on
+   * @param hdbContext - not used
+   * @param sessionId - used to identify the session
+   * @param sessionContext - used to get session context if needed
+   * @param requestHeader - ua client request header
+   * @param historyReadDetails - specifies how to format the read result
+   * @param timestampsToReturn - specifies which timestamps to return
+   * @param releaseContinuationPoints - unknown @todo: figure this out
+   * @param nodesToReadSize - how many node ids to read
+   * @param nodesToRead - array of node ids to read
+   * @param response - used to indicate request failure
+   * @param historyData - history result
    */
-  static void readProcessed(UA_Server* server, void* hdbContext,
+  void readProcessed(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_ReadProcessedDetails* historyReadDetails,
@@ -317,26 +170,22 @@ struct HistorizerLowLevelAPI {
       UA_HistoryData* const* const historyData);
 
   /**
-   * @brief Called by UA Server instance to get historical information from a
-   * database
+   * @brief Not documented and not implemented by open62541
    *
-   * @todo: what is the difference between this and readRaw, readModified,
-   * readEvent and readProcessed?
-   *
-   * @param server
-   * @param hdbContext
-   * @param sessionId
-   * @param sessionContext
-   * @param requestHeader
-   * @param historyReadDetails
-   * @param timestampsToReturn
-   * @param releaseContinuationPoints
-   * @param nodesToReadSize
-   * @param nodesToRead
-   * @param response
-   * @param historyData
+   * @param server - the parent server, that node exists on
+   * @param hdbContext - not used
+   * @param sessionId - used to identify the session
+   * @param sessionContext - used to get session context if needed
+   * @param requestHeader - ua client request header
+   * @param historyReadDetails - specifies how to format the read result
+   * @param timestampsToReturn - specifies which timestamps to return
+   * @param releaseContinuationPoints - unknown @todo: figure this out
+   * @param nodesToReadSize - how many node ids to read
+   * @param nodesToRead - array of node ids to read
+   * @param response - used to indicate request failure
+   * @param historyData - history result
    */
-  static void readAtTime(UA_Server* server, void* hdbContext,
+  void readAtTime(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_ReadAtTimeDetails* historyReadDetails,
@@ -346,16 +195,56 @@ struct HistorizerLowLevelAPI {
       UA_HistoryReadResponse* response,
       UA_HistoryData* const* const historyData);
 
-  static void updateData(UA_Server* server, void* hdbContext,
+  /**
+   * @brief Not documented by open62541
+   *
+   * Is this function even used? If so, how?
+   *
+   * @param server - the parent server, that node exists on
+   * @param hdbContext - not used
+   * @param sessionId - used to identify the session
+   * @param sessionContext - used to get session context if needed
+   * @param requestHeader - ua client request header
+   * @param details - data values that must be added to node id
+   * @param result - history result
+   */
+  void updateData(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_UpdateDataDetails* details, UA_HistoryUpdateResult* result);
 
-  static void deleteRawModified(UA_Server* server, void* hdbContext,
+  /**
+   * @brief @brief Not documented by open62541
+   *
+   * Is this function even used? If so, how?
+   *
+   * @param server - the parent server, that node exists on
+   * @param hdbContext - not used
+   * @param sessionId - used to identify the session
+   * @param sessionContext - used to get session context if needed
+   * @param requestHeader - ua client request header
+   * @param details - node id timestamps to delete
+   * @param result - history result
+   */
+  void deleteRawModified(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_DeleteRawModifiedDetails* details,
       UA_HistoryUpdateResult* result);
-};
 
+  /**
+   * @brief Callback implementation for monitored item data change call
+   *
+   * @param server - the parent server, that node exists on
+   * @param monitoredItemId - unkown
+   * @param monitoredItemContext - not used
+   * @param nodeId - node id, the new value is set for
+   * @param nodeContext - not used
+   * @param attributeId - unkown
+   * @param value - new node value
+   */
+  void dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
+      void* monitoredItemContext, const UA_NodeId* nodeId, void* nodeContext,
+      UA_UInt32 attributeId, const UA_DataValue* value);
+};
 #endif //__OPCUA_HISTORIZER_HPP
