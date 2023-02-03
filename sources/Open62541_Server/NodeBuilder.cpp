@@ -272,6 +272,9 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
     status = UA_Server_addDataSourceVariableNode(server_ptr, metrid_node_id,
         parent_id, reference_type_id, metric_browse_name, type_definition,
         node_attr, data_source, nullptr, nullptr);
+#ifdef UA_ENABLE_HISTORIZING
+    server_->registerForHistorization(&metrid_node_id);
+#endif
   }
   if (status != UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::ERROR,
@@ -327,6 +330,9 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
     status = UA_Server_addDataSourceVariableNode(server_->getServer(),
         metrid_node_id, parent_id, reference_type_id, metric_browse_name,
         type_definition, node_attr, data_source, nullptr, nullptr);
+#ifdef UA_ENABLE_HISTORIZING
+    server_->registerForHistorization(&metrid_node_id);
+#endif
   }
 
   if (status != UA_STATUSCODE_GOOD) {
