@@ -1,6 +1,7 @@
 #include "Configuration.hpp"
 #include "Config_Serializer.hpp"
 #include "HaSLL_Logger.hpp"
+#include "Historizer.hpp"
 
 #include <open62541/network_tcp.h>
 #include <open62541/plugin/securitypolicy_default.h>
@@ -139,6 +140,14 @@ Configuration::Configuration(const string& filepath) : Configuration() {
 #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
     configuration_.maxEventsPerNode =
         config.subscription_limits.max_events_per_node;
+#endif
+
+#ifdef UA_ENABLE_HISTORIZING
+    /** @todo: obtain database configuration data and parse it to historizer */
+    auto historizer = make_shared<Historizer>();
+    /** @todo: figure out where to store the historizer and hwo to parse it
+     * there*/
+    configuration_.historyDatabase = historizer->createDatabase();
 #endif
 
     configuration_.maxMonitoredItems =
