@@ -121,5 +121,5 @@ void Historizer::dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
                                // example code, so might be imposable to do so
   UA_Boolean historize = UA_TRUE; // check if node has historization attribute
                                   // set in it's attributes
-  setValue(server, sessionId, NULL, nodeId, historize, value);
+  setValue(server, NULL, sessionId, NULL, nodeId, historize, value);
 }
