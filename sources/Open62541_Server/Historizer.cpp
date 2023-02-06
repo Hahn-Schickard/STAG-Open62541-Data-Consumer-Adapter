@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <open62541/client_subscriptions.h>
+#include <open62541/server.h>
 
 using namespace std;
 using namespace std::placeholders;
