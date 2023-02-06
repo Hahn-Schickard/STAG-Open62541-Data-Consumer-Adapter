@@ -273,7 +273,7 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
         parent_id, reference_type_id, metric_browse_name, type_definition,
         node_attr, data_source, nullptr, nullptr);
 #ifdef UA_ENABLE_HISTORIZING
-    server_->registerForHistorization(metrid_node_id);
+    server_->registerForHistorization(metrid_node_id, node_attr.value.type);
 #endif
   }
   if (status != UA_STATUSCODE_GOOD) {
@@ -331,7 +331,7 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
         metrid_node_id, parent_id, reference_type_id, metric_browse_name,
         type_definition, node_attr, data_source, nullptr, nullptr);
 #ifdef UA_ENABLE_HISTORIZING
-    server_->registerForHistorization(metrid_node_id);
+    server_->registerForHistorization(metrid_node_id, node_attr.value.type);
 #endif
   }
 

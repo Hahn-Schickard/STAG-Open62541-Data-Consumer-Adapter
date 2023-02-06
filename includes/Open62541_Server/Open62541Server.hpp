@@ -26,7 +26,8 @@ class Open62541Server {
 #ifdef UA_ENABLE_HISTORIZING
   std::unique_ptr<Historizer> historizer_;
 
-  UA_StatusCode registerForHistorization(UA_NodeId nodeId);
+  UA_StatusCode registerForHistorization(
+      UA_NodeId nodeId, const UA_DataType* type);
 #endif
 
   void runnable();

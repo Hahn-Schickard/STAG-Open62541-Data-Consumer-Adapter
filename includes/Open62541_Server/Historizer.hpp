@@ -12,7 +12,8 @@ struct Historizer {
    * https://github.com/open62541/open62541/blob/master/plugins/historydata/ua_history_data_gathering_default.c#L59
    *
    */
-  UA_StatusCode registerNodeId(UA_Server* server, UA_NodeId nodeId);
+  UA_StatusCode registerNodeId(
+      UA_Server* server, UA_NodeId nodeId, const UA_DataType* type);
 
   /**
    * @brief UA_HistoryDatabase constructor

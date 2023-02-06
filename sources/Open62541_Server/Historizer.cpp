@@ -7,13 +7,17 @@ using namespace std;
 
 bool Historizer::initialized_ = false; // NOLINT
 
-UA_StatusCode Historizer::registerNodeId(UA_Server* server, UA_NodeId nodeId) {
+UA_StatusCode Historizer::registerNodeId(
+    UA_Server* server, UA_NodeId nodeId, const UA_DataType* type) {
   auto monitor_request = UA_MonitoredItemCreateRequest_default(nodeId);
   monitor_request.requestedParameters.samplingInterval = 100.0;
   monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
   auto result = UA_Server_createDataChangeMonitoredItem(server,
       UA_TIMESTAMPSTORETURN_BOTH, monitor_request, NULL,
       &Historizer::dataChanged); // save UA_UInt32 result.monitoredItemId ?
+  // save nodeId and type for later checks??
+  // create a table for given nodeId with UA_DataType value entries indexed by
+  // source timestamp
   return result.statusCode;
 }
 
