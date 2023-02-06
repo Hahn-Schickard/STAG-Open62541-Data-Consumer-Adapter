@@ -1,8 +1,10 @@
 #include "Historizer.hpp"
 #include "HaSLL/LoggerManager.hpp"
+#include "Utility.hpp"
 
 #include <open62541/client_subscriptions.h>
 #include <open62541/server.h>
+#include <string>
 
 using namespace std;
 using namespace HaSLI;
@@ -48,10 +50,91 @@ void Historizer::clear(UA_HistoryDatabase* database) {
   // there is nothing to clear, since we do not use a context
 }
 
+void getNodeValue(UA_Variant data) {
+  switch (data.type->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
+    break;
+  }
+  default: {
+    // log default case
+  }
+  }
+}
+
+string getTimestamp(UA_DateTime timestamp) {
+  /* Format UA_DateTime into a %Y-%m-%d %H:%M:%S.%ms*/
+  return string();
+}
+
 void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
-    const UA_NodeId* sessionId, void* /*sessionContext*/,
+    const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
     const UA_NodeId* nodeId, UA_Boolean historizing,
-    const UA_DataValue* value) {}
+    const UA_DataValue* value) {
+  if (historizing) {
+    if (value->hasValue) {
+      string node_id = toString(nodeId);
+      getNodeValue(value->value); // get data
+      string server_time;
+      if (value->hasServerTimestamp) {
+        server_time = getTimestamp(value->serverTimestamp);
+      }
+      string source_time;
+      if (value->hasSourceTimestamp) {
+        source_time = getTimestamp(value->sourceTimestamp);
+      }
+      // write data change for given node to our db
+    } else {
+      // what to do when there is no value?
+    }
+  } else {
+    // log not historized value warning?
+  }
+}
 
 void Historizer::setEvent(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* originId, const UA_NodeId* emitterId,
