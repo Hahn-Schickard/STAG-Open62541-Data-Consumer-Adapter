@@ -95,3 +95,9 @@ bool Open62541Server::isRunning() {
   lock_guard<mutex> lock(status_mutex_);
   return is_running_;
 }
+
+#ifdef UA_ENABLE_HISTORIZING
+UA_StatusCode Open62541Server::registerForHistorization(UA_NodeId nodeId) {
+  return historizer_->registerNodeId(open62541_server_, nodeId);
+}
+#endif
