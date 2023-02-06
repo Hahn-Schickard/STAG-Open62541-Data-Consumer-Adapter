@@ -3,6 +3,7 @@
 
 #include "open62541/plugin/historydatabase.h"
 
+namespace open62541 {
 struct Historizer {
   /**
    * @brief Create UA_MonitoredItem for a given node ide and use the data change
@@ -253,4 +254,5 @@ private:
   static bool initialized_; // False if historizer was not initialized, used by
                             // static methods
 };
+} // namespace open62541
 #endif //__OPCUA_HISTORIZER_HPP

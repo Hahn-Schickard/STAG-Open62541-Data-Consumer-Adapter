@@ -5,6 +5,7 @@
 
 using namespace std;
 
+namespace open62541 {
 bool Historizer::initialized_ = false; // NOLINT
 
 UA_StatusCode Historizer::registerNodeId(
@@ -119,3 +120,4 @@ void Historizer::dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
 
   setValue(server, NULL, sessionId, NULL, nodeId, historize, value);
 }
+} // namespace open62541
