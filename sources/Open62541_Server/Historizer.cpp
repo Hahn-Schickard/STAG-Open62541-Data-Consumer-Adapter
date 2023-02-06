@@ -1,12 +1,16 @@
 #include "Historizer.hpp"
+#include "HaSLL/LoggerManager.hpp"
 
 #include <open62541/client_subscriptions.h>
 #include <open62541/server.h>
 
 using namespace std;
+using namespace HaSLI;
 
 namespace open62541 {
 bool Historizer::initialized_ = false; // NOLINT
+
+Historizer::Historizer() : logger_(LoggerManager::registerTypedLogger(this)) {}
 
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId nodeId, const UA_DataType* type) {

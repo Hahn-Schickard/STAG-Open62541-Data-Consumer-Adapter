@@ -1,10 +1,13 @@
 #ifndef __OPCUA_HISTORIZER_HPP
 #define __OPCUA_HISTORIZER_HPP
 
+#include "HaSLL/Logger.hpp"
 #include "open62541/plugin/historydatabase.h"
 
 namespace open62541 {
 struct Historizer {
+
+  Historizer();
   /**
    * @brief Create UA_MonitoredItem for a given node ide and use the data change
    * callback to as a historization call for the database
@@ -253,6 +256,7 @@ private:
 
   static bool initialized_; // False if historizer was not initialized, used by
                             // static methods
+  HaSLI::LoggerPtr logger_;
 };
 } // namespace open62541
 #endif //__OPCUA_HISTORIZER_HPP
