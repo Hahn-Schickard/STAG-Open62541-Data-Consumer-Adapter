@@ -35,7 +35,9 @@ UA_HistoryDatabase Historizer::createDatabase() {
   return database;
 }
 
-void Historizer::clear(UA_HistoryDatabase* database) {}
+void Historizer::clear(UA_HistoryDatabase* database) {
+  // there is nothing to clear, since we do not use a context
+}
 
 void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* sessionId, void* /*sessionContext*/,
