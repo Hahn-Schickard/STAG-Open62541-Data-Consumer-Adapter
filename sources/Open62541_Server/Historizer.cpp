@@ -108,9 +108,8 @@ void Historizer::dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
     UA_UInt32 attributeId, const UA_DataValue* value) {
   UA_NodeId* sessionId = NULL; // obtain session id, its set to NULL in the
                                // example code, so might be imposable to do so
-  UA_Boolean historize = UA_TRUE; // check if node has historization attribute
-                                  // set in it's attributes
-  auto value_node_ctx = (UA_VariableAttributes*)nodeContext;
+  UA_Boolean historize =
+      attributeId & UA_ATTRIBUTEID_HISTORIZING != 0 ? UA_TRUE : UA_FALSE;
 
   setValue(server, NULL, sessionId, NULL, nodeId, historize, value);
 }
