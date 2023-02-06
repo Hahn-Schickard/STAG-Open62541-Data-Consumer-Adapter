@@ -28,7 +28,7 @@ private:
    *
    * @param database
    */
-  void clear(UA_HistoryDatabase* database);
+  static void clear(UA_HistoryDatabase* database);
 
   /**
    * @brief Called when a given node receives new data value.
@@ -42,9 +42,9 @@ private:
    * new value is ignored
    * @param value - new node value to historize
    */
-  void setValue(UA_Server* server, void* hdbContext, const UA_NodeId* sessionId,
-      void* sessionContext, const UA_NodeId* nodeId, UA_Boolean historizing,
-      const UA_DataValue* value);
+  static void setValue(UA_Server* server, void* hdbContext,
+      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
+      UA_Boolean historizing, const UA_DataValue* value);
 
   /**
    * @brief Called when an event was triggered
@@ -58,8 +58,9 @@ private:
    * does not exist
    * @param fieldList - event value
    */
-  void setEvent(UA_Server* server, void* hdbContext, const UA_NodeId* originId,
-      const UA_NodeId* emitterId, const UA_EventFilter* historicalEventFilter,
+  static void setEvent(UA_Server* server, void* hdbContext,
+      const UA_NodeId* originId, const UA_NodeId* emitterId,
+      const UA_EventFilter* historicalEventFilter,
       UA_EventFieldList* fieldList);
 
   /**
@@ -80,8 +81,9 @@ private:
    * @param response - used to indicate request failure
    * @param historyData - history result
    */
-  void readRaw(UA_Server* server, void* hdbContext, const UA_NodeId* sessionId,
-      void* sessionContext, const UA_RequestHeader* requestHeader,
+  static void readRaw(UA_Server* server, void* hdbContext,
+      const UA_NodeId* sessionId, void* sessionContext,
+      const UA_RequestHeader* requestHeader,
       const UA_ReadRawModifiedDetails* historyReadDetails,
       UA_TimestampsToReturn timestampsToReturn,
       UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
@@ -107,7 +109,7 @@ private:
    * @param response - used to indicate request failure
    * @param historyData - history result
    */
-  void readModified(UA_Server* server, void* hdbContext,
+  static void readModified(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_ReadRawModifiedDetails* historyReadDetails,
@@ -133,7 +135,7 @@ private:
    * @param response - used to indicate request failure
    * @param historyData - history result
    */
-  void readEvent(UA_Server* server, void* hdbContext,
+  static void readEvent(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_ReadEventDetails* historyReadDetails,
@@ -159,7 +161,7 @@ private:
    * @param response - used to indicate request failure
    * @param historyData - history result
    */
-  void readProcessed(UA_Server* server, void* hdbContext,
+  static void readProcessed(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_ReadProcessedDetails* historyReadDetails,
@@ -185,7 +187,7 @@ private:
    * @param response - used to indicate request failure
    * @param historyData - history result
    */
-  void readAtTime(UA_Server* server, void* hdbContext,
+  static void readAtTime(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_ReadAtTimeDetails* historyReadDetails,
@@ -208,7 +210,7 @@ private:
    * @param details - data values that must be added to node id
    * @param result - history result
    */
-  void updateData(UA_Server* server, void* hdbContext,
+  static void updateData(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_UpdateDataDetails* details, UA_HistoryUpdateResult* result);
@@ -226,7 +228,7 @@ private:
    * @param details - node id timestamps to delete
    * @param result - history result
    */
-  void deleteRawModified(UA_Server* server, void* hdbContext,
+  static void deleteRawModified(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
       const UA_DeleteRawModifiedDetails* details,
@@ -243,8 +245,11 @@ private:
    * @param attributeId - unkown
    * @param value - new node value
    */
-  void dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
+  static void dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
       void* monitoredItemContext, const UA_NodeId* nodeId, void* nodeContext,
       UA_UInt32 attributeId, const UA_DataValue* value);
+
+  static bool initialized_; // False if historizer was not initialized, used by
+                            // static methods
 };
 #endif //__OPCUA_HISTORIZER_HPP
