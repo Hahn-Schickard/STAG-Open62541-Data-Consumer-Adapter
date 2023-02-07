@@ -137,9 +137,9 @@ void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
     const UA_NodeId* nodeId, UA_Boolean historizing,
     const UA_DataValue* value) {
+  string node_id = toString(nodeId);
   if (historizing) {
     if (value->hasValue) {
-      string node_id = toString(nodeId);
       getNodeValue(value->value); // get data
       string server_time;
       if (value->hasServerTimestamp) {
@@ -151,10 +151,12 @@ void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
       }
       // write data change for given node to our db
     } else {
-      // what to do when there is no value?
+      log(SeverityLevel::ERROR,
+          "Failed to historize Node {} value. No data provided.", node_id);
     }
   } else {
-    // log not historized value warning?
+    log(SeverityLevel::WARNING, "Node {} is not configured for historization",
+        node_id);
   }
 }
 
