@@ -107,8 +107,14 @@ void getNodeValue(UA_Variant data) {
 }
 
 string getTimestamp(UA_DateTime timestamp) {
-  /* Format UA_DateTime into a %Y-%m-%d %H:%M:%S.%ms*/
-  return string();
+  auto calendar_time = UA_DateTime_toStruct(timestamp);
+  /* Format UA_DateTime into a %Y-%m-%d %H:%M:%S.%ms%us*/
+  string result = to_string(calendar_time.year) + "-" +
+      to_string(calendar_time.month) + "-" + to_string(calendar_time.day) +
+      " " + to_string(calendar_time.hour) + ":" + to_string(calendar_time.min) +
+      ":" + to_string(calendar_time.sec) + "." +
+      to_string(calendar_time.milliSec) + to_string(calendar_time.microSec);
+  return result;
 }
 
 void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
