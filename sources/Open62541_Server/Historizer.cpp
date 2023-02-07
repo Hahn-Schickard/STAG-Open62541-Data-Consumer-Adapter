@@ -142,16 +142,23 @@ void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
   string node_id = toString(nodeId);
   if (historizing) {
     if (value->hasValue) {
-      getNodeValue(value->value); // get data
-      string server_time;
-      if (value->hasServerTimestamp) {
-        server_time = getTimestamp(value->serverTimestamp);
+      try {
+        getNodeValue(value->value); // get data
+        string server_time;
+        if (value->hasServerTimestamp) {
+          server_time = getTimestamp(value->serverTimestamp);
+        }
+        string source_time;
+        if (value->hasSourceTimestamp) {
+          source_time = getTimestamp(value->sourceTimestamp);
+        }
+        // write data change for given node to our db
+      } catch (exception& ex) {
+        log(SeverityLevel::ERROR,
+            "Failed to historize Node {} value due to an exception. Exception "
+            "{}",
+            ex.what());
       }
-      string source_time;
-      if (value->hasSourceTimestamp) {
-        source_time = getTimestamp(value->sourceTimestamp);
-      }
-      // write data change for given node to our db
     } else {
       log(SeverityLevel::ERROR,
           "Failed to historize Node {} value. No data provided.", node_id);
