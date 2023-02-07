@@ -117,7 +117,9 @@ void getNodeValue(UA_Variant data) {
     break;
   }
   default: {
-    // log default case
+    string error_msg =
+        "Unhandeled UA_Variant type detected: " + string(data.type->typeName);
+    throw logic_error(error_msg);
   }
   }
 }
