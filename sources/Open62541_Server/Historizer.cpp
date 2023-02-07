@@ -23,6 +23,12 @@ Historizer::~Historizer() {
   initialized_ = false;
 }
 
+template <typename... Types>
+void Historizer::log(SeverityLevel level, string message, Types... args) {
+  if (logger_ && initialized_) {
+    logger_->log(level, message, args...);
+  }
+}
 
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId nodeId, const UA_DataType* type) {
