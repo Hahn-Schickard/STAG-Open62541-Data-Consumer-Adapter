@@ -11,8 +11,18 @@ using namespace HaSLI;
 
 namespace open62541 {
 bool Historizer::initialized_ = false; // NOLINT
+LoggerPtr Historizer::logger_ = LoggerPtr(); // NOLINT
 
-Historizer::Historizer() : logger_(LoggerManager::registerTypedLogger(this)) {}
+Historizer::Historizer() {
+  logger_ = LoggerManager::registerTypedLogger(this);
+  initialized_ = true;
+}
+
+Historizer::~Historizer() {
+  logger_.reset();
+  initialized_ = false;
+}
+
 
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId nodeId, const UA_DataType* type) {
