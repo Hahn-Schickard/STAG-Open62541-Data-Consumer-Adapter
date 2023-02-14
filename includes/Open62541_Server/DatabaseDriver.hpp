@@ -92,7 +92,7 @@ private:
   uint8_t scale_ = 0; // used to specify the decimal type scale
   uint8_t size_ = 0; // Used to specify data type size for variable length data
                      // types like char and array
-}
+};
 
 using Columns = std::vector<Column>;
 
