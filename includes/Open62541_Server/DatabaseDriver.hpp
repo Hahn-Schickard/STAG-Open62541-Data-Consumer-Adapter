@@ -35,12 +35,12 @@ using OnlyStringTypes = typename std::enable_if<
 // Passthrough incase there is nothing to concatenate
 std::string concatenate(const std::string& head) { return head; }
 
-// Final concatenate method
+// Final concatenate function
 std::string concatenate(const std::string& head, const std::string& tail) {
   return head + tail;
 }
 
-// Unwinding method for variadic concatenate method
+// Unwinding method for variadic concatenate function
 template <typename... T, typename = OnlyStringTypes<T...>>
 std::string concatenate(
     const std::string& head, const std::string& tail, const T&... remainder) {
