@@ -157,11 +157,11 @@ void DatabaseDriver::create(const string& table_name, Columns columns) {
   execute("CREATE TABLE ", table_name, column_types);
 }
 
-void DatabaseDriver::drop(const string table_name) {
+void DatabaseDriver::drop(const string& table_name) {
   execute("DROP TABLE IF EXISTS ", table_name);
 }
 
-void DatabaseDriver::insert(const string table_name,
+void DatabaseDriver::insert(const string& table_name,
     vector<string> column_names, DataPoints data_points) {
   string column_names = "(";
   string values_placeholder = "(";

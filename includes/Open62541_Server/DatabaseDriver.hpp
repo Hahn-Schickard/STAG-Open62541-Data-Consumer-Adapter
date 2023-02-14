@@ -106,14 +106,14 @@ struct DatabaseDriver {
 
   void create(const std::string& table_name, Columns columns);
 
-  void drop(const std::string table_name);
+  void drop(const std::string& table_name);
 
   template <typename... T, typename = OnlyStringTypes<T...>>
   nanodbc::result execute(const T&... query_parts) {
     return nanodbc::execute(*db_, concatenate(query_parts...));
   }
 
-  void insert(const std::string table_name,
+  void insert(const std::string& table_name,
       std::vector<std::string> column_names = {}, DataPoints data_points = {});
 
 private:
