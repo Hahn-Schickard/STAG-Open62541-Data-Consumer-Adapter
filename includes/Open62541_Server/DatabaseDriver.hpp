@@ -32,24 +32,19 @@ using OnlyStringTypes = typename std::enable_if<
         std::is_convertible<T, std::string>...>::value>::type;
 // clang-format on
 
-// Unwinding method for variadic concatenate method
-template <typename... T, typename = OnlyStringTypes<T...>>
-std::string concatenate(
-    const std::string& head, const std::string& tail, const T&... remainder) {
-  return concatenate(head + tail, remainder...);
-}
+// Passthrough incase there is nothing to concatenate
+std::string concatenate(const std::string& head) { return head; }
 
 // Final concatenate method
 std::string concatenate(const std::string& head, const std::string& tail) {
   return head + tail;
 }
 
-// Passthrough incase there is nothing to concatenate
-std::string concatenate(const std::string& head) { return head; }
-
+// Unwinding method for variadic concatenate method
 template <typename... T, typename = OnlyStringTypes<T...>>
-nanodbc::result execute(const T&... query_parts) {
-  return nanodbc::execute(*db_, concatenate(query_parts...));
+std::string concatenate(
+    const std::string& head, const std::string& tail, const T&... remainder) {
+  return concatenate(head + tail, remainder...);
 }
 
 enum class ColumnDataType {
