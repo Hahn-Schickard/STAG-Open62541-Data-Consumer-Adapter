@@ -51,6 +51,33 @@ string toString(ColumnDataType type) {
   }
 }
 
+static constexpr uint16_t COLUMN_DATA_TYPE_MASK = 0xFF00;
+static constexpr uint8_t COLUMN_DATA_TYPE_OFFSET = 8;
+static constexpr uint8_t COLUMN_DATA_TYPE_INT = 0x01;
+static constexpr uint8_t COLUMN_DATA_TYPE_FLOAT = 0x02;
+static constexpr uint8_t COLUMN_DATA_TYPE_VARLEN = 0x03;
+static constexpr uint8_t COLUMN_DATA_TYPE_FIXLEN = 0x04;
+
+bool isIntegerType(ColumnDataType type) {
+  return ((static_cast<uint16_t>(type) & COLUMN_DATA_TYPE_MASK) >>
+             COLUMN_DATA_TYPE_OFFSET) == COLUMN_DATA_TYPE_INT;
+}
+
+bool isFloatingType(ColumnDataType type) {
+  return ((static_cast<uint16_t>(type) & COLUMN_DATA_TYPE_MASK) >>
+             COLUMN_DATA_TYPE_OFFSET) == COLUMN_DATA_TYPE_FLOAT;
+}
+
+bool isVarLengthType(ColumnDataType type) {
+  return ((static_cast<uint16_t>(type) & COLUMN_DATA_TYPE_MASK) >>
+             COLUMN_DATA_TYPE_OFFSET) == COLUMN_DATA_TYPE_VARLEN;
+}
+
+bool isFixedLengthType(ColumnDataType type) {
+  return ((static_cast<uint16_t>(type) & COLUMN_DATA_TYPE_MASK) >>
+             COLUMN_DATA_TYPE_OFFSET) == COLUMN_DATA_TYPE_FIXLEN;
+}
+
 Column::Column(string name, ColumnDataType type) : Column(name, type, false) {}
 
 Column::Column(string name, ColumnDataType type, bool null_allowed)

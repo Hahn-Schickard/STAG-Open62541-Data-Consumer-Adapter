@@ -47,21 +47,26 @@ std::string concatenate(
   return concatenate(head + tail, remainder...);
 }
 
-enum class ColumnDataType {
-  BOOLEAN, // 1 byte to store TRUE or FALSE
-  INT, // 32 bit signed integer [-2^31;2^31]
-  BIGINT, // 64 bit signed integer [-2^63;2^63]
-  SMALLINT, // 16 bit signed integer [-2^15;2^15]
-  DECIMAL, // N(p,s)
-  FLOAT,
-  CHAR, // c(n)
-  VARCHAR, // c(n)
-  DATE,
-  TIME,
-  TIMESTAMP,
-  BIT, // Binary data of fixed length b(n)
-  VARBIT, // variable length binary data b(n)
+enum class ColumnDataType : uint16_t {
+  BOOLEAN = 0x100, // 1 byte to store TRUE or FALSE
+  INT = 0x101, // 32 bit signed integer [-2^31;2^31]
+  BIGINT = 0x102, // 64 bit signed integer [-2^63;2^63]
+  SMALLINT = 0x103, // 16 bit signed integer [-2^15;2^15]
+  DECIMAL = 0x200, // N(p,s)
+  FLOAT = 0x201,
+  CHAR = 0x300, // c(n)
+  VARCHAR = 0x301, // c(n)
+  BIT = 0x302, // Binary data of fixed length b(n)
+  VARBIT = 0x303, // variable length binary data b(n)
+  DATE = 0x400,
+  TIME = 0x401,
+  TIMESTAMP = 0x402
 };
+
+bool isIntegerType(ColumnDataType type);
+bool isFloatingType(ColumnDataType type);
+bool isVarLengthType(ColumnDataType type);
+bool isFixedLengthType(ColumnDataType type);
 
 std::string toString(ColumnDataType type);
 
