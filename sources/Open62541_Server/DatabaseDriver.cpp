@@ -82,14 +82,12 @@ Column::Column(string name, ColumnDataType type) : Column(name, type, false) {}
 
 Column::Column(string name, ColumnDataType type, bool null_allowed)
     : name_(name), type_(type), null_allowed_(null_allowed) {
-  if (type == ColumnDataType::CHAR || type == ColumnDataType::VARCHAR ||
-      type == ColumnDataType::BIN || type == ColumnDataType::VARBIN) {
-    string error_msg = toString(type) + " requires size parameter";
+  if (isVarLengthType(type)) {
+    string error_msg = ODD::toString(type) + " requires size parameter";
     throw logic_error(error_msg);
-  } else if (type == ColumnDataType::DECIMAL || type == ColumnDataType::FLOAT ||
-      type == ColumnDataType::DOUBLE) {
+  } else if (isFloatingType(type)) {
     string error_msg =
-        toString(type) + " requires precision and scale parameters";
+        ODD::toString(type) + " requires precision and scale parameters";
     throw logic_error(error_msg);
   }
 }
@@ -97,9 +95,8 @@ Column::Column(string name, ColumnDataType type, bool null_allowed)
 Column::Column(
     string name, ColumnDataType type, uint8_t size, bool null_allowed)
     : name_(name), type_(type), size_(size), null_allowed_(null_allowed) {
-  if (type != ColumnDataType::CHAR || type != ColumnDataType::VARCHAR ||
-      type != ColumnDataType::BIN || type != ColumnDataType::VARBIN) {
-    string error_msg = toString(type) + " does not use the size parameter";
+  if (!isVarLengthType(type)) {
+    string error_msg = ODD::toString(type) + " does not use the size parameter";
     throw logic_error(error_msg);
   }
 }
@@ -108,10 +105,9 @@ Column::Column(string name, ColumnDataType type, uint8_t precision,
     uint8_t scale, bool null_allowed)
     : name_(name), type_(type), precision_(precision), scale_(scale),
       null_allowed_(null_allowed) {
-  if (type != ColumnDataType::DECIMAL || type != ColumnDataType::FLOAT ||
-      type != ColumnDataType::DOUBLE) {
-    string error_msg =
-        toString(type) + " does not use the precision and scale parameters";
+  if (!isFloatingType(type)) {
+    string error_msg = ODD::toString(type) +
+        " does not use the precision and scale parameters";
     throw logic_error(error_msg);
   }
 }
@@ -123,16 +119,14 @@ ColumnDataType Column::type() { return type_; }
 bool Column::isNullable() { return null_allowed_; }
 
 string Column::toString() {
-  if (type == ColumnDataType::CHAR || type == ColumnDataType::VARCHAR ||
-      type == ColumnDataType::BIN || type == ColumnDataType::VARBIN) {
-    return name_ + " " + toString(type_) + "(" + to_string(size_) + ")" +
+  if (isVarLengthType(type_)) {
+    return name_ + " " + ODD::toString(type_) + "(" + to_string(size_) + ")" +
         (null_allowed_ ? " NULL" : " NOT NULL");
-  } else if (type == ColumnDataType::DECIMAL || type == ColumnDataType::FLOAT ||
-      type == ColumnDataType::DOUBLE) {
-    return name_ + " " + toString(type_) + "(" + to_string(precision_) + "," +
-        to_string(scale_) + ")" + (null_allowed_ ? " NULL" : " NOT NULL");
+  } else if (isFloatingType(type_)) {
+    return name_ + " " + ODD::toString(type_) + "(" + to_string(precision_) +
+        "," + to_string(scale_) + ")" + (null_allowed_ ? " NULL" : " NOT NULL");
   } else {
-    return name_ + " " + toString(type_) +
+    return name_ + " " + ODD::toString(type_) +
         (null_allowed_ ? " NULL" : " NOT NULL");
   }
 }
