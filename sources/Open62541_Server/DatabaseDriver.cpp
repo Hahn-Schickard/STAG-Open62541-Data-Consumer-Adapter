@@ -171,7 +171,8 @@ void DatabaseDriver::insert(const string& table_name,
   auto query = "INSERT INTO " + table_name + " " + columns + " values" +
       values_placeholder + ";";
 
-  prepare(statement, query);
+  nanodbc::statement statement(*db_);
+  nanodbc::prepare(statement, query);
   for (uint32_t i = 0; i < data_points.size(); ++i) {
     // clang-format off
     match(data_points[i], 
