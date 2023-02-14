@@ -175,14 +175,14 @@ void DatabaseDriver::insert(const string& table_name,
   nanodbc::prepare(statement, query);
   for (uint32_t i = 0; i < data_points.size(); ++i) {
     // clang-format off
-    match(data_points[i], 
-        [&](bool value) { statement.bind(i, value); },
-        [&](uintmax_t value) { statement.bind(i, value); },
-        [&](intmax_t value) { statement.bind(i, value); },
-        [&](float value) { statement.bind(i, value); },
-        [&](double value) { statement.bind(i, value); },
-        [&](string value) { statement.bind(i, value); },
-        [&](vector<uint8_t> value) { statement.bind(i, value); });
+    match(data_points[i], // this might be a bad idea, since we are taking the address of a temporay
+        [&](bool value) { statement.bind(i, &value); },
+        [&](uintmax_t value) { statement.bind(i, &value); },
+        [&](intmax_t value) { statement.bind(i, &value); },
+        [&](float value) { statement.bind(i, &value); },
+        [&](double value) { statement.bind(i, &value); },
+        [&](string value) { statement.bind(i, &value); },
+        [&](vector<uint8_t> value) { statement.bind(i, &value); });
     // clang-format on
   }
 
