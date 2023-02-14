@@ -27,8 +27,9 @@ using DataPoints = std::vector<DataType>;
 // Restrict parameter pack data to only accept string like data types
 template <typename... T>
 // clang-format off
-using OnlyStringTypes = typename enable_if<
-        conjunction<is_convertible<T, string>...>::value>::type;
+using OnlyStringTypes = typename std::enable_if<
+      std::conjunction<
+        std::is_convertible<T, std::string>...>::value>::type;
 // clang-format on
 
 // Unwinding method for variadic concatenate method
