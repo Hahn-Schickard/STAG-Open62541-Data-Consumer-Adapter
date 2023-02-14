@@ -78,9 +78,10 @@ bool isFixedLengthType(ColumnDataType type) {
              COLUMN_DATA_TYPE_OFFSET) == COLUMN_DATA_TYPE_FIXLEN;
 }
 
-Column::Column(string name, ColumnDataType type) : Column(name, type, false) {}
+Column::Column(const string& name, ColumnDataType type)
+    : Column(name, type, false) {}
 
-Column::Column(string name, ColumnDataType type, bool null_allowed)
+Column::Column(const string& name, ColumnDataType type, bool null_allowed)
     : name_(name), type_(type), null_allowed_(null_allowed) {
   if (isVarLengthType(type)) {
     string error_msg = ODD::toString(type) + " requires size parameter";
@@ -93,7 +94,7 @@ Column::Column(string name, ColumnDataType type, bool null_allowed)
 }
 
 Column::Column(
-    string name, ColumnDataType type, uint8_t size, bool null_allowed)
+    const string& name, ColumnDataType type, uint8_t size, bool null_allowed)
     : name_(name), type_(type), size_(size), null_allowed_(null_allowed) {
   if (!isVarLengthType(type)) {
     string error_msg = ODD::toString(type) + " does not use the size parameter";
@@ -101,7 +102,7 @@ Column::Column(
   }
 }
 
-Column::Column(string name, ColumnDataType type, uint8_t precision,
+Column::Column(const string& name, ColumnDataType type, uint8_t precision,
     uint8_t scale, bool null_allowed)
     : name_(name), type_(type), precision_(precision), scale_(scale),
       null_allowed_(null_allowed) {

@@ -71,11 +71,11 @@ bool isFixedLengthType(ColumnDataType type);
 std::string toString(ColumnDataType type);
 
 struct Column {
-  Column(std::string name, ColumnDataType type);
-  Column(std::string name, ColumnDataType type, bool null_allowed);
-  Column(std::string name, ColumnDataType type, uint8_t size,
+  Column(const std::string& name, ColumnDataType type);
+  Column(const std::string& name, ColumnDataType type, bool null_allowed);
+  Column(const std::string& name, ColumnDataType type, uint8_t size,
       bool null_allowed = false);
-  Column(std::string name, ColumnDataType type, uint8_t precision,
+  Column(const std::string& name, ColumnDataType type, uint8_t precision,
       uint8_t scale, bool null_allowed = false);
 
   std::string name();
