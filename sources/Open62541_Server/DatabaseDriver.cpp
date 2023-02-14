@@ -157,18 +157,18 @@ void DatabaseDriver::drop(const string& table_name) {
 
 void DatabaseDriver::insert(const string& table_name,
     vector<string> column_names, DataPoints data_points) {
-  string column_names = "(";
+  string columns = "(";
   string values_placeholder = "(";
-  for (auto column : columns) {
-    column_names += column + ",";
+  for (auto column : column_names) {
+    columns += column + ",";
     values_placeholder += "?,";
   }
-  column_names.pop_back();
+  columns.pop_back();
   values_placeholder.pop_back();
-  column_names += ")";
+  columns += ")";
   values_placeholder += ")";
 
-  auto query = "INSERT INTO " + table + " " + column_names + " values" +
+  auto query = "INSERT INTO " + table_name + " " + columns + " values" +
       values_placeholder + ";";
 
   prepare(statement, query);
