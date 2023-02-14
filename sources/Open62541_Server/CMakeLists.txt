@@ -23,6 +23,7 @@ target_link_libraries(${THIS} PUBLIC
                               nanodbc::nanodbc
                               Variant_Visitor::Variant_Visitor
                               HaSLL::HaSLL
+                              HSCUL::HSCUL
                               Config_Serializer
 )
 

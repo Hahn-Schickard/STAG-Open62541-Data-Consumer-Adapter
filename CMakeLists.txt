@@ -37,6 +37,7 @@ endif()
 #@+ ======================== User PACKAGES configuration ===========================
 list(APPEND DEPENDENCIES_LIST
             HaSLL
+            HSCUL
             Variant_Visitor
             Data_Consumer_Adapter_Interface
             open62541
