@@ -186,6 +186,6 @@ void DatabaseDriver::insert(const string& table_name,
     // clang-format on
   }
 
-  return execute(statement);
+  nanodbc::execute(statement);
 }
 } // namespace ODD
