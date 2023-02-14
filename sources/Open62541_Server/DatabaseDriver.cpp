@@ -131,7 +131,7 @@ string Column::toString() {
   }
 }
 
-DatabaseDriver::DatabaseDriver() : Database("PostgreSQL") {}
+DatabaseDriver::DatabaseDriver() : DatabaseDriver("PostgreSQL") {}
 
 DatabaseDriver::DatabaseDriver(const string& data_source)
     : db_(make_unique<connection>(data_source)) {}
