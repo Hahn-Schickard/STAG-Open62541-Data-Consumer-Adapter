@@ -100,16 +100,41 @@ string getCurrentTimestamp() {
 
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId nodeId, const UA_DataType* type) {
-  auto monitor_request = UA_MonitoredItemCreateRequest_default(nodeId);
-  monitor_request.requestedParameters.samplingInterval = 100.0;
-  monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
-  auto result = UA_Server_createDataChangeMonitoredItem(server,
-      UA_TIMESTAMPSTORETURN_BOTH, monitor_request, NULL,
-      &Historizer::dataChanged); // save UA_UInt32 result.monitoredItemId ?
-  // save nodeId and type for later checks??
-  // create a table for given nodeId with UA_DataType value entries indexed by
-  // source timestamp
-  return result.statusCode;
+  auto node_id = toString(&nodeId);
+  try {
+    if (db_) {
+      auto monitor_request = UA_MonitoredItemCreateRequest_default(nodeId);
+      monitor_request.requestedParameters.samplingInterval = 100.0;
+      monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
+      auto result = UA_Server_createDataChangeMonitoredItem(server,
+          UA_TIMESTAMPSTORETURN_BOTH, monitor_request, NULL,
+          &Historizer::dataChanged); // save UA_UInt32 result.monitoredItemId ?
+      // save nodeId and type for later checks??
+      // create a table for given nodeId with UA_DataType value entries indexed
+      // by source timestamp
+      db_->insert("Historized_Nodes",
+          vector<ODD::ColumnValue>{// clang-format off
+              ODD::ColumnValue("Node_Id", node_id), 
+              ODD::ColumnValue("Last_Updated", getCurrentTimestamp())
+      }); // clang-format on
+      db_->create(node_id,
+          {// clang-format off
+          ODD::Column("Server_Timestamp", ODD::ColumnDataType::TIMESTAMP),
+          ODD::Column("Source_Timestamp", ODD::ColumnDataType::TIMESTAMP),
+          ODD::Column("Value", getColumnDataType(type))
+      }); // clang-format on
+      return result.statusCode;
+    } else {
+      log(SeverityLevel::CRITICAL, "Database Driver is not initialized");
+      return UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+    }
+  } catch (exception& ex) {
+    log(SeverityLevel::CRITICAL,
+        "An unhandled exception occurred while trying to register {} node. "
+        "Exception: {}",
+        node_id, ex.what());
+    return UA_STATUSCODE_BADUNEXPECTEDERROR;
+  }
 }
 
 UA_HistoryDatabase Historizer::createDatabase() {
