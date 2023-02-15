@@ -43,6 +43,7 @@ list(APPEND DEPENDENCIES_LIST
             open62541
             nlohmann_json
             nanodbc
+            date
             Threads
 )
 #@- ========================= END OF USER CONFIGURATION ============================

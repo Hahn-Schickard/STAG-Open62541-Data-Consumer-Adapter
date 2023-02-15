@@ -12,6 +12,7 @@ class PackageConan(ConanFile):
         "nlohmann_json/3.11.1",
         "open62541/1.3.1",
         "nanodbc/2.14.0",
+        "date/3.0.1",
         "HaSLL/[~0.3]@hahn-schickard/stable",
         "HSCUL/[~0.2]@hahn-schickard/stable",
         "Variant_Visitor/[~0.1]@hahn-schickard/stable",
