@@ -291,6 +291,35 @@ void DatabaseDriver::insert(
   execute(query);
 }
 
-  nanodbc::execute(statement);
+void DatabaseDriver::update(const string& table_name,
+    vector<ColumnFilter> filters, vector<ColumnValue> values) {
+  string filter_values;
+  for (auto filter : filters) {
+    filter_values += filter.toString() + " AND ";
+  }
+  filter_values.erase(filter_values.rfind(" AND "));
+
+  string column_values;
+  for (auto value : values) {
+    column_values += value.toString() + ",";
+  }
+  column_values.pop_back();
+  execute(
+      "UPDATE ", table_name, " SET ", column_values, " WHERE ", filter_values);
+}
+
+void DatabaseDriver::update(
+    const string& table_name, vector<ColumnFilter> filters, ColumnValue value) {
+  update(table_name, filters, vector<ColumnValue>{value});
+}
+
+void DatabaseDriver::update(
+    const string& table_name, ColumnFilter filter, vector<ColumnValue> values) {
+  update(table_name, vector<ColumnFilter>{filter}, values);
+}
+
+void DatabaseDriver::update(
+    const string& table_name, ColumnFilter filter, ColumnValue value) {
+  update(table_name, vector<ColumnFilter>{filter}, vector<ColumnValue>{value});
 }
 } // namespace ODD

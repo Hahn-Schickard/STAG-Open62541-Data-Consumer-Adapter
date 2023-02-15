@@ -164,6 +164,18 @@ struct DatabaseDriver {
 
   void insert(const std::string& table_name, std::vector<ColumnValue> values);
 
+  void update(const std::string& table_name, std::vector<ColumnFilter> filters,
+      std::vector<ColumnValue> values);
+
+  void update(const std::string& table_name, ColumnFilter filter,
+      std::vector<ColumnValue> values);
+
+  void update(const std::string& table_name, std::vector<ColumnFilter> filters,
+      ColumnValue value);
+
+  void update(
+      const std::string& table_name, ColumnFilter filter, ColumnValue value);
+
 private:
   std::unique_ptr<nanodbc::connection> db_;
 };
