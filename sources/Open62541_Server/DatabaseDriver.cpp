@@ -147,6 +147,98 @@ string Column::toString() {
   }
 }
 
+string toString(FilterType type) {
+  switch (type) {
+  case FilterType::EQUAL: {
+    return "=";
+  }
+  case FilterType::NOT_EQUAL: {
+    return "!=";
+  }
+  case FilterType::GREATER: {
+    return ">";
+  }
+  case FilterType::LESS: {
+    return "<";
+  }
+  case FilterType::GREATER_OR_EQUAL: {
+    return ">=";
+  }
+  case FilterType::LESS_OR_EQUAL: {
+    return "<=";
+  }
+  case FilterType::BETWEEN: {
+    return "BETWEEN";
+  }
+  case FilterType::NOT_BETWEEN: {
+    return "NOT BETWEEN";
+  }
+  case FilterType::LIKE: {
+    return "LIKE";
+  }
+  case FilterType::NOT_LIKE: {
+    return "NOT LIKE";
+  }
+  case FilterType::IN: {
+    return "IN";
+  }
+  case FilterType::NOT_IN: {
+    return "NOT IN";
+  }
+  }
+}
+
+ColumnFilter::ColumnFilter(FilterType type, const string column_name)
+    : ColumnFilter(type, column_name, DataType{}) {}
+
+ColumnFilter::ColumnFilter(
+    FilterType type, const string column_name, DataType value)
+    : type_(type), column_(column_name), values_(DataPoints{value}) {
+  if (type_ == FilterType::LIKE && !holds_alternative<string>(value)) {
+    throw invalid_argument(
+        "LIKE filter type requires filter value to be in string format");
+  }
+}
+
+ColumnFilter::ColumnFilter(
+    FilterType type, const string column_name, DataPoints values)
+    : type_(type), column_(column_name), values_(values_) {
+  if ((type_ == FilterType::BETWEEN || type_ == FilterType::NOT_BETWEEN) &&
+      values_.size() != 2) {
+    throw invalid_argument(
+        "BETWEEN filter type requires two data points as filter value");
+  }
+  if ((type_ == FilterType::BETWEEN || type_ == FilterType::NOT_BETWEEN) ||
+      (type_ != FilterType::IN || type_ != FilterType::NOT_IN)) {
+    throw invalid_argument("Only BETWEEN, NOT BETWEEN, IN and NOT IN filter "
+                           "types support multiple values");
+  }
+}
+
+FilterType ColumnFilter::type() { return type_; }
+
+string ColumnFilter::toString() {
+  string filter_value;
+  if (type_ == FilterType::BETWEEN) {
+    filter_value =
+        ODD::toString(values_[0]) + " AND " + ODD::toString(values_[1]);
+  } else if (type_ == FilterType::IN) {
+    filter_value = "(";
+    for (auto value : values_) {
+      filter_value += ODD::toString(value) + ",";
+    }
+    filter_value.pop_back();
+    filter_value += ")";
+  } else {
+    filter_value = ODD::toString(values_[0]);
+  }
+  return "WHERE " + column_ + ODD::toString(type_) + filter_value;
+}
+
+DataPoints ColumnFilter::values() { return values_; }
+
+string ColumnFilter::column() { return column_; }
+
 DatabaseDriver::DatabaseDriver() : DatabaseDriver("PostgreSQL") {}
 
 DatabaseDriver::DatabaseDriver(const string& data_source)

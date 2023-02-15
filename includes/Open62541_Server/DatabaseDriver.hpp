@@ -99,6 +99,40 @@ private:
 
 using Columns = std::vector<Column>;
 
+enum class FilterType {
+  EQUAL,
+  NOT_EQUAL,
+  GREATER,
+  LESS,
+  GREATER_OR_EQUAL,
+  LESS_OR_EQUAL,
+  BETWEEN,
+  NOT_BETWEEN,
+  LIKE,
+  NOT_LIKE,
+  IN,
+  NOT_IN
+};
+
+std::string toString(FilterType type);
+
+struct ColumnFilter {
+  ColumnFilter(FilterType type, const std::string column_name);
+  ColumnFilter(FilterType type, const std::string column_name, DataType value);
+  ColumnFilter(
+      FilterType type, const std::string column_name, DataPoints values);
+
+  FilterType type();
+  std::string toString();
+  DataPoints values();
+  std::string column();
+
+private:
+  FilterType type_;
+  std::string column_;
+  DataPoints values_;
+};
+
 struct DatabaseDriver {
   DatabaseDriver();
 
