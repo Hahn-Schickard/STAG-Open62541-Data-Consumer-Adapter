@@ -12,14 +12,17 @@ using namespace HaSLI;
 namespace open62541 {
 bool Historizer::initialized_ = false; // NOLINT
 LoggerPtr Historizer::logger_ = LoggerPtr(); // NOLINT
+ODD::DatabaseDriverPtr Historizer::db_ = ODD::DatabaseDriverPtr(); // NOLINT
 
 Historizer::Historizer() {
   logger_ = LoggerManager::registerTypedLogger(this);
+  db_ = make_unique<ODD::DatabaseDriver>();
   initialized_ = true;
 }
 
 Historizer::~Historizer() {
   logger_.reset();
+  db_.reset();
   initialized_ = false;
 }
 

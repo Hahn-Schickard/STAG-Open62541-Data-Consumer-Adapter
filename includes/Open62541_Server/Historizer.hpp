@@ -1,6 +1,7 @@
 #ifndef __OPCUA_HISTORIZER_HPP
 #define __OPCUA_HISTORIZER_HPP
 
+#include "DatabaseDriver.hpp"
 #include "HaSLL/Logger.hpp"
 #include "open62541/plugin/historydatabase.h"
 
@@ -263,6 +264,7 @@ private:
   static bool initialized_; // False if historizer was not initialized, used by
                             // static methods
   static HaSLI::LoggerPtr logger_;
+  static ODD::DatabaseDriverPtr db_;
 };
 } // namespace open62541
 #endif //__OPCUA_HISTORIZER_HPP
