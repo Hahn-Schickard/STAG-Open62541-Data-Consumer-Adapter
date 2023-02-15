@@ -134,6 +134,17 @@ void Historizer::clear(UA_HistoryDatabase* database) {
   // there is nothing to clear, since we do not use a context
 }
 
+string getTimestamp(UA_DateTime timestamp) {
+  auto calendar_time = UA_DateTime_toStruct(timestamp);
+  /* Format UA_DateTime into a %Y-%m-%d %H:%M:%S.%ms%us*/
+  string result = to_string(calendar_time.year) + "-" +
+      to_string(calendar_time.month) + "-" + to_string(calendar_time.day) +
+      " " + to_string(calendar_time.hour) + ":" + to_string(calendar_time.min) +
+      ":" + to_string(calendar_time.sec) + "." +
+      to_string(calendar_time.milliSec) + to_string(calendar_time.microSec);
+  return result;
+}
+
 ODD::DataType getNodeValue(UA_Variant variant) {
   switch (variant.type->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
@@ -173,7 +184,8 @@ ODD::DataType getNodeValue(UA_Variant variant) {
     return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    break;
+    auto value = getTimestamp(*((UA_DateTime*)(variant.data)));
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
     auto status_code = UA_StatusCode_name(*((UA_StatusCode*)(variant.data)));
@@ -208,17 +220,6 @@ ODD::DataType getNodeValue(UA_Variant variant) {
     throw logic_error(error_msg);
   }
   }
-}
-
-string getTimestamp(UA_DateTime timestamp) {
-  auto calendar_time = UA_DateTime_toStruct(timestamp);
-  /* Format UA_DateTime into a %Y-%m-%d %H:%M:%S.%ms%us*/
-  string result = to_string(calendar_time.year) + "-" +
-      to_string(calendar_time.month) + "-" + to_string(calendar_time.day) +
-      " " + to_string(calendar_time.hour) + ":" + to_string(calendar_time.min) +
-      ":" + to_string(calendar_time.sec) + "." +
-      to_string(calendar_time.milliSec) + to_string(calendar_time.microSec);
-  return result;
 }
 
 void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
