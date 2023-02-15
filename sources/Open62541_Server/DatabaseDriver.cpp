@@ -272,39 +272,24 @@ void DatabaseDriver::drop(const string& table_name) {
   execute("DROP TABLE IF EXISTS ", table_name);
 }
 
-void DatabaseDriver::insert(const string& table_name,
-    vector<string> column_names, DataPoints data_points) {
-  string columns = "(";
-  string values_placeholder = "(";
-  for (auto column : column_names) {
-    columns += column + ",";
-    values_placeholder += "?,";
+void DatabaseDriver::insert(
+    const string& table_name, vector<ColumnValue> values) {
+  string column_names = "(";
+  string column_values = "(";
+  for (auto value : values) {
+    column_names += value.name() + ",";
+    column_values += ODD::toString(value.value()) + ",";
   }
-  columns.pop_back();
-  values_placeholder.pop_back();
-  columns += ")";
-  values_placeholder += ")";
+  column_names.pop_back();
+  column_values.pop_back();
+  column_names += ")";
+  column_values += ")";
 
-  auto query = "INSERT INTO " + table_name + " " + columns + " values" +
-      values_placeholder + ";";
+  auto query = "INSERT INTO " + table_name + " " + column_names + " values" +
+      column_values + ";";
 
-  nanodbc::statement statement(*db_);
-  nanodbc::prepare(statement, query);
-  for (uint32_t i = 0; i < data_points.size(); ++i) {
-    // clang-format off
-    // I might want to refactor this into functors instead, to avoid accessing temporary values after their cleanup
-    match(data_points[i], // this might be a bad idea, since we are taking the address of a temporary
-        [&](bool value) { statement.bind(i, &value); },
-        [&](uintmax_t value) { statement.bind(i, &value); },
-        [&](intmax_t value) { statement.bind(i, &value); },
-        [&](float value) { statement.bind(i, &value); },
-        [&](double value) { statement.bind(i, &value); },
-        [&](string value) { statement.bind(i, value.c_str()); }, // really bad idea?
-        [&](vector<uint8_t> value) { 
-          auto string_value = HSCUL::toString(value); 
-          statement.bind(i, string_value.c_str()); }); // really bad idea?
-    // clang-format on
-  }
+  execute(query);
+}
 
   nanodbc::execute(statement);
 }

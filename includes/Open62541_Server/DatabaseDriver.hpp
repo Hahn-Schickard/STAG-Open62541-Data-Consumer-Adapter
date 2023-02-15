@@ -162,8 +162,7 @@ struct DatabaseDriver {
     return nanodbc::execute(*db_, concatenate(query_parts...));
   }
 
-  void insert(const std::string& table_name,
-      std::vector<std::string> column_names = {}, DataPoints data_points = {});
+  void insert(const std::string& table_name, std::vector<ColumnValue> values);
 
 private:
   std::unique_ptr<nanodbc::connection> db_;
