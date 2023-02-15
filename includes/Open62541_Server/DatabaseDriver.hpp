@@ -22,6 +22,8 @@ using DataType = std::variant<
                     >;
 // clang-format on
 
+std::string toString(DataType data);
+
 using DataPoints = std::vector<DataType>;
 
 // Restrict parameter pack data to only accept string like data types

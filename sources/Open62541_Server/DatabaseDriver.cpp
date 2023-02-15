@@ -7,6 +7,20 @@ using namespace nanodbc;
 
 namespace ODD {
 
+string toString(DataType data) {
+  string result;
+  match(data, // clang-format off
+      [&result](bool value) { result = value ? "True" : "False"; },
+      [&result](uintmax_t value) { result = to_string(value); },
+      [&result](intmax_t value) { result = to_string(value); },
+      [&result](float value) { result = to_string(value); },
+      [&result](double value) { result = to_string(value); },
+      [&result](string value) { result = "\'" + value + "\'"; },
+      [&result](vector<uint8_t> value) { result = HSCUL::toString(value); }
+      ); // clang-format on
+  return result;
+}
+
 string toString(ColumnDataType type) {
   switch (type) {
   case ColumnDataType::BOOLEAN: {
