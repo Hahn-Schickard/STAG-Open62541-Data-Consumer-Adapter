@@ -2,6 +2,8 @@
 #include "HaSLL/LoggerManager.hpp"
 #include "Utility.hpp"
 
+#include <chrono>
+#include <date/date.h>
 #include <open62541/client_subscriptions.h>
 #include <open62541/server.h>
 #include <string>
@@ -89,6 +91,11 @@ ODD::ColumnDataType getColumnDataType(const UA_DataType* variant) {
     throw logic_error(error_msg);
   }
   }
+}
+
+string getCurrentTimestamp() {
+  auto timestamp = chrono::system_clock::now();
+  return date::format("%F %T", timestamp);
 }
 
 UA_StatusCode Historizer::registerNodeId(
