@@ -134,59 +134,77 @@ void Historizer::clear(UA_HistoryDatabase* database) {
   // there is nothing to clear, since we do not use a context
 }
 
-void getNodeValue(UA_Variant data) {
-  switch (data.type->typeKind) {
+ODD::DataType getNodeValue(UA_Variant variant) {
+  switch (variant.type->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-    break;
+    auto value = *((bool*)(variant.data));
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    break;
+    auto value = (intmax_t) * ((UA_SByte*)(variant.data));
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    break;
+    auto value = (intmax_t) * ((UA_Int16*)(variant.data));
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    break;
+    auto value = (intmax_t) * ((UA_Int32*)(variant.data));
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    break;
+    auto value = (intmax_t) * ((UA_Int64*)(variant.data));
+    return ODD::DataType(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    auto value = (uintmax_t) * ((UA_Byte*)(variant.data));
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    break;
+    auto value = (uintmax_t) * ((UA_UInt16*)(variant.data));
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    break;
+    auto value = (uintmax_t) * ((UA_UInt32*)(variant.data));
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    break;
+    auto value = (uintmax_t) * ((UA_UInt64*)(variant.data));
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-    break;
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-    break;
+    auto status_code = UA_StatusCode_name(*((UA_StatusCode*)(variant.data)));
+    auto value = string(status_code);
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-    break;
+    auto value = (UA_Float*)(variant.data);
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    break;
+    auto value = (UA_Double*)(variant.data);
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-    break;
+    auto byte_string = (UA_ByteString*)(variant.data);
+    auto value = vector<uint8_t>(
+        byte_string->data, byte_string->data + byte_string->length);
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-    break;
+    auto* ua_string = (UA_String*)(variant.data);
+    auto value = string((char*)ua_string->data, ua_string->length);
+    return ODD::DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
-    break;
+    [[fallthrough]];
   }
   default: {
     string error_msg =
-        "Unhandeled UA_Variant type detected: " + string(data.type->typeName);
+        "Unhandled UA_Variant type detected: " + string(variant.type->typeName);
     throw logic_error(error_msg);
   }
   }
