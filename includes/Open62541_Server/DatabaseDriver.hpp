@@ -179,5 +179,6 @@ struct DatabaseDriver {
 private:
   std::unique_ptr<nanodbc::connection> db_;
 };
+using DatabaseDriverPtr = std::unique_ptr<DatabaseDriver>;
 } // namespace ODD
 #endif // __DATABASE_DRIVER_HPP
