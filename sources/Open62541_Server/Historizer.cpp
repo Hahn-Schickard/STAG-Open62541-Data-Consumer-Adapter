@@ -255,7 +255,6 @@ void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
   if (historizing) {
     if (value->hasValue) {
       try {
-        getNodeValue(value->value); // get data
         string server_time;
         if (value->hasServerTimestamp) {
           server_time = getTimestamp(value->serverTimestamp);
@@ -264,7 +263,16 @@ void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
         if (value->hasSourceTimestamp) {
           source_time = getTimestamp(value->sourceTimestamp);
         }
-        // write data change for given node to our db
+        auto data = getNodeValue(value->value); // get data
+        db_->insert(node_id,
+            vector<ODD::ColumnValue>{// clang-format off
+              ODD::ColumnValue("Server_Timestamp", server_time), 
+              ODD::ColumnValue("Source_Timestamp", source_time),
+              ODD::ColumnValue("Value", data)
+            }); // clang-format on
+        db_->update("Historized_Nodes",
+            ODD::ColumnFilter(ODD::FilterType::EQUAL, "Node_Id", node_id),
+            ODD::ColumnValue("Last_Updated", getCurrentTimestamp()));
       } catch (exception& ex) {
         log(SeverityLevel::ERROR,
             "Failed to historize Node {} value due to an exception. Exception "
