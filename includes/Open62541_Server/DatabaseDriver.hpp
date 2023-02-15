@@ -35,16 +35,17 @@ using OnlyStringTypes = typename std::enable_if<
 // clang-format on
 
 // Passthrough incase there is nothing to concatenate
-std::string concatenate(const std::string& head) { return head; }
+inline std::string concatenate(const std::string& head) { return head; }
 
 // Final concatenate function
-std::string concatenate(const std::string& head, const std::string& tail) {
+inline std::string concatenate(
+    const std::string& head, const std::string& tail) {
   return head + tail;
 }
 
 // Unwinding method for variadic concatenate function
 template <typename... T, typename = OnlyStringTypes<T...>>
-std::string concatenate(
+inline std::string concatenate(
     const std::string& head, const std::string& tail, const T&... remainder) {
   return concatenate(head + tail, remainder...);
 }
