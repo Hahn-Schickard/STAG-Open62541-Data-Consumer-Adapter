@@ -188,6 +188,15 @@ string toString(FilterType type) {
   }
 }
 
+ColumnValue::ColumnValue(const string& name, DataType value)
+    : name_(name), value_(value) {}
+
+string ColumnValue::name() { return name_; }
+
+string ColumnValue::toString() { return name_ + "=" + ODD::toString(value_); }
+
+DataType ColumnValue::value() { return value_; }
+
 ColumnFilter::ColumnFilter(FilterType type, const string column_name)
     : ColumnFilter(type, column_name, DataType{}) {}
 

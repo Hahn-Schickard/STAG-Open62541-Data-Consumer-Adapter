@@ -99,6 +99,18 @@ private:
 
 using Columns = std::vector<Column>;
 
+struct ColumnValue {
+  ColumnValue(const std::string& name, DataType value_);
+
+  std::string name();
+  std::string toString();
+  DataType value();
+
+private:
+  std::string name_;
+  DataType value_;
+};
+
 enum class FilterType {
   EQUAL,
   NOT_EQUAL,
