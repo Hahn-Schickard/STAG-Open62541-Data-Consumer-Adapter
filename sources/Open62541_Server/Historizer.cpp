@@ -33,6 +33,64 @@ void Historizer::log(SeverityLevel level, string message, Types... args) {
   }
 }
 
+ODD::ColumnDataType getColumnDataType(const UA_DataType* variant) {
+  switch (variant->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
+    return ODD::ColumnDataType::BOOLEAN;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
+    [[fallthrough]];
+  }
+  default: {
+    string error_msg =
+        "Unhandeled UA_DataType detected: " + string(variant->typeName);
+    throw logic_error(error_msg);
+  }
+  }
+}
+
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId nodeId, const UA_DataType* type) {
   auto monitor_request = UA_MonitoredItemCreateRequest_default(nodeId);
