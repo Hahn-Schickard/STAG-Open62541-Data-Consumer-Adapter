@@ -325,7 +325,7 @@ void DatabaseDriver::update(
 }
 
 DataType intoDataType(
-    int type_id, const short column_id, nanoodbc::result& data) {
+    int type_id, const short column_id, nanodbc::result& data) {
   switch (type_id) {
   case SQL_C_CHAR: {
     return DataType(data.get<string>(column_id));
@@ -410,7 +410,7 @@ DataType intoDataType(
 }
 
 unordered_map<size_t, vector<ColumnValue>> intoColumnValues(
-    nanoodbc::result data) {
+    nanodbc::result data) {
   unordered_map<size_t, vector<ColumnValue>> result;
   size_t row = 0;
   do {
