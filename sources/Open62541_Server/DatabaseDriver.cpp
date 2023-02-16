@@ -332,33 +332,27 @@ DataType intoDataType(
   }
   case SQL_C_UTINYINT:
     [[fallthrough]];
-  case SQL_C_TINYINT: {
-    return DataType(data.get<uint8_t>(column_id));
+  case SQL_C_TINYINT:
+    [[fallthrough]];
+  case SQL_C_USHORT:
+    [[fallthrough]];
+  case SQL_C_ULONG:
+    [[fallthrough]];
+  case SQL_C_UBIGINT: {
+    return DataType(data.get<uintmax_t>(column_id));
   }
-  case SQL_C_STINYINT: {
-    return DataType(data.get<int8_t>(column_id));
-  }
+  case SQL_C_STINYINT:
+    [[fallthrough]];
   case SQL_C_SSHORT:
     [[fallthrough]];
-  case SQL_C_SHORT: {
-    return DataType(data.get<short>(column_id));
-  }
-  case SQL_C_USHORT: {
-    return DataType(data.get<unsigned short>(column_id));
-  }
+  case SQL_C_SHORT:
+    [[fallthrough]];
   case SQL_C_LONG:
     [[fallthrough]];
-  case SQL_C_SLONG: {
-    return DataType(data.get<int32_t>(column_id));
-  }
-  case SQL_C_ULONG: {
-    return DataType(data.get<uint32_t>(column_id));
-  }
+  case SQL_C_SLONG:
+    [[fallthrough]];
   case SQL_C_SBIGINT: {
-    return DataType(data.get<int64_t>(column_id));
-  }
-  case SQL_C_UBIGINT: {
-    return DataType(data.get<uint64_t>(column_id));
+    return DataType(data.get<intmax_t>(column_id));
   }
   case SQL_C_FLOAT: {
     return DataType(data.get<float>(column_id));
@@ -378,25 +372,22 @@ DataType intoDataType(
     [[fallthrough]];
   case SQL_C_TIME: {
     auto time = data.get<nanodbc::time>(column_id);
-    string value = to_string(date.hour) + ":" + to_string(date.min) + ":" +
-        to_string(date.sec);
+    string value = to_string(time.hour) + ":" + to_string(time.min) + ":" +
+        to_string(time.sec);
     return DataType(value);
   }
   case SQL_C_TYPE_TIMESTAMP:
     [[fallthrough]];
   case SQL_C_TIMESTAMP: {
     auto timestamp = data.get<nanodbc::timestamp>(column_id);
-    string value = to_string(date.year) + "-" + to_string(date.month) + "-" +
-        to_string(date.day) + " " to_string(date.hour) + ":" +
-        to_string(date.min) + ":" + to_string(date.sec) + "." +
-        to_string(date.fract);
+    string value = to_string(timestamp.year) + "-" +
+        to_string(timestamp.month) + "-" + to_string(timestamp.day) + " " +
+        to_string(timestamp.hour) + ":" + to_string(timestamp.min) + ":" +
+        to_string(timestamp.sec) + "." + to_string(timestamp.fract);
     return DataType(value);
   }
   case SQL_C_BINARY: {
     return DataType(data.get<vector<uint8_t>>(column_id));
-  }
-  case SQL_C_BIT: {
-    return DataType(data.get<bool>(column_id));
   }
   case SQL_C_NUMERIC:
     [[fallthrough]];
