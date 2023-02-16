@@ -1,5 +1,6 @@
 #include "DatabaseDriver.hpp"
 #include "HSCUL/String.hpp"
+#include "SQL_DataTypes.h"
 #include "Variant_Visitor.hpp"
 
 using namespace std;
@@ -321,5 +322,150 @@ void DatabaseDriver::update(
 void DatabaseDriver::update(
     const string& table_name, ColumnFilter filter, ColumnValue value) {
   update(table_name, vector<ColumnFilter>{filter}, vector<ColumnValue>{value});
+}
+
+DataType intoDataType(
+    int type_id, const short column_id, nanoodbc::result& data) {
+  switch (type_id) {
+  case SQL_C_CHAR: {
+    return DataType(data.get<string>(column_id));
+  }
+  case SQL_C_UTINYINT:
+    [[fallthrough]];
+  case SQL_C_TINYINT: {
+    return DataType(data.get<uint8_t>(column_id));
+  }
+  case SQL_C_STINYINT: {
+    return DataType(data.get<int8_t>(column_id));
+  }
+  case SQL_C_SSHORT:
+    [[fallthrough]];
+  case SQL_C_SHORT: {
+    return DataType(data.get<short>(column_id));
+  }
+  case SQL_C_USHORT: {
+    return DataType(data.get<unsigned short>(column_id));
+  }
+  case SQL_C_LONG:
+    [[fallthrough]];
+  case SQL_C_SLONG: {
+    return DataType(data.get<int32_t>(column_id));
+  }
+  case SQL_C_ULONG: {
+    return DataType(data.get<uint32_t>(column_id));
+  }
+  case SQL_C_SBIGINT: {
+    return DataType(data.get<int64_t>(column_id));
+  }
+  case SQL_C_UBIGINT: {
+    return DataType(data.get<uint64_t>(column_id));
+  }
+  case SQL_C_FLOAT: {
+    return DataType(data.get<float>(column_id));
+  }
+  case SQL_C_DOUBLE: {
+    return DataType(data.get<double>(column_id));
+  }
+  case SQL_C_TYPE_DATE:
+    [[fallthrough]];
+  case SQL_C_DATE: {
+    auto date = data.get<nanodbc::date>(column_id);
+    string value = to_string(date.year) + "-" + to_string(date.month) + "-" +
+        to_string(date.day);
+    return DataType(value);
+  }
+  case SQL_C_TYPE_TIME:
+    [[fallthrough]];
+  case SQL_C_TIME: {
+    auto time = data.get<nanodbc::time>(column_id);
+    string value = to_string(date.hour) + ":" + to_string(date.min) + ":" +
+        to_string(date.sec);
+    return DataType(value);
+  }
+  case SQL_C_TYPE_TIMESTAMP:
+    [[fallthrough]];
+  case SQL_C_TIMESTAMP: {
+    auto timestamp = data.get<nanodbc::timestamp>(column_id);
+    string value = to_string(date.year) + "-" + to_string(date.month) + "-" +
+        to_string(date.day) + " " to_string(date.hour) + ":" +
+        to_string(date.min) + ":" + to_string(date.sec) + "." +
+        to_string(date.fract);
+    return DataType(value);
+  }
+  case SQL_C_BINARY: {
+    return DataType(data.get<vector<uint8_t>>(column_id));
+  }
+  case SQL_C_BIT: {
+    return DataType(data.get<bool>(column_id));
+  }
+  case SQL_C_NUMERIC:
+    [[fallthrough]];
+  default: {
+    string error_msg = "Requested for DataType conversion for an unsupported "
+                       "SQL C Type: " +
+        to_string(type_id);
+    throw domain_error(error_msg);
+  }
+  }
+}
+
+unordered_map<size_t, vector<ColumnValue>> intoColumnValues(
+    nanoodbc::result data) {
+  unordered_map<size_t, vector<ColumnValue>> result;
+  size_t row = 0;
+  do {
+    vector<ColumnValue> values;
+    for (size_t column = 0; column < data.columns(); ++column) {
+      values.emplace_back(data.column_name(column),
+          intoDataType(data.column_c_datatype(column), column, data));
+    }
+    result.emplace(row, values);
+    ++row;
+  } while (data.next());
+  return result;
+}
+
+unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
+    const string& table_name, vector<string> column_names,
+    vector<ColumnFilter> filters) {
+  string columns;
+  for (auto column_name : column_names) {
+    columns += column_name + ",";
+  }
+  columns.pop_back();
+
+  auto query = "SELECT " + columns + " FROM " + table_name;
+  if (!filters.empty()) {
+    string filter_values;
+    for (auto filter : filters) {
+      filter_values += filter.toString() + " AND ";
+    }
+    filter_values.erase(filter_values.rfind(" AND "));
+
+    query += " WHERE " + filter_values;
+
+    auto result = execute(query);
+    return intoColumnValues(result);
+  }
+}
+
+unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
+    const string& table_name, vector<string> column_names) {
+  return read(table_name, column_names, vector<ColumnFilter>{});
+}
+
+unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
+    const string& table_name, vector<ColumnFilter> filter) {
+  return read(table_name, vector<string>{"*"}, filter);
+}
+
+unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
+    const string& table_name, ColumnFilter filter) {
+  return read(table_name, vector<ColumnFilter>{filter});
+}
+
+unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
+    const string& table_name, string column_name) {
+  return read(table_name, vector<string>{column_name});
 }
 } // namespace ODD

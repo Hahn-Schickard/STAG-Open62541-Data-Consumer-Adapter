@@ -5,6 +5,7 @@
 #include <memory>
 #include <nanodbc/nanodbc.h>
 #include <string>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -175,6 +176,22 @@ struct DatabaseDriver {
 
   void update(
       const std::string& table_name, ColumnFilter filter, ColumnValue value);
+
+  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+      const std::string& table_name, std::vector<std::string> column_names,
+      std::vector<ColumnFilter> filter);
+
+  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+      const std::string& table_name, std::vector<std::string> column_names);
+
+  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+      const std::string& table_name, std::vector<ColumnFilter> filter);
+
+  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+      const std::string& table_name, ColumnFilter filter);
+
+  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+      const std::string& table_name, std::string column_name);
 
 private:
   std::unique_ptr<nanodbc::connection> db_;
