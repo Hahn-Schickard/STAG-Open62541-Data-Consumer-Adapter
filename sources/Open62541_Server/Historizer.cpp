@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <date/date.h>
+#include <date/tz.h> // is this needed?
 #include <open62541/client_subscriptions.h>
 #include <open62541/server.h>
 #include <string>
@@ -266,8 +267,8 @@ void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
         auto data = getNodeValue(value->value); // get data
         db_->insert(node_id,
             vector<ODD::ColumnValue>{// clang-format off
-              ODD::ColumnValue("Server_Timestamp", server_time), 
               ODD::ColumnValue("Source_Timestamp", source_time),
+              ODD::ColumnValue("Server_Timestamp", server_time), 
               ODD::ColumnValue("Value", data)
             }); // clang-format on
         db_->update("Historized_Nodes",
@@ -294,6 +295,113 @@ void Historizer::setEvent(UA_Server* server, void* /*hdbContext*/,
     const UA_EventFilter* historicalEventFilter, UA_EventFieldList* fieldList) {
 }
 
+UA_StatusCode appendUADataValue(UA_HistoryData* result,
+    UA_DataValue* data_points, size_t data_points_size) {
+  if (result->dataValuesSize == 0) {
+    // no previous data to append to
+    result->dataValuesSize = data_points_size;
+    result->dataValues = data_points;
+    return UA_STATUSCODE_GOOD;
+  } else {
+    UA_StatusCode status = UA_STATUSCODE_BAD; // nothing was appended
+    for (size_t i = 0; i < data_points_size; ++i) {
+      // there is no method in open62541 to expand an existing array with
+      // another array of the same type, so we need to manually append values
+      status = UA_Array_append( // use UA_Array_appendCopy instead?
+          (void**)&(result->dataValues), &result->dataValuesSize,
+          &(data_points[i]), &UA_TYPES[UA_TYPES_DATAVALUE]);
+      if (status != UA_STATUSCODE_GOOD) {
+        // early return for failure
+        return status;
+      }
+    }
+    return status;
+  }
+}
+
+UA_Variant toUAVariant(ODD::DataType data) {
+  // throw domain_error("Invalid Conversion");
+}
+
+UA_DateTime toUADateTime(ODD::DataType data) {
+  if (holds_alternative<string>(data)) {
+    using namespace date;
+    using namespace std::chrono;
+
+    istringstream string_stream{get<string>(data)};
+    system_clock::time_point time_point;
+    string_stream >> parse("%F %T", time_point);
+
+    UA_DateTimeStruct calendar_time;
+    auto calender_date = year_month_day{floor<days>(time_point)};
+    calendar_time.year = int{calender_date.year()};
+    calendar_time.month = unsigned{calender_date.month()};
+    calendar_time.day = unsigned{calender_date.day()};
+
+    auto day_time = hh_mm_ss{time_point};
+    calendar_time.hour = day_time.hours().count();
+    calendar_time.min = day_time.minutes().count();
+    calendar_time.sec = day_time.seconds().count();
+    calendar_time.milliSec = floor<milliseconds>(day_time).count();
+    calendar_time.microSec = floor<microseconds>(day_time.seconds()).count();
+    calendar_time.nanoSec = floor<nanoseconds>(day_time.seconds()).count();
+
+    return UA_DateTime_fromStruct(calendar_time);
+  } else {
+    throw domain_error("ODD::DataType can not be converted into UA_DateTime. "
+                       "It does not contain a DateTime string.");
+  }
+}
+
+UA_StatusCode expandHistoryResult(UA_HistoryData* result,
+    unordered_map<size_t, vector<ODD::ColumnValue>> rows) {
+  auto* data =
+      (UA_DataValue*)UA_Array_new(rows.size(), &UA_TYPES[UA_TYPES_DATAVALUE]);
+  if (!data) {
+    return UA_STATUSCODE_BADOUTOFMEMORY;
+  }
+
+  for (size_t index = 0; index < rows.size(); ++index) {
+    try {
+      if (rows[index].size() == 3) {
+        // row has Source_Timestamp, Server_Timestamp and Value columns
+        data[index].hasSourceTimestamp = true;
+        data[index].hasServerTimestamp = true;
+        data[index].sourceTimestamp = toUADateTime(rows[index][0].value());
+        data[index].serverTimestamp = toUADateTime(rows[index][1].value());
+        data[index].value = toUAVariant(rows[index][2].value());
+      } else if (rows[index].size() == 2) {
+        if (rows[index][0].name() == "Source_Timestamp") {
+          // row has Source_Timestamp column
+          data[index].hasSourceTimestamp = true;
+          data[index].sourceTimestamp = toUADateTime(rows[index][0].value());
+        } else {
+          // row has Server_Timestamp column
+          data[index].hasServerTimestamp = true;
+          data[index].serverTimestamp = toUADateTime(rows[index][0].value());
+        }
+        // remaining row column MUST be Value
+        data[index].value = toUAVariant(rows[index][1].value());
+      } else {
+        // row only has Value column
+        data[index].hasSourceTimestamp = false;
+        data[index].hasServerTimestamp = false;
+        data[index].value = toUAVariant(rows[index][0].value());
+      }
+      data[index].hasValue = true;
+    } catch (domain_error& ex) {
+      // failed to decode timestamps or value for UA_DataValue, hasValue was
+      // not set to true, so it MUST be false
+      data[index].hasStatus = true;
+      data[index].status =
+          UA_STATUSCODE_BADDECODINGERROR; // mark the entire data set or just
+                                          // the failed value?
+    }
+  }
+
+  return appendUADataValue(result, data, rows.size());
+}
+
 void Historizer::readRaw(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* sessionId, void* /*sessionContext*/,
     const UA_RequestHeader* requestHeader,
@@ -301,7 +409,64 @@ void Historizer::readRaw(UA_Server* server, void* /*hdbContext*/,
     UA_TimestampsToReturn timestampsToReturn,
     UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
     const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
-    UA_HistoryData* const* const historyData) {}
+    UA_HistoryData* const* const historyData) {
+  if (db_) {
+    for (size_t i = 0; i < nodesToReadSize; ++i) {
+      vector<string> columns;
+      switch (timestampsToReturn) {
+      case UA_TIMESTAMPSTORETURN_SOURCE: {
+        columns.push_back("Source_Timestamp");
+        break;
+      }
+      case UA_TIMESTAMPSTORETURN_SERVER: {
+        columns.push_back("Server_Timestamp");
+        break;
+      }
+      case UA_TIMESTAMPSTORETURN_BOTH: {
+        columns.push_back("Source_Timestamp");
+        columns.push_back("Server_Timestamp");
+        break;
+      }
+      case UA_TIMESTAMPSTORETURN_NEITHER:
+        [[fallthrough]];
+      default: { break; }
+      }
+      columns.push_back("Value");
+
+      ODD::FilterType start_filter, end_filter;
+      if (historyReadDetails->returnBounds) {
+        start_filter = ODD::FilterType::GREATER_OR_EQUAL;
+        end_filter = ODD::FilterType::LESS_OR_EQUAL;
+      } else {
+        start_filter = ODD::FilterType::GREATER;
+        end_filter = ODD::FilterType::LESS;
+      }
+      vector<ODD::ColumnFilter> filters;
+      filters.emplace_back(start_filter, "Source_Timestamp",
+          getTimestamp(historyReadDetails->startTime));
+      filters.emplace_back(end_filter, "Source_Timestamp",
+          getTimestamp(historyReadDetails->endTime));
+
+      auto node_id = toString(&(nodesToRead[i].nodeId));
+      try {
+        auto history_values = db_->read(
+            node_id, columns, filters, historyReadDetails->numValuesPerNode);
+        // do something with releaseContinuationPoints
+        // do something with &nodesToRead[i].continuationPoint
+        // do something with &response->results[i].continuationPoint
+        response->results[i].statusCode =
+            expandHistoryResult(historyData[i], history_values);
+      } catch (exception& ex) {
+        // handle unexpected read exceptions here
+        response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
+      }
+    }
+    response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
+  } else {
+    response->responseHeader.serviceResult =
+        UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+  }
+}
 
 void Historizer::readModified(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* sessionId, void* /*sessionContext*/,
