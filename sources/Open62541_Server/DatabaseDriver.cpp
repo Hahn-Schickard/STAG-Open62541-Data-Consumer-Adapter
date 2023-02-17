@@ -418,7 +418,7 @@ unordered_map<size_t, vector<ColumnValue>> intoColumnValues(
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, vector<string> column_names,
-    vector<ColumnFilter> filters) {
+    vector<ColumnFilter> filters, optional<size_t> response_limit) {
   string columns;
   for (auto column_name : column_names) {
     columns += column_name + ",";
@@ -435,28 +435,37 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
 
     query += " WHERE " + filter_values;
 
+    if (response_limit.has_value()) {
+      query +=
+          "FETCH FIRST " + to_string(response_limit.value()) + " ROWS ONLY";
+    }
+
     auto result = execute(query);
     return intoColumnValues(result);
   }
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
-    const string& table_name, vector<string> column_names) {
-  return read(table_name, column_names, vector<ColumnFilter>{});
+    const string& table_name, vector<string> column_names,
+    optional<size_t> response_limit) {
+  return read(table_name, column_names, vector<ColumnFilter>{}, response_limit);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
-    const string& table_name, vector<ColumnFilter> filter) {
-  return read(table_name, vector<string>{"*"}, filter);
+    const string& table_name, vector<ColumnFilter> filter,
+    optional<size_t> response_limit) {
+  return read(table_name, vector<string>{"*"}, filter, response_limit);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
-    const string& table_name, ColumnFilter filter) {
-  return read(table_name, vector<ColumnFilter>{filter});
+    const string& table_name, ColumnFilter filter,
+    optional<size_t> response_limit) {
+  return read(table_name, vector<ColumnFilter>{filter}, response_limit);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
-    const string& table_name, string column_name) {
-  return read(table_name, vector<string>{column_name});
+    const string& table_name, string column_name,
+    optional<size_t> response_limit) {
+  return read(table_name, vector<string>{column_name}, response_limit);
 }
 } // namespace ODD

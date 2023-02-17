@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <nanodbc/nanodbc.h>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -179,19 +180,24 @@ struct DatabaseDriver {
 
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
       const std::string& table_name, std::vector<std::string> column_names,
-      std::vector<ColumnFilter> filter);
+      std::vector<ColumnFilter> filter,
+      std::optional<size_t> response_limit = std::nullopt);
 
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
-      const std::string& table_name, std::vector<std::string> column_names);
+      const std::string& table_name, std::vector<std::string> column_names,
+      std::optional<size_t> response_limit = std::nullopt);
 
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
-      const std::string& table_name, std::vector<ColumnFilter> filter);
+      const std::string& table_name, std::vector<ColumnFilter> filter,
+      std::optional<size_t> response_limit = std::nullopt);
 
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
-      const std::string& table_name, ColumnFilter filter);
+      const std::string& table_name, ColumnFilter filter,
+      std::optional<size_t> response_limit = std::nullopt);
 
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
-      const std::string& table_name, std::string column_name);
+      const std::string& table_name, std::string column_name,
+      std::optional<size_t> response_limit = std::nullopt);
 
 private:
   std::unique_ptr<nanodbc::connection> db_;
