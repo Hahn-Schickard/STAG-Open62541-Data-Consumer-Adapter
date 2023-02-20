@@ -194,6 +194,11 @@ struct DatabaseDriver {
       const std::string& table_name, std::string column_name,
       std::optional<size_t> response_limit = std::nullopt);
 
+  template <typename... T, typename = OnlyStringTypes<T...>>
+  void query(const T&... query_parts) {
+    execute(query_parts...);
+  }
+
 private:
   template <typename... T, typename = OnlyStringTypes<T...>>
   nanodbc::result execute(const T&... query_parts) {
