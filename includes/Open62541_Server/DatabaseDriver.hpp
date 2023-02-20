@@ -147,6 +147,19 @@ private:
   DataPoints values_;
 };
 
+struct OverrunPoint {
+  OverrunPoint() = default;
+
+  bool hasMoreValues();
+
+  std::vector<ColumnValue> getOverrunRecord();
+
+private:
+  friend struct DatabaseDriver;
+
+  std::vector<ColumnValue> columns_;
+};
+
 struct DatabaseDriver {
   DatabaseDriver();
 
@@ -176,23 +189,33 @@ struct DatabaseDriver {
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
       const std::string& table_name, std::vector<std::string> column_names,
       std::vector<ColumnFilter> filter,
-      std::optional<size_t> response_limit = std::nullopt);
+      std::optional<size_t> response_limit = std::nullopt,
+      const std::string& order_by_column = std::string(),
+      bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
       const std::string& table_name, std::vector<std::string> column_names,
-      std::optional<size_t> response_limit = std::nullopt);
+      std::optional<size_t> response_limit = std::nullopt,
+      const std::string& order_by_column = std::string(),
+      bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
       const std::string& table_name, std::vector<ColumnFilter> filter,
-      std::optional<size_t> response_limit = std::nullopt);
+      std::optional<size_t> response_limit = std::nullopt,
+      const std::string& order_by_column = std::string(),
+      bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
       const std::string& table_name, ColumnFilter filter,
-      std::optional<size_t> response_limit = std::nullopt);
+      std::optional<size_t> response_limit = std::nullopt,
+      const std::string& order_by_column = std::string(),
+      bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
   std::unordered_map<size_t, std::vector<ColumnValue>> read(
       const std::string& table_name, std::string column_name,
-      std::optional<size_t> response_limit = std::nullopt);
+      std::optional<size_t> response_limit = std::nullopt,
+      const std::string& order_by_column = std::string(),
+      bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
   template <typename... T, typename = OnlyStringTypes<T...>>
   void query(const T&... query_parts) {

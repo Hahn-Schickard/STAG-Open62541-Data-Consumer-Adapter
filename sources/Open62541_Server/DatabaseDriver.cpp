@@ -252,6 +252,10 @@ DataPoints ColumnFilter::values() { return values_; }
 
 string ColumnFilter::column() { return column_; }
 
+bool OverrunPoint::hasMoreValues() { return !columns_.empty(); }
+
+vector<ColumnValue> OverrunPoint::getOverrunRecord() { return columns_; }
+
 DatabaseDriver::DatabaseDriver() : DatabaseDriver("PostgreSQL") {}
 
 DatabaseDriver::DatabaseDriver(const string& data_source)
@@ -426,7 +430,9 @@ unordered_map<size_t, vector<ColumnValue>> intoRowValues(nanodbc::result data) {
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, vector<string> column_names,
-    vector<ColumnFilter> filters, optional<size_t> response_limit) {
+    vector<ColumnFilter> filters, optional<size_t> response_limit,
+    const string& order_by_column, bool highest_value_first,
+    OverrunPoint* overrun) {
   string columns;
   for (const auto& column_name : column_names) {
     columns += column_name + ",";
@@ -444,8 +450,25 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     query += " WHERE " + filter_values;
 
     if (response_limit.has_value()) {
-      query +=
-          "FETCH FIRST " + to_string(response_limit.value()) + " ROWS ONLY";
+      auto record_limit = response_limit.value();
+      if (overrun != nullptr) {
+        // get the number of records that match the given filter parameters
+        auto record_count = execute(
+            "SELECT COUNT(*) FROM ", table_name, " WHERE ", filter_values)
+                                .get<size_t>(0);
+        if (record_count > record_limit) {
+          // if there are more values, that could be fetched, get the row
+          // values, from which to fetch the next point
+          auto last_row = execute("SELECT * FROM ", table_name, " WHERE ",
+              filter_values, " ORDER BY ", order_by_column,
+              (highest_value_first ? " DESC" : " ASC"), "OFFSET ",
+              to_string(record_limit - 1), " ROWS FETCH NEXT 1 ROWS ONLY");
+          overrun->columns_ = intoColumnValues(last_row);
+        }
+      }
+      query += " ORDER BY " + order_by_column +
+          (highest_value_first ? " DESC" : " ASC") + " FETCH FIRST " +
+          to_string(record_limit) + " ROWS ONLY";
     }
   }
   auto result = execute(query);
@@ -454,26 +477,33 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, vector<string> column_names,
-    optional<size_t> response_limit) {
-  return read(
-      table_name, move(column_names), vector<ColumnFilter>{}, response_limit);
+    optional<size_t> response_limit, const string& order_by_column,
+    bool highest_value_first, OverrunPoint* overrun) {
+  return read(table_name, move(column_names), vector<ColumnFilter>{},
+      response_limit, order_by_column, highest_value_first, overrun);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, vector<ColumnFilter> filter,
-    optional<size_t> response_limit) {
-  return read(table_name, vector<string>{"*"}, move(filter), response_limit);
+    optional<size_t> response_limit, const string& order_by_column,
+    bool highest_value_first, OverrunPoint* overrun) {
+  return read(table_name, vector<string>{"*"}, move(filter), response_limit,
+      order_by_column, highest_value_first, overrun);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, ColumnFilter filter,
-    optional<size_t> response_limit) {
-  return read(table_name, vector<ColumnFilter>{move(filter)}, response_limit);
+    optional<size_t> response_limit, const string& order_by_column,
+    bool highest_value_first, OverrunPoint* overrun) {
+  return read(table_name, vector<ColumnFilter>{move(filter)}, response_limit,
+      order_by_column, highest_value_first, overrun);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, string column_name,
-    optional<size_t> response_limit) {
-  return read(table_name, vector<string>{move(column_name)}, response_limit);
+    optional<size_t> response_limit, const string& order_by_column,
+    bool highest_value_first, OverrunPoint* overrun) {
+  return read(table_name, vector<string>{move(column_name)}, response_limit,
+      order_by_column, highest_value_first, overrun);
 }
 } // namespace ODD
