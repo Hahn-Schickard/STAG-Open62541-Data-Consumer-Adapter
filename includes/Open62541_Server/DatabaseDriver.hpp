@@ -131,10 +131,10 @@ enum class FilterType {
 std::string toString(FilterType type);
 
 struct ColumnFilter {
-  ColumnFilter(FilterType type, const std::string column_name);
-  ColumnFilter(FilterType type, const std::string column_name, DataType value);
+  ColumnFilter(FilterType type, const std::string& column_name);
+  ColumnFilter(FilterType type, const std::string& column_name, DataType value);
   ColumnFilter(
-      FilterType type, const std::string column_name, DataPoints values);
+      FilterType type, const std::string& column_name, DataPoints values);
 
   FilterType type();
   std::string toString();

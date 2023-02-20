@@ -198,12 +198,12 @@ string ColumnValue::toString() { return name_ + "=" + ODD::toString(value_); }
 
 DataType ColumnValue::value() { return value_; }
 
-ColumnFilter::ColumnFilter(FilterType type, const string column_name)
+ColumnFilter::ColumnFilter(FilterType type, const string& column_name)
     : ColumnFilter(type, column_name, DataType{}) {}
 
 ColumnFilter::ColumnFilter(
-    FilterType type, const string column_name, DataType value)
-    : type_(type), column_(column_name), values_(DataPoints{value}) {
+    FilterType type, const string& column_name, DataType value) // NOLINT
+    : type_(type), column_(column_name), values_(DataPoints{value}) { // NOLINT
   if (type_ == FilterType::LIKE && !holds_alternative<string>(value)) {
     throw invalid_argument(
         "LIKE filter type requires filter value to be in string format");
@@ -211,8 +211,8 @@ ColumnFilter::ColumnFilter(
 }
 
 ColumnFilter::ColumnFilter(
-    FilterType type, const string column_name, DataPoints values)
-    : type_(type), column_(column_name), values_(values_) {
+    FilterType type, const string& column_name, DataPoints values) // NOLINT
+    : type_(type), column_(column_name), values_(values) { // NOLINT
   if ((type_ == FilterType::BETWEEN || type_ == FilterType::NOT_BETWEEN) &&
       values_.size() != 2) {
     throw invalid_argument(
