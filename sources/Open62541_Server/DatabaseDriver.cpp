@@ -97,8 +97,9 @@ bool isFixedLengthType(ColumnDataType type) {
 Column::Column(const string& name, ColumnDataType type)
     : Column(name, type, false) {}
 
-Column::Column(const string& name, ColumnDataType type, bool null_allowed)
-    : name_(name), type_(type), null_allowed_(null_allowed) {
+Column::Column(
+    const string& name, ColumnDataType type, bool null_allowed) // NOLINT
+    : name_(name), type_(type), null_allowed_(null_allowed) { // NOLINT
   if (isVarLengthType(type)) {
     string error_msg = ODD::toString(type) + " requires size parameter";
     throw logic_error(error_msg);
@@ -109,18 +110,19 @@ Column::Column(const string& name, ColumnDataType type, bool null_allowed)
   }
 }
 
-Column::Column(
-    const string& name, ColumnDataType type, uint8_t size, bool null_allowed)
-    : name_(name), type_(type), size_(size), null_allowed_(null_allowed) {
+Column::Column(const string& name, ColumnDataType type, uint8_t size, // NOLINT
+    bool null_allowed)
+    : name_(name), type_(type), size_(size), // NOLINT
+      null_allowed_(null_allowed) {
   if (!isVarLengthType(type)) {
     string error_msg = ODD::toString(type) + " does not use the size parameter";
     throw logic_error(error_msg);
   }
 }
 
-Column::Column(const string& name, ColumnDataType type, uint8_t precision,
-    uint8_t scale, bool null_allowed)
-    : name_(name), type_(type), precision_(precision), scale_(scale),
+Column::Column(const string& name, ColumnDataType type, // NOLINT
+    uint8_t precision, uint8_t scale, bool null_allowed)
+    : name_(name), type_(type), precision_(precision), scale_(scale), // NOLINT
       null_allowed_(null_allowed) {
   if (!isFloatingType(type)) {
     string error_msg = ODD::toString(type) +
@@ -186,11 +188,12 @@ string toString(FilterType type) {
   case FilterType::NOT_IN: {
     return "NOT IN";
   }
+  default: { return ""; }
   }
 }
 
-ColumnValue::ColumnValue(const string& name, DataType value)
-    : name_(name), value_(value) {}
+ColumnValue::ColumnValue(const string& name, DataType value) // NOLINT
+    : name_(name), value_(value) {} // NOLINT
 
 string ColumnValue::name() { return name_; }
 
@@ -234,7 +237,7 @@ string ColumnFilter::toString() {
         ODD::toString(values_[0]) + " AND " + ODD::toString(values_[1]);
   } else if (type_ == FilterType::IN) {
     filter_value = "(";
-    for (auto value : values_) {
+    for (const auto& value : values_) {
       filter_value += ODD::toString(value) + ",";
     }
     filter_value.pop_back();
@@ -311,17 +314,18 @@ void DatabaseDriver::update(const string& table_name,
 
 void DatabaseDriver::update(
     const string& table_name, vector<ColumnFilter> filters, ColumnValue value) {
-  update(table_name, filters, vector<ColumnValue>{value});
+  update(table_name, move(filters), vector<ColumnValue>{move(value)});
 }
 
 void DatabaseDriver::update(
     const string& table_name, ColumnFilter filter, vector<ColumnValue> values) {
-  update(table_name, vector<ColumnFilter>{filter}, values);
+  update(table_name, vector<ColumnFilter>{move(filter)}, move(values));
 }
 
 void DatabaseDriver::update(
     const string& table_name, ColumnFilter filter, ColumnValue value) {
-  update(table_name, vector<ColumnFilter>{filter}, vector<ColumnValue>{value});
+  update(table_name, vector<ColumnFilter>{move(filter)},
+      vector<ColumnValue>{move(value)});
 }
 
 DataType intoDataType(
@@ -406,7 +410,8 @@ unordered_map<size_t, vector<ColumnValue>> intoColumnValues(
   size_t row = 0;
   do {
     vector<ColumnValue> values;
-    for (size_t column = 0; column < data.columns(); ++column) {
+    // why does columns use short instead of unsigned short?
+    for (short column = 0; column < data.columns(); ++column) {
       values.emplace_back(data.column_name(column),
           intoDataType(data.column_c_datatype(column), column, data));
     }
@@ -420,7 +425,7 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, vector<string> column_names,
     vector<ColumnFilter> filters, optional<size_t> response_limit) {
   string columns;
-  for (auto column_name : column_names) {
+  for (const auto& column_name : column_names) {
     columns += column_name + ",";
   }
   columns.pop_back();
@@ -439,33 +444,33 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
       query +=
           "FETCH FIRST " + to_string(response_limit.value()) + " ROWS ONLY";
     }
-
-    auto result = execute(query);
-    return intoColumnValues(result);
   }
+  auto result = execute(query);
+  return intoColumnValues(result);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, vector<string> column_names,
     optional<size_t> response_limit) {
-  return read(table_name, column_names, vector<ColumnFilter>{}, response_limit);
+  return read(
+      table_name, move(column_names), vector<ColumnFilter>{}, response_limit);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, vector<ColumnFilter> filter,
     optional<size_t> response_limit) {
-  return read(table_name, vector<string>{"*"}, filter, response_limit);
+  return read(table_name, vector<string>{"*"}, move(filter), response_limit);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, ColumnFilter filter,
     optional<size_t> response_limit) {
-  return read(table_name, vector<ColumnFilter>{filter}, response_limit);
+  return read(table_name, vector<ColumnFilter>{move(filter)}, response_limit);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     const string& table_name, string column_name,
     optional<size_t> response_limit) {
-  return read(table_name, vector<string>{column_name}, response_limit);
+  return read(table_name, vector<string>{move(column_name)}, response_limit);
 }
 } // namespace ODD
