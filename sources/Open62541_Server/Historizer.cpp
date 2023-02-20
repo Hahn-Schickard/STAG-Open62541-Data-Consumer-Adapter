@@ -365,16 +365,17 @@ UA_DateTime toUADateTime(ODD::DataType data) {
     string_stream >> parse("%F %T", time_point);
 
     UA_DateTimeStruct calendar_time;
-    auto calender_date = year_month_day{floor<days>(time_point)};
+    auto day_point = floor<days>(time_point);
+    auto calender_date = year_month_day{day_point};
     calendar_time.year = int{calender_date.year()};
     calendar_time.month = unsigned{calender_date.month()};
     calendar_time.day = unsigned{calender_date.day()};
 
-    auto day_time = hh_mm_ss{time_point};
+    auto day_time = hh_mm_ss{time_point - day_point};
     calendar_time.hour = day_time.hours().count();
     calendar_time.min = day_time.minutes().count();
     calendar_time.sec = day_time.seconds().count();
-    calendar_time.milliSec = floor<milliseconds>(day_time).count();
+    calendar_time.milliSec = floor<milliseconds>(day_time.seconds()).count();
     calendar_time.microSec = floor<microseconds>(day_time.seconds()).count();
     calendar_time.nanoSec = floor<nanoseconds>(day_time.seconds()).count();
 
