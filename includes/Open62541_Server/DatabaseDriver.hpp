@@ -159,11 +159,6 @@ struct DatabaseDriver {
 
   void drop(const std::string& table_name);
 
-  template <typename... T, typename = OnlyStringTypes<T...>>
-  nanodbc::result execute(const T&... query_parts) {
-    return nanodbc::execute(*db_, concatenate(query_parts...));
-  }
-
   void insert(const std::string& table_name, std::vector<ColumnValue> values);
 
   void update(const std::string& table_name, std::vector<ColumnFilter> filters,
@@ -200,6 +195,11 @@ struct DatabaseDriver {
       std::optional<size_t> response_limit = std::nullopt);
 
 private:
+  template <typename... T, typename = OnlyStringTypes<T...>>
+  nanodbc::result execute(const T&... query_parts) {
+    return nanodbc::execute(*db_, concatenate(query_parts...));
+  }
+
   std::unique_ptr<nanodbc::connection> db_;
 };
 using DatabaseDriverPtr = std::unique_ptr<DatabaseDriver>;
