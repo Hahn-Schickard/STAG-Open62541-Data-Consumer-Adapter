@@ -71,6 +71,13 @@ private:
       const UA_EventFilter* historicalEventFilter,
       UA_EventFieldList* fieldList);
 
+  static std::unordered_map<size_t, std::vector<ODD::ColumnValue>> readHistory(
+      const UA_ReadRawModifiedDetails* historyReadDetails,
+      UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
+      UA_Boolean releaseContinuationPoints,
+      const UA_ByteString* continuationPoint_IN,
+      UA_ByteString* continuationPoint_OUT);
+
   /**
    * @brief Called by UA_Server instance when a history read is requested with
    * isRawReadModified set to false

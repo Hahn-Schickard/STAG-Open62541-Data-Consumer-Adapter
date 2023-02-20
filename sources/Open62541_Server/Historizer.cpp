@@ -390,7 +390,7 @@ UA_StatusCode expandHistoryResult(UA_HistoryData* result,
     unordered_map<size_t, vector<ODD::ColumnValue>> rows) {
   auto* data =
       (UA_DataValue*)UA_Array_new(rows.size(), &UA_TYPES[UA_TYPES_DATAVALUE]);
-  if (!data) {
+  if (data == nullptr) {
     return UA_STATUSCODE_BADOUTOFMEMORY;
   }
 
@@ -435,38 +435,67 @@ UA_StatusCode expandHistoryResult(UA_HistoryData* result,
   return appendUADataValue(result, data, rows.size());
 }
 
-void Historizer::readRaw(UA_Server* server, void* /*hdbContext*/,
-    const UA_NodeId* sessionId, void* /*sessionContext*/,
-    const UA_RequestHeader* requestHeader,
-    const UA_ReadRawModifiedDetails* historyReadDetails,
-    UA_TimestampsToReturn timestampsToReturn,
-    UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-    const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
-    UA_HistoryData* const* const historyData) {
-  if (db_) {
-    for (size_t i = 0; i < nodesToReadSize; ++i) {
-      vector<string> columns;
-      switch (timestampsToReturn) {
-      case UA_TIMESTAMPSTORETURN_SOURCE: {
-        columns.push_back("Source_Timestamp");
-        break;
-      }
-      case UA_TIMESTAMPSTORETURN_SERVER: {
-        columns.push_back("Server_Timestamp");
-        break;
-      }
-      case UA_TIMESTAMPSTORETURN_BOTH: {
-        columns.push_back("Source_Timestamp");
-        columns.push_back("Server_Timestamp");
-        break;
-      }
-      case UA_TIMESTAMPSTORETURN_NEITHER:
-        [[fallthrough]];
-      default: { break; }
-      }
-      columns.push_back("Value");
+struct DatabaseNotAvailable : runtime_error {
+  DatabaseNotAvailable()
+      : runtime_error("Database driver is not initialized") {}
+};
 
-      ODD::FilterType start_filter, end_filter;
+struct BadContinuationPoint : runtime_error {
+  BadContinuationPoint() : runtime_error("Corrupted Continuation Point") {}
+};
+
+UA_ByteString* makeContinuationPoint(vector<ODD::ColumnValue> last_row) {
+  if (holds_alternative<string>(last_row[0].value())) {
+    auto source_timestamp = get<string>(last_row[0].value());
+    UA_ByteString* result;
+    auto status = UA_ByteString_allocBuffer(result, source_timestamp.size());
+    if (status == UA_STATUSCODE_GOOD) {
+      memcpy(result->data, source_timestamp.c_str(), source_timestamp.size());
+    } else {
+      throw BadContinuationPoint();
+    }
+    return result;
+  } else {
+    throw BadContinuationPoint();
+  }
+}
+
+unordered_map<size_t, vector<ODD::ColumnValue>> Historizer::readHistory(
+    const UA_ReadRawModifiedDetails* historyReadDetails,
+    UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
+    UA_Boolean releaseContinuationPoints,
+    const UA_ByteString* continuationPoint_IN,
+    UA_ByteString* continuationPoint_OUT) {
+  if (db_) {
+    vector<string> columns;
+    switch (timestampsToReturn) {
+    case UA_TIMESTAMPSTORETURN_SOURCE: {
+      columns.emplace_back("Source_Timestamp");
+      break;
+    }
+    case UA_TIMESTAMPSTORETURN_SERVER: {
+      columns.emplace_back("Server_Timestamp");
+      break;
+    }
+    case UA_TIMESTAMPSTORETURN_BOTH: {
+      columns.emplace_back("Source_Timestamp");
+      columns.emplace_back("Server_Timestamp");
+      break;
+    }
+    case UA_TIMESTAMPSTORETURN_NEITHER:
+      [[fallthrough]];
+    default: { break; }
+    }
+    columns.emplace_back("Value");
+
+    vector<ODD::ColumnFilter> filters;
+    ODD::FilterType start_filter, end_filter;
+    string start_time;
+    if (continuationPoint_IN != nullptr) {
+      start_time = string(
+          (char*)continuationPoint_IN->data, continuationPoint_IN->length);
+      start_filter = ODD::FilterType::GREATER;
+    } else {
       if (historyReadDetails->returnBounds) {
         start_filter = ODD::FilterType::GREATER_OR_EQUAL;
         end_filter = ODD::FilterType::LESS_OR_EQUAL;
@@ -474,30 +503,54 @@ void Historizer::readRaw(UA_Server* server, void* /*hdbContext*/,
         start_filter = ODD::FilterType::GREATER;
         end_filter = ODD::FilterType::LESS;
       }
-      vector<ODD::ColumnFilter> filters;
-      filters.emplace_back(start_filter, "Source_Timestamp",
-          getTimestamp(historyReadDetails->startTime));
-      filters.emplace_back(end_filter, "Source_Timestamp",
-          getTimestamp(historyReadDetails->endTime));
-
-      auto node_id = toString(&(nodesToRead[i].nodeId));
-      try {
-        auto history_values = db_->read(
-            node_id, columns, filters, historyReadDetails->numValuesPerNode);
-        // do something with releaseContinuationPoints
-        // do something with &nodesToRead[i].continuationPoint
-        // do something with &response->results[i].continuationPoint
-        response->results[i].statusCode =
-            expandHistoryResult(historyData[i], history_values);
-      } catch (exception& ex) {
-        // handle unexpected read exceptions here
-        response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
-      }
+      start_time = getTimestamp(historyReadDetails->startTime);
     }
-    response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
+    filters.emplace_back(start_filter, "Source_Timestamp", start_time);
+    filters.emplace_back(end_filter, "Source_Timestamp",
+        getTimestamp(historyReadDetails->endTime));
+
+    ODD::OverrunPoint* overrun_point;
+    auto results = db_->read(toString(&node_id), columns, filters,
+        historyReadDetails->numValuesPerNode, "Source_Timestamp", false,
+        overrun_point);
+    if (overrun_point->hasMoreValues()) {
+      continuationPoint_OUT =
+          makeContinuationPoint(overrun_point->getOverrunRecord());
+    }
+    return results;
   } else {
-    response->responseHeader.serviceResult =
-        UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+    throw DatabaseNotAvailable();
+  }
+}
+
+void Historizer::readRaw(UA_Server* server, void* /*hdbContext*/,
+    const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
+    const UA_RequestHeader* /*requestHeader*/,
+    const UA_ReadRawModifiedDetails* historyReadDetails,
+    UA_TimestampsToReturn timestampsToReturn,
+    UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
+    const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
+    UA_HistoryData* const* const historyData) {
+
+  response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
+  for (size_t i = 0; i < nodesToReadSize; ++i) {
+    try {
+      auto history_values = readHistory(historyReadDetails, timestampsToReturn,
+          nodesToRead[i].nodeId, releaseContinuationPoints,
+          &nodesToRead[i].continuationPoint,
+          &response->results[i].continuationPoint);
+      response->results[i].statusCode =
+          expandHistoryResult(historyData[i], history_values);
+    } catch (BadContinuationPoint& ex) {
+      response->results[i].statusCode =
+          UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
+    } catch (runtime_error& ex) {
+      // handle unexpected read exceptions here
+      response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
+    } catch (DatabaseNotAvailable& ex) {
+      response->responseHeader.serviceResult =
+          UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+    }
   }
 }
 
