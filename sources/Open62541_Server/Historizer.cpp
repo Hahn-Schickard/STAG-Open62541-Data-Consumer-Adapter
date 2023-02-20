@@ -4,7 +4,6 @@
 
 #include <chrono>
 #include <date/date.h>
-#include <date/tz.h> // is this needed?
 #include <open62541/client_subscriptions.h>
 #include <open62541/server.h>
 #include <string>
