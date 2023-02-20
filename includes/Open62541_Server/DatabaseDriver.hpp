@@ -92,11 +92,11 @@ struct Column {
 private:
   std::string name_;
   ColumnDataType type_;
-  bool null_allowed_ = false;
-  uint8_t precision_ = 0; // used to specify decimal type precision
-  uint8_t scale_ = 0; // used to specify the decimal type scale
   uint8_t size_ = 0; // Used to specify data type size for variable length data
                      // types like char and array
+  uint8_t precision_ = 0; // used to specify decimal type precision
+  uint8_t scale_ = 0; // used to specify the decimal type scale
+  bool null_allowed_ = false;
 };
 
 using Columns = std::vector<Column>;
