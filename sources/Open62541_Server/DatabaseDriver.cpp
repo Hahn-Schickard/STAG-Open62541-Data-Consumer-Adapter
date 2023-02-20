@@ -404,17 +404,20 @@ DataType intoDataType(
   }
 }
 
-unordered_map<size_t, vector<ColumnValue>> intoColumnValues(
-    nanodbc::result data) {
+vector<ColumnValue> intoColumnValues(nanodbc::result data) {
+  vector<ColumnValue> result;
+  for (short column = 0; column < data.columns(); ++column) {
+    result.emplace_back(data.column_name(column),
+        intoDataType(data.column_c_datatype(column), column, data));
+  }
+  return result;
+}
+
+unordered_map<size_t, vector<ColumnValue>> intoRowValues(nanodbc::result data) {
   unordered_map<size_t, vector<ColumnValue>> result;
   size_t row = 0;
   do {
-    vector<ColumnValue> values;
-    // why does columns use short instead of unsigned short?
-    for (short column = 0; column < data.columns(); ++column) {
-      values.emplace_back(data.column_name(column),
-          intoDataType(data.column_c_datatype(column), column, data));
-    }
+    vector<ColumnValue> values = intoColumnValues(data);
     result.emplace(row, values);
     ++row;
   } while (data.next());
@@ -446,7 +449,7 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
     }
   }
   auto result = execute(query);
-  return intoColumnValues(result);
+  return intoRowValues(result);
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::read(
