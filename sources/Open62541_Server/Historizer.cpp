@@ -523,13 +523,21 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
         setColumnFilters(continuationPoint_IN, historyReadDetails->returnBounds,
             getTimestamp(historyReadDetails->startTime),
             getTimestamp(historyReadDetails->endTime));
-    OverrunPoint* overrun_point;
-    auto results = db_->read(toString(&node_id), columns, filters,
-        historyReadDetails->numValuesPerNode, "Source_Timestamp", false,
-        overrun_point);
-    if (overrun_point->hasMoreValues()) {
-      continuationPoint_OUT =
-          makeContinuationPoint(overrun_point->getOverrunRecord());
+
+    unordered_map<size_t, vector<ColumnValue>> results;
+    auto read_limit = historyReadDetails->numValuesPerNode;
+    if (read_limit != 0) { // if numValuesPerNode is zero, there is no limit
+      OverrunPoint* overrun_point;
+      results = db_->read(toString(&node_id), columns, filters,
+          historyReadDetails->numValuesPerNode, "Source_Timestamp", false,
+          overrun_point);
+      if (overrun_point->hasMoreValues()) {
+        continuationPoint_OUT =
+            makeContinuationPoint(overrun_point->getOverrunRecord());
+      }
+    } else {
+      results = db_->read(
+          toString(&node_id), columns, filters, nullopt, "Source_Timestamp");
     }
     return results;
   } else {
