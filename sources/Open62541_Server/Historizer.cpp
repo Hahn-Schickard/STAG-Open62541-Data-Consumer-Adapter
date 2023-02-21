@@ -120,6 +120,7 @@ UA_StatusCode Historizer::registerNodeId(
       }); // clang-format on
       db_->create(node_id,
           vector<Column>{// clang-format off
+            Column("URID", ColumnDataType::INT, ColumnModifier::AUTO_INCREMENT),
             Column("Server_Timestamp", ColumnDataType::TIMESTAMP),
             Column("Source_Timestamp", ColumnDataType::TIMESTAMP),
             Column("Value", getColumnDataType(type))
