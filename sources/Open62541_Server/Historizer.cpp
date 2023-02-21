@@ -572,7 +572,7 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
   }
 }
 
-void Historizer::readRaw(UA_Server* server, void* /*hdbContext*/,
+void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
     const UA_RequestHeader* /*requestHeader*/,
     const UA_ReadRawModifiedDetails* historyReadDetails,
