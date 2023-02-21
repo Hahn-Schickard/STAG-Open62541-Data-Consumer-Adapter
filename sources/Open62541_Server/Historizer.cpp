@@ -558,7 +558,8 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
           historyReadDetails->numValuesPerNode, "Source_Timestamp",
           reverse_order, overrun_point);
       if (overrun_point->hasMoreValues()) {
-        continuationPoint_OUT =
+        // continuationPoint_OUT is read by the Client, not the Server
+        continuationPoint_OUT = // NOLINT
             makeContinuationPoint(overrun_point->getOverrunRecord());
       }
     } else {
