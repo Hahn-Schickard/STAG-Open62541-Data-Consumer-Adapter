@@ -581,25 +581,29 @@ void Historizer::readRaw(UA_Server* server, void* /*hdbContext*/,
     UA_HistoryData* const* const historyData) {
 
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
-  for (size_t i = 0; i < nodesToReadSize; ++i) {
-    try {
-      auto history_values = readHistory(historyReadDetails, timestampsToReturn,
-          nodesToRead[i].nodeId, releaseContinuationPoints,
-          &nodesToRead[i].continuationPoint,
-          &response->results[i].continuationPoint);
-      response->results[i].statusCode =
-          expandHistoryResult(historyData[i], history_values);
-    } catch (BadContinuationPoint& ex) {
-      response->results[i].statusCode =
-          UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-    } catch (runtime_error& ex) {
-      // handle unexpected read exceptions here
-      response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
-    } catch (DatabaseNotAvailable& ex) {
-      response->responseHeader.serviceResult =
-          UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+  if (!releaseContinuationPoints) {
+    for (size_t i = 0; i < nodesToReadSize; ++i) {
+      try {
+        auto history_values =
+            readHistory(historyReadDetails, timestampsToReturn,
+                nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
+                &response->results[i].continuationPoint);
+        response->results[i].statusCode =
+            expandHistoryResult(historyData[i], history_values);
+      } catch (BadContinuationPoint& ex) {
+        response->results[i].statusCode =
+            UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
+      } catch (runtime_error& ex) {
+        // handle unexpected read exceptions here
+        response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
+      } catch (DatabaseNotAvailable& ex) {
+        response->responseHeader.serviceResult =
+            UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+      }
     }
-  }
+  } /* Continuation points are not stored internally, so no need to release
+     * them, simply return StatusCode::Good for the entire request without
+     * setting any data*/
 }
 
 void Historizer::readModified(UA_Server* server, void* /*hdbContext*/,
