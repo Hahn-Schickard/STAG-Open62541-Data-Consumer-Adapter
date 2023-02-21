@@ -553,14 +553,14 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
 
     unordered_map<size_t, vector<ColumnValue>> results;
     if (read_limit != 0) { // if numValuesPerNode is zero, there is no limit
-      OverrunPoint* overrun_point;
+      OverrunPoint overrun_point;
       results = db_->read(toString(&node_id), columns, filters,
           historyReadDetails->numValuesPerNode, "Source_Timestamp",
-          reverse_order, overrun_point);
-      if (overrun_point->hasMoreValues()) {
+          reverse_order, &overrun_point);
+      if (overrun_point.hasMoreValues()) {
         // continuationPoint_OUT is read by the Client, not the Server
         continuationPoint_OUT = // NOLINT
-            makeContinuationPoint(overrun_point->getOverrunRecord());
+            makeContinuationPoint(overrun_point.getOverrunRecord());
       }
     } else {
       results = db_->read(toString(&node_id), columns, filters, nullopt,
