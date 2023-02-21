@@ -95,11 +95,11 @@ bool isFixedLengthType(ColumnDataType type) {
 }
 
 Column::Column(const string& name, ColumnDataType type)
-    : Column(name, type, false) {}
+    : Column(name, type, ColumnModifier::NOT_NULL) {}
 
 Column::Column(
-    const string& name, ColumnDataType type, bool null_allowed) // NOLINT
-    : name_(name), type_(type), null_allowed_(null_allowed) { // NOLINT
+    const string& name, ColumnDataType type, ColumnModifier modifier) // NOLINT
+    : name_(name), type_(type), modifier_(modifier) { // NOLINT
   if (isVarLengthType(type)) {
     string error_msg = ODD::toString(type) + " requires size parameter";
     throw logic_error(error_msg);
@@ -111,9 +111,9 @@ Column::Column(
 }
 
 Column::Column(const string& name, ColumnDataType type, uint8_t size, // NOLINT
-    bool null_allowed)
+    ColumnModifier modifier)
     : name_(name), type_(type), size_(size), // NOLINT
-      null_allowed_(null_allowed) {
+      modifier_(modifier) {
   if (!isVarLengthType(type)) {
     string error_msg = ODD::toString(type) + " does not use the size parameter";
     throw logic_error(error_msg);
@@ -121,9 +121,9 @@ Column::Column(const string& name, ColumnDataType type, uint8_t size, // NOLINT
 }
 
 Column::Column(const string& name, ColumnDataType type, // NOLINT
-    uint8_t precision, uint8_t scale, bool null_allowed)
+    uint8_t precision, uint8_t scale, ColumnModifier modifier)
     : name_(name), type_(type), precision_(precision), scale_(scale), // NOLINT
-      null_allowed_(null_allowed) {
+      modifier_(modifier) {
   if (!isFloatingType(type)) {
     string error_msg = ODD::toString(type) +
         " does not use the precision and scale parameters";
@@ -135,18 +135,32 @@ string Column::name() { return name_; }
 
 ColumnDataType Column::type() { return type_; }
 
-bool Column::isNullable() { return null_allowed_; }
+bool Column::isNullable() { return modifier_ == ColumnModifier::NULL_ALLOWED; }
+
+string toString(ColumnModifier modifier) {
+  switch (modifier) {
+  case ColumnModifier::NULL_ALLOWED: {
+    return " NULL";
+  }
+  case ColumnModifier::AUTO_INCREMENT: {
+    return " NOT NULL GENERATED ALWAYS AS IDENTITY";
+  }
+  default: { [[fallthrough]]; }
+  case ColumnModifier::NOT_NULL: {
+    return " NOT NULL";
+  }
+  }
+}
 
 string Column::toString() {
   if (isVarLengthType(type_)) {
     return name_ + " " + ODD::toString(type_) + "(" + to_string(size_) + ")" +
-        (null_allowed_ ? " NULL" : " NOT NULL");
+        ODD::toString(modifier_);
   } else if (isFloatingType(type_)) {
     return name_ + " " + ODD::toString(type_) + "(" + to_string(precision_) +
-        "," + to_string(scale_) + ")" + (null_allowed_ ? " NULL" : " NOT NULL");
+        "," + to_string(scale_) + ")" + ODD::toString(modifier_);
   } else {
-    return name_ + " " + ODD::toString(type_) +
-        (null_allowed_ ? " NULL" : " NOT NULL");
+    return name_ + " " + ODD::toString(type_) + ODD::toString(modifier_);
   }
 }
 

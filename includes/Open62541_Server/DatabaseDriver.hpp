@@ -75,13 +75,15 @@ bool isFixedLengthType(ColumnDataType type);
 
 std::string toString(ColumnDataType type);
 
+enum class ColumnModifier { NOT_NULL, NULL_ALLOWED, AUTO_INCREMENT };
+
 struct Column {
   Column(const std::string& name, ColumnDataType type);
-  Column(const std::string& name, ColumnDataType type, bool null_allowed);
+  Column(const std::string& name, ColumnDataType type, ColumnModifier modifier);
   Column(const std::string& name, ColumnDataType type, uint8_t size,
-      bool null_allowed = false);
+      ColumnModifier modifier = ColumnModifier::NOT_NULL);
   Column(const std::string& name, ColumnDataType type, uint8_t precision,
-      uint8_t scale, bool null_allowed = false);
+      uint8_t scale, ColumnModifier modifier = ColumnModifier::NOT_NULL);
 
   std::string name();
   ColumnDataType type();
@@ -96,7 +98,7 @@ private:
                      // types like char and array
   uint8_t precision_ = 0; // used to specify decimal type precision
   uint8_t scale_ = 0; // used to specify the decimal type scale
-  bool null_allowed_ = false;
+  ColumnModifier modifier_;
 };
 
 using Columns = std::vector<Column>;
