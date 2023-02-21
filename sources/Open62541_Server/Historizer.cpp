@@ -593,12 +593,12 @@ void Historizer::readRaw(UA_Server* server, void* /*hdbContext*/,
       } catch (BadContinuationPoint& ex) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-      } catch (runtime_error& ex) {
-        // handle unexpected read exceptions here
-        response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
       } catch (DatabaseNotAvailable& ex) {
         response->responseHeader.serviceResult =
             UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+      } catch (runtime_error& ex) {
+        // handle unexpected read exceptions here
+        response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
       }
     }
   } /* Continuation points are not stored internally, so no need to release
