@@ -81,19 +81,18 @@ private:
    * @brief Called by UA_Server instance when a history read is requested with
    * isRawReadModified set to false
    *
-   * @param server - the parent server, that node exists on
+   * @param server - not used
    * @param hdbContext - not used
-   * @param sessionId - used to identify the session
-   * @param sessionContext - used to get session context if needed
-   * @param requestHeader - ua client request header
-   * @param historyReadDetails - specifies how to format the read result
-   * @param timestampsToReturn - specifies which timestamps to return
-   * @param releaseContinuationPoints - god fucking knows, open62541 does not
-   * document it @todo: figure this out
+   * @param sessionId -  not used
+   * @param sessionContext -  not used
+   * @param requestHeader -  not used
+   * @param historyReadDetails - specifies which values to return
+   * @param timestampsToReturn - specifies how to format the result
+   * @param releaseContinuationPoints - if true, returns no historic values
    * @param nodesToReadSize - how many node ids to read
    * @param nodesToRead - array of node ids to read
-   * @param response - used to indicate request failure
-   * @param historyData - history result
+   * @param response - used to indicate request success/failure
+   * @param historyData - history result array
    */
   static void readRaw(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
