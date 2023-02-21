@@ -74,7 +74,6 @@ private:
   static std::unordered_map<size_t, std::vector<ODD::ColumnValue>> readHistory(
       const UA_ReadRawModifiedDetails* historyReadDetails,
       UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
-      UA_Boolean releaseContinuationPoints,
       const UA_ByteString* continuationPoint_IN,
       UA_ByteString* continuationPoint_OUT);
 
