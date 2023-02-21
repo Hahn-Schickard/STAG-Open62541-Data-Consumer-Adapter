@@ -463,56 +463,68 @@ UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   }
 }
 
-unordered_map<size_t, vector<ODD::ColumnValue>> Historizer::readHistory(
+vector<string> setColumnNames(UA_TimestampsToReturn timestampsToReturn) {
+  vector<string> result;
+  switch (timestampsToReturn) {
+  case UA_TIMESTAMPSTORETURN_SOURCE: {
+    result.emplace_back("Source_Timestamp");
+    break;
+  }
+  case UA_TIMESTAMPSTORETURN_SERVER: {
+    result.emplace_back("Server_Timestamp");
+    break;
+  }
+  case UA_TIMESTAMPSTORETURN_BOTH: {
+    result.emplace_back("Source_Timestamp");
+    result.emplace_back("Server_Timestamp");
+    break;
+  }
+  case UA_TIMESTAMPSTORETURN_NEITHER:
+    [[fallthrough]];
+  default: { break; }
+  }
+  result.emplace_back("Value");
+
+  return result;
+}
+
+vector<ColumnFilter> setColumnFilters(const UA_ByteString* continuationPoint,
+    UA_Boolean include_bounds, string start_time, string end_time) {
+  vector<ColumnFilter> result;
+
+  if (continuationPoint != nullptr) {
+    auto continuation_index =
+        string( // rework to UID and use it as an extension for the filters
+            (char*)continuationPoint->data, continuationPoint->length);
+    result.emplace_back(FilterType::GREATER, "URID", continuation_index);
+  }
+  FilterType start_filter, end_filter;
+  if (include_bounds) {
+    start_filter = FilterType::GREATER_OR_EQUAL;
+    end_filter = FilterType::LESS_OR_EQUAL;
+  } else {
+    start_filter = FilterType::GREATER;
+    end_filter = FilterType::LESS;
+  }
+  result.emplace_back(start_filter, "Source_Timestamp", start_time);
+  result.emplace_back(end_filter, "Source_Timestamp", end_time);
+
+  return result;
+}
+
+unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
     const UA_ReadRawModifiedDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
     UA_Boolean releaseContinuationPoints,
     const UA_ByteString* continuationPoint_IN,
     UA_ByteString* continuationPoint_OUT) {
   if (db_) {
-    vector<string> columns;
-    switch (timestampsToReturn) {
-    case UA_TIMESTAMPSTORETURN_SOURCE: {
-      columns.emplace_back("Source_Timestamp");
-      break;
-    }
-    case UA_TIMESTAMPSTORETURN_SERVER: {
-      columns.emplace_back("Server_Timestamp");
-      break;
-    }
-    case UA_TIMESTAMPSTORETURN_BOTH: {
-      columns.emplace_back("Source_Timestamp");
-      columns.emplace_back("Server_Timestamp");
-      break;
-    }
-    case UA_TIMESTAMPSTORETURN_NEITHER:
-      [[fallthrough]];
-    default: { break; }
-    }
-    columns.emplace_back("Value");
-
-    vector<ODD::ColumnFilter> filters;
-    ODD::FilterType start_filter, end_filter;
-    string start_time;
-    if (continuationPoint_IN != nullptr) {
-      start_time = string(
-          (char*)continuationPoint_IN->data, continuationPoint_IN->length);
-      start_filter = ODD::FilterType::GREATER;
-    } else {
-      if (historyReadDetails->returnBounds) {
-        start_filter = ODD::FilterType::GREATER_OR_EQUAL;
-        end_filter = ODD::FilterType::LESS_OR_EQUAL;
-      } else {
-        start_filter = ODD::FilterType::GREATER;
-        end_filter = ODD::FilterType::LESS;
-      }
-      start_time = getTimestamp(historyReadDetails->startTime);
-    }
-    filters.emplace_back(start_filter, "Source_Timestamp", start_time);
-    filters.emplace_back(end_filter, "Source_Timestamp",
-        getTimestamp(historyReadDetails->endTime));
-
-    ODD::OverrunPoint* overrun_point;
+    auto columns = setColumnNames(timestampsToReturn);
+    auto filters =
+        setColumnFilters(continuationPoint_IN, historyReadDetails->returnBounds,
+            getTimestamp(historyReadDetails->startTime),
+            getTimestamp(historyReadDetails->endTime));
+    OverrunPoint* overrun_point;
     auto results = db_->read(toString(&node_id), columns, filters,
         historyReadDetails->numValuesPerNode, "Source_Timestamp", false,
         overrun_point);
