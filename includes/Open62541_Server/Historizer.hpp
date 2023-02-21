@@ -41,7 +41,7 @@ private:
   /**
    * @brief Called when a given node receives new data value.
    *
-   * @param server - the parent server, that node exists on
+   * @param server - not used
    * @param hdbContext - not used
    * @param sessionId - used to identify the session the value is set for
    * @param sessionContext - used to get session context if needed

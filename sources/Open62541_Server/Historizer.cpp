@@ -249,7 +249,7 @@ DataType getNodeValue(UA_Variant variant) {
   }
 }
 
-void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
+void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
     const UA_NodeId* nodeId, UA_Boolean historizing,
     const UA_DataValue* value) {
