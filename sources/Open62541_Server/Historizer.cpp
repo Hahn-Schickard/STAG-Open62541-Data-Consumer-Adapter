@@ -579,7 +579,8 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
     UA_TimestampsToReturn timestampsToReturn,
     UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
     const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
-    UA_HistoryData* const* const historyData) {
+    UA_HistoryData* const* const
+        historyData) { // NOLINT parameter name set by open62541
 
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
   if (!releaseContinuationPoints) {
