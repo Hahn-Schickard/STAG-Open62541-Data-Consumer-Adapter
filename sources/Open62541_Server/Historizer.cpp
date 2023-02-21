@@ -10,15 +10,16 @@
 
 using namespace std;
 using namespace HaSLI;
+using namespace ODD;
 
 namespace open62541 {
 bool Historizer::initialized_ = false; // NOLINT
 LoggerPtr Historizer::logger_ = LoggerPtr(); // NOLINT
-ODD::DatabaseDriverPtr Historizer::db_ = ODD::DatabaseDriverPtr(); // NOLINT
+DatabaseDriverPtr Historizer::db_ = DatabaseDriverPtr(); // NOLINT
 
 Historizer::Historizer() {
   logger_ = LoggerManager::registerTypedLogger(this);
-  db_ = make_unique<ODD::DatabaseDriver>();
+  db_ = make_unique<DatabaseDriver>();
   initialized_ = true;
 }
 
@@ -35,52 +36,52 @@ void Historizer::log(SeverityLevel level, string message, Types... args) {
   }
 }
 
-ODD::ColumnDataType getColumnDataType(const UA_DataType* variant) {
+ColumnDataType getColumnDataType(const UA_DataType* variant) {
   switch (variant->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-    return ODD::ColumnDataType::BOOLEAN;
+    return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
     [[fallthrough]];
@@ -113,15 +114,15 @@ UA_StatusCode Historizer::registerNodeId(
       // create a table for given nodeId with UA_DataType value entries indexed
       // by source timestamp
       db_->insert("Historized_Nodes",
-          vector<ODD::ColumnValue>{// clang-format off
-              ODD::ColumnValue("Node_Id", node_id), 
-              ODD::ColumnValue("Last_Updated", getCurrentTimestamp())
+          vector<ColumnValue>{// clang-format off
+              ColumnValue("Node_Id", node_id), 
+              ColumnValue("Last_Updated", getCurrentTimestamp())
       }); // clang-format on
       db_->create(node_id,
-          {// clang-format off
-          ODD::Column("Server_Timestamp", ODD::ColumnDataType::TIMESTAMP),
-          ODD::Column("Source_Timestamp", ODD::ColumnDataType::TIMESTAMP),
-          ODD::Column("Value", getColumnDataType(type))
+          vector<Column>{// clang-format off
+            Column("Server_Timestamp", ColumnDataType::TIMESTAMP),
+            Column("Source_Timestamp", ColumnDataType::TIMESTAMP),
+            Column("Value", getColumnDataType(type))
       }); // clang-format on
       return result.statusCode;
     } else {
@@ -170,71 +171,71 @@ string getTimestamp(UA_DateTime timestamp) {
   return result;
 }
 
-ODD::DataType getNodeValue(UA_Variant variant) {
+DataType getNodeValue(UA_Variant variant) {
   switch (variant.type->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
     auto value = *((bool*)(variant.data));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
     auto value = (intmax_t) * ((UA_SByte*)(variant.data));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
     auto value = (intmax_t) * ((UA_Int16*)(variant.data));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
     auto value = (intmax_t) * ((UA_Int32*)(variant.data));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
     auto value = (intmax_t) * ((UA_Int64*)(variant.data));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
     auto value = (uintmax_t) * ((UA_Byte*)(variant.data));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
     auto value = (uintmax_t) * ((UA_UInt16*)(variant.data));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
     auto value = (uintmax_t) * ((UA_UInt32*)(variant.data));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
     auto value = (uintmax_t) * ((UA_UInt64*)(variant.data));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
     auto value = getTimestamp(*((UA_DateTime*)(variant.data)));
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
     auto status_code = UA_StatusCode_name(*((UA_StatusCode*)(variant.data)));
     auto value = string(status_code);
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
     auto value = (UA_Float*)(variant.data);
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
     auto value = (UA_Double*)(variant.data);
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
     auto byte_string = (UA_ByteString*)(variant.data);
     auto value = vector<uint8_t>(
         byte_string->data, byte_string->data + byte_string->length);
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
     auto* ua_string = (UA_String*)(variant.data);
     auto value = string((char*)ua_string->data, ua_string->length);
-    return ODD::DataType(value);
+    return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
     [[fallthrough]];
@@ -265,14 +266,14 @@ void Historizer::setValue(UA_Server* server, void* /*hdbContext*/,
         }
         auto data = getNodeValue(value->value); // get data
         db_->insert(node_id,
-            vector<ODD::ColumnValue>{// clang-format off
-              ODD::ColumnValue("Source_Timestamp", source_time),
-              ODD::ColumnValue("Server_Timestamp", server_time), 
-              ODD::ColumnValue("Value", data)
+            vector<ColumnValue>{// clang-format off
+              ColumnValue("Source_Timestamp", source_time),
+              ColumnValue("Server_Timestamp", server_time), 
+              ColumnValue("Value", data)
             }); // clang-format on
         db_->update("Historized_Nodes",
-            ODD::ColumnFilter(ODD::FilterType::EQUAL, "Node_Id", node_id),
-            ODD::ColumnValue("Last_Updated", getCurrentTimestamp()));
+            ColumnFilter(FilterType::EQUAL, "Node_Id", node_id),
+            ColumnValue("Last_Updated", getCurrentTimestamp()));
       } catch (exception& ex) {
         log(SeverityLevel::ERROR,
             "Failed to historize Node {} value due to an exception. Exception "
@@ -318,7 +319,7 @@ UA_StatusCode appendUADataValue(UA_HistoryData* result,
   }
 }
 
-UA_Variant toUAVariant(ODD::DataType data) {
+UA_Variant toUAVariant(DataType data) {
   UA_Variant result;
   UA_Variant_init(&result);
   match(data, // clang-format off
@@ -355,7 +356,7 @@ UA_Variant toUAVariant(ODD::DataType data) {
   return result;
 }
 
-UA_DateTime toUADateTime(ODD::DataType data) {
+UA_DateTime toUADateTime(DataType data) {
   if (holds_alternative<string>(data)) {
     using namespace date;
     using namespace std::chrono;
@@ -381,13 +382,13 @@ UA_DateTime toUADateTime(ODD::DataType data) {
 
     return UA_DateTime_fromStruct(calendar_time);
   } else {
-    throw domain_error("ODD::DataType can not be converted into UA_DateTime. "
+    throw domain_error("DataType can not be converted into UA_DateTime. "
                        "It does not contain a DateTime string.");
   }
 }
 
-UA_StatusCode expandHistoryResult(UA_HistoryData* result,
-    unordered_map<size_t, vector<ODD::ColumnValue>> rows) {
+UA_StatusCode expandHistoryResult(
+    UA_HistoryData* result, unordered_map<size_t, vector<ColumnValue>> rows) {
   auto* data =
       (UA_DataValue*)UA_Array_new(rows.size(), &UA_TYPES[UA_TYPES_DATAVALUE]);
   if (data == nullptr) {
@@ -444,9 +445,10 @@ struct BadContinuationPoint : runtime_error {
   BadContinuationPoint() : runtime_error("Corrupted Continuation Point") {}
 };
 
-UA_ByteString* makeContinuationPoint(vector<ODD::ColumnValue> last_row) {
+UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   if (holds_alternative<string>(last_row[0].value())) {
-    auto source_timestamp = get<string>(last_row[0].value());
+    auto source_timestamp =
+        get<string>(last_row[0].value()); // this SHOULD be the URID column
     UA_ByteString* result;
     auto status = UA_ByteString_allocBuffer(result, source_timestamp.size());
     if (status == UA_STATUSCODE_GOOD) {
