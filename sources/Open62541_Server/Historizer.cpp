@@ -489,7 +489,7 @@ vector<string> setColumnNames(UA_TimestampsToReturn timestampsToReturn) {
 }
 
 vector<ColumnFilter> setColumnFilters(const UA_ByteString* continuationPoint,
-    UA_Boolean include_bounds, string start_time, string end_time) {
+    UA_Boolean include_bounds, UA_DateTime start_time, UA_DateTime end_time) {
   vector<ColumnFilter> result;
 
   if (continuationPoint != nullptr) {
@@ -497,6 +497,7 @@ vector<ColumnFilter> setColumnFilters(const UA_ByteString* continuationPoint,
         string((char*)continuationPoint->data, continuationPoint->length);
     result.emplace_back(FilterType::GREATER, "URID", continuation_index);
   }
+
   FilterType start_filter, end_filter;
   if (include_bounds) {
     start_filter = FilterType::GREATER_OR_EQUAL;
@@ -505,8 +506,24 @@ vector<ColumnFilter> setColumnFilters(const UA_ByteString* continuationPoint,
     start_filter = FilterType::GREATER;
     end_filter = FilterType::LESS;
   }
-  result.emplace_back(start_filter, "Source_Timestamp", start_time);
-  result.emplace_back(end_filter, "Source_Timestamp", end_time);
+
+  UA_DateTime start, end;
+  if (start_time < end_time) {
+    start = start_time;
+    end = end_time;
+  } else { // set reverse order filters
+    start = end_time;
+    end = start_time;
+  }
+
+  if (start > 0) {
+    // if start time is equal DateTime.MinValue, then there is no start filter
+    result.emplace_back(start_filter, "Source_Timestamp", getTimestamp(start));
+  }
+  if (end > 0) {
+    // if end time is equal DateTime.MinValue, then there is no end filter
+    result.emplace_back(end_filter, "Source_Timestamp", getTimestamp(end));
+  }
 
   return result;
 }
@@ -514,30 +531,39 @@ vector<ColumnFilter> setColumnFilters(const UA_ByteString* continuationPoint,
 unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
     const UA_ReadRawModifiedDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
-    UA_Boolean releaseContinuationPoints,
     const UA_ByteString* continuationPoint_IN,
     UA_ByteString* continuationPoint_OUT) {
   if (db_) {
     auto columns = setColumnNames(timestampsToReturn);
     auto filters =
         setColumnFilters(continuationPoint_IN, historyReadDetails->returnBounds,
-            getTimestamp(historyReadDetails->startTime),
-            getTimestamp(historyReadDetails->endTime));
+            historyReadDetails->startTime, historyReadDetails->endTime);
+
+    auto read_limit = historyReadDetails->numValuesPerNode;
+    bool reverse_order = false;
+    if (((historyReadDetails->startTime == 0) &&
+            ((read_limit != 0) && historyReadDetails->endTime != 0)) ||
+        (historyReadDetails->startTime > historyReadDetails->endTime)) {
+      // if start time was not specified (start time is equal to
+      // DateTime.MinValue), but end time AND read_limit is, OR end time is
+      // less than start time, than the historical values should be in reverse
+      // order (freshest values first, oldest ones last)
+      reverse_order = true;
+    }
 
     unordered_map<size_t, vector<ColumnValue>> results;
-    auto read_limit = historyReadDetails->numValuesPerNode;
     if (read_limit != 0) { // if numValuesPerNode is zero, there is no limit
       OverrunPoint* overrun_point;
       results = db_->read(toString(&node_id), columns, filters,
-          historyReadDetails->numValuesPerNode, "Source_Timestamp", false,
-          overrun_point);
+          historyReadDetails->numValuesPerNode, "Source_Timestamp",
+          reverse_order, overrun_point);
       if (overrun_point->hasMoreValues()) {
         continuationPoint_OUT =
             makeContinuationPoint(overrun_point->getOverrunRecord());
       }
     } else {
-      results = db_->read(
-          toString(&node_id), columns, filters, nullopt, "Source_Timestamp");
+      results = db_->read(toString(&node_id), columns, filters, nullopt,
+          "Source_Timestamp", reverse_order);
     }
     return results;
   } else {
