@@ -532,7 +532,7 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
     const UA_ReadRawModifiedDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
     const UA_ByteString* continuationPoint_IN,
-    UA_ByteString* continuationPoint_OUT) {
+    [[maybe_unused]] UA_ByteString* continuationPoint_OUT) { // NOLINT
   if (db_) {
     auto columns = setColumnNames(timestampsToReturn);
     auto filters =
