@@ -494,8 +494,7 @@ vector<ColumnFilter> setColumnFilters(const UA_ByteString* continuationPoint,
 
   if (continuationPoint != nullptr) {
     auto continuation_index =
-        string( // rework to UID and use it as an extension for the filters
-            (char*)continuationPoint->data, continuationPoint->length);
+        string((char*)continuationPoint->data, continuationPoint->length);
     result.emplace_back(FilterType::GREATER, "URID", continuation_index);
   }
   FilterType start_filter, end_filter;
