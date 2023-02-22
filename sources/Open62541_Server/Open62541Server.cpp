@@ -100,6 +100,10 @@ bool Open62541Server::isRunning() {
 #ifdef UA_ENABLE_HISTORIZING
 UA_StatusCode Open62541Server::registerForHistorization(
     UA_NodeId nodeId, const UA_DataType* type) {
-  return historizer_->registerNodeId(open62541_server_, nodeId, type);
+  if (historizer_) {
+    return historizer_->registerNodeId(open62541_server_, nodeId, type);
+  } else {
+    return UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+  }
 }
 #endif
