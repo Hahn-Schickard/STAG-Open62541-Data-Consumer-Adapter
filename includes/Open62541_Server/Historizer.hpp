@@ -266,8 +266,6 @@ private:
   static void log(
       HaSLI::SeverityLevel level, std::string message, Types... args);
 
-  static bool initialized_; // False if historizer was not initialized, used by
-                            // static methods
   static HaSLI::LoggerPtr logger_;
   static ODD::DatabaseDriverPtr db_;
 };

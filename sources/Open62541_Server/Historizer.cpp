@@ -13,25 +13,22 @@ using namespace HaSLI;
 using namespace ODD;
 
 namespace open62541 {
-bool Historizer::initialized_ = false; // NOLINT
 LoggerPtr Historizer::logger_ = LoggerPtr(); // NOLINT
 DatabaseDriverPtr Historizer::db_ = DatabaseDriverPtr(); // NOLINT
 
 Historizer::Historizer() {
   logger_ = LoggerManager::registerTypedLogger(this);
   db_ = make_unique<DatabaseDriver>();
-  initialized_ = true;
 }
 
 Historizer::~Historizer() {
   logger_.reset();
   db_.reset();
-  initialized_ = false;
 }
 
 template <typename... Types>
 void Historizer::log(SeverityLevel level, string message, Types... args) {
-  if (logger_ && initialized_) {
+  if (logger_) {
     logger_->log(level, message, args...);
   }
 }
