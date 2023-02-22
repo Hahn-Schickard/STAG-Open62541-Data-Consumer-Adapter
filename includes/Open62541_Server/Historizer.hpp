@@ -54,23 +54,6 @@ private:
       const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
       UA_Boolean historizing, const UA_DataValue* value);
 
-  /**
-   * @brief Called when an event was triggered
-   *
-   * @param server - the parent server, that node exists on
-   * @param hdbContext - not used
-   * @param originId - event origins id
-   * @param emitterId - event emitters id
-   * @param historicalEventFilter - historical event filter of the emitter as
-   * specified by OPC UA Part 11, 5.3.2. Can be set to NULL if this property
-   * does not exist
-   * @param fieldList - event value
-   */
-  static void setEvent(UA_Server* server, void* hdbContext,
-      const UA_NodeId* originId, const UA_NodeId* emitterId,
-      const UA_EventFilter* historicalEventFilter,
-      UA_EventFieldList* fieldList);
-
   static std::unordered_map<size_t, std::vector<ODD::ColumnValue>> readHistory(
       const UA_ReadRawModifiedDetails* historyReadDetails,
       UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
@@ -148,32 +131,6 @@ private:
    * @param response - used to indicate request failure
    * @param historyData - history result
    */
-  static void readEvent(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_RequestHeader* requestHeader,
-      const UA_ReadEventDetails* historyReadDetails,
-      UA_TimestampsToReturn timestampsToReturn,
-      UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-      const UA_HistoryReadValueId* nodesToRead,
-      UA_HistoryReadResponse* response,
-      UA_HistoryEvent* const* const historyData);
-
-  /**
-   * @brief Not documented and not implemented by open62541
-   *
-   * @param server - the parent server, that node exists on
-   * @param hdbContext - not used
-   * @param sessionId - used to identify the session
-   * @param sessionContext - used to get session context if needed
-   * @param requestHeader - ua client request header
-   * @param historyReadDetails - specifies how to format the read result
-   * @param timestampsToReturn - specifies which timestamps to return
-   * @param releaseContinuationPoints - unknown @todo: figure this out
-   * @param nodesToReadSize - how many node ids to read
-   * @param nodesToRead - array of node ids to read
-   * @param response - used to indicate request failure
-   * @param historyData - history result
-   */
   static void readProcessed(UA_Server* server, void* hdbContext,
       const UA_NodeId* sessionId, void* sessionContext,
       const UA_RequestHeader* requestHeader,
@@ -209,43 +166,6 @@ private:
       const UA_HistoryReadValueId* nodesToRead,
       UA_HistoryReadResponse* response,
       UA_HistoryData* const* const historyData);
-
-  /**
-   * @brief Not documented by open62541
-   *
-   * Is this function even used? If so, how?
-   *
-   * @param server - the parent server, that node exists on
-   * @param hdbContext - not used
-   * @param sessionId - used to identify the session
-   * @param sessionContext - used to get session context if needed
-   * @param requestHeader - ua client request header
-   * @param details - data values that must be added to node id
-   * @param result - history result
-   */
-  static void updateData(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_RequestHeader* requestHeader,
-      const UA_UpdateDataDetails* details, UA_HistoryUpdateResult* result);
-
-  /**
-   * @brief @brief Not documented by open62541
-   *
-   * Is this function even used? If so, how?
-   *
-   * @param server - the parent server, that node exists on
-   * @param hdbContext - not used
-   * @param sessionId - used to identify the session
-   * @param sessionContext - used to get session context if needed
-   * @param requestHeader - ua client request header
-   * @param details - node id timestamps to delete
-   * @param result - history result
-   */
-  static void deleteRawModified(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_RequestHeader* requestHeader,
-      const UA_DeleteRawModifiedDetails* details,
-      UA_HistoryUpdateResult* result);
 
   /**
    * @brief Callback implementation for monitored item data change call

@@ -142,14 +142,14 @@ UA_HistoryDatabase Historizer::createDatabase() {
 
   database.clear = &Historizer::clear;
   database.setValue = &Historizer::setValue;
-  database.setEvent = Historizer::setEvent;
+  database.setEvent = nullptr;
   database.readRaw = &Historizer::readRaw;
   database.readModified = &Historizer::readModified;
-  database.readEvent = &Historizer::readEvent;
+  database.readEvent = nullptr;
   database.readProcessed = &Historizer::readProcessed;
   database.readAtTime = &Historizer::readAtTime;
-  database.updateData = &Historizer::updateData;
-  database.deleteRawModified = &Historizer::deleteRawModified;
+  database.updateData = nullptr;
+  database.deleteRawModified = nullptr;
 
   return database;
 }
@@ -286,11 +286,6 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
     log(SeverityLevel::WARNING, "Node {} is not configured for historization",
         node_id);
   }
-}
-
-void Historizer::setEvent(UA_Server* server, void* /*hdbContext*/,
-    const UA_NodeId* originId, const UA_NodeId* emitterId,
-    const UA_EventFilter* historicalEventFilter, UA_EventFieldList* fieldList) {
 }
 
 UA_StatusCode appendUADataValue(UA_HistoryData* result,
@@ -614,15 +609,6 @@ void Historizer::readModified(UA_Server* server, void* /*hdbContext*/,
     const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
     UA_HistoryModifiedData* const* const historyData) {}
 
-void Historizer::readEvent(UA_Server* server, void* /*hdbContext*/,
-    const UA_NodeId* sessionId, void* /*sessionContext*/,
-    const UA_RequestHeader* requestHeader,
-    const UA_ReadEventDetails* historyReadDetails,
-    UA_TimestampsToReturn timestampsToReturn,
-    UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-    const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
-    UA_HistoryEvent* const* const historyData) {}
-
 void Historizer::readProcessed(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* sessionId, void* /*sessionContext*/,
     const UA_RequestHeader* requestHeader,
@@ -640,17 +626,6 @@ void Historizer::readAtTime(UA_Server* server, void* /*hdbContext*/,
     UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
     const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
     UA_HistoryData* const* const historyData) {}
-
-void Historizer::updateData(UA_Server* server, void* /*hdbContext*/,
-    const UA_NodeId* sessionId, void* /*sessionContext*/,
-    const UA_RequestHeader* requestHeader, const UA_UpdateDataDetails* details,
-    UA_HistoryUpdateResult* result) {}
-
-void Historizer::deleteRawModified(UA_Server* server, void* /*hdbContext*/,
-    const UA_NodeId* sessionId, void* /*sessionContext*/,
-    const UA_RequestHeader* requestHeader,
-    const UA_DeleteRawModifiedDetails* details,
-    UA_HistoryUpdateResult* result) {}
 
 void Historizer::dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
     void* /*monitoredItemContext*/, const UA_NodeId* nodeId,
