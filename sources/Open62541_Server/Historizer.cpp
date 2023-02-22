@@ -332,11 +332,9 @@ UA_Variant toUAVariant(DataType data) {
         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
       },
       [&result](string cpp_string) { 
-        UA_String value;
-        value.length = strlen(cpp_string.c_str());
-        value.data = (UA_Byte*)malloc(value.length);
-        memcpy(value.data, cpp_string.c_str(), value.length);
+        UA_String value = UA_String_fromChars(cpp_string.c_str());
         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_STRING]);
+        UA_String_delete(&value); // delete original, since a copy is already within the variant
       },
       [&result](vector<uint8_t> opaque) { 
          UA_ByteString value;
@@ -344,6 +342,7 @@ UA_Variant toUAVariant(DataType data) {
          value.data = (UA_Byte*)malloc(value.length);
          memcpy(value.data, opaque.data(), value.length);
          UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BYTESTRING]);
+         UA_String_delete(&value); // delete original, since a copy is already within the variant
       }
       ); // clang-format on
   return result;
