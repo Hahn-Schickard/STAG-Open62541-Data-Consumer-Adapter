@@ -148,6 +148,19 @@ Configuration::Configuration(const string& filepath) : Configuration() {
     /** @todo: figure out where to store the historizer and hwo to parse it
      * there*/
     configuration_.historyDatabase = historizer->createDatabase();
+    configuration_.accessHistoryDataCapability = true;
+    configuration_.accessHistoryEventsCapability = false;
+    configuration_.maxReturnDataValues = 0; // unlimited
+    configuration_.insertDataCapability = false;
+    configuration_.insertEventCapability = false;
+    configuration_.insertAnnotationsCapability = false;
+    configuration_.replaceDataCapability = false;
+    configuration_.replaceEventCapability = false;
+    configuration_.updateDataCapability = false;
+    configuration_.updateEventCapability = false;
+    configuration_.deleteRawCapability = false;
+    configuration_.deleteEventCapability = false;
+    configuration_.deleteAtTimeDataCapability = false;
 #endif
 
     configuration_.maxMonitoredItems =
