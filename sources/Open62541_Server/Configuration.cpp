@@ -144,10 +144,8 @@ Configuration::Configuration(const string& filepath) : Configuration() {
 
 #ifdef UA_ENABLE_HISTORIZING
     /** @todo: obtain database configuration data and parse it to historizer */
-    auto historizer = make_shared<Historizer>();
-    /** @todo: figure out where to store the historizer and hwo to parse it
-     * there*/
-    configuration_.historyDatabase = historizer->createDatabase();
+    historizer_ = make_unique<Historizer>();
+    configuration_.historyDatabase = historizer_->createDatabase();
     configuration_.accessHistoryDataCapability = true;
     configuration_.accessHistoryEventsCapability = false;
     configuration_.maxReturnDataValues = 0; // unlimited
@@ -196,6 +194,10 @@ Configuration::Configuration(const string& filepath) : Configuration() {
 }
 
 UA_ServerConfig* Configuration::getConfig() { return &configuration_; }
+
+unique_ptr<Historizer> Configuration::obtainHistorizer() {
+  return move(historizer_);
+}
 
 Configuration::~Configuration() { UA_ServerConfig_clean(&configuration_); }
 
