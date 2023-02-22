@@ -13,7 +13,8 @@ Open62541Server::Open62541Server()
     : Open62541Server(make_unique<Configuration>()) {}
 
 Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
-    : logger_(LoggerManager::registerTypedLogger(this)) {
+    : logger_(LoggerManager::registerTypedLogger(this)),
+      historizer_(configuration->obtainHistorizer()) {
   registerLoggers();
   auto config = configuration->getConfig();
   // Config is consumed, so no need to save it
