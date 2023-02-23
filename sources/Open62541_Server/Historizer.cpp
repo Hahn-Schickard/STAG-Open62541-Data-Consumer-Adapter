@@ -479,15 +479,9 @@ vector<string> setColumnNames(UA_TimestampsToReturn timestampsToReturn) {
   return result;
 }
 
-vector<ColumnFilter> setColumnFilters(const UA_ByteString* continuationPoint,
+vector<ColumnFilter> setColumnFilters(
     UA_Boolean include_bounds, UA_DateTime start_time, UA_DateTime end_time) {
   vector<ColumnFilter> result;
-
-  if (continuationPoint != nullptr) {
-    auto continuation_index =
-        string((char*)continuationPoint->data, continuationPoint->length);
-    result.emplace_back(FilterType::GREATER, "URID", continuation_index);
-  }
 
   FilterType start_filter, end_filter;
   if (include_bounds) {
@@ -519,6 +513,21 @@ vector<ColumnFilter> setColumnFilters(const UA_ByteString* continuationPoint,
   return result;
 }
 
+vector<ColumnFilter> setColumnFilters(UA_Boolean include_bounds,
+    UA_DateTime start_time, UA_DateTime end_time,
+    const UA_ByteString* continuationPoint) {
+  vector<ColumnFilter> result =
+      setColumnFilters(include_bounds, start_time, end_time);
+
+  if (continuationPoint != nullptr) {
+    auto continuation_index =
+        string((char*)continuationPoint->data, continuationPoint->length);
+    result.emplace_back(FilterType::GREATER, "URID", continuation_index);
+  }
+
+  return result;
+}
+
 unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
     const UA_ReadRawModifiedDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
@@ -526,9 +535,9 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
     [[maybe_unused]] UA_ByteString* continuationPoint_OUT) { // NOLINT
   if (db_) {
     auto columns = setColumnNames(timestampsToReturn);
-    auto filters =
-        setColumnFilters(continuationPoint_IN, historyReadDetails->returnBounds,
-            historyReadDetails->startTime, historyReadDetails->endTime);
+    auto filters = setColumnFilters(historyReadDetails->returnBounds,
+        historyReadDetails->startTime, historyReadDetails->endTime,
+        continuationPoint_IN);
 
     auto read_limit = historyReadDetails->numValuesPerNode;
     bool reverse_order = false;
