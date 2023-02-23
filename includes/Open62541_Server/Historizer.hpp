@@ -88,34 +88,6 @@ private:
       UA_HistoryData* const* const historyData);
 
   /**
-   * @brief Called by UA_Server instance when a history read is requested with
-   * isRawReadModified set to true
-   *
-   * @param server - the parent server, that node exists on
-   * @param hdbContext - not used
-   * @param sessionId - used to identify the session
-   * @param sessionContext - used to get session context if needed
-   * @param requestHeader - ua client request header
-   * @param historyReadDetails - specifies how to format the read result
-   * @param timestampsToReturn - specifies which timestamps to return
-   * @param releaseContinuationPoints - god fucking knows, open62541 does not
-   * document it @todo: figure this out
-   * @param nodesToReadSize - how many node ids to read
-   * @param nodesToRead - array of node ids to read
-   * @param response - used to indicate request failure
-   * @param historyData - history result
-   */
-  static void readModified(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_RequestHeader* requestHeader,
-      const UA_ReadRawModifiedDetails* historyReadDetails,
-      UA_TimestampsToReturn timestampsToReturn,
-      UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-      const UA_HistoryReadValueId* nodesToRead,
-      UA_HistoryReadResponse* response,
-      UA_HistoryModifiedData* const* const historyData);
-
-  /**
    * @brief Not documented and not implemented by open62541
    *
    * @param server - the parent server, that node exists on

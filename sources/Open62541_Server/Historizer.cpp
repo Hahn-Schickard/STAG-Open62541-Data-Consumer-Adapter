@@ -144,7 +144,7 @@ UA_HistoryDatabase Historizer::createDatabase() {
   database.setValue = &Historizer::setValue;
   database.setEvent = nullptr;
   database.readRaw = &Historizer::readRaw;
-  database.readModified = &Historizer::readModified;
+  database.readModified = nullptr;
   database.readEvent = nullptr;
   database.readProcessed = &Historizer::readProcessed;
   database.readAtTime = &Historizer::readAtTime;
@@ -598,15 +598,6 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
      * them, simply return StatusCode::Good for the entire request without
      * setting any data*/
 }
-
-void Historizer::readModified(UA_Server* server, void* /*hdbContext*/,
-    const UA_NodeId* sessionId, void* /*sessionContext*/,
-    const UA_RequestHeader* requestHeader,
-    const UA_ReadRawModifiedDetails* historyReadDetails,
-    UA_TimestampsToReturn timestampsToReturn,
-    UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-    const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
-    UA_HistoryModifiedData* const* const historyData) {}
 
 void Historizer::readProcessed(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* sessionId, void* /*sessionContext*/,
