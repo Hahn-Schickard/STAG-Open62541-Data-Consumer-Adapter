@@ -3,6 +3,7 @@
 #include "Utility.hpp"
 
 #include <chrono>
+#include <cmath>
 #include <date/date.h>
 #include <open62541/client_subscriptions.h>
 #include <open62541/server.h>
@@ -608,6 +609,72 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
      * setting any data*/
 }
 
+UA_DateTime toUA_DateTime(UA_Double interval) {
+  UA_DateTimeStruct time;
+  // init all UA_DateTimeStruct values to 0
+  memset(&time, 0, sizeof(UA_DateTimeStruct));
+
+  double mili_seconds;
+  auto fraction = modf(abs(interval), &mili_seconds);
+  auto micro_seconds = round(fraction * 1e3);
+  auto nano_seconds = round((fraction * 1e6 - micro_seconds * 1e3));
+
+  time.milliSec += (UA_UInt16)mili_seconds;
+  time.microSec += (UA_UInt16)micro_seconds;
+  time.nanoSec += (UA_UInt16)nano_seconds;
+
+  return UA_DateTime_fromStruct(time);
+}
+
+size_t getIntervalCount(
+    UA_DateTime start, UA_DateTime stop, UA_Double interval) {
+  UA_DateTime duration = abs(stop - start);
+  return ceil(duration / toUA_DateTime(interval));
+}
+
+unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
+    const UA_ReadProcessedDetails* historyReadDetails,
+    UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id) {
+  if (db_) {
+    auto columns = setColumnNames(timestampsToReturn);
+
+    bool reverse_order = false;
+    if (historyReadDetails->startTime > historyReadDetails->endTime) {
+      // if end time is less than start time, than the historical values
+      // should be in reverse order (freshest values first, oldest ones last)
+      reverse_order = true;
+    }
+
+    auto start = historyReadDetails->startTime;
+    auto interval = toUA_DateTime(historyReadDetails->processingInterval);
+    auto stop = start + interval;
+    auto number_of_request = getIntervalCount(
+        historyReadDetails->startTime, historyReadDetails->endTime, interval);
+
+    unordered_map<size_t, vector<ColumnValue>> results;
+    while (number_of_request > 0) {
+      auto filters = setColumnFilters(true, start, stop);
+
+      auto request_result = db_->select(toString(&node_id), columns, filters,
+          nullopt, "Source_Timestamp", reverse_order, nullptr);
+      results.merge(request_result); // using merge, ensures that duplicate
+                                     // start/stop boundaries are ignored
+
+      start = stop;
+      stop += interval;
+      --number_of_request;
+    }
+
+    return results;
+  } else {
+    throw DatabaseNotAvailable();
+  }
+}
+
+UA_StatusCode aggregateHistoryResult(size_t aggregateTypeSize,
+    UA_NodeId* aggregateType, UA_AggregateConfiguration aggregateConfiguration,
+    UA_HistoryData* result, unordered_map<size_t, vector<ColumnValue>> rows) {}
+
 void Historizer::readProcessed(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* sessionId, void* /*sessionContext*/,
     const UA_RequestHeader* requestHeader,
@@ -615,7 +682,30 @@ void Historizer::readProcessed(UA_Server* server, void* /*hdbContext*/,
     UA_TimestampsToReturn timestampsToReturn,
     UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
     const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
-    UA_HistoryData* const* const historyData) {}
+    UA_HistoryData* const* const historyData) {
+  response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
+
+  for (size_t i = 0; i < nodesToReadSize; ++i) {
+    try {
+      auto history_values = readHistory(
+          historyReadDetails, timestampsToReturn, nodesToRead[i].nodeId);
+      response->results[i].statusCode =
+          aggregateHistoryResult(historyReadDetails->aggregateTypeSize,
+              historyReadDetails->aggregateType,
+              historyReadDetails->aggregateConfiguration, historyData[i],
+              history_values);
+    } catch (BadContinuationPoint& ex) {
+      response->results[i].statusCode =
+          UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
+    } catch (DatabaseNotAvailable& ex) {
+      response->responseHeader.serviceResult =
+          UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+    } catch (runtime_error& ex) {
+      // handle unexpected read exceptions here
+      response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
+    }
+  }
+}
 
 void Historizer::readAtTime(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* sessionId, void* /*sessionContext*/,

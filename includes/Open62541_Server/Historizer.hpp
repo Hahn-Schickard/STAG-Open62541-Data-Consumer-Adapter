@@ -87,6 +87,10 @@ private:
       UA_HistoryReadResponse* response,
       UA_HistoryData* const* const historyData);
 
+  static std::unordered_map<size_t, std::vector<ColumnValue>>
+  Historizer::readHistory(const UA_ReadProcessedDetails* historyReadDetails,
+      UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id);
+
   /**
    * @brief Not documented and not implemented by open62541
    *
