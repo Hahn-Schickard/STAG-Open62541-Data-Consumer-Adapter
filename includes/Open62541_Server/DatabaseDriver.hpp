@@ -188,32 +188,32 @@ struct DatabaseDriver {
   void update(
       const std::string& table_name, ColumnFilter filter, ColumnValue value);
 
-  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+  std::unordered_map<size_t, std::vector<ColumnValue>> select(
       const std::string& table_name, std::vector<std::string> column_names,
       std::vector<ColumnFilter> filter,
       std::optional<size_t> response_limit = std::nullopt,
       const std::string& order_by_column = std::string(),
       bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
-  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+  std::unordered_map<size_t, std::vector<ColumnValue>> select(
       const std::string& table_name, std::vector<std::string> column_names,
       std::optional<size_t> response_limit = std::nullopt,
       const std::string& order_by_column = std::string(),
       bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
-  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+  std::unordered_map<size_t, std::vector<ColumnValue>> select(
       const std::string& table_name, std::vector<ColumnFilter> filter,
       std::optional<size_t> response_limit = std::nullopt,
       const std::string& order_by_column = std::string(),
       bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
-  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+  std::unordered_map<size_t, std::vector<ColumnValue>> select(
       const std::string& table_name, ColumnFilter filter,
       std::optional<size_t> response_limit = std::nullopt,
       const std::string& order_by_column = std::string(),
       bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
-  std::unordered_map<size_t, std::vector<ColumnValue>> read(
+  std::unordered_map<size_t, std::vector<ColumnValue>> select(
       const std::string& table_name, std::string column_name,
       std::optional<size_t> response_limit = std::nullopt,
       const std::string& order_by_column = std::string(),

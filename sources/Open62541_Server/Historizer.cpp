@@ -545,7 +545,7 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
     unordered_map<size_t, vector<ColumnValue>> results;
     if (read_limit != 0) { // if numValuesPerNode is zero, there is no limit
       OverrunPoint overrun_point;
-      results = db_->read(toString(&node_id), columns, filters,
+      results = db_->select(toString(&node_id), columns, filters,
           historyReadDetails->numValuesPerNode, "Source_Timestamp",
           reverse_order, &overrun_point);
       if (overrun_point.hasMoreValues()) {
@@ -554,7 +554,7 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
             makeContinuationPoint(overrun_point.getOverrunRecord());
       }
     } else {
-      results = db_->read(toString(&node_id), columns, filters, nullopt,
+      results = db_->select(toString(&node_id), columns, filters, nullopt,
           "Source_Timestamp", reverse_order);
     }
     return results;
