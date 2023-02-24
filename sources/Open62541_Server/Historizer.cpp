@@ -438,6 +438,11 @@ struct BadContinuationPoint : runtime_error {
   BadContinuationPoint() : runtime_error("Corrupted Continuation Point") {}
 };
 
+struct OutOfMemory : runtime_error {
+  OutOfMemory()
+      : runtime_error("There is not enough memory to complete the operation") {}
+};
+
 UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   if (holds_alternative<string>(last_row[0].value())) {
     auto source_timestamp =
@@ -447,7 +452,7 @@ UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
     if (status == UA_STATUSCODE_GOOD) {
       memcpy(result->data, source_timestamp.c_str(), source_timestamp.size());
     } else {
-      throw BadContinuationPoint();
+      throw OutOfMemory();
     }
     return result;
   } else {
@@ -599,6 +604,8 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
       } catch (DatabaseNotAvailable& ex) {
         response->responseHeader.serviceResult =
             UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+      } catch (OutOfMemory& ex) {
+        response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
       } catch (runtime_error& ex) {
         // handle unexpected read exceptions here
         response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
