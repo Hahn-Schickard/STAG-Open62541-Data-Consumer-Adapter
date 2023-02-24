@@ -14,6 +14,20 @@ using namespace HaSLI;
 using namespace ODD;
 
 namespace open62541 {
+struct DatabaseNotAvailable : runtime_error {
+  DatabaseNotAvailable()
+      : runtime_error("Database driver is not initialized") {}
+};
+
+struct BadContinuationPoint : runtime_error {
+  BadContinuationPoint() : runtime_error("Corrupted Continuation Point") {}
+};
+
+struct OutOfMemory : runtime_error {
+  OutOfMemory()
+      : runtime_error("There is not enough memory to complete the operation") {}
+};
+
 LoggerPtr Historizer::logger_ = LoggerPtr(); // NOLINT
 DatabaseDriverPtr Historizer::db_ = DatabaseDriverPtr(); // NOLINT
 
@@ -428,20 +442,6 @@ UA_StatusCode expandHistoryResult(
 
   return appendUADataValue(result, data, rows.size());
 }
-
-struct DatabaseNotAvailable : runtime_error {
-  DatabaseNotAvailable()
-      : runtime_error("Database driver is not initialized") {}
-};
-
-struct BadContinuationPoint : runtime_error {
-  BadContinuationPoint() : runtime_error("Corrupted Continuation Point") {}
-};
-
-struct OutOfMemory : runtime_error {
-  OutOfMemory()
-      : runtime_error("There is not enough memory to complete the operation") {}
-};
 
 UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   if (holds_alternative<string>(last_row[0].value())) {
