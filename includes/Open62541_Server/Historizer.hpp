@@ -54,6 +54,21 @@ private:
       const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
       UA_Boolean historizing, const UA_DataValue* value);
 
+  /**
+   * @brief Callback implementation for monitored item data change call
+   *
+   * @param server - the parent server, that node exists on
+   * @param monitoredItemId - unkown
+   * @param monitoredItemContext - not used
+   * @param nodeId - node id, the new value is set for
+   * @param nodeContext - not used
+   * @param attributeId - unkown
+   * @param value - new node value
+   */
+  static void dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
+      void* monitoredItemContext, const UA_NodeId* nodeId, void* nodeContext,
+      UA_UInt32 attributeId, const UA_DataValue* value);
+
   static std::unordered_map<size_t, std::vector<ODD::ColumnValue>> readHistory(
       const UA_ReadRawModifiedDetails* historyReadDetails,
       UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
@@ -112,21 +127,6 @@ private:
       const UA_HistoryReadValueId* nodesToRead,
       UA_HistoryReadResponse* response,
       UA_HistoryData* const* const historyData);
-
-  /**
-   * @brief Callback implementation for monitored item data change call
-   *
-   * @param server - the parent server, that node exists on
-   * @param monitoredItemId - unkown
-   * @param monitoredItemContext - not used
-   * @param nodeId - node id, the new value is set for
-   * @param nodeContext - not used
-   * @param attributeId - unkown
-   * @param value - new node value
-   */
-  static void dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
-      void* monitoredItemContext, const UA_NodeId* nodeId, void* nodeContext,
-      UA_UInt32 attributeId, const UA_DataValue* value);
 
   template <typename... Types>
   static void log(
