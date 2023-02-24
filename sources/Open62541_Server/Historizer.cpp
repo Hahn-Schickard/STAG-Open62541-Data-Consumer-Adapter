@@ -118,7 +118,7 @@ UA_StatusCode Historizer::registerNodeId(
       }); // clang-format on
       db_->create(node_id,
           vector<Column>{// clang-format off
-            Column("URID", ColumnDataType::INT, ColumnModifier::AUTO_INCREMENT),
+            Column("Index", ColumnDataType::INT, ColumnModifier::AUTO_INCREMENT),
             Column("Server_Timestamp", ColumnDataType::TIMESTAMP),
             Column("Source_Timestamp", ColumnDataType::TIMESTAMP),
             Column("Value", getColumnDataType(type))
@@ -441,7 +441,7 @@ struct BadContinuationPoint : runtime_error {
 UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   if (holds_alternative<string>(last_row[0].value())) {
     auto source_timestamp =
-        get<string>(last_row[0].value()); // this SHOULD be the URID column
+        get<string>(last_row[0].value()); // this SHOULD be the index column
     UA_ByteString* result = UA_ByteString_new();
     auto status = UA_ByteString_allocBuffer(result, source_timestamp.size());
     if (status == UA_STATUSCODE_GOOD) {
@@ -523,7 +523,7 @@ vector<ColumnFilter> setColumnFilters(UA_Boolean include_bounds,
   if (continuationPoint != nullptr) {
     auto continuation_index =
         string((char*)continuationPoint->data, continuationPoint->length);
-    result.emplace_back(FilterType::GREATER, "URID", continuation_index);
+    result.emplace_back(FilterType::GREATER, "Index", continuation_index);
   }
 
   return result;
