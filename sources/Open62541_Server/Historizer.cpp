@@ -442,7 +442,7 @@ UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   if (holds_alternative<string>(last_row[0].value())) {
     auto source_timestamp =
         get<string>(last_row[0].value()); // this SHOULD be the index column
-    UA_ByteString* result = UA_ByteString_new();
+    UA_ByteString* result = UA_ByteString_new(); // should it be on heap?
     auto status = UA_ByteString_allocBuffer(result, source_timestamp.size());
     if (status == UA_STATUSCODE_GOOD) {
       memcpy(result->data, source_timestamp.c_str(), source_timestamp.size());
