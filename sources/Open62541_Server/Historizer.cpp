@@ -671,9 +671,42 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
   }
 }
 
-UA_StatusCode aggregateHistoryResult(size_t aggregateTypeSize,
-    UA_NodeId* aggregateType, UA_AggregateConfiguration aggregateConfiguration,
-    UA_HistoryData* result, unordered_map<size_t, vector<ColumnValue>> rows) {}
+UA_StatusCode aggregateHistoryResult(string aggregate_typename,
+    UA_AggregateConfiguration aggregateConfiguration, UA_HistoryData* result,
+    const unordered_map<size_t, vector<ColumnValue>> rows) {
+  /**
+   * @TODO:
+   * 1. Use aggregate_typename to identify aggregate function type
+   * aggregate function type names are defined in OPC 10000-13 Aggregates
+   * Table 5, available at:
+   * https://opcfoundation.org/developer-tools/documents/view/170
+   *
+   * 2.a Once aggregate function is known, use it to aggregate rows into
+   * UA_HistoryData* result struct, based on aggregateConfiguration and return
+   * UA_STATUSCODE_GOOD if successful, if not return
+   * UA_STATUSCODE_BADAGGREGATEINVALIDINPUTS, @see
+   * UA_StatusCode expandHistoryResult(UA_HistoryData* result,
+   *                  unordered_map<size_t, vector<ColumnValue>> rows)
+   * function on how to append values to UA_HistoryData* struct
+   *
+   * 2.b If aggregate function is not known return
+   * UA_STATUSCODE_BADAGGREGATENOTSUPPORTED
+   */
+  return UA_STATUSCODE_BADAGGREGATENOTSUPPORTED;
+}
+
+string resolveAggregateTypename(
+    UA_Server* server, const UA_NodeId aggregateTypeID) {
+  UA_QualifiedName aggregate_typename;
+  auto status =
+      UA_Server_readBrowseName(server, aggregateTypeID, &aggregate_typename);
+  if (status == UA_STATUSCODE_GOOD) {
+    auto c_string = aggregate_typename.name;
+    return string((char*)c_string.data, c_string.length);
+  } else {
+    return string();
+  }
+}
 
 void Historizer::readProcessed(UA_Server* server, void* /*hdbContext*/,
     const UA_NodeId* sessionId, void* /*sessionContext*/,
@@ -685,25 +718,44 @@ void Historizer::readProcessed(UA_Server* server, void* /*hdbContext*/,
     UA_HistoryData* const* const historyData) {
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
 
-  for (size_t i = 0; i < nodesToReadSize; ++i) {
-    try {
-      auto history_values = readHistory(
-          historyReadDetails, timestampsToReturn, nodesToRead[i].nodeId);
-      response->results[i].statusCode =
-          aggregateHistoryResult(historyReadDetails->aggregateTypeSize,
-              historyReadDetails->aggregateType,
-              historyReadDetails->aggregateConfiguration, historyData[i],
-              history_values);
-    } catch (BadContinuationPoint& ex) {
-      response->results[i].statusCode =
-          UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-    } catch (DatabaseNotAvailable& ex) {
-      response->responseHeader.serviceResult =
-          UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
-    } catch (runtime_error& ex) {
-      // handle unexpected read exceptions here
-      response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
+  if (nodesToReadSize != historyReadDetails->aggregateTypeSize) {
+    response->responseHeader.serviceResult =
+        UA_STATUSCODE_BADAGGREGATELISTMISMATCH;
+    return;
+  }
+
+  if (!releaseContinuationPoints) {
+    for (size_t i = 0; i < nodesToReadSize; ++i) {
+      try {
+        auto history_values = readHistory(
+            historyReadDetails, timestampsToReturn, nodesToRead[i].nodeId);
+        /**
+         * @TODO:
+         * 1. Check if &nodesToRead[i].continuationPoint is NULL, if it is not,
+         * use a continuation point to continue aggregating from last stop.
+         *
+         * 2. If requestHeader->timeoutHint < aggregate computation time, return
+         * a partial historyData[i] result as well as
+         * &response->results[i].continuationPoint for client to use
+         */
+        response->results[i].statusCode =
+            aggregateHistoryResult(resolveAggregateTypename(server,
+                                       historyReadDetails->aggregateType[i]),
+                historyReadDetails->aggregateConfiguration, historyData[i],
+                history_values);
+      } catch (DatabaseNotAvailable& ex) {
+        response->responseHeader.serviceResult =
+            UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+      } catch (runtime_error& ex) {
+        // handle unexpected read exceptions here
+        response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
+      }
     }
+  } else {
+    /**
+     * @TODO:
+     * release all stored continuation points
+     */
   }
 }
 
