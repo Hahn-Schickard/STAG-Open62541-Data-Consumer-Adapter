@@ -303,7 +303,7 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
   }
 }
 
-void Historizer::dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
+void Historizer::dataChanged(UA_Server* server, UA_UInt32 /*monitoredItemId*/,
     void* /*monitoredItemContext*/, const UA_NodeId* nodeId,
     void* /*nodeContext*/, UA_UInt32 attributeId, const UA_DataValue* value) {
   UA_NodeId* session_id =
