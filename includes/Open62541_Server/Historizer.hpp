@@ -87,36 +87,6 @@ private:
       UA_HistoryReadResponse* response,
       UA_HistoryData* const* const historyData);
 
-  static std::unordered_map<size_t, std::vector<ColumnValue>>
-  Historizer::readHistory(const UA_ReadProcessedDetails* historyReadDetails,
-      UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id);
-
-  /**
-   * @brief Not documented and not implemented by open62541
-   *
-   * @param server - the parent server, that node exists on
-   * @param hdbContext - not used
-   * @param sessionId - used to identify the session
-   * @param sessionContext - used to get session context if needed
-   * @param requestHeader - ua client request header
-   * @param historyReadDetails - specifies how to format the read result
-   * @param timestampsToReturn - specifies which timestamps to return
-   * @param releaseContinuationPoints - unknown @todo: figure this out
-   * @param nodesToReadSize - how many node ids to read
-   * @param nodesToRead - array of node ids to read
-   * @param response - used to indicate request failure
-   * @param historyData - history result
-   */
-  static void readProcessed(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_RequestHeader* requestHeader,
-      const UA_ReadProcessedDetails* historyReadDetails,
-      UA_TimestampsToReturn timestampsToReturn,
-      UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-      const UA_HistoryReadValueId* nodesToRead,
-      UA_HistoryReadResponse* response,
-      UA_HistoryData* const* const historyData);
-
   /**
    * @brief Not documented and not implemented by open62541
    *
