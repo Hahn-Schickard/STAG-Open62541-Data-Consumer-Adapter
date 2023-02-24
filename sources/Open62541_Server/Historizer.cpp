@@ -306,14 +306,15 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
 void Historizer::dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
     void* /*monitoredItemContext*/, const UA_NodeId* nodeId,
     void* /*nodeContext*/, UA_UInt32 attributeId, const UA_DataValue* value) {
-  UA_NodeId* session_id = NULL; // obtain session id, its set to NULL in the
-                                // example code, so might be imposable to do so
+  UA_NodeId* session_id =
+      nullptr; // obtain session id, its set to NULL in the
+               // example code, so might be imposable to do so
   UA_Boolean historize = false;
   if ((attributeId & UA_ATTRIBUTEID_HISTORIZING) != 0) {
     historize = true;
   }
 
-  setValue(server, NULL, session_id, NULL, nodeId, historize, value);
+  setValue(server, nullptr, session_id, nullptr, nodeId, historize, value);
 }
 
 vector<string> setColumnNames(UA_TimestampsToReturn timestampsToReturn) {
