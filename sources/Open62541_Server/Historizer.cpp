@@ -303,6 +303,80 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
   }
 }
 
+vector<string> setColumnNames(UA_TimestampsToReturn timestampsToReturn) {
+  vector<string> result;
+  switch (timestampsToReturn) {
+  case UA_TIMESTAMPSTORETURN_SOURCE: {
+    result.emplace_back("Source_Timestamp");
+    break;
+  }
+  case UA_TIMESTAMPSTORETURN_SERVER: {
+    result.emplace_back("Server_Timestamp");
+    break;
+  }
+  case UA_TIMESTAMPSTORETURN_BOTH: {
+    result.emplace_back("Source_Timestamp");
+    result.emplace_back("Server_Timestamp");
+    break;
+  }
+  case UA_TIMESTAMPSTORETURN_NEITHER:
+    [[fallthrough]];
+  default: { break; }
+  }
+  result.emplace_back("Value");
+
+  return result;
+}
+
+vector<ColumnFilter> setColumnFilters(
+    UA_Boolean include_bounds, UA_DateTime start_time, UA_DateTime end_time) {
+  vector<ColumnFilter> result;
+
+  FilterType start_filter, end_filter;
+  if (include_bounds) {
+    start_filter = FilterType::GREATER_OR_EQUAL;
+    end_filter = FilterType::LESS_OR_EQUAL;
+  } else {
+    start_filter = FilterType::GREATER;
+    end_filter = FilterType::LESS;
+  }
+
+  UA_DateTime start, end;
+  if (start_time < end_time) {
+    start = start_time;
+    end = end_time;
+  } else { // set reverse order filters
+    start = end_time;
+    end = start_time;
+  }
+
+  if (start > 0) {
+    // if start time is equal DateTime.MinValue, then there is no start filter
+    result.emplace_back(start_filter, "Source_Timestamp", getTimestamp(start));
+  }
+  if (end > 0) {
+    // if end time is equal DateTime.MinValue, then there is no end filter
+    result.emplace_back(end_filter, "Source_Timestamp", getTimestamp(end));
+  }
+
+  return result;
+}
+
+vector<ColumnFilter> setColumnFilters(UA_Boolean include_bounds,
+    UA_DateTime start_time, UA_DateTime end_time,
+    const UA_ByteString* continuationPoint) {
+  vector<ColumnFilter> result =
+      setColumnFilters(include_bounds, start_time, end_time);
+
+  if (continuationPoint != nullptr) {
+    auto continuation_index =
+        string((char*)continuationPoint->data, continuationPoint->length);
+    result.emplace_back(FilterType::GREATER, "Index", continuation_index);
+  }
+
+  return result;
+}
+
 UA_StatusCode appendUADataValue(UA_HistoryData* result,
     UA_DataValue* data_points, size_t data_points_size) {
   if (result->dataValuesSize == 0) {
@@ -458,80 +532,6 @@ UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   } else {
     throw BadContinuationPoint();
   }
-}
-
-vector<string> setColumnNames(UA_TimestampsToReturn timestampsToReturn) {
-  vector<string> result;
-  switch (timestampsToReturn) {
-  case UA_TIMESTAMPSTORETURN_SOURCE: {
-    result.emplace_back("Source_Timestamp");
-    break;
-  }
-  case UA_TIMESTAMPSTORETURN_SERVER: {
-    result.emplace_back("Server_Timestamp");
-    break;
-  }
-  case UA_TIMESTAMPSTORETURN_BOTH: {
-    result.emplace_back("Source_Timestamp");
-    result.emplace_back("Server_Timestamp");
-    break;
-  }
-  case UA_TIMESTAMPSTORETURN_NEITHER:
-    [[fallthrough]];
-  default: { break; }
-  }
-  result.emplace_back("Value");
-
-  return result;
-}
-
-vector<ColumnFilter> setColumnFilters(
-    UA_Boolean include_bounds, UA_DateTime start_time, UA_DateTime end_time) {
-  vector<ColumnFilter> result;
-
-  FilterType start_filter, end_filter;
-  if (include_bounds) {
-    start_filter = FilterType::GREATER_OR_EQUAL;
-    end_filter = FilterType::LESS_OR_EQUAL;
-  } else {
-    start_filter = FilterType::GREATER;
-    end_filter = FilterType::LESS;
-  }
-
-  UA_DateTime start, end;
-  if (start_time < end_time) {
-    start = start_time;
-    end = end_time;
-  } else { // set reverse order filters
-    start = end_time;
-    end = start_time;
-  }
-
-  if (start > 0) {
-    // if start time is equal DateTime.MinValue, then there is no start filter
-    result.emplace_back(start_filter, "Source_Timestamp", getTimestamp(start));
-  }
-  if (end > 0) {
-    // if end time is equal DateTime.MinValue, then there is no end filter
-    result.emplace_back(end_filter, "Source_Timestamp", getTimestamp(end));
-  }
-
-  return result;
-}
-
-vector<ColumnFilter> setColumnFilters(UA_Boolean include_bounds,
-    UA_DateTime start_time, UA_DateTime end_time,
-    const UA_ByteString* continuationPoint) {
-  vector<ColumnFilter> result =
-      setColumnFilters(include_bounds, start_time, end_time);
-
-  if (continuationPoint != nullptr) {
-    auto continuation_index =
-        string((char*)continuationPoint->data, continuationPoint->length);
-    result.emplace_back(FilterType::GREATER, "Index", continuation_index);
-  }
-
-  return result;
 }
 
 unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
