@@ -630,12 +630,122 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
      * setting any data*/
 }
 
-void Historizer::readAtTime(UA_Server* server, void* /*hdbContext*/,
-    const UA_NodeId* sessionId, void* /*sessionContext*/,
+vector<ColumnValue> interpolateValues(UA_DateTime target_timestamp,
+    bool simple_bounds, unordered_map<size_t, vector<ColumnValue>> first,
+    unordered_map<size_t, vector<ColumnValue>> second) {
+  vector<ColumnValue> result;
+  // both maps MUST have 1 row each
+  if (first.size() != 1 || second.size() != 1) {
+    // throw an exception?
+  }
+
+  auto first_row = first.begin()->second;
+
+  // set result timestamp columns
+  switch (first_row.size()) { // MUST either be equal to 1,2 or 3
+  case 1: {
+    // only value is returned, nothing to set
+    break;
+  }
+  case 2: {
+    result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
+    break;
+  }
+  case 3: {
+    result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
+    result.emplace_back(first_row[1].name(), getTimestamp(target_timestamp));
+    break;
+  }
+  default: {
+    // bad no data
+    // throw an exception?
+    break;
+  }
+  }
+
+  if (simple_bounds) {
+    // first + second / 2 ?
+  } else {
+    if (first.empty()) {
+      // bad no data
+    }
+    // t1 = timestamp - first_nearest_timestamp
+    // v_diff = second_nearest_value - first_nearest_value
+    // t_diff = second_nearest_timestamp - first_nearest_timestamp
+    // result =  ((t1 * v_diff) / t_diff) + first_nearest_value
+  }
+  return result;
+}
+
+unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
+    const UA_ReadAtTimeDetails* historyReadDetails,
+    UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
+    const UA_ByteString* continuationPoint_IN,
+    [[maybe_unused]] UA_ByteString* continuationPoint_OUT) { // NOLINT
+  if (db_) {
+    auto columns = setColumnNames(timestampsToReturn);
+
+    unordered_map<size_t, vector<ColumnValue>> results;
+    for (size_t i = 0; i < historyReadDetails->reqTimesSize; ++i) {
+      auto timestamp = getTimestamp(historyReadDetails->reqTimes[i]);
+      auto timestamp_results = db_->select(toString(&node_id), columns,
+          ColumnFilter(FilterType::EQUAL, timestamp), nullopt,
+          "Source_Timestamp");
+      if (timestamp_results.empty()) {
+        auto first_nearest_result = db_->select(toString(&node_id), columns,
+            ColumnFilter(FilterType::LESS, timestamp), 1, "Source_Timestamp",
+            true);
+        auto second_nearest_result = db_->select(toString(&node_id), columns,
+            ColumnFilter(FilterType::GREATER, timestamp), 1, "Source_Timestamp",
+            false);
+        // interpolate index value based on first and second result indexes
+        auto index = second_nearest_result.begin()->first -
+            first_nearest_result.begin()->first; // probably a horrible idea
+        results.emplace(index,
+            interpolateValues(historyReadDetails->reqTimes[i],
+                historyReadDetails->useSimpleBounds, first_nearest_result,
+                second_nearest_result));
+      } else {
+        results.merge(timestamp_results);
+      }
+    }
+    return results;
+  } else {
+    throw DatabaseNotAvailable();
+  }
+}
+
+void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
+    const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
     const UA_RequestHeader* requestHeader,
     const UA_ReadAtTimeDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn,
     UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
     const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
-    UA_HistoryData* const* const historyData) {}
+    UA_HistoryData* const* const historyData) {
+  response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
+  if (!releaseContinuationPoints) {
+    for (size_t i = 0; i < nodesToReadSize; ++i) {
+      try {
+        auto history_values =
+            readHistory(historyReadDetails, timestampsToReturn,
+                nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
+                &response->results[i].continuationPoint);
+        response->results[i].statusCode =
+            expandHistoryResult(historyData[i], history_values);
+      } catch (BadContinuationPoint& ex) {
+        response->results[i].statusCode =
+            UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
+      } catch (DatabaseNotAvailable& ex) {
+        response->responseHeader.serviceResult =
+            UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+      } catch (OutOfMemory& ex) {
+        response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
+      } catch (runtime_error& ex) {
+        // handle unexpected read exceptions here
+        response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
+      }
+    }
+  }
+}
 } // namespace open62541
