@@ -202,6 +202,12 @@ struct DatabaseDriver {
       bool highest_value_first = false, OverrunPoint* overrun = nullptr);
 
   std::unordered_map<size_t, std::vector<ColumnValue>> select(
+      const std::string& table_name, std::vector<std::string> column_names,
+      ColumnFilter filter, std::optional<size_t> response_limit = std::nullopt,
+      const std::string& order_by_column = std::string(),
+      bool highest_value_first = false, OverrunPoint* overrun = nullptr);
+
+  std::unordered_map<size_t, std::vector<ColumnValue>> select(
       const std::string& table_name, std::vector<ColumnFilter> filter,
       std::optional<size_t> response_limit = std::nullopt,
       const std::string& order_by_column = std::string(),

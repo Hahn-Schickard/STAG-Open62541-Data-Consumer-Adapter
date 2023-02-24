@@ -498,6 +498,15 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::select(
 }
 
 unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::select(
+    const string& table_name, vector<string> column_names, ColumnFilter filter,
+    optional<size_t> response_limit, const string& order_by_column,
+    bool highest_value_first, OverrunPoint* overrun) {
+  return select(table_name, move(column_names),
+      vector<ColumnFilter>{move(filter)}, response_limit, order_by_column,
+      highest_value_first, overrun);
+}
+
+unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::select(
     const string& table_name, vector<ColumnFilter> filter,
     optional<size_t> response_limit, const string& order_by_column,
     bool highest_value_first, OverrunPoint* overrun) {
