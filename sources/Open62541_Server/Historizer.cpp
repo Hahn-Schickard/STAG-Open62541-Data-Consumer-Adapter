@@ -308,8 +308,10 @@ void Historizer::dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
     void* /*nodeContext*/, UA_UInt32 attributeId, const UA_DataValue* value) {
   UA_NodeId* session_id = NULL; // obtain session id, its set to NULL in the
                                 // example code, so might be imposable to do so
-  UA_Boolean historize =
-      attributeId & UA_ATTRIBUTEID_HISTORIZING != 0 ? UA_TRUE : UA_FALSE;
+  UA_Boolean historize = false;
+  if ((attributeId & UA_ATTRIBUTEID_HISTORIZING) != 0) {
+    historize = true;
+  }
 
   setValue(server, NULL, session_id, NULL, nodeId, historize, value);
 }
