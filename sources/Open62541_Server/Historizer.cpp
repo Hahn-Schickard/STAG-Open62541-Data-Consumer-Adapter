@@ -1004,5 +1004,5 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
       }
     }
   }
-} // namespace open62541
+}
 } // namespace open62541
