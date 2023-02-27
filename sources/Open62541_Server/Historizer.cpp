@@ -617,7 +617,7 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
       } catch (DatabaseNotAvailable& ex) {
         response->responseHeader.serviceResult =
-            UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+            UA_STATUSCODE_BADDATAUNAVAILABLE;
       } catch (OutOfMemory& ex) {
         response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
       } catch (runtime_error& ex) {
@@ -995,7 +995,7 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
       } catch (DatabaseNotAvailable& ex) {
         response->responseHeader.serviceResult =
-            UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+            UA_STATUSCODE_BADDATAUNAVAILABLE;
       } catch (OutOfMemory& ex) {
         response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
       } catch (runtime_error& ex) {
