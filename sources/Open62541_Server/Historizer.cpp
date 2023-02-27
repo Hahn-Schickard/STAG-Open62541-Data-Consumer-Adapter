@@ -677,6 +677,92 @@ vector<ColumnValue> interpolateValues(UA_DateTime target_timestamp,
   return result;
 }
 
+/**
+ * @brief Defines Aggregate Result Status Code expansion
+ *
+ * Defined in UA Part 4: Services Table 181 DataValue InfoBits
+ *
+ */
+namespace HistorianBits {
+enum class DataLocation {
+  RAW = 0x00,
+  CALCULATED = 0x01,
+  INTERPOLATED = 0x02,
+  RESERVED = 0x03
+};
+
+static constexpr uint32_t HISTORIAN_BITS_MASK = 0x1F;
+static constexpr uint32_t DATA_LOCATION_MASK = 0xFFFFFFFC;
+static constexpr uint32_t ADDITION_INFORMATION_MASK = 0xFFFFFFE3;
+static constexpr uint32_t PARTIAL_DATA_MASK = 0x1B;
+static constexpr uint32_t EXTRA_DATA_MASK = 0x17;
+static constexpr uint32_t MULTI_VALUE_MASK = 0x0F;
+
+void setHistorianBits(UA_StatusCode* status, DataLocation data_loc,
+    bool is_partial = false, bool has_extra = false,
+    bool has_multiple = false) {
+  if (UA_StatusCode_isBad(*status)) {
+    string error_msg =
+        "Can not set historian bits for " + string(UA_StatusCode_name(*status));
+    throw invalid_argument(error_msg);
+  }
+  if (data_loc == DataLocation::RESERVED) {
+    throw invalid_argument(
+        "Data location type can not be set to reserved type.");
+  }
+  *status &= DATA_LOCATION_MASK & static_cast<uint32_t>(data_loc);
+  *status &= ADDITION_INFORMATION_MASK &
+      (static_cast<uint32_t>(is_partial) & PARTIAL_DATA_MASK) &
+      (static_cast<uint32_t>(has_extra) & EXTRA_DATA_MASK) &
+      (static_cast<uint32_t>(has_multiple) & MULTI_VALUE_MASK);
+}
+
+UA_StatusCode setHistorianBits(const UA_StatusCode* status,
+    DataLocation data_loc, bool is_partial = false, bool has_extra = false,
+    bool has_multiple = false) {
+  UA_StatusCode result = *status; // obtain a copy of original status code
+  setHistorianBits(&result, data_loc, is_partial, has_extra, has_multiple);
+  return result;
+}
+
+UA_Boolean hasHistorianBits(const UA_StatusCode status) {
+  return status & HISTORIAN_BITS_MASK > 0 ? UA_TRUE : UA_FALSE;
+}
+
+/**
+ * @brief Checks if StatusCode indicates that data value is calculated with an
+ * incomplete interval
+ *
+ * @param status
+ * @return UA_Boolean
+ */
+UA_Boolean hasPartialValue(const UA_StatusCode status) {
+  return status & PARTIAL_DATA_MASK > 0 ? UA_TRUE : UA_FALSE;
+}
+
+/**
+ * @brief Checks if StatusCode indicates that the Raw data value supersedes
+ * other data at the same timestamp
+ *
+ * @param status
+ * @return UA_Boolean
+ */
+UA_Boolean hasExtraData(const UA_StatusCode status) {
+  return status & EXTRA_DATA_MASK > 0 ? UA_TRUE : UA_FALSE;
+}
+
+/**
+ * @brief Checks if StatusCode indicates that the multiple data values match the
+ * Aggregate criteria
+ *
+ * @param status
+ * @return UA_Boolean
+ */
+UA_Boolean hasMultipleValues(const UA_StatusCode status) {
+  return status & MULTI_VALUE_MASK > 0 ? UA_TRUE : UA_FALSE;
+}
+} // namespace HistorianBits
+
 unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
     const UA_ReadAtTimeDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
