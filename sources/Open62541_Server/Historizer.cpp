@@ -28,6 +28,10 @@ struct OutOfMemory : runtime_error {
       : runtime_error("There is not enough memory to complete the operation") {}
 };
 
+struct NoBoundData : runtime_error {
+  NoBoundData() : runtime_error("No bound data") {}
+};
+
 LoggerPtr Historizer::logger_ = LoggerPtr(); // NOLINT
 DatabaseDriverPtr Historizer::db_ = DatabaseDriverPtr(); // NOLINT
 
@@ -804,8 +808,7 @@ vector<ColumnValue> interpolateValues(UA_DateTime target_timestamp,
     break;
   }
   default: {
-    // bad no data
-    // throw an exception?
+    throw NoBoundData();
     break;
   }
   }
@@ -822,9 +825,6 @@ vector<ColumnValue> interpolateValues(UA_DateTime target_timestamp,
         ((first_nearest_value * weight1) + (second_nearest_value * weight2)) /
         denominator;
   } else {
-    if (first.empty()) {
-      // bad no data
-    }
     // use formula from OPC UA Part 13 Aggregates specification section 3.1.8
     intmax_t weight = target_timestamp - first_nearest_timestamp;
     auto value_diff = second_nearest_value - first_nearest_value;
@@ -990,6 +990,8 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
         // UA_DateTime
         response->results[i].statusCode =
             UA_STATUSCODE_BADAGGREGATEINVALIDINPUTS;
+      } catch (NoBoundData& ex) {
+        response->results[i].statusCode = UA_STATUSCODE_BADBOUNDNOTFOUND;
       } catch (BadContinuationPoint& ex) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
