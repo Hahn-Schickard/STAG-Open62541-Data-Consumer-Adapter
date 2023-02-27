@@ -630,6 +630,143 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
      * setting any data*/
 }
 
+DataType operator*(const DataType& lhs, const intmax_t& rhs) {
+  DataType result;
+  match(lhs,
+      [&](bool value) { throw logic_error("Can not multiply Boolean value"); },
+      [&](uintmax_t value) { result = value * abs(rhs); },
+      [&](intmax_t value) { result = value * rhs; },
+      [&](float value) { result = value * rhs; },
+      [&](double value) { result = value * rhs; },
+      [&](string value) { throw logic_error("Can not multiply Text"); },
+      [&](vector<uint8_t> value) {
+        throw logic_error("Can not multiply Opaque data");
+      });
+  return result;
+}
+
+DataType operator+(const DataType& lhs, const DataType& rhs) {
+  DataType result;
+  match(lhs,
+      [&](bool value) {
+        if (holds_alternative<bool>(rhs)) {
+          auto addition = get<bool>(rhs);
+          result = (bool)(value | addition); // use logical AND instead?
+        } else {
+          throw invalid_argument("Can not add non boolean value to a boolean");
+        }
+      },
+      [&](uintmax_t value) {
+        if (holds_alternative<uintmax_t>(rhs)) {
+          auto addition = get<uintmax_t>(rhs);
+          result = value + addition;
+        } else {
+          throw invalid_argument(
+              "Can not add non unsigned int value to a unsigned int");
+        }
+      },
+      [&](intmax_t value) {
+        if (holds_alternative<intmax_t>(rhs)) {
+          auto addition = get<intmax_t>(rhs);
+          result = value + addition;
+        } else {
+          throw invalid_argument(
+              "Can not add non signed int value to a signed int");
+        }
+      },
+      [&](float value) {
+        if (holds_alternative<float>(rhs)) {
+          auto addition = get<float>(rhs);
+          result = value + addition;
+        } else {
+          throw invalid_argument("Can not add non float value to a float");
+        }
+      },
+      [&](double value) {
+        if (holds_alternative<double>(rhs)) {
+          auto addition = get<double>(rhs);
+          result = value + addition;
+        } else {
+          throw invalid_argument("Can not add non double value to a double");
+        }
+      },
+      [&](string value) { throw logic_error("Can not add to Text"); },
+      [&](vector<uint8_t> value) {
+        throw logic_error("Can not add to Opaque data");
+      });
+  return result;
+}
+
+DataType operator-(const DataType& lhs, const DataType& rhs) {
+  DataType result;
+  match(lhs,
+      [&](bool value) {
+        if (holds_alternative<bool>(rhs)) {
+          auto addition = get<bool>(rhs);
+          result = (bool)(value & addition);
+        } else {
+          throw invalid_argument(
+              "Can not subtract non boolean value from a boolean");
+        }
+      },
+      [&](uintmax_t value) {
+        if (holds_alternative<uintmax_t>(rhs)) {
+          auto addition = get<uintmax_t>(rhs);
+          result = value - addition;
+        } else {
+          throw invalid_argument(
+              "Can not subtract non unsigned int value from a unsigned int");
+        }
+      },
+      [&](intmax_t value) {
+        if (holds_alternative<intmax_t>(rhs)) {
+          auto addition = get<intmax_t>(rhs);
+          result = value - addition;
+        } else {
+          throw invalid_argument(
+              "Can not subtract non signed int value from a signed int");
+        }
+      },
+      [&](float value) {
+        if (holds_alternative<float>(rhs)) {
+          auto addition = get<float>(rhs);
+          result = value - addition;
+        } else {
+          throw invalid_argument(
+              "Can not subtract non float value from a float");
+        }
+      },
+      [&](double value) {
+        if (holds_alternative<double>(rhs)) {
+          auto addition = get<double>(rhs);
+          result = value - addition;
+        } else {
+          throw invalid_argument(
+              "Can not subtract non double value from a double");
+        }
+      },
+      [&](string value) { throw logic_error("Can not subtract from Text"); },
+      [&](vector<uint8_t> value) {
+        throw logic_error("Can not subtract from Opaque data");
+      });
+  return result;
+}
+
+DataType operator/(const DataType& lhs, const intmax_t& rhs) {
+  DataType result;
+  match(lhs,
+      [&](bool value) { throw logic_error("Can not divide Boolean value"); },
+      [&](uintmax_t value) { result = value / rhs; },
+      [&](intmax_t value) { result = value / rhs; },
+      [&](float value) { result = value / rhs; },
+      [&](double value) { result = value / rhs; },
+      [&](string value) { throw logic_error("Can not divide Text"); },
+      [&](vector<uint8_t> value) {
+        throw logic_error("Can not divide Opaque data");
+      });
+  return result;
+}
+
 vector<ColumnValue> interpolateValues(UA_DateTime target_timestamp,
     bool simple_bounds, unordered_map<size_t, vector<ColumnValue>> first,
     unordered_map<size_t, vector<ColumnValue>> second) {
