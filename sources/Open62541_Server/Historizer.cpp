@@ -777,20 +777,30 @@ vector<ColumnValue> interpolateValues(UA_DateTime target_timestamp,
   }
 
   auto first_row = first.begin()->second;
-
-  // set result timestamp columns
+  auto second_row = second.begin()->second;
+  DataType first_nearest_value, second_nearest_value;
+  string data_point_name;
+  // set result timestamp columns and nearest_value DataTypes
   switch (first_row.size()) { // MUST either be equal to 1,2 or 3
   case 1: {
-    // only value is returned, nothing to set
+    first_nearest_value = first_row[0].value();
+    second_nearest_value = second_row[0].value();
+    data_point_name = first_row[0].name();
     break;
   }
   case 2: {
     result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
+    first_nearest_value = first_row[1].value();
+    second_nearest_value = second_row[1].value();
+    data_point_name = first_row[1].name();
     break;
   }
   case 3: {
     result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
     result.emplace_back(first_row[1].name(), getTimestamp(target_timestamp));
+    first_nearest_value = first_row[2].value();
+    second_nearest_value = second_row[2].value();
+    data_point_name = first_row[2].name();
     break;
   }
   default: {
@@ -800,17 +810,29 @@ vector<ColumnValue> interpolateValues(UA_DateTime target_timestamp,
   }
   }
 
+  auto first_nearest_timestamp = toUADateTime(first_row[0].value());
+  auto second_nearest_timestamp = toUADateTime(second_row[0].value());
+  DataType interpolated_data;
   if (simple_bounds) {
-    // first + second / 2 ?
+    // use linear interpolation between the nearest bounding values
+    intmax_t weight1 = second_nearest_timestamp - target_timestamp;
+    intmax_t weight2 = target_timestamp - first_nearest_timestamp;
+    intmax_t denominator = second_nearest_timestamp - first_nearest_timestamp;
+    interpolated_data =
+        ((first_nearest_value * weight1) + (second_nearest_value * weight2)) /
+        denominator;
   } else {
     if (first.empty()) {
       // bad no data
     }
-    // t1 = timestamp - first_nearest_timestamp
-    // v_diff = second_nearest_value - first_nearest_value
-    // t_diff = second_nearest_timestamp - first_nearest_timestamp
-    // result =  ((t1 * v_diff) / t_diff) + first_nearest_value
+    // use formula from OPC UA Part 13 Aggregates specification section 3.1.8
+    intmax_t weight = target_timestamp - first_nearest_timestamp;
+    auto value_diff = second_nearest_value - first_nearest_value;
+    intmax_t denominator = second_nearest_timestamp - first_nearest_timestamp;
+    interpolated_data =
+        ((value_diff * weight) / denominator) + first_nearest_value;
   }
+  result.emplace_back(ColumnValue(data_point_name, interpolated_data));
   return result;
 }
 
