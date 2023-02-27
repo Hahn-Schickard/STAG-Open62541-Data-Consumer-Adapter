@@ -777,7 +777,7 @@ vector<ColumnValue> interpolateValues(UA_DateTime target_timestamp,
   vector<ColumnValue> result;
   // both maps MUST have 1 row each
   if (first.size() != 1 || second.size() != 1) {
-    // throw an exception?
+    throw logic_error("Multiple nearest match values are not supported");
   }
 
   auto first_row = first.begin()->second;
