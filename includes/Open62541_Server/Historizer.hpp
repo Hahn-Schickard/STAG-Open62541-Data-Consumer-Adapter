@@ -102,11 +102,11 @@ private:
       UA_HistoryReadResponse* response,
       UA_HistoryData* const* const historyData);
 
-  static std::unordered_map<size_t, std::vector<ODD::ColumnValue>> readHistory(
+  static UA_StatusCode readAndAppendHistory(
       const UA_ReadAtTimeDetails* historyReadDetails,
       UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
       const UA_ByteString* continuationPoint_IN,
-      UA_ByteString* continuationPoint_OUT);
+      UA_ByteString* continuationPoint_OUT, UA_HistoryData* historyData);
   /**
    * @brief Not documented and not implemented by open62541
    *

@@ -922,20 +922,24 @@ UA_Boolean hasMultipleValues(const UA_StatusCode status) {
 }
 } // namespace HistorianBits
 
-unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
+UA_StatusCode Historizer::readAndAppendHistory(
     const UA_ReadAtTimeDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
     const UA_ByteString* continuationPoint_IN,
-    [[maybe_unused]] UA_ByteString* continuationPoint_OUT) { // NOLINT
+    [[maybe_unused]] UA_ByteString* continuationPoint_OUT,
+    UA_HistoryData* historyData) { // NOLINT
   if (db_) {
     auto columns = setColumnNames(timestampsToReturn);
 
+    UA_StatusCode status = UA_STATUSCODE_GOOD;
+    using namespace HistorianBits;
     unordered_map<size_t, vector<ColumnValue>> results;
     for (size_t i = 0; i < historyReadDetails->reqTimesSize; ++i) {
       auto timestamp = getTimestamp(historyReadDetails->reqTimes[i]);
       auto timestamp_results = db_->select(toString(&node_id), columns,
           ColumnFilter(FilterType::EQUAL, timestamp), nullopt,
           "Source_Timestamp");
+
       if (timestamp_results.empty()) {
         auto first_nearest_result = db_->select(toString(&node_id), columns,
             ColumnFilter(FilterType::LESS, timestamp), 1, "Source_Timestamp",
@@ -950,11 +954,14 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
             interpolateValues(historyReadDetails->reqTimes[i],
                 historyReadDetails->useSimpleBounds, first_nearest_result,
                 second_nearest_result));
+        setHistorianBits(&status, DataLocation::INTERPOLATED);
       } else {
         results.merge(timestamp_results);
+        setHistorianBits(&status, DataLocation::RAW);
       }
     }
-    return results;
+    expandHistoryResult(historyData, results);
+    return status;
   } else {
     throw DatabaseNotAvailable();
   }
@@ -972,12 +979,17 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
   if (!releaseContinuationPoints) {
     for (size_t i = 0; i < nodesToReadSize; ++i) {
       try {
-        auto history_values =
-            readHistory(historyReadDetails, timestampsToReturn,
-                nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
-                &response->results[i].continuationPoint);
         response->results[i].statusCode =
-            expandHistoryResult(historyData[i], history_values);
+            readAndAppendHistory(historyReadDetails, timestampsToReturn,
+                nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
+                &response->results[i].continuationPoint, historyData[i]);
+      } catch (logic_error& ex) {
+        // Target Node Id values can not be interpolated due to mismatching data
+        // types or non aggregable data types (text, opaque values, etc...)
+        // OR resulting timestamps where malformed and could not be decoded as
+        // UA_DateTime
+        response->results[i].statusCode =
+            UA_STATUSCODE_BADAGGREGATEINVALIDINPUTS;
       } catch (BadContinuationPoint& ex) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
@@ -992,5 +1004,5 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
       }
     }
   }
-}
+} // namespace open62541
 } // namespace open62541
