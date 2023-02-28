@@ -646,13 +646,15 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
 DataType operator*(const DataType& lhs, const intmax_t& rhs) {
   DataType result;
   match(lhs,
-      [&](bool value) { throw logic_error("Can not multiply Boolean value"); },
+      [&](bool /*value*/) {
+        throw logic_error("Can not multiply Boolean value");
+      },
       [&](uintmax_t value) { result = value * abs(rhs); },
       [&](intmax_t value) { result = value * rhs; },
       [&](float value) { result = value * rhs; },
       [&](double value) { result = value * rhs; },
-      [&](string value) { throw logic_error("Can not multiply Text"); },
-      [&](vector<uint8_t> value) {
+      [&](string /*value*/) { throw logic_error("Can not multiply Text"); },
+      [&](vector<uint8_t> /*value*/) {
         throw logic_error("Can not multiply Opaque data");
       });
   return result;
@@ -661,7 +663,9 @@ DataType operator*(const DataType& lhs, const intmax_t& rhs) {
 DataType operator+(const DataType& lhs, const DataType& rhs) {
   DataType result;
   match(lhs,
-      [&](bool value) { throw invalid_argument("Can not add to a boolean"); },
+      [&](bool /*value*/) {
+        throw invalid_argument("Can not add to a boolean");
+      },
       [&](uintmax_t value) {
         if (holds_alternative<uintmax_t>(rhs)) {
           auto addition = get<uintmax_t>(rhs);
@@ -696,8 +700,8 @@ DataType operator+(const DataType& lhs, const DataType& rhs) {
           throw invalid_argument("Can not add non double value to a double");
         }
       },
-      [&](string value) { throw logic_error("Can not add to Text"); },
-      [&](vector<uint8_t> value) {
+      [&](string /*value*/) { throw logic_error("Can not add to Text"); },
+      [&](vector<uint8_t> /*value*/) {
         throw logic_error("Can not add to Opaque data");
       });
   return result;
@@ -706,7 +710,7 @@ DataType operator+(const DataType& lhs, const DataType& rhs) {
 DataType operator-(const DataType& lhs, const DataType& rhs) {
   DataType result;
   match(lhs,
-      [&](bool value) {
+      [&](bool /*value*/) {
         throw invalid_argument("Can not subtract from a boolean");
       },
       [&](uintmax_t value) {
@@ -745,8 +749,10 @@ DataType operator-(const DataType& lhs, const DataType& rhs) {
               "Can not subtract non double value from a double");
         }
       },
-      [&](string value) { throw logic_error("Can not subtract from Text"); },
-      [&](vector<uint8_t> value) {
+      [&](string /*value*/) {
+        throw logic_error("Can not subtract from Text");
+      },
+      [&](vector<uint8_t> /*value*/) {
         throw logic_error("Can not subtract from Opaque data");
       });
   return result;
@@ -755,13 +761,15 @@ DataType operator-(const DataType& lhs, const DataType& rhs) {
 DataType operator/(const DataType& lhs, const intmax_t& rhs) {
   DataType result;
   match(lhs,
-      [&](bool value) { throw logic_error("Can not divide Boolean value"); },
+      [&](bool /*value*/) {
+        throw logic_error("Can not divide Boolean value");
+      },
       [&](uintmax_t value) { result = value / rhs; },
       [&](intmax_t value) { result = value / rhs; },
       [&](float value) { result = value / rhs; },
       [&](double value) { result = value / rhs; },
-      [&](string value) { throw logic_error("Can not divide Text"); },
-      [&](vector<uint8_t> value) {
+      [&](string /*value*/) { throw logic_error("Can not divide Text"); },
+      [&](vector<uint8_t> /*value*/) {
         throw logic_error("Can not divide Opaque data");
       });
   return result;
@@ -941,7 +949,7 @@ UA_Boolean hasMultipleValues(const UA_StatusCode status) {
 UA_StatusCode Historizer::readAndAppendHistory(
     const UA_ReadAtTimeDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
-    const UA_ByteString* continuationPoint_IN,
+    const UA_ByteString* /*continuationPoint_IN*/,
     [[maybe_unused]] UA_ByteString* continuationPoint_OUT,
     UA_HistoryData* historyData) { // NOLINT
   if (db_) {
@@ -957,6 +965,7 @@ UA_StatusCode Historizer::readAndAppendHistory(
           "Source_Timestamp");
 
       if (timestamp_results.empty()) {
+
         auto nearest_before_result = db_->select(toString(&node_id), columns,
             ColumnFilter(FilterType::LESS, timestamp), 1, "Source_Timestamp",
             true);
@@ -991,12 +1000,13 @@ UA_StatusCode Historizer::readAndAppendHistory(
 
 void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
-    const UA_RequestHeader* requestHeader,
+    const UA_RequestHeader* /*requestHeader*/,
     const UA_ReadAtTimeDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn,
     UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
     const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
-    UA_HistoryData* const* const historyData) {
+    UA_HistoryData* const* const
+        historyData) { // NOLINT parameter name set by open62541
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
   if (!releaseContinuationPoints) {
     for (size_t i = 0; i < nodesToReadSize; ++i) {
