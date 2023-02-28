@@ -987,9 +987,11 @@ UA_StatusCode Historizer::readAndAppendHistory(
         auto second_nearest_result = db_->select(toString(&node_id), columns,
             ColumnFilter(FilterType::GREATER, timestamp), 1, "Source_Timestamp",
             false);
-        // interpolate index value based on first and second result indexes
-        auto index = second_nearest_result.begin()->first -
-            first_nearest_result.begin()->first; // probably a horrible idea
+        // indexes are only used to iterate over the results map, so we only
+        // need to make sure that they are all unique, since bounding values by
+        // defintion do not meet our aggregate criteria, their indexes will
+        // never be in the results maps, thus it is safe to use their indexes
+        auto index = second_nearest_result.begin()->first;
         results.emplace(index,
             interpolateValues(historyReadDetails->reqTimes[i],
                 historyReadDetails->useSimpleBounds, first_nearest_result,
