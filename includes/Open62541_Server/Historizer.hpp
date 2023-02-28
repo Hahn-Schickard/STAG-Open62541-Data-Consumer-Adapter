@@ -69,7 +69,7 @@ private:
       void* monitoredItemContext, const UA_NodeId* nodeId, void* nodeContext,
       UA_UInt32 attributeId, const UA_DataValue* value);
 
-  static std::unordered_map<size_t, std::vector<ODD::ColumnValue>> readHistory(
+  static ODD::Rows readHistory(
       const UA_ReadRawModifiedDetails* historyReadDetails,
       UA_UInt32 timeout_hint, UA_TimestampsToReturn timestampsToReturn,
       UA_NodeId node_id, const UA_ByteString* continuationPoint_IN,

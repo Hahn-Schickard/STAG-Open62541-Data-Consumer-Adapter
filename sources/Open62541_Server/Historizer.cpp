@@ -490,8 +490,7 @@ UA_DateTime toUADateTime(DataType data) {
   }
 }
 
-UA_StatusCode expandHistoryResult(
-    UA_HistoryData* result, unordered_map<size_t, vector<ColumnValue>> rows) {
+UA_StatusCode expandHistoryResult(UA_HistoryData* result, Rows rows) {
   auto* data =
       (UA_DataValue*)UA_Array_new(rows.size(), &UA_TYPES[UA_TYPES_DATAVALUE]);
   if (data == nullptr) {
@@ -539,6 +538,10 @@ UA_StatusCode expandHistoryResult(
   return appendUADataValue(result, data, rows.size());
 }
 
+/**
+ * @todo: expand ContinuationPoint to store either the index of next value or a
+ * future result for async select statements
+ */
 UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   if (holds_alternative<string>(last_row[0].value())) {
     auto source_timestamp =
@@ -556,7 +559,7 @@ UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   }
 }
 
-unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
+Rows Historizer::readHistory(
     const UA_ReadRawModifiedDetails* historyReadDetails,
     UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestampsToReturn,
     UA_NodeId node_id, const UA_ByteString* continuationPoint_IN,
@@ -579,9 +582,14 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
       reverse_order = true;
     }
 
-    unordered_map<size_t, vector<ColumnValue>> results;
+    Rows results;
     if (read_limit != 0) { // if numValuesPerNode is zero, there is no limit
       OverrunPoint overrun_point;
+      /**
+       * @todo: use an async select request or a batch read, and check if
+       * timeout_hint elapsed, if it did set a continuation point
+       *
+       */
       results = db_->select(toString(&node_id), columns, filters,
           historyReadDetails->numValuesPerNode, "Source_Timestamp",
           reverse_order, &overrun_point);
@@ -591,6 +599,11 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
             makeContinuationPoint(overrun_point.getOverrunRecord());
       }
     } else {
+      /**
+       * @todo: use an async select request or a batch read, and check if
+       * timeout_hint elapsed, if it did set a continuation point
+       *
+       */
       results = db_->select(toString(&node_id), columns, filters, nullopt,
           "Source_Timestamp", reverse_order);
     }
@@ -775,9 +788,8 @@ DataType operator/(const DataType& lhs, const intmax_t& rhs) {
   return result;
 }
 
-vector<ColumnValue> interpolateValues(UA_DateTime target_timestamp,
-    bool simple_bounds, unordered_map<size_t, vector<ColumnValue>> first,
-    unordered_map<size_t, vector<ColumnValue>> second) {
+vector<ColumnValue> interpolateValues(
+    UA_DateTime target_timestamp, bool simple_bounds, Rows first, Rows second) {
   vector<ColumnValue> result;
   // both maps MUST have 1 row each
   if (first.size() != 1 || second.size() != 1) {
@@ -957,15 +969,26 @@ UA_StatusCode Historizer::readAndAppendHistory(
 
     UA_StatusCode status = UA_STATUSCODE_GOOD;
     using namespace HistorianBits;
-    unordered_map<size_t, vector<ColumnValue>> results;
+    Rows results;
     for (size_t i = 0; i < historyReadDetails->reqTimesSize; ++i) {
       auto timestamp = getTimestamp(historyReadDetails->reqTimes[i]);
+      /**
+       * @todo: use an async select request or a batch read, and check if
+       * timeout_hint elapsed, if it did set a continuation point
+       *
+       */
       auto timestamp_results = db_->select(toString(&node_id), columns,
           ColumnFilter(FilterType::EQUAL, timestamp), nullopt,
           "Source_Timestamp");
 
       if (timestamp_results.empty()) {
-
+        /**
+         * @todo: use an async select requests or a batch reads, and check if
+         * timeout_hint elapsed for both nearest_before_result and
+         * nearest_after_result select requests, if it did set a continuation
+         * point for next
+         *
+         */
         auto nearest_before_result = db_->select(toString(&node_id), columns,
             ColumnFilter(FilterType::LESS, timestamp), 1, "Source_Timestamp",
             true);
