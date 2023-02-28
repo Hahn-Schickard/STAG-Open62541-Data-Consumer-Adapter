@@ -146,22 +146,29 @@ Configuration::Configuration(const string& filepath) : Configuration() {
 #endif
 
 #ifdef UA_ENABLE_HISTORIZING
-    /** @todo: obtain database configuration data and parse it to historizer */
-    historizer_ = make_unique<Historizer>();
-    configuration_.historyDatabase = historizer_->createDatabase();
-    configuration_.accessHistoryDataCapability = true;
-    configuration_.accessHistoryEventsCapability = false;
-    configuration_.maxReturnDataValues = 0; // unlimited
-    configuration_.insertDataCapability = false;
-    configuration_.insertEventCapability = false;
-    configuration_.insertAnnotationsCapability = false;
-    configuration_.replaceDataCapability = false;
-    configuration_.replaceEventCapability = false;
-    configuration_.updateDataCapability = false;
-    configuration_.updateEventCapability = false;
-    configuration_.deleteRawCapability = false;
-    configuration_.deleteEventCapability = false;
-    configuration_.deleteAtTimeDataCapability = false;
+    try {
+      /** @todo: obtain database configuration data and parse it to historizer
+       */
+      historizer_ = make_unique<Historizer>();
+      configuration_.historyDatabase = historizer_->createDatabase();
+      configuration_.accessHistoryDataCapability = true;
+      configuration_.accessHistoryEventsCapability = false;
+      configuration_.maxReturnDataValues = 0; // unlimited
+      configuration_.insertDataCapability = false;
+      configuration_.insertEventCapability = false;
+      configuration_.insertAnnotationsCapability = false;
+      configuration_.replaceDataCapability = false;
+      configuration_.replaceEventCapability = false;
+      configuration_.updateDataCapability = false;
+      configuration_.updateEventCapability = false;
+      configuration_.deleteRawCapability = false;
+      configuration_.deleteEventCapability = false;
+      configuration_.deleteAtTimeDataCapability = false;
+    } catch (exception& ex) {
+      logger_->error("Data Historization Service will not be available, due to "
+                     "an exception: {}",
+          ex.what());
+    }
 #endif
 
     configuration_.maxMonitoredItems =
