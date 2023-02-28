@@ -957,21 +957,25 @@ UA_StatusCode Historizer::readAndAppendHistory(
           "Source_Timestamp");
 
       if (timestamp_results.empty()) {
-        auto first_nearest_result = db_->select(toString(&node_id), columns,
+        auto nearest_before_result = db_->select(toString(&node_id), columns,
             ColumnFilter(FilterType::LESS, timestamp), 1, "Source_Timestamp",
             true);
-        auto second_nearest_result = db_->select(toString(&node_id), columns,
+        auto nearest_after_result = db_->select(toString(&node_id), columns,
             ColumnFilter(FilterType::GREATER, timestamp), 1, "Source_Timestamp",
             false);
         // indexes are only used to iterate over the results map, so we only
         // need to make sure that they are all unique, since bounding values by
         // defintion do not meet our aggregate criteria, their indexes will
         // never be in the results maps, thus it is safe to use their indexes
-        auto index = second_nearest_result.begin()->first;
+        auto index = nearest_after_result.begin()->first;
         results.emplace(index,
+            // useSimpleBounds=False dictates that we need to find first Non-Bad
+            // Raw values to use for interpolation, however it is not specified
+            // what is a Non-Bad Raw value, so we assume that the nearest RAW
+            // values to our target timestamp qualify as Non-Bad
             interpolateValues(historyReadDetails->reqTimes[i],
-                historyReadDetails->useSimpleBounds, first_nearest_result,
-                second_nearest_result));
+                historyReadDetails->useSimpleBounds, nearest_before_result,
+                nearest_after_result));
         setHistorianBits(&status, DataLocation::INTERPOLATED);
       } else {
         results.merge(timestamp_results);
