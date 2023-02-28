@@ -28,6 +28,10 @@ struct OutOfMemory : runtime_error {
       : runtime_error("There is not enough memory to complete the operation") {}
 };
 
+struct NoData : runtime_error {
+  NoData() : runtime_error("No data") {}
+};
+
 struct NoBoundData : runtime_error {
   NoBoundData() : runtime_error("No bound data") {}
 };
@@ -144,7 +148,7 @@ UA_StatusCode Historizer::registerNodeId(
       return result.statusCode;
     } else {
       log(SeverityLevel::CRITICAL, "Database Driver is not initialized");
-      return UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+      return UA_STATUSCODE_BADDATAUNAVAILABLE;
     }
   } catch (exception& ex) {
     log(SeverityLevel::CRITICAL,
@@ -629,15 +633,25 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
         response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
       }
     }
-  } /* Continuation points are not stored internally, so no need to release
-     * them, simply return StatusCode::Good for the entire request without
-     * setting any data*/
+  } /**
+     * @todo: release response->results[i]->historyData ?
+     * as specified in:
+     * https://github.com/open62541/open62541/blob/master/include/open62541/plugin/historydatabase.h#L73
+     */
+  /* Continuation points are not stored internally, so no need to release
+   * them, simply return StatusCode::Good for the entire request without
+   * setting any data*/
 }
 
 DataType operator*(const DataType& lhs, const intmax_t& rhs) {
   DataType result;
   match(lhs,
-      [&](bool value) { throw logic_error("Can not multiply Boolean value"); },
+      [&](bool value) {
+        /**
+         * @todo: how to multiply bool values?
+         */
+        throw logic_error("Can not multiply Boolean value");
+      },
       [&](uintmax_t value) { result = value * abs(rhs); },
       [&](intmax_t value) { result = value * rhs; },
       [&](float value) { result = value * rhs; },
@@ -653,6 +667,9 @@ DataType operator+(const DataType& lhs, const DataType& rhs) {
   DataType result;
   match(lhs,
       [&](bool value) {
+        /**
+         * @todo: how to add to bool?
+         */
         if (holds_alternative<bool>(rhs)) {
           auto addition = get<bool>(rhs);
           result = (bool)(value | addition); // use logical AND instead?
@@ -705,6 +722,9 @@ DataType operator-(const DataType& lhs, const DataType& rhs) {
   DataType result;
   match(lhs,
       [&](bool value) {
+        /**
+         * @todo: how to subtract from bool?
+         */
         if (holds_alternative<bool>(rhs)) {
           auto addition = get<bool>(rhs);
           result = (bool)(value & addition);
@@ -850,13 +870,6 @@ enum class DataLocation {
   RESERVED = 0x03
 };
 
-static constexpr uint32_t HISTORIAN_BITS_MASK = 0x1F;
-static constexpr uint32_t DATA_LOCATION_MASK = 0xFFFFFFFC;
-static constexpr uint32_t ADDITION_INFORMATION_MASK = 0xFFFFFFE3;
-static constexpr uint32_t PARTIAL_DATA_MASK = 0x1B;
-static constexpr uint32_t EXTRA_DATA_MASK = 0x17;
-static constexpr uint32_t MULTI_VALUE_MASK = 0x0F;
-
 void setHistorianBits(UA_StatusCode* status, DataLocation data_loc,
     bool is_partial = false, bool has_extra = false,
     bool has_multiple = false) {
@@ -869,11 +882,15 @@ void setHistorianBits(UA_StatusCode* status, DataLocation data_loc,
     throw invalid_argument(
         "Data location type can not be set to reserved type.");
   }
-  *status &= DATA_LOCATION_MASK & static_cast<uint32_t>(data_loc);
-  *status &= ADDITION_INFORMATION_MASK &
-      (static_cast<uint32_t>(is_partial) & PARTIAL_DATA_MASK) &
-      (static_cast<uint32_t>(has_extra) & EXTRA_DATA_MASK) &
-      (static_cast<uint32_t>(has_multiple) & MULTI_VALUE_MASK);
+  *status |= static_cast<uint32_t>(data_loc);
+
+  static constexpr uint8_t PARTIAL_DATA_OFFSET = 2;
+  static constexpr uint8_t EXTRA_DATA_OFFSET = 3;
+  static constexpr uint8_t MULTI_VALUE_OFFSET = 4;
+
+  *status |= (static_cast<uint32_t>(is_partial) << PARTIAL_DATA_OFFSET) |
+      (static_cast<uint32_t>(has_extra) << EXTRA_DATA_OFFSET) |
+      (static_cast<uint32_t>(has_multiple) << MULTI_VALUE_OFFSET);
 }
 
 UA_StatusCode setHistorianBits(const UA_StatusCode* status,
@@ -884,8 +901,25 @@ UA_StatusCode setHistorianBits(const UA_StatusCode* status,
   return result;
 }
 
-UA_Boolean hasHistorianBits(const UA_StatusCode status) {
-  return status & HISTORIAN_BITS_MASK > 0 ? UA_TRUE : UA_FALSE;
+DataLocation getDataLocation(const UA_StatusCode status) {
+  static constexpr uint32_t HISTORIAN_BITS_MASK = 0x03;
+
+  return static_cast<DataLocation>(status & HISTORIAN_BITS_MASK);
+}
+
+string toString(DataLocation location) {
+  switch (location) {
+  case DataLocation::RAW: {
+    return "Raw";
+  }
+  case DataLocation::CALCULATED: {
+    return "Calculated";
+  }
+  case DataLocation::INTERPOLATED: {
+    return "Interpolated";
+  }
+  default: { return "Reserved"; }
+  }
 }
 
 /**
@@ -896,7 +930,9 @@ UA_Boolean hasHistorianBits(const UA_StatusCode status) {
  * @return UA_Boolean
  */
 UA_Boolean hasPartialValue(const UA_StatusCode status) {
-  return status & PARTIAL_DATA_MASK > 0 ? UA_TRUE : UA_FALSE;
+  static constexpr uint32_t PARTIAL_DATA_MASK = 0x1B;
+
+  return (status & PARTIAL_DATA_MASK) > 0 ? UA_TRUE : UA_FALSE;
 }
 
 /**
@@ -907,7 +943,9 @@ UA_Boolean hasPartialValue(const UA_StatusCode status) {
  * @return UA_Boolean
  */
 UA_Boolean hasExtraData(const UA_StatusCode status) {
-  return status & EXTRA_DATA_MASK > 0 ? UA_TRUE : UA_FALSE;
+  static constexpr uint32_t EXTRA_DATA_MASK = 0x17;
+
+  return (status & EXTRA_DATA_MASK) > 0 ? UA_TRUE : UA_FALSE;
 }
 
 /**
@@ -918,7 +956,9 @@ UA_Boolean hasExtraData(const UA_StatusCode status) {
  * @return UA_Boolean
  */
 UA_Boolean hasMultipleValues(const UA_StatusCode status) {
-  return status & MULTI_VALUE_MASK > 0 ? UA_TRUE : UA_FALSE;
+  static constexpr uint32_t MULTI_VALUE_MASK = 0x0F;
+
+  return (status & MULTI_VALUE_MASK) > 0 ? UA_TRUE : UA_FALSE;
 }
 } // namespace HistorianBits
 
@@ -992,6 +1032,8 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
             UA_STATUSCODE_BADAGGREGATEINVALIDINPUTS;
       } catch (NoBoundData& ex) {
         response->results[i].statusCode = UA_STATUSCODE_BADBOUNDNOTFOUND;
+      } catch (NoData& ex) {
+        response->results[i].statusCode = UA_STATUSCODE_BADNODATA;
       } catch (BadContinuationPoint& ex) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
