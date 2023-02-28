@@ -558,8 +558,8 @@ UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
 
 unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
     const UA_ReadRawModifiedDetails* historyReadDetails,
-    UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
-    const UA_ByteString* continuationPoint_IN,
+    UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestampsToReturn,
+    UA_NodeId node_id, const UA_ByteString* continuationPoint_IN,
     [[maybe_unused]] UA_ByteString* continuationPoint_OUT) { // NOLINT
   if (db_) {
     auto columns = setColumnNames(timestampsToReturn);
@@ -602,7 +602,7 @@ unordered_map<size_t, vector<ColumnValue>> Historizer::readHistory(
 
 void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
-    const UA_RequestHeader* /*requestHeader*/,
+    const UA_RequestHeader* requestHeader,
     const UA_ReadRawModifiedDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn,
     UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
@@ -614,10 +614,10 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
   if (!releaseContinuationPoints) {
     for (size_t i = 0; i < nodesToReadSize; ++i) {
       try {
-        auto history_values =
-            readHistory(historyReadDetails, timestampsToReturn,
-                nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
-                &response->results[i].continuationPoint);
+        auto history_values = readHistory(historyReadDetails,
+            requestHeader->timeoutHint, timestampsToReturn,
+            nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
+            &response->results[i].continuationPoint);
         response->results[i].statusCode =
             expandHistoryResult(historyData[i], history_values);
       } catch (BadContinuationPoint& ex) {
@@ -947,7 +947,7 @@ UA_Boolean hasMultipleValues(const UA_StatusCode status) {
 } // namespace HistorianBits
 
 UA_StatusCode Historizer::readAndAppendHistory(
-    const UA_ReadAtTimeDetails* historyReadDetails,
+    const UA_ReadAtTimeDetails* historyReadDetails, UA_UInt32 /*timeout_hint*/,
     UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
     const UA_ByteString* /*continuationPoint_IN*/,
     [[maybe_unused]] UA_ByteString* continuationPoint_OUT,
@@ -1000,7 +1000,7 @@ UA_StatusCode Historizer::readAndAppendHistory(
 
 void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
-    const UA_RequestHeader* /*requestHeader*/,
+    const UA_RequestHeader* requestHeader,
     const UA_ReadAtTimeDetails* historyReadDetails,
     UA_TimestampsToReturn timestampsToReturn,
     UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
@@ -1011,10 +1011,10 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
   if (!releaseContinuationPoints) {
     for (size_t i = 0; i < nodesToReadSize; ++i) {
       try {
-        response->results[i].statusCode =
-            readAndAppendHistory(historyReadDetails, timestampsToReturn,
-                nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
-                &response->results[i].continuationPoint, historyData[i]);
+        response->results[i].statusCode = readAndAppendHistory(
+            historyReadDetails, requestHeader->timeoutHint, timestampsToReturn,
+            nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
+            &response->results[i].continuationPoint, historyData[i]);
       } catch (logic_error& ex) {
         // Target Node Id values can not be interpolated due to mismatching data
         // types or non aggregable data types (text, opaque values, etc...)

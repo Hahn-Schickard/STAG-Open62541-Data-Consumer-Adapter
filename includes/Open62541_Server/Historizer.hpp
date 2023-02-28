@@ -71,8 +71,8 @@ private:
 
   static std::unordered_map<size_t, std::vector<ODD::ColumnValue>> readHistory(
       const UA_ReadRawModifiedDetails* historyReadDetails,
-      UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
-      const UA_ByteString* continuationPoint_IN,
+      UA_UInt32 timeout_hint, UA_TimestampsToReturn timestampsToReturn,
+      UA_NodeId node_id, const UA_ByteString* continuationPoint_IN,
       UA_ByteString* continuationPoint_OUT);
 
   /**
@@ -103,7 +103,7 @@ private:
       UA_HistoryData* const* const historyData);
 
   static UA_StatusCode readAndAppendHistory(
-      const UA_ReadAtTimeDetails* historyReadDetails,
+      const UA_ReadAtTimeDetails* historyReadDetails, UA_UInt32 timeout_hint,
       UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
       const UA_ByteString* continuationPoint_IN,
       UA_ByteString* continuationPoint_OUT, UA_HistoryData* historyData);
