@@ -646,12 +646,7 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
 DataType operator*(const DataType& lhs, const intmax_t& rhs) {
   DataType result;
   match(lhs,
-      [&](bool value) {
-        /**
-         * @todo: how to multiply bool values?
-         */
-        throw logic_error("Can not multiply Boolean value");
-      },
+      [&](bool value) { throw logic_error("Can not multiply Boolean value"); },
       [&](uintmax_t value) { result = value * abs(rhs); },
       [&](intmax_t value) { result = value * rhs; },
       [&](float value) { result = value * rhs; },
@@ -666,17 +661,7 @@ DataType operator*(const DataType& lhs, const intmax_t& rhs) {
 DataType operator+(const DataType& lhs, const DataType& rhs) {
   DataType result;
   match(lhs,
-      [&](bool value) {
-        /**
-         * @todo: how to add to bool?
-         */
-        if (holds_alternative<bool>(rhs)) {
-          auto addition = get<bool>(rhs);
-          result = (bool)(value | addition); // use logical AND instead?
-        } else {
-          throw invalid_argument("Can not add non boolean value to a boolean");
-        }
-      },
+      [&](bool value) { throw invalid_argument("Can not add to a boolean"); },
       [&](uintmax_t value) {
         if (holds_alternative<uintmax_t>(rhs)) {
           auto addition = get<uintmax_t>(rhs);
@@ -722,16 +707,7 @@ DataType operator-(const DataType& lhs, const DataType& rhs) {
   DataType result;
   match(lhs,
       [&](bool value) {
-        /**
-         * @todo: how to subtract from bool?
-         */
-        if (holds_alternative<bool>(rhs)) {
-          auto addition = get<bool>(rhs);
-          result = (bool)(value & addition);
-        } else {
-          throw invalid_argument(
-              "Can not subtract non boolean value from a boolean");
-        }
+        throw invalid_argument("Can not subtract from a boolean");
       },
       [&](uintmax_t value) {
         if (holds_alternative<uintmax_t>(rhs)) {
