@@ -1,6 +1,7 @@
 #ifndef __DCAI_OPEN62541_SERVER_CONFIGURATION_HPP_
 #define __DCAI_OPEN62541_SERVER_CONFIGURATION_HPP_
 
+#include "HaSLL/Logger.hpp"
 #include "Historizer.hpp"
 
 #include <memory>
@@ -14,6 +15,7 @@ struct Open62541_Config_Exception : public std::runtime_error {
 };
 
 class Configuration {
+  HaSLI::LoggerPtr logger_;
   std::unique_ptr<Historizer> historizer_;
   UA_ServerConfig configuration_;
 

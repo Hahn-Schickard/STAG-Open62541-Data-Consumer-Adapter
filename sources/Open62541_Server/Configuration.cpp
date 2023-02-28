@@ -1,5 +1,6 @@
 #include "Configuration.hpp"
 #include "Config_Serializer.hpp"
+#include "HaSLL/LoggerManager.hpp"
 #include "HaSLL_Logger.hpp"
 #include "Historizer.hpp"
 
@@ -8,10 +9,12 @@
 #include <open62541/server_config_default.h>
 
 using namespace std;
+using namespace HaSLI;
 
 namespace open62541 {
 
-Configuration::Configuration() {
+Configuration::Configuration()
+    : logger_(LoggerManager::registerLogger("Open62541 Configuration")) {
   try {
     memset(&configuration_, 0, sizeof(UA_ServerConfig));
     configuration_.logger = HaSLL_Logger_;
