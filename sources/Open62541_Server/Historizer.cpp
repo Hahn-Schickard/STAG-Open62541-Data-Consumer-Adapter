@@ -916,7 +916,7 @@ string toString(DataLocation location) {
 UA_Boolean hasPartialValue(const UA_StatusCode status) {
   static constexpr uint32_t PARTIAL_DATA_MASK = 0x1B;
 
-  return (status & PARTIAL_DATA_MASK) > 0 ? UA_TRUE : UA_FALSE;
+  return (status & PARTIAL_DATA_MASK) > 0;
 }
 
 /**
@@ -929,7 +929,7 @@ UA_Boolean hasPartialValue(const UA_StatusCode status) {
 UA_Boolean hasExtraData(const UA_StatusCode status) {
   static constexpr uint32_t EXTRA_DATA_MASK = 0x17;
 
-  return (status & EXTRA_DATA_MASK) > 0 ? UA_TRUE : UA_FALSE;
+  return (status & EXTRA_DATA_MASK) > 0;
 }
 
 /**
@@ -942,7 +942,7 @@ UA_Boolean hasExtraData(const UA_StatusCode status) {
 UA_Boolean hasMultipleValues(const UA_StatusCode status) {
   static constexpr uint32_t MULTI_VALUE_MASK = 0x0F;
 
-  return (status & MULTI_VALUE_MASK) > 0 ? UA_TRUE : UA_FALSE;
+  return (status & MULTI_VALUE_MASK) > 0;
 }
 } // namespace HistorianBits
 
