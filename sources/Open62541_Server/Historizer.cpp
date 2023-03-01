@@ -306,9 +306,8 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
       } catch (exception& ex) {
         log(SeverityLevel::ERROR,
             "Failed to historize Node {} value due to an exception. "
-            "Exception "
-            "{}",
-            ex.what());
+            "Exception: {}",
+            node_id, ex.what());
       }
     } else {
       log(SeverityLevel::ERROR,
