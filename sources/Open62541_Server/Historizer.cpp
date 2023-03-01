@@ -155,11 +155,17 @@ UA_StatusCode Historizer::registerNodeId(
       // save nodeId and type for later checks??
       // create a table for given nodeId with UA_DataType value entries
       // indexed by source timestamp
-      db_->insert("Historized_Nodes",
-          vector<ColumnValue>{// clang-format off
+      if (isHistorized(&nodeId)) {
+        db_->update("Historized_Nodes",
+            ColumnFilter(FilterType::EQUAL, "Node_Id", toString(&nodeId)),
+            ColumnValue("Last_Updated", getCurrentTimestamp()));
+      } else {
+        db_->insert("Historized_Nodes",
+            vector<ColumnValue>{// clang-format off
               ColumnValue("Node_Id", toString(&nodeId)), // column value is automatically sanitized
               ColumnValue("Last_Updated", getCurrentTimestamp())
           }); // clang-format on
+      }
       db_->create(node_id,
           vector<Column>{// clang-format off
             Column("Index", ColumnDataType::INT, ColumnModifier::AUTO_INCREMENT),
