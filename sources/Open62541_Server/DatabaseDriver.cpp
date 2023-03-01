@@ -262,7 +262,7 @@ string ColumnFilter::toString() {
   } else {
     filter_value = ODD::toString(values_[0]);
   }
-  return "WHERE " + column_ + ODD::toString(type_) + filter_value;
+  return column_ + ODD::toString(type_) + filter_value;
 }
 
 DataPoints ColumnFilter::values() { return values_; }
