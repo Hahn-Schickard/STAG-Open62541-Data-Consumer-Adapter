@@ -135,11 +135,7 @@ bool Historizer::isHistorized(const UA_NodeId* nodeId) {
   auto node_id = toString(nodeId);
   auto result = db_->select(
       "Historized_Nodes", ColumnFilter(FilterType::EQUAL, "Node_Id", node_id));
-  if (result.empty()) {
-    return false;
-  } else {
-    return true;
-  }
+  return !result.empty();
 }
 
 UA_StatusCode Historizer::registerNodeId(
