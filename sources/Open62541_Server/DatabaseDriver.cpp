@@ -443,12 +443,14 @@ vector<ColumnValue> intoColumnValues(nanodbc::result data) {
 
 unordered_map<size_t, vector<ColumnValue>> intoRowValues(nanodbc::result data) {
   unordered_map<size_t, vector<ColumnValue>> result;
-  size_t row = 0;
-  do {
-    vector<ColumnValue> values = intoColumnValues(data);
-    result.emplace(row, values);
-    ++row;
-  } while (data.next());
+  if (data) {
+    size_t row = 0;
+    while (data.next()) {
+      vector<ColumnValue> values = intoColumnValues(data);
+      result.emplace(row, values);
+      ++row;
+    }
+  }
   return result;
 }
 
