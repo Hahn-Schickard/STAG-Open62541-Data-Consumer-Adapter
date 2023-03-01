@@ -495,6 +495,7 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::select(
           to_string(record_limit) + " ROWS ONLY";
     }
   }
+  query += ";";
   auto result = execute(query);
   return intoRowValues(result);
 }
