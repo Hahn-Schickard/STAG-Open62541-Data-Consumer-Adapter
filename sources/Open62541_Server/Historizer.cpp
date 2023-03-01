@@ -68,46 +68,48 @@ ColumnDataType getColumnDataType(const UA_DataType* variant) {
     return ColumnDataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    return ColumnDataType::BOOLEAN;
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    return ColumnDataType::BOOLEAN;
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    return ColumnDataType::BOOLEAN;
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    return ColumnDataType::BOOLEAN;
+    [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-    return ColumnDataType::BOOLEAN;
+    [[fallthrough]];
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    return ColumnDataType::SMALLINT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    return ColumnDataType::BOOLEAN;
+    [[fallthrough]];
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    return ColumnDataType::INT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    return ColumnDataType::BOOLEAN;
+    [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    return ColumnDataType::BOOLEAN;
+    // SQL does not have larger integer type than 64 bits
+    // We will have to loose the upper most value bound
+    [[fallthrough]];
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    return ColumnDataType::BIGINT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    return ColumnDataType::BOOLEAN;
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-    return ColumnDataType::BOOLEAN;
+    return ColumnDataType::TIMESTAMP;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-    return ColumnDataType::BOOLEAN;
+    [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    return ColumnDataType::BOOLEAN;
+    return ColumnDataType::FLOAT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-    return ColumnDataType::BOOLEAN;
+    [[fallthrough]];
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
+    [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-    return ColumnDataType::BOOLEAN;
+    return ColumnDataType::TEXT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
     [[fallthrough]];
