@@ -38,6 +38,8 @@ private:
    */
   static void clear(UA_HistoryDatabase* database);
 
+  static bool isHistorized(const UA_NodeId* nodeId);
+
   /**
    * @brief Called when a given node receives new data value.
    *

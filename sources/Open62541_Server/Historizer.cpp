@@ -129,6 +129,17 @@ string toSanitizedString(const UA_NodeId* nodeId) {
   return "\"" + toString(nodeId) + "\"";
 }
 
+bool Historizer::isHistorized(const UA_NodeId* nodeId) {
+  auto node_id = toString(nodeId);
+  auto result = db_->select(
+      "Historized_Nodes", ColumnFilter(FilterType::EQUAL, "Node_Id", node_id));
+  if (result.empty()) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId nodeId, const UA_DataType* type) {
   auto node_id = toSanitizedString(&nodeId);
