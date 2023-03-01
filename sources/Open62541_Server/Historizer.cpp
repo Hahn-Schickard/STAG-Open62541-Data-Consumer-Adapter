@@ -143,16 +143,6 @@ UA_StatusCode Historizer::registerNodeId(
   auto node_id = toSanitizedString(&nodeId);
   try {
     if (db_) {
-      auto monitor_request = UA_MonitoredItemCreateRequest_default(nodeId);
-      monitor_request.requestedParameters.samplingInterval = 100.0;
-      monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
-      auto result = UA_Server_createDataChangeMonitoredItem(server,
-          UA_TIMESTAMPSTORETURN_BOTH, monitor_request, NULL,
-          &Historizer::dataChanged); // save UA_UInt32 result.monitoredItemId
-                                     // ?
-      // save nodeId and type for later checks??
-      // create a table for given nodeId with UA_DataType value entries
-      // indexed by source timestamp
       if (isHistorized(&nodeId)) {
         db_->update("Historized_Nodes",
             ColumnFilter(FilterType::EQUAL, "Node_Id", toString(&nodeId)),
@@ -172,6 +162,13 @@ UA_StatusCode Historizer::registerNodeId(
             Column("Value", getColumnDataType(type))
           }, // clang-format on
           true);
+
+      auto monitor_request = UA_MonitoredItemCreateRequest_default(nodeId);
+      monitor_request.requestedParameters.samplingInterval = 100.0;
+      monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
+      auto result = UA_Server_createDataChangeMonitoredItem(server,
+          UA_TIMESTAMPSTORETURN_BOTH, monitor_request, NULL,
+          &Historizer::dataChanged);
       return result.statusCode;
     } else {
       log(SeverityLevel::CRITICAL, "Database Driver is not initialized");
