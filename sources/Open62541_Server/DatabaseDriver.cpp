@@ -273,7 +273,7 @@ vector<ColumnValue> OverrunPoint::getOverrunRecord() { return columns_; }
 DatabaseDriver::DatabaseDriver() : DatabaseDriver("PostgreSQL") {}
 
 DatabaseDriver::DatabaseDriver(const string& data_source)
-    : db_(make_unique<connection>(data_source)) {}
+    : DatabaseDriver(data_source, "", "") {}
 
 DatabaseDriver::DatabaseDriver(
     const string& data_source, const string& username, const string& password)
