@@ -279,7 +279,8 @@ DatabaseDriver::DatabaseDriver(
     const string& data_source, const string& username, const string& password)
     : db_(make_unique<connection>(data_source, username, password)) {}
 
-void DatabaseDriver::create(const string& table_name, Columns columns) {
+void DatabaseDriver::create(
+    const string& table_name, Columns columns, bool tmp) {
   string column_types = "(";
   for (auto column : columns) {
     column_types += column.toString() + ",";
@@ -287,7 +288,13 @@ void DatabaseDriver::create(const string& table_name, Columns columns) {
   column_types.pop_back();
   column_types += ")";
 
-  execute("CREATE TABLE ", table_name, column_types);
+  string query = "CREATE TABLE ";
+
+  if (tmp) {
+    query += " IF NOT EXISTS ";
+  }
+
+  execute(query, table_name, column_types);
 }
 
 void DatabaseDriver::drop(const string& table_name) {

@@ -177,7 +177,7 @@ struct DatabaseDriver {
   DatabaseDriver(const std::string& data_source, const std::string& username,
       const std::string& password);
 
-  void create(const std::string& table_name, Columns columns);
+  void create(const std::string& table_name, Columns columns, bool tmp = false);
 
   void drop(const std::string& table_name);
 
