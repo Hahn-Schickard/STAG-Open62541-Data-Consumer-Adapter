@@ -300,7 +300,7 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
   string node_id = toSanitizedString(nodeId);
   if (db_) {
     if (historizing) {
-      if (value->hasValue) {
+      if (value != nullptr) {
         try {
           string server_time;
           if (value->hasServerTimestamp) {
@@ -345,22 +345,15 @@ void Historizer::dataChanged(UA_Server* server, UA_UInt32 /*monitoredItemId*/,
     void* /*monitoredItemContext*/, const UA_NodeId* nodeId,
     void* /*nodeContext*/, UA_UInt32 attributeId, const UA_DataValue* value) {
   if (db_) {
-    if (isHistorized(nodeId)) {
-      UA_NodeId* session_id =
-          nullptr; // obtain session id, its set to NULL in the
-                   // example code, so might be imposable to do so
-      UA_Boolean historize = false;
-      if ((attributeId & UA_ATTRIBUTEID_HISTORIZING) != 0) {
-        historize = true;
-      }
-
-      setValue(server, nullptr, session_id, nullptr, nodeId, historize, value);
-    } else {
-      log(SeverityLevel::WARNING,
-          "Node {} has not been registered for historization. No values will "
-          "be historized, until the node has finished it's registration.",
-          toString(nodeId));
+    UA_NodeId* session_id =
+        nullptr; // obtain session id, its set to NULL in the
+                 // example code, so might be imposable to do so
+    UA_Boolean historize = false;
+    if ((attributeId & UA_ATTRIBUTEID_HISTORIZING) != 0) {
+      historize = true;
     }
+
+    setValue(server, nullptr, session_id, nullptr, nodeId, historize, value);
   } else {
     log(SeverityLevel::CRITICAL,
         "Tried to historize Node {}, but internal database is unavailable",
