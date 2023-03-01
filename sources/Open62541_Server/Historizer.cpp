@@ -125,9 +125,13 @@ string getCurrentTimestamp() {
   return date::format("%F %T", timestamp);
 }
 
+string toSanitizedString(const UA_NodeId* nodeId) {
+  return "\"" + toString(nodeId) + "\"";
+}
+
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId nodeId, const UA_DataType* type) {
-  auto node_id = toString(&nodeId);
+  auto node_id = toSanitizedString(&nodeId);
   try {
     if (db_) {
       auto monitor_request = UA_MonitoredItemCreateRequest_default(nodeId);
@@ -142,7 +146,7 @@ UA_StatusCode Historizer::registerNodeId(
       // indexed by source timestamp
       db_->insert("Historized_Nodes",
           vector<ColumnValue>{// clang-format off
-              ColumnValue("Node_Id", node_id), 
+              ColumnValue("Node_Id", toString(&nodeId)), // column value is automatically sanitized
               ColumnValue("Last_Updated", getCurrentTimestamp())
           }); // clang-format on
       db_->create(node_id,
@@ -281,7 +285,7 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
     const UA_NodeId* nodeId, UA_Boolean historizing,
     const UA_DataValue* value) {
-  string node_id = toString(nodeId);
+  string node_id = toSanitizedString(nodeId);
   if (historizing) {
     if (value->hasValue) {
       try {
