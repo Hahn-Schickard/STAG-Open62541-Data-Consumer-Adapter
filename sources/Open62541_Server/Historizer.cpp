@@ -42,6 +42,12 @@ DatabaseDriverPtr Historizer::db_ = DatabaseDriverPtr(); // NOLINT
 Historizer::Historizer() {
   logger_ = LoggerManager::registerTypedLogger(this);
   db_ = make_unique<DatabaseDriver>();
+  db_->create("Historized_Nodes",
+      vector<Column>{// clang-format off
+            Column("Node_Id", ColumnDataType::TEXT),
+            Column("Last_Updated", ColumnDataType::TIMESTAMP)
+      }, // clang-format on
+      true);
 }
 
 Historizer::~Historizer() {
@@ -129,22 +135,24 @@ UA_StatusCode Historizer::registerNodeId(
       monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
       auto result = UA_Server_createDataChangeMonitoredItem(server,
           UA_TIMESTAMPSTORETURN_BOTH, monitor_request, NULL,
-          &Historizer::dataChanged); // save UA_UInt32 result.monitoredItemId ?
+          &Historizer::dataChanged); // save UA_UInt32 result.monitoredItemId
+                                     // ?
       // save nodeId and type for later checks??
-      // create a table for given nodeId with UA_DataType value entries indexed
-      // by source timestamp
+      // create a table for given nodeId with UA_DataType value entries
+      // indexed by source timestamp
       db_->insert("Historized_Nodes",
           vector<ColumnValue>{// clang-format off
               ColumnValue("Node_Id", node_id), 
               ColumnValue("Last_Updated", getCurrentTimestamp())
-      }); // clang-format on
+          }); // clang-format on
       db_->create(node_id,
           vector<Column>{// clang-format off
             Column("Index", ColumnDataType::INT, ColumnModifier::AUTO_INCREMENT),
             Column("Server_Timestamp", ColumnDataType::TIMESTAMP),
             Column("Source_Timestamp", ColumnDataType::TIMESTAMP),
             Column("Value", getColumnDataType(type))
-      }); // clang-format on
+          }, // clang-format on
+          true);
       return result.statusCode;
     } else {
       log(SeverityLevel::CRITICAL, "Database Driver is not initialized");
@@ -297,7 +305,8 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
             ColumnValue("Last_Updated", getCurrentTimestamp()));
       } catch (exception& ex) {
         log(SeverityLevel::ERROR,
-            "Failed to historize Node {} value due to an exception. Exception "
+            "Failed to historize Node {} value due to an exception. "
+            "Exception "
             "{}",
             ex.what());
       }
@@ -306,7 +315,7 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
           "Failed to historize Node {} value. No data provided.", node_id);
     }
   } else {
-    log(SeverityLevel::WARNING, "Node {} is not configured for historization",
+    log(SeverityLevel::INFO, "Node {} is not configured for historization",
         node_id);
   }
 }
@@ -539,8 +548,8 @@ UA_StatusCode expandHistoryResult(UA_HistoryData* result, Rows rows) {
 }
 
 /**
- * @todo: expand ContinuationPoint to store either the index of next value or a
- * future result for async select statements
+ * @todo: expand ContinuationPoint to store either the index of next value or
+ * a future result for async select statements
  */
 UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
   if (holds_alternative<string>(last_row[0].value())) {
@@ -622,7 +631,6 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
     UA_HistoryData* const* const
         historyData) { // NOLINT parameter name set by open62541
-
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
   if (!releaseContinuationPoints) {
     for (size_t i = 0; i < nodesToReadSize; ++i) {
@@ -919,8 +927,8 @@ string toString(DataLocation location) {
 }
 
 /**
- * @brief Checks if StatusCode indicates that data value is calculated with an
- * incomplete interval
+ * @brief Checks if StatusCode indicates that data value is calculated with
+ * an incomplete interval
  *
  * @param status
  * @return UA_Boolean
@@ -945,8 +953,8 @@ UA_Boolean hasExtraData(const UA_StatusCode status) {
 }
 
 /**
- * @brief Checks if StatusCode indicates that the multiple data values match the
- * Aggregate criteria
+ * @brief Checks if StatusCode indicates that the multiple data values match
+ * the Aggregate criteria
  *
  * @param status
  * @return UA_Boolean
@@ -996,15 +1004,15 @@ UA_StatusCode Historizer::readAndAppendHistory(
             ColumnFilter(FilterType::GREATER, timestamp), 1, "Source_Timestamp",
             false);
         // indexes are only used to iterate over the results map, so we only
-        // need to make sure that they are all unique, since bounding values by
-        // defintion do not meet our aggregate criteria, their indexes will
+        // need to make sure that they are all unique, since bounding values
+        // by defintion do not meet our aggregate criteria, their indexes will
         // never be in the results maps, thus it is safe to use their indexes
         auto index = nearest_after_result.begin()->first;
         results.emplace(index,
-            // useSimpleBounds=False dictates that we need to find first Non-Bad
-            // Raw values to use for interpolation, however it is not specified
-            // what is a Non-Bad Raw value, so we assume that the nearest RAW
-            // values to our target timestamp qualify as Non-Bad
+            // useSimpleBounds=False dictates that we need to find first
+            // Non-Bad Raw values to use for interpolation, however it is not
+            // specified what is a Non-Bad Raw value, so we assume that the
+            // nearest RAW values to our target timestamp qualify as Non-Bad
             interpolateValues(historyReadDetails->reqTimes[i],
                 historyReadDetails->useSimpleBounds, nearest_before_result,
                 nearest_after_result));
@@ -1039,10 +1047,10 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
             nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
             &response->results[i].continuationPoint, historyData[i]);
       } catch (logic_error& ex) {
-        // Target Node Id values can not be interpolated due to mismatching data
-        // types or non aggregable data types (text, opaque values, etc...)
-        // OR resulting timestamps where malformed and could not be decoded as
-        // UA_DateTime
+        // Target Node Id values can not be interpolated due to mismatching
+        // data types or non aggregable data types (text, opaque values,
+        // etc...) OR resulting timestamps where malformed and could not be
+        // decoded as UA_DateTime
         response->results[i].statusCode =
             UA_STATUSCODE_BADAGGREGATEINVALIDINPUTS;
       } catch (NoBoundData& ex) {
