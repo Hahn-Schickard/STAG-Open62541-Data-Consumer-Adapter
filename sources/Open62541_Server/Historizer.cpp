@@ -303,39 +303,45 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* nodeId, UA_Boolean historizing,
     const UA_DataValue* value) {
   string node_id = toSanitizedString(nodeId);
-  if (historizing) {
-    if (value->hasValue) {
-      try {
-        string server_time;
-        if (value->hasServerTimestamp) {
-          server_time = getTimestamp(value->serverTimestamp);
-        }
-        string source_time;
-        if (value->hasSourceTimestamp) {
-          source_time = getTimestamp(value->sourceTimestamp);
-        }
-        auto data = getNodeValue(value->value); // get data
-        db_->insert(node_id,
-            vector<ColumnValue>{// clang-format off
+  if (db_) {
+    if (historizing) {
+      if (value->hasValue) {
+        try {
+          string server_time;
+          if (value->hasServerTimestamp) {
+            server_time = getTimestamp(value->serverTimestamp);
+          }
+          string source_time;
+          if (value->hasSourceTimestamp) {
+            source_time = getTimestamp(value->sourceTimestamp);
+          }
+          auto data = getNodeValue(value->value); // get data
+          db_->insert(node_id,
+              vector<ColumnValue>{// clang-format off
               ColumnValue("Source_Timestamp", source_time),
               ColumnValue("Server_Timestamp", server_time), 
               ColumnValue("Value", data)
             }); // clang-format on
-        db_->update("Historized_Nodes",
-            ColumnFilter(FilterType::EQUAL, "Node_Id", node_id),
-            ColumnValue("Last_Updated", getCurrentTimestamp()));
-      } catch (exception& ex) {
+          db_->update("Historized_Nodes",
+              ColumnFilter(FilterType::EQUAL, "Node_Id", node_id),
+              ColumnValue("Last_Updated", getCurrentTimestamp()));
+        } catch (exception& ex) {
+          log(SeverityLevel::ERROR,
+              "Failed to historize Node {} value due to an exception. "
+              "Exception: {}",
+              node_id, ex.what());
+        }
+      } else {
         log(SeverityLevel::ERROR,
-            "Failed to historize Node {} value due to an exception. "
-            "Exception: {}",
-            node_id, ex.what());
+            "Failed to historize Node {} value. No data provided.", node_id);
       }
     } else {
-      log(SeverityLevel::ERROR,
-          "Failed to historize Node {} value. No data provided.", node_id);
+      log(SeverityLevel::INFO, "Node {} is not configured for historization",
+          node_id);
     }
   } else {
-    log(SeverityLevel::INFO, "Node {} is not configured for historization",
+    log(SeverityLevel::CRITICAL,
+        "Tried to historize Node {}, but internal database is unavailable",
         node_id);
   }
 }
