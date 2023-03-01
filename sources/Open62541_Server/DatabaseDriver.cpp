@@ -294,7 +294,7 @@ void DatabaseDriver::create(
   string query = "CREATE TABLE ";
 
   if (tmp) {
-    query += " IF NOT EXISTS ";
+    query += "IF NOT EXISTS ";
   }
 
   execute(query, table_name, column_types);
