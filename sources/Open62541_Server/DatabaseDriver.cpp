@@ -57,6 +57,9 @@ string toString(ColumnDataType type) {
   case ColumnDataType::TIMESTAMP: {
     return "TIMESTAMP";
   }
+  case ColumnDataType::TEXT: {
+    return "TEXT";
+  }
   case ColumnDataType::BIT: {
     return "BIT";
   }

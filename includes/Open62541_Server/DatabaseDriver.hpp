@@ -65,7 +65,8 @@ enum class ColumnDataType : uint16_t {
   VARBIT = 0x303, // variable length binary data b(n)
   DATE = 0x400,
   TIME = 0x401,
-  TIMESTAMP = 0x402
+  TIMESTAMP = 0x402,
+  TEXT = 0x403
 };
 
 bool isIntegerType(ColumnDataType type);
