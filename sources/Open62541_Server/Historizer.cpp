@@ -637,7 +637,7 @@ Rows Historizer::readHistory(
        * timeout_hint elapsed, if it did set a continuation point
        *
        */
-      results = db_->select(toString(&node_id), columns, filters,
+      results = db_->select(toSanitizedString(&node_id), columns, filters,
           historyReadDetails->numValuesPerNode, "Source_Timestamp",
           reverse_order, &overrun_point);
       if (overrun_point.hasMoreValues()) {
@@ -651,8 +651,8 @@ Rows Historizer::readHistory(
        * timeout_hint elapsed, if it did set a continuation point
        *
        */
-      results = db_->select(toString(&node_id), columns, filters, nullopt,
-          "Source_Timestamp", reverse_order);
+      results = db_->select(toSanitizedString(&node_id), columns, filters,
+          nullopt, "Source_Timestamp", reverse_order);
     }
     return results;
   } else {
@@ -1023,7 +1023,7 @@ UA_StatusCode Historizer::readAndAppendHistory(
        * timeout_hint elapsed, if it did set a continuation point
        *
        */
-      auto timestamp_results = db_->select(toString(&node_id), columns,
+      auto timestamp_results = db_->select(toSanitizedString(&node_id), columns,
           ColumnFilter(FilterType::EQUAL, timestamp), nullopt,
           "Source_Timestamp");
 
@@ -1035,12 +1035,12 @@ UA_StatusCode Historizer::readAndAppendHistory(
          * point for next
          *
          */
-        auto nearest_before_result = db_->select(toString(&node_id), columns,
-            ColumnFilter(FilterType::LESS, timestamp), 1, "Source_Timestamp",
-            true);
-        auto nearest_after_result = db_->select(toString(&node_id), columns,
-            ColumnFilter(FilterType::GREATER, timestamp), 1, "Source_Timestamp",
-            false);
+        auto nearest_before_result = db_->select(toSanitizedString(&node_id),
+            columns, ColumnFilter(FilterType::LESS, timestamp), 1,
+            "Source_Timestamp", true);
+        auto nearest_after_result = db_->select(toSanitizedString(&node_id),
+            columns, ColumnFilter(FilterType::GREATER, timestamp), 1,
+            "Source_Timestamp", false);
         // indexes are only used to iterate over the results map, so we only
         // need to make sure that they are all unique, since bounding values
         // by defintion do not meet our aggregate criteria, their indexes will
