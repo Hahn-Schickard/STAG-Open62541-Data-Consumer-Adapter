@@ -438,7 +438,9 @@ vector<ColumnFilter> setColumnFilters(UA_Boolean include_bounds,
   if (continuationPoint != nullptr) {
     auto continuation_index =
         string((char*)continuationPoint->data, continuationPoint->length);
-    result.emplace_back(FilterType::GREATER, "Index", continuation_index);
+    if (!continuation_index.empty()) {
+      result.emplace_back(FilterType::GREATER, "Index", continuation_index);
+    }
   }
 
   return result;
