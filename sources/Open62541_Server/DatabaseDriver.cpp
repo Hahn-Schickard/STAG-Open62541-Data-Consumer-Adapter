@@ -479,17 +479,23 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::select(
       auto record_limit = response_limit.value();
       if (overrun != nullptr) {
         // get the number of records that match the given filter parameters
-        auto record_count = execute(
-            "SELECT COUNT(*) FROM ", table_name, " WHERE ", filter_values)
-                                .get<size_t>(0);
-        if (record_count > record_limit) {
-          // if there are more values, that could be fetched, get the row
-          // values, from which to fetch the next point
-          auto last_row = execute("SELECT * FROM ", table_name, " WHERE ",
-              filter_values, " ORDER BY ", order_by_column,
-              (highest_value_first ? " DESC" : " ASC"), "OFFSET ",
-              to_string(record_limit - 1), " ROWS FETCH NEXT 1 ROWS ONLY");
-          overrun->columns_ = intoColumnValues(last_row);
+        auto record_count_request = execute(
+            "SELECT COUNT(*) FROM ", table_name, " WHERE ", filter_values);
+        // we MUST ALWAYS first call next, to obtain data
+        if (record_count_request.next()) {
+          auto record_count = record_count_request.get<size_t>("count", 0);
+          if (record_count > record_limit) {
+            // if there are more values, that could be fetched, get the row
+            // values, from which to fetch the next point
+            auto last_row = execute("SELECT * FROM ", table_name, " WHERE ",
+                filter_values, " ORDER BY ", order_by_column,
+                (highest_value_first ? " DESC" : " ASC"), "OFFSET ",
+                to_string(record_limit - 1), " ROWS FETCH NEXT 1 ROWS ONLY");
+            overrun->columns_ = intoColumnValues(last_row);
+          }
+        } else {
+          // there are no values so we can do an early return
+          return Rows();
         }
       }
       query += " ORDER BY " + order_by_column +
