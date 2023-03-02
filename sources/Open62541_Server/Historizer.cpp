@@ -327,7 +327,7 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
               ColumnValue("Value", data)
             }); // clang-format on
           db_->update("Historized_Nodes",
-              ColumnFilter(FilterType::EQUAL, "Node_Id", node_id),
+              ColumnFilter(FilterType::EQUAL, "Node_Id", toString(nodeId)),
               ColumnValue("Last_Updated", getCurrentTimestamp()));
         } catch (exception& ex) {
           log(SeverityLevel::ERROR,
