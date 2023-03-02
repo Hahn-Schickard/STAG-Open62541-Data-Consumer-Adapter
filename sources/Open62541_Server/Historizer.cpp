@@ -187,6 +187,9 @@ UA_HistoryDatabase Historizer::createDatabase() {
   UA_HistoryDatabase database;
   memset(&database, 0, sizeof(UA_HistoryDatabase));
 
+  // open62541 uses database context to check if historization service is
+  // available, so we MUST set some value
+  database.context = (UA_Boolean*)UA_calloc(1, sizeof(UA_Boolean));
   database.clear = &Historizer::clear;
   database.setValue = &Historizer::setValue;
   database.setEvent = nullptr;
@@ -201,8 +204,14 @@ UA_HistoryDatabase Historizer::createDatabase() {
   return database;
 }
 
-void Historizer::clear(UA_HistoryDatabase* /*database*/) {
-  // there is nothing to clear, since we do not use a context
+void Historizer::clear(UA_HistoryDatabase* database) {
+  if (database == nullptr || database->context == nullptr) {
+    return;
+  } else {
+    // cleanup dummy context
+    auto* ctx = (UA_Boolean*)database->context;
+    UA_free(ctx);
+  }
 }
 
 string getTimestamp(UA_DateTime timestamp) {
