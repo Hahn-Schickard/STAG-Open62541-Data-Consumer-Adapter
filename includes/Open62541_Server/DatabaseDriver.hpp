@@ -237,7 +237,8 @@ struct DatabaseDriver {
 private:
   template <typename... T, typename = OnlyStringTypes<T...>>
   nanodbc::result execute(const T&... query_parts) {
-    return nanodbc::execute(*db_, concatenate(query_parts...));
+    auto query = concatenate(query_parts...) + ";";
+    return nanodbc::execute(*db_, query);
   }
 
   std::unique_ptr<nanodbc::connection> db_;

@@ -318,7 +318,7 @@ void DatabaseDriver::insert(
   column_values += ")";
 
   auto query = "INSERT INTO " + table_name + " " + column_names + " values" +
-      column_values + ";";
+      column_values;
 
   execute(query);
 }
@@ -497,7 +497,6 @@ unordered_map<size_t, vector<ColumnValue>> DatabaseDriver::select(
           to_string(record_limit) + " ROWS ONLY";
     }
   }
-  query += ";";
   auto result = execute(query);
   return intoRowValues(result);
 }
