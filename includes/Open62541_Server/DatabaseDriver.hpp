@@ -89,7 +89,6 @@ struct Column {
   std::string name();
   ColumnDataType type();
   bool isNullable();
-  bool isCompressible();
   std::string toString();
 
 private:
