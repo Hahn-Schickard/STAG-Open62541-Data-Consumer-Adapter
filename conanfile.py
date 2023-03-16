@@ -11,10 +11,10 @@ class PackageConan(ConanFile):
     requires = [
         "nlohmann_json/3.11.1",
         "open62541/1.3.1",
-        "nanodbc/2.14.0",
         "date/3.0.1",
+        "OODD/[~0.1]@hahn-schickard/stable",
         "HaSLL/[~0.3]@hahn-schickard/stable",
-        "HSCUL/[~0.2]@hahn-schickard/stable",
+        "HSCUL/[~0.3]@hahn-schickard/stable",
         "Variant_Visitor/[~0.1]@hahn-schickard/stable",
         "Data_Consumer_Adapter_Interface/[~0.1]@hahn-schickard/stable"
     ]

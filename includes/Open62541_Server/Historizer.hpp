@@ -1,8 +1,8 @@
 #ifndef __OPCUA_HISTORIZER_HPP
 #define __OPCUA_HISTORIZER_HPP
 
-#include "DatabaseDriver.hpp"
 #include "HaSLL/Logger.hpp"
+#include "OODD/DatabaseDriver.hpp"
 #include "open62541/plugin/historydatabase.h"
 
 namespace open62541 {
@@ -71,7 +71,7 @@ private:
       void* monitoredItemContext, const UA_NodeId* nodeId, void* nodeContext,
       UA_UInt32 attributeId, const UA_DataValue* value);
 
-  static ODD::Rows readHistory(
+  static OODD::Rows readHistory(
       const UA_ReadRawModifiedDetails* historyReadDetails,
       UA_UInt32 timeout_hint, UA_TimestampsToReturn timestampsToReturn,
       UA_NodeId node_id, const UA_ByteString* continuationPoint_IN,
@@ -140,7 +140,7 @@ private:
       HaSLI::SeverityLevel level, std::string message, Types... args);
 
   static HaSLI::LoggerPtr logger_;
-  static ODD::DatabaseDriverPtr db_;
+  static OODD::DatabaseDriverPtr db_;
 };
 } // namespace open62541
 #endif //__OPCUA_HISTORIZER_HPP

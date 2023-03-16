@@ -38,11 +38,11 @@ endif()
 list(APPEND DEPENDENCIES_LIST
             HaSLL
             HSCUL
+            OODD
             Variant_Visitor
             Data_Consumer_Adapter_Interface
             open62541
             nlohmann_json
-            nanodbc
             date
             Threads
 )

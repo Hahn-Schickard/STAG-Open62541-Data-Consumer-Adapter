@@ -11,7 +11,7 @@
 
 using namespace std;
 using namespace HaSLI;
-using namespace ODD;
+using namespace OODD;
 
 namespace open62541 {
 struct DatabaseNotAvailable : runtime_error {
@@ -41,13 +41,12 @@ DatabaseDriverPtr Historizer::db_ = DatabaseDriverPtr(); // NOLINT
 
 Historizer::Historizer() {
   logger_ = LoggerManager::registerTypedLogger(this);
-  db_ = make_unique<DatabaseDriver>();
+  db_ = makeDatabaseDriver("PostgreSQL");
   db_->create("Historized_Nodes",
       vector<Column>{// clang-format off
             Column("Node_Id", ColumnDataType::TEXT),
             Column("Last_Updated", ColumnDataType::TIMESTAMP)
-      }, // clang-format on
-      true);
+      }); // clang-format on
 }
 
 Historizer::~Historizer() {
@@ -160,11 +159,10 @@ UA_StatusCode Historizer::registerNodeId(
             Column("Server_Timestamp", ColumnDataType::TIMESTAMP),
             Column("Source_Timestamp", ColumnDataType::TIMESTAMP),
             Column("Value", getColumnDataType(type))
-          }, // clang-format on
-          true);
+          }); // clang-format on
 
       auto monitor_request = UA_MonitoredItemCreateRequest_default(nodeId);
-      monitor_request.requestedParameters.samplingInterval = 100.0;
+      monitor_request.requestedParameters.samplingInterval = 1000000.0;
       monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
       auto result = UA_Server_createDataChangeMonitoredItem(server,
           UA_TIMESTAMPSTORETURN_BOTH, monitor_request, NULL,
