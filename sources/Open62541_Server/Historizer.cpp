@@ -271,11 +271,11 @@ DataType getNodeValue(UA_Variant variant) {
     return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-    auto value = (UA_Float*)(variant.data);
+    auto value = *((UA_Float*)(variant.data));
     return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    auto value = (UA_Double*)(variant.data);
+    auto value = *((UA_Double*)(variant.data));
     return DataType(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
