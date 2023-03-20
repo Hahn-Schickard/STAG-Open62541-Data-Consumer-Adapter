@@ -10,7 +10,7 @@ class PackageConan(ConanFile):
     build_requires = 'gtest/[~1.11]'
     requires = [
         "nlohmann_json/3.11.1",
-        "open62541/1.3.1",
+        "open62541/1.3.4",
         "date/3.0.1",
         "OODD/[~0.1]@hahn-schickard/stable",
         "HaSLL/[~0.3]@hahn-schickard/stable",
