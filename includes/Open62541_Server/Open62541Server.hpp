@@ -5,6 +5,9 @@
 #include "Configuration.hpp"
 #include "HaSLL/Logger.hpp"
 #include "Information_Model/Device.hpp"
+#ifdef UA_ENABLE_HISTORIZING
+#include "Historizer.hpp"
+#endif
 
 #include <memory>
 #include <mutex>
@@ -12,6 +15,7 @@
 #include <thread>
 
 namespace open62541 {
+
 class Open62541Server {
   volatile bool is_running_ = false;
   UA_Server* open62541_server_;
@@ -19,8 +23,16 @@ class Open62541Server {
   std::thread server_thread_;
   HaSLI::LoggerPtr logger_;
   std::mutex status_mutex_;
+#ifdef UA_ENABLE_HISTORIZING
+  std::unique_ptr<Historizer> historizer_;
+
+  UA_StatusCode registerForHistorization(
+      UA_NodeId nodeId, const UA_DataType* type);
+#endif
 
   void runnable();
+
+  friend class NodeBuilder;
 
 public:
   /**

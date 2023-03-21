@@ -99,8 +99,7 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(
   logger_->log(SeverityLevel::INFO, "Adding element {} to node {}",
       element->getElementName(), toString(&parent_id));
 
-  match(
-      element->specific_interface,
+  match(element->specific_interface,
       [&](NonemptyDeviceElementGroupPtr group) {
         status = addGroupNode(element, group, parent_id);
       },
@@ -165,8 +164,7 @@ UA_StatusCode NodeBuilder::addFunctionNode(
 
 void setVariant(UA_VariableAttributes& value_attribute, DataVariant variant) {
   // Postcondition: value_attribute.value is non-empty
-  match(
-      variant,
+  match(variant,
       [&](bool value) {
         UA_Variant_setScalarCopy(
             &value_attribute.value, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
@@ -259,6 +257,10 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
     logger_->log(SeverityLevel::TRACE, "Assigning {} read callback for {} node",
         toString(metric->getDataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
+#ifdef UA_ENABLE_HISTORIZING
+    node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
+    node_attr.historizing = true;
+#endif
     status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
         make_shared<CallbackWrapper>(metric->getDataType(),
             bind(&Metric::getMetricValue, metric.base())));
@@ -269,6 +271,9 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
     status = UA_Server_addDataSourceVariableNode(server_ptr, metrid_node_id,
         parent_id, reference_type_id, metric_browse_name, type_definition,
         node_attr, data_source, nullptr, nullptr);
+#ifdef UA_ENABLE_HISTORIZING
+    server_->registerForHistorization(metrid_node_id, node_attr.value.type);
+#endif
   }
   if (status != UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::ERROR,
@@ -306,7 +311,11 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
     logger_->log(SeverityLevel::TRACE,
         "Assigning {} read and write callbacks for {} node",
         toString(metric->getDataType()), toString(&metrid_node_id));
-    node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+    node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
+#ifdef UA_ENABLE_HISTORIZING
+    node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
+    node_attr.historizing = true;
+#endif
     status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
         make_shared<CallbackWrapper>(metric->getDataType(),
             bind(&WritableMetric::getMetricValue, metric.base()),
@@ -319,6 +328,9 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
     status = UA_Server_addDataSourceVariableNode(server_->getServer(),
         metrid_node_id, parent_id, reference_type_id, metric_browse_name,
         type_definition, node_attr, data_source, nullptr, nullptr);
+#ifdef UA_ENABLE_HISTORIZING
+    server_->registerForHistorization(metrid_node_id, node_attr.value.type);
+#endif
   }
 
   if (status != UA_STATUSCODE_GOOD) {

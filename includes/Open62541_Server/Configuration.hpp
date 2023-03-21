@@ -1,6 +1,9 @@
 #ifndef __DCAI_OPEN62541_SERVER_CONFIGURATION_HPP_
 #define __DCAI_OPEN62541_SERVER_CONFIGURATION_HPP_
 
+#include "HaSLL/Logger.hpp"
+#include "Historizer.hpp"
+
 #include <memory>
 #include <open62541/server.h>
 #include <stdexcept>
@@ -12,6 +15,8 @@ struct Open62541_Config_Exception : public std::runtime_error {
 };
 
 class Configuration {
+  HaSLI::LoggerPtr logger_;
+  std::unique_ptr<Historizer> historizer_;
   UA_ServerConfig configuration_;
 
 public:
@@ -21,6 +26,8 @@ public:
 
   UA_ServerConfig* getConfig();
   // may only be called once, throws Double_Use afterwards
+
+  std::unique_ptr<Historizer> obtainHistorizer();
 };
 } // namespace open62541
 

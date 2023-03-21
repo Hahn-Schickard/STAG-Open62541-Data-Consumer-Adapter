@@ -13,7 +13,8 @@ Open62541Server::Open62541Server()
     : Open62541Server(make_unique<Configuration>()) {}
 
 Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
-    : logger_(LoggerManager::registerTypedLogger(this)) {
+    : logger_(LoggerManager::registerTypedLogger(this)),
+      historizer_(configuration->obtainHistorizer()) {
   registerLoggers();
   auto config = configuration->getConfig();
   // Config is consumed, so no need to save it
@@ -95,3 +96,14 @@ bool Open62541Server::isRunning() {
   lock_guard<mutex> lock(status_mutex_);
   return is_running_;
 }
+
+#ifdef UA_ENABLE_HISTORIZING
+UA_StatusCode Open62541Server::registerForHistorization(
+    UA_NodeId nodeId, const UA_DataType* type) {
+  if (historizer_) {
+    return historizer_->registerNodeId(open62541_server_, nodeId, type);
+  } else {
+    return UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+  }
+}
+#endif

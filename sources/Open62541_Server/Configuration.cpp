@@ -1,16 +1,20 @@
 #include "Configuration.hpp"
 #include "Config_Serializer.hpp"
+#include "HaSLL/LoggerManager.hpp"
 #include "HaSLL_Logger.hpp"
+#include "Historizer.hpp"
 
 #include <open62541/network_tcp.h>
 #include <open62541/plugin/securitypolicy_default.h>
 #include <open62541/server_config_default.h>
 
 using namespace std;
+using namespace HaSLI;
 
 namespace open62541 {
 
-Configuration::Configuration() {
+Configuration::Configuration()
+    : logger_(LoggerManager::registerLogger("Open62541 Configuration")) {
   try {
     memset(&configuration_, 0, sizeof(UA_ServerConfig));
     configuration_.logger = HaSLL_Logger_;
@@ -141,6 +145,32 @@ Configuration::Configuration(const string& filepath) : Configuration() {
         config.subscription_limits.max_events_per_node;
 #endif
 
+#ifdef UA_ENABLE_HISTORIZING
+    try {
+      /** @todo: obtain database configuration data and parse it to historizer
+       */
+      historizer_ = make_unique<Historizer>();
+      configuration_.historyDatabase = historizer_->createDatabase();
+      configuration_.accessHistoryDataCapability = true;
+      configuration_.accessHistoryEventsCapability = false;
+      configuration_.maxReturnDataValues = 0; // unlimited
+      configuration_.insertDataCapability = false;
+      configuration_.insertEventCapability = false;
+      configuration_.insertAnnotationsCapability = false;
+      configuration_.replaceDataCapability = false;
+      configuration_.replaceEventCapability = false;
+      configuration_.updateDataCapability = false;
+      configuration_.updateEventCapability = false;
+      configuration_.deleteRawCapability = false;
+      configuration_.deleteEventCapability = false;
+      configuration_.deleteAtTimeDataCapability = false;
+    } catch (exception& ex) {
+      logger_->error("Data Historization Service will not be available, due to "
+                     "an exception: {}",
+          ex.what());
+    }
+#endif
+
     configuration_.maxMonitoredItems =
         config.monitored_items_limits.max_monitored_items;
     configuration_.maxMonitoredItemsPerSubscription =
@@ -174,6 +204,10 @@ Configuration::Configuration(const string& filepath) : Configuration() {
 }
 
 UA_ServerConfig* Configuration::getConfig() { return &configuration_; }
+
+unique_ptr<Historizer> Configuration::obtainHistorizer() {
+  return move(historizer_);
+}
 
 Configuration::~Configuration() { UA_ServerConfig_clean(&configuration_); }
 
