@@ -12,13 +12,21 @@ using namespace std;
 using namespace HaSLI;
 
 namespace open62541 {
+UA_ServerConfig* makeServerConfig() {
+  auto config = (UA_ServerConfig*)malloc(sizeof(UA_ServerConfig));
+  memset(config, 0, sizeof(UA_ServerConfig));
+  return config;
+}
 
 Configuration::Configuration()
-    : logger_(LoggerManager::registerLogger("Open62541 Configuration")) {
+    : logger_(LoggerManager::registerLogger("Open62541 Configuration")),
+      // UA_ServerConfig_clean check if passed ptr is not NULL first, if it is,
+      // it returns early
+      configuration_(
+          UA_ServerConfigPtr(makeServerConfig(), &UA_ServerConfig_clean)) {
   try {
-    memset(&configuration_, 0, sizeof(UA_ServerConfig));
-    configuration_.logger = HaSLL_Logger_;
-    UA_ServerConfig_setDefault(&configuration_);
+    configuration_->logger = HaSLL_Logger_;
+    UA_ServerConfig_setDefault(configuration_.get());
   } catch (exception& ex) {
     string error_msg =
         "Caught exception when deserializing Configuration file: " +
@@ -32,9 +40,9 @@ Configuration::Configuration(const string& filepath) : Configuration() {
     Config config = deserializeConfig(filepath);
 
     // TODO: allow_anonymous_access
-    configuration_.networkLayersSize = 1;
-    configuration_.networkLayers = new UA_ServerNetworkLayer;
-    configuration_.networkLayers[0] =
+    configuration_->networkLayersSize = 1;
+    configuration_->networkLayers = new UA_ServerNetworkLayer;
+    configuration_->networkLayers[0] =
         UA_ServerNetworkLayerTCP(config.networking, config.port_number, 0);
 
     switch (config.security_policy) {
@@ -45,103 +53,104 @@ Configuration::Configuration(const string& filepath) : Configuration() {
     case BASIC256:
     case BASIC256_SHA256:
 #endif
-      configuration_.securityPoliciesSize = 1;
+      configuration_->securityPoliciesSize = 1;
       break;
     case ALL:
 #ifdef UA_ENABLE_ENCRYPTION
-      configuration_.securityPoliciesSize = 4;
+      configuration_->securityPoliciesSize = 4;
 #else
-      configuration_.securityPoliciesSize = 1;
+      configuration_->securityPoliciesSize = 1;
 #endif
       break;
       throw Open62541_Config_Exception("Unsupported security policy");
     }
-    configuration_.securityPolicies =
-        new UA_SecurityPolicy[configuration_.securityPoliciesSize];
-    for (size_t i = 0; i < configuration_.securityPoliciesSize; ++i) {
-      configuration_.securityPolicies[i] = {};
+    configuration_->securityPolicies =
+        new UA_SecurityPolicy[configuration_->securityPoliciesSize];
+    for (size_t i = 0; i < configuration_->securityPoliciesSize; ++i) {
+      configuration_->securityPolicies[i] = {};
     }
     {
       UA_ByteString empty = {};
       size_t i = 0;
       if ((config.security_policy == NONE) || (config.security_policy == ALL)) {
-        UA_SecurityPolicy_None(
-            &configuration_.securityPolicies[i], empty, &configuration_.logger);
+        UA_SecurityPolicy_None(&configuration_->securityPolicies[i], empty,
+            &configuration_->logger);
         ++i;
       }
 #ifdef UA_ENABLE_ENCRYPTION
       if ((config.security_policy == BASIC128_RSA15) ||
           (config.security_policy == ALL)) {
-        UA_SecurityPolicy_Basic128Rsa15(&configuration_.securityPolicies[i],
-            empty, config.access_credentials.password, &configuration_.logger);
+        UA_SecurityPolicy_Basic128Rsa15(&configuration_->securityPolicies[i],
+            empty, config.access_credentials.password, &configuration_->logger);
         ++i;
       }
       if ((config.security_policy == BASIC256) ||
           (config.security_policy == ALL)) {
-        UA_SecurityPolicy_Basic256(&configuration_.securityPolicies[i], empty,
-            config.access_credentials.password, &configuration_.logger);
+        UA_SecurityPolicy_Basic256(&configuration_->securityPolicies[i], empty,
+            config.access_credentials.password, &configuration_->logger);
         ++i;
       }
       if ((config.security_policy == BASIC256_SHA256) ||
           (config.security_policy == ALL)) {
-        UA_SecurityPolicy_Basic256Sha256(&configuration_.securityPolicies[i],
-            empty, config.access_credentials.password, &configuration_.logger);
+        UA_SecurityPolicy_Basic256Sha256(&configuration_->securityPolicies[i],
+            empty, config.access_credentials.password, &configuration_->logger);
         ++i;
       }
 #endif
     }
 
-    configuration_.buildInfo = config.build_info;
-    configuration_.applicationDescription = config.app_info;
-    configuration_.serverCertificate = config.server_certificate;
-    configuration_.shutdownDelay = config.shutdown_delay_ms;
-    configuration_.verifyRequestTimestamp = config.rules_handling;
+    configuration_->buildInfo = config.build_info;
+    configuration_->applicationDescription = config.app_info;
+    configuration_->serverCertificate = config.server_certificate;
+    configuration_->shutdownDelay = config.shutdown_delay_ms;
+    configuration_->verifyRequestTimestamp = config.rules_handling;
 
-    configuration_.maxSecureChannels =
+    configuration_->maxSecureChannels =
         config.secure_channels_limits.max_secure_channels;
-    configuration_.maxSecurityTokenLifetime =
+    configuration_->maxSecurityTokenLifetime =
         config.secure_channels_limits.max_security_token_lifetime_ms;
 
-    configuration_.maxSessions = config.session_limits.max_sessions;
-    configuration_.maxSessionTimeout =
+    configuration_->maxSessions = config.session_limits.max_sessions;
+    configuration_->maxSessionTimeout =
         config.session_limits.max_session_timeout_ms;
 
-    configuration_.maxNodesPerRead = config.operation_limits.max_nodes_per_read;
-    configuration_.maxNodesPerWrite =
+    configuration_->maxNodesPerRead =
+        config.operation_limits.max_nodes_per_read;
+    configuration_->maxNodesPerWrite =
         config.operation_limits.max_nodes_per_write;
-    configuration_.maxNodesPerMethodCall =
+    configuration_->maxNodesPerMethodCall =
         config.operation_limits.max_nodes_per_method_call;
-    configuration_.maxNodesPerBrowse =
+    configuration_->maxNodesPerBrowse =
         config.operation_limits.max_nodes_per_browse;
-    configuration_.maxNodesPerRegisterNodes =
+    configuration_->maxNodesPerRegisterNodes =
         config.operation_limits.max_nodes_per_register_nodes;
-    configuration_.maxNodesPerTranslateBrowsePathsToNodeIds =
+    configuration_->maxNodesPerTranslateBrowsePathsToNodeIds =
         config.operation_limits.max_nodes_per_translate_browse_paths_to_nodeids;
-    configuration_.maxNodesPerNodeManagement =
+    configuration_->maxNodesPerNodeManagement =
         config.operation_limits.max_nodes_per_node_management;
-    configuration_.maxMonitoredItemsPerCall =
+    configuration_->maxMonitoredItemsPerCall =
         config.operation_limits.max_monitored_items_per_call;
 
-    configuration_.maxReferencesPerNode = config.max_references_per_node;
+    configuration_->maxReferencesPerNode = config.max_references_per_node;
 
-    configuration_.maxSubscriptions =
+    configuration_->maxSubscriptions =
         config.subscription_limits.max_subscriptions;
-    configuration_.maxSubscriptionsPerSession =
+    configuration_->maxSubscriptionsPerSession =
         config.subscription_limits.max_subscriptions_per_session;
-    configuration_.publishingIntervalLimits =
+    configuration_->publishingIntervalLimits =
         config.subscription_limits.publishing_interval_limits_ms;
-    configuration_.lifeTimeCountLimits =
+    configuration_->lifeTimeCountLimits =
         config.subscription_limits.life_time_count_limits;
-    configuration_.keepAliveCountLimits =
+    configuration_->keepAliveCountLimits =
         config.subscription_limits.keep_alive_count_limits;
-    configuration_.maxNotificationsPerPublish =
+    configuration_->maxNotificationsPerPublish =
         config.subscription_limits.max_notifications_per_publish;
-    configuration_.enableRetransmissionQueue =
+    configuration_->enableRetransmissionQueue =
         config.subscription_limits.enable_retransmission_queue;
-    configuration_.maxRetransmissionQueueSize =
+    configuration_->maxRetransmissionQueueSize =
         config.subscription_limits.max_retransmission_queue_size;
 #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
-    configuration_.maxEventsPerNode =
+    configuration_->maxEventsPerNode =
         config.subscription_limits.max_events_per_node;
 #endif
 
@@ -150,20 +159,20 @@ Configuration::Configuration(const string& filepath) : Configuration() {
       /** @todo: obtain database configuration data and parse it to historizer
        */
       historizer_ = make_unique<Historizer>();
-      configuration_.historyDatabase = historizer_->createDatabase();
-      configuration_.accessHistoryDataCapability = true;
-      configuration_.accessHistoryEventsCapability = false;
-      configuration_.maxReturnDataValues = 0; // unlimited
-      configuration_.insertDataCapability = false;
-      configuration_.insertEventCapability = false;
-      configuration_.insertAnnotationsCapability = false;
-      configuration_.replaceDataCapability = false;
-      configuration_.replaceEventCapability = false;
-      configuration_.updateDataCapability = false;
-      configuration_.updateEventCapability = false;
-      configuration_.deleteRawCapability = false;
-      configuration_.deleteEventCapability = false;
-      configuration_.deleteAtTimeDataCapability = false;
+      configuration_->historyDatabase = historizer_->createDatabase();
+      configuration_->accessHistoryDataCapability = true;
+      configuration_->accessHistoryEventsCapability = false;
+      configuration_->maxReturnDataValues = 0; // unlimited
+      configuration_->insertDataCapability = false;
+      configuration_->insertEventCapability = false;
+      configuration_->insertAnnotationsCapability = false;
+      configuration_->replaceDataCapability = false;
+      configuration_->replaceEventCapability = false;
+      configuration_->updateDataCapability = false;
+      configuration_->updateEventCapability = false;
+      configuration_->deleteRawCapability = false;
+      configuration_->deleteEventCapability = false;
+      configuration_->deleteAtTimeDataCapability = false;
     } catch (exception& ex) {
       logger_->error("Data Historization Service will not be available, due to "
                      "an exception: {}",
@@ -171,27 +180,28 @@ Configuration::Configuration(const string& filepath) : Configuration() {
     }
 #endif
 
-    configuration_.maxMonitoredItems =
+    configuration_->maxMonitoredItems =
         config.monitored_items_limits.max_monitored_items;
-    configuration_.maxMonitoredItemsPerSubscription =
+    configuration_->maxMonitoredItemsPerSubscription =
         config.monitored_items_limits.max_monitored_items_per_subscription;
-    configuration_.samplingIntervalLimits =
+    configuration_->samplingIntervalLimits =
         config.monitored_items_limits.sampling_interval_limits_ms;
-    configuration_.queueSizeLimits =
+    configuration_->queueSizeLimits =
         config.monitored_items_limits.queue_size_limits;
 
-    configuration_.maxPublishReqPerSession = config.max_publish_req_per_session;
+    configuration_->maxPublishReqPerSession =
+        config.max_publish_req_per_session;
 #ifdef UA_ENABLE_DISCOVERY
-    configuration_.discoveryCleanupTimeout =
+    configuration_->discoveryCleanupTimeout =
         config.discovery.discoveryCleanupTimeout;
 #ifdef UA_ENABLE_DISCOVERY_MULTICAST
-    configuration_.mdnsEnabled = config.discovery.mdnsEnabled;
-    configuration_.mdnsConfig = config.discovery.mdnsConfig;
-    configuration_.mdnsInterfaceIP = config.discovery.mdnsInterfaceIP;
+    configuration_->mdnsEnabled = config.discovery.mdnsEnabled;
+    configuration_->mdnsConfig = config.discovery.mdnsConfig;
+    configuration_->mdnsInterfaceIP = config.discovery.mdnsInterfaceIP;
 #if !defined(UA_HAS_GETIFADDR)
-    configuration_.mdnsIpAddressListSize =
+    configuration_->mdnsIpAddressListSize =
         config.discovery.mdnsIpAddressListSize;
-    configuration_.mdnsIpAddressList = config.discovery.mdnsIpAddressList;
+    configuration_->mdnsIpAddressList = config.discovery.mdnsIpAddressList;
 #endif //! UA_HAS_GETIFADDR
 #endif // UA_ENABLE_DISCOVERY_MULTICAST
 #endif // UA_ENABLE_DISCOVERY
@@ -203,12 +213,15 @@ Configuration::Configuration(const string& filepath) : Configuration() {
   }
 }
 
-UA_ServerConfig* Configuration::getConfig() { return &configuration_; }
+Configuration::UA_ServerConfigPtr Configuration::getConfig() {
+  return move(configuration_);
+}
 
 unique_ptr<Historizer> Configuration::obtainHistorizer() {
   return move(historizer_);
 }
 
-Configuration::~Configuration() { UA_ServerConfig_clean(&configuration_); }
+Configuration::~Configuration() { /* UA_ServerConfig_clean(&configuration_); */
+}
 
 } // namespace open62541

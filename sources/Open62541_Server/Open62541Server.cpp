@@ -18,7 +18,12 @@ Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
   registerLoggers();
   auto config = configuration->getConfig();
   // Config is consumed, so no need to save it
-  open62541_server_ = UA_Server_newWithConfig(config);
+  /* Inside UA_Server_newWithConfig assigns the config as follwos
+   *      server->config = *config;
+   * and afterwards sets it to 0 with:
+   *      memset(config, 0, sizeof(UA_ServerConfig));
+   */
+  open62541_server_ = UA_Server_newWithConfig(config.get());
   server_namespace_index_ = 1;
 }
 

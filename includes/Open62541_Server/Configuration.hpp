@@ -14,20 +14,23 @@ struct Open62541_Config_Exception : public std::runtime_error {
       : std::runtime_error(message) {}
 };
 
-class Configuration {
-  HaSLI::LoggerPtr logger_;
-  std::unique_ptr<Historizer> historizer_;
-  UA_ServerConfig configuration_;
+struct Configuration {
+  using UA_ServerConfigPtr =
+      std::unique_ptr<UA_ServerConfig, void (*)(UA_ServerConfig*)>;
 
-public:
   Configuration();
   Configuration(const std::string& filepath);
   ~Configuration();
 
-  UA_ServerConfig* getConfig();
+  UA_ServerConfigPtr getConfig();
   // may only be called once, throws Double_Use afterwards
 
   std::unique_ptr<Historizer> obtainHistorizer();
+
+private:
+  HaSLI::LoggerPtr logger_;
+  std::unique_ptr<Historizer> historizer_;
+  UA_ServerConfigPtr configuration_;
 };
 } // namespace open62541
 
