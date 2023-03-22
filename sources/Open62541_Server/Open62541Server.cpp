@@ -17,11 +17,12 @@ Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
       historizer_(configuration->obtainHistorizer()) {
   registerLoggers();
   auto config = configuration->getConfig();
-  // Config is consumed, so no need to save it
-  /* Inside UA_Server_newWithConfig assigns the config as follwos
+  /* Config is consumed, so no need to save it
+   * Inside UA_Server_newWithConfig assigns the config as follows
    *      server->config = *config;
    * and afterwards sets it to 0 with:
    *      memset(config, 0, sizeof(UA_ServerConfig));
+   * this mimics cpp std::move()
    */
   open62541_server_ = UA_Server_newWithConfig(config.get());
   server_namespace_index_ = 1;
