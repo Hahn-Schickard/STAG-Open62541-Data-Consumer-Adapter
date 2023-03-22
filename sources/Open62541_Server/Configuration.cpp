@@ -12,19 +12,11 @@ using namespace std;
 using namespace HaSLI;
 
 namespace open62541 {
-UA_ServerConfig* makeServerConfig() {
-  auto config = (UA_ServerConfig*)malloc(sizeof(UA_ServerConfig));
-  memset(config, 0, sizeof(UA_ServerConfig));
-  return config;
-}
-
 Configuration::Configuration()
     : logger_(LoggerManager::registerLogger("Open62541 Configuration")),
-      // UA_ServerConfig_clean check if passed ptr is not NULL first, if it is,
-      // it returns early
-      configuration_(
-          UA_ServerConfigPtr(makeServerConfig(), &UA_ServerConfig_clean)) {
+      configuration_(make_unique<UA_ServerConfig>()) {
   try {
+    memset(configuration_.get(), 0, sizeof(UA_ServerConfig));
     configuration_->logger = HaSLL_Logger_;
     UA_ServerConfig_setDefault(configuration_.get());
   } catch (exception& ex) {
@@ -213,15 +205,11 @@ Configuration::Configuration(const string& filepath) : Configuration() {
   }
 }
 
-Configuration::UA_ServerConfigPtr Configuration::getConfig() {
+unique_ptr<UA_ServerConfig> Configuration::getConfig() {
   return move(configuration_);
 }
 
 unique_ptr<Historizer> Configuration::obtainHistorizer() {
   return move(historizer_);
 }
-
-Configuration::~Configuration() { /* UA_ServerConfig_clean(&configuration_); */
-}
-
 } // namespace open62541
