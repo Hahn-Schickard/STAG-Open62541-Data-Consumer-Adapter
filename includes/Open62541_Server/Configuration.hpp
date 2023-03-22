@@ -23,6 +23,8 @@ struct Configuration {
   std::unique_ptr<Historizer> obtainHistorizer();
 
 private:
+  Configuration(bool basic);
+
   HaSLI::LoggerPtr logger_;
   std::unique_ptr<Historizer> historizer_;
   std::unique_ptr<UA_ServerConfig> configuration_;
