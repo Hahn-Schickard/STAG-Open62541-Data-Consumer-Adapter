@@ -226,9 +226,7 @@ Configuration::Configuration(const string& filepath) : Configuration(true) {
         config.networking.sendBufferSize, config.networking.recvBufferSize);
     addSecurityPolicy(configuration_.get(), config.security_policy);
     auto policy_uri =
-        configuration_
-            ->securityPolicies[configuration_->securityPoliciesSize - 1]
-            .policyUri;
+        configuration_->securityPolicies[0].policyUri; // none policy
     UA_AccessControl_default(configuration_.get(), true, NULL, &policy_uri, 0,
         NULL); // allow_anonymous_access
     UA_ServerConfig_addEndpoint(configuration_.get(),
