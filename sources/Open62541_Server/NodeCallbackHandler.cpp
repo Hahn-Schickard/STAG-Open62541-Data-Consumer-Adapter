@@ -159,6 +159,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(UNUSED(UA_Server* server),
               memcpy(byte_string.data, opaque_value.data(), byte_string.length);
               UA_Variant_setScalarCopy(
                   &value->value, &byte_string, &UA_TYPES[UA_TYPES_BYTESTRING]);
+              UA_String_clear(&byte_string);
             } else {
               throw runtime_error("Tried to read an Opaque data type "
                                   "when node data type is: " +
@@ -174,6 +175,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(UNUSED(UA_Server* server),
                   open62541_string.length);
               UA_Variant_setScalarCopy(
                   &value->value, &open62541_string, &UA_TYPES[UA_TYPES_STRING]);
+              UA_String_clear(&open62541_string);
             } else {
               throw runtime_error("Tried to read a String data type "
                                   "when node data type is: " +
