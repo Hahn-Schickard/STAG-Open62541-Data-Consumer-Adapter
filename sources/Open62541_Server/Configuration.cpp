@@ -147,9 +147,9 @@ Configuration::Configuration(const string& filepath) : Configuration() {
 
 #ifdef UA_ENABLE_HISTORIZING
     try {
-      /** @todo: obtain database configuration data and parse it to historizer
-       */
-      historizer_ = make_unique<Historizer>();
+      auto db_config = config.historization;
+      historizer_ = make_unique<Historizer>(db_config.dsn, db_config.user,
+          db_config.auth, db_config.request_timeout, db_config.request_logging);
       configuration_.historyDatabase = historizer_->createDatabase();
       configuration_.accessHistoryDataCapability = true;
       configuration_.accessHistoryEventsCapability = false;
