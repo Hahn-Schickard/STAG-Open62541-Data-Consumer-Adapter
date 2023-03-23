@@ -23,13 +23,18 @@ UA_DurationRange initDurationRange(UA_Duration min, UA_Duration max) {
 }
 
 Config makeDefaultConfig() {
+  // clang-format off
   UA_ConnectionConfig networking = {0, 65535, 65535, 0, 0};
-  UA_BuildInfo build_info = {UA_String_fromChars("http://open62541.org"),
+  UA_BuildInfo build_info = {
+      UA_String_fromChars("http://open62541.org"),
       UA_String_fromChars("open62541"),
       UA_String_fromChars("open62541 OPC UA Server"),
-      UA_String_fromChars(VERSION(ADAPTER_VERSION_MAJOR, ADAPTER_VERSION_MINOR,
+      UA_String_fromChars(VERSION(
+          ADAPTER_VERSION_MAJOR, ADAPTER_VERSION_MINOR,
           ADAPTER_VERSION_PATCH, ADAPTER_VERSION_LABEL)),
-      UA_String_fromChars(__DATE__ " " __TIME__), UA_DateTime_now()};
+      UA_String_fromChars(__DATE__ " " __TIME__), 
+      UA_DateTime_now()
+    };
   UA_ApplicationDescription app_info = {
       UA_String_fromChars("urn:open62541.server.application"),
       UA_String_fromChars("http://open62541.org"),
@@ -38,7 +43,7 @@ Config makeDefaultConfig() {
       UA_STRING_NULL,
       UA_STRING_NULL,
       0,
-      NULL,
+      NULL //NOLINT
   };
   SecureChannelsLimits secure_channels_limits = {
       40, (10 * 60 * 1000) /* 10 minutes */
@@ -47,16 +52,27 @@ Config makeDefaultConfig() {
       100, (60.0 * 60.0 * 1000.0) /* 1h */
   };
   OperationalLimits operation_limits = {};
-  SubscriptionsLimits subscription_limits = {0, 0,
-      initDurationRange(100.0, (3600.0 * 1000.0)), initUInt32Range(3, 15000),
-      initUInt32Range(1, 100), 1000, true, 0, 0};
-  MonitoredItemsLimits monitored_items_limits = {0, 0,
-      initDurationRange(50.0, 24.0 * 3600.0 * 1000.0), initUInt32Range(1, 100)};
+  SubscriptionsLimits subscription_limits = {
+      0,
+      0,
+      initDurationRange(100.0, (3600.0 * 1000.0)),
+      initUInt32Range(3, 15000),
+      initUInt32Range(1, 100),
+      1000,
+      true,
+      0, 
+      0
+  };
+  MonitoredItemsLimits monitored_items_limits = {
+      0,
+      0,
+      initDurationRange(50.0, 24.0 * 3600.0 * 1000.0),
+      initUInt32Range(1, 100)
+  };
   UA_ServerConfig_Discovery discovery = {0, false};
   UserCredentials user_credentials = {};
   Historization historization = {"PostgreSQL", "", "", 60, false};
 
-  // clang-format off
   Config config = {
       true,
       user_credentials,
@@ -129,7 +145,10 @@ static void from_json(const json& j, UA_LocalizedText& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_LocalizedText& p) {
-  j = json{{"locale", p.locale}, {"text", p.text}};
+  j = json{// clang-format off
+      {"locale", p.locale},
+      {"text", p.text}
+  }; // clang-format on
 }
 
 // ======================== UA_DurationRange ============================
@@ -141,7 +160,10 @@ static void from_json(const json& j, UA_DurationRange& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_DurationRange& p) {
-  j = json{{"min", p.min}, {"max", p.max}};
+  j = json{// clang-format off
+      {"min", p.min},
+      {"max", p.max}
+  }; // clang-format on
 }
 
 // ======================== UA_UInt32Range ============================
@@ -153,7 +175,10 @@ static void from_json(const json& j, UA_UInt32Range& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_UInt32Range& p) {
-  j = json{{"min", p.min}, {"max", p.max}};
+  j = json{// clang-format off
+      {"min", p.min},
+      {"max", p.max}
+  }; // clang-format on
 }
 
 // ======================== SecureChannelsLimts ============================
@@ -165,7 +190,10 @@ static void from_json(const json& j, UserCredentials& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UserCredentials& p) {
-  j = json{{"username", p.username}, {"password", p.password}};
+  j = json{// clang-format off
+      {"username", p.username},
+      {"password", p.password}
+  }; // clang-format on
 }
 
 // ======================== SecureChannelsLimts ============================
@@ -178,8 +206,10 @@ static void from_json(const json& j, SecureChannelsLimits& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const SecureChannelsLimits& p) {
-  j = json{{"max_secure_channels", p.max_secure_channels},
-      {"max_security_token_lifetime_ms", p.max_security_token_lifetime_ms}};
+  j = json{// clang-format off
+      {"max_secure_channels", p.max_secure_channels},
+      {"max_security_token_lifetime_ms", p.max_security_token_lifetime_ms}
+  }; // clang-format on
 }
 
 // ============================ SessionsLimits ===============================
@@ -191,8 +221,10 @@ static void from_json(const json& j, SessionsLimits& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const SessionsLimits& p) {
-  j = json{{"max_sessions", p.max_sessions},
-      {"max_session_timeout_ms", p.max_session_timeout_ms}};
+  j = json{// clang-format off
+      {"max_sessions", p.max_sessions},
+      {"max_session_timeout_ms", p.max_session_timeout_ms}
+  }; // clang-format on
 }
 
 // ======================== OperationalLimits ===========================
@@ -215,7 +247,8 @@ static void from_json(const json& j, OperationalLimits& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const OperationalLimits& p) {
-  j = json{{"max_nodes_per_read", p.max_nodes_per_read},
+  j = json{// clang-format off
+      {"max_nodes_per_read", p.max_nodes_per_read},
       {"max_nodes_per_write", p.max_nodes_per_write},
       {"max_nodes_per_method_call", p.max_nodes_per_method_call},
       {"max_nodes_per_browse", p.max_nodes_per_browse},
@@ -223,7 +256,8 @@ static void to_json(json& j, const OperationalLimits& p) {
       {"max_nodes_per_translate_browse_paths_to_nodeids",
           p.max_nodes_per_translate_browse_paths_to_nodeids},
       {"max_nodes_per_node_management", p.max_nodes_per_node_management},
-      {"max_monitored_items_per_call", p.max_monitored_items_per_call}};
+      {"max_monitored_items_per_call", p.max_monitored_items_per_call}
+  }; // clang-format on
 }
 
 // ======================== SubscriptionsLimtis ===========================
@@ -249,7 +283,8 @@ static void from_json(const json& j, SubscriptionsLimits& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const SubscriptionsLimits& p) {
-  j = json{{"max_subscriptions", p.max_subscriptions},
+  j = json{// clang-format off
+      {"max_subscriptions", p.max_subscriptions},
       {"max_subscriptions_per_session", p.max_subscriptions_per_session},
       {"publishing_interval_limits_ms", p.publishing_interval_limits_ms},
       {"life_time_count_limits", p.life_time_count_limits},
@@ -257,7 +292,8 @@ static void to_json(json& j, const SubscriptionsLimits& p) {
       {"max_notifications_per_publish", p.max_notifications_per_publish},
       {"enable_retransmission_queue", p.enable_retransmission_queue},
       {"max_retransmission_queue_size", p.max_retransmission_queue_size},
-      {"max_events_per_node", p.max_events_per_node}};
+      {"max_events_per_node", p.max_events_per_node}
+  }; // clang-format on
 }
 
 // ======================== MonitoredItemsLimits ===========================
@@ -273,11 +309,13 @@ static void from_json(const json& j, MonitoredItemsLimits& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const MonitoredItemsLimits& p) {
-  j = json{{"max_monitored_items", p.max_monitored_items},
-      {"max_monitored_items_per_subscription",
+  j = json{// clang-format off
+      {"max_monitored_items", p.max_monitored_items},
+      {"max_monitored_items_per_subscription", 
           p.max_monitored_items_per_subscription},
       {"sampling_interval_limits_ms", p.sampling_interval_limits_ms},
-      {"queue_size_limits", p.queue_size_limits}};
+      {"queue_size_limits", p.queue_size_limits}
+  }; // clang-format on
 }
 
 // ======================== UA_ConnectionConfig ===========================
@@ -290,9 +328,11 @@ static void from_json(const json& j, UA_ConnectionConfig& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_ConnectionConfig& p) {
-  j = json{{"protocolVersion", p.protocolVersion},
+  j = json{// clang-format off
+      {"protocolVersion", p.protocolVersion},
       {"recvBufferSize", p.recvBufferSize},
-      {"sendBufferSize", p.sendBufferSize}};
+      {"sendBufferSize", p.sendBufferSize}
+  }; // clang-format on
 }
 
 // ======================== UA_BuildInfo ===========================
@@ -308,10 +348,14 @@ static void from_json(const json& j, UA_BuildInfo& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_BuildInfo& p) {
-  j = json{{"productUri", p.productUri},
-      {"manufacturerName", p.manufacturerName}, {"productName", p.productName},
-      {"softwareVersion", p.softwareVersion}, {"buildNumber", p.buildNumber},
-      {"buildDate", p.buildDate}};
+  j = json{// clang-format off
+      {"productUri", p.productUri},
+      {"manufacturerName", p.manufacturerName}, 
+      {"productName", p.productName},
+      {"softwareVersion", p.softwareVersion}, 
+      {"buildNumber", p.buildNumber},
+      {"buildDate", p.buildDate}
+  }; // clang-format on
 }
 
 // ====================== UA_ApplicationDescription =======================
@@ -329,11 +373,14 @@ static void from_json(const json& j, UA_ApplicationDescription& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_ApplicationDescription& p) {
-  j = json{{"applicationUri", p.applicationUri}, {"productUri", p.productUri},
+  j = json{// clang-format off
+      {"applicationUri", p.applicationUri}, 
+      {"productUri", p.productUri},
       {"applicationName", p.applicationName},
       {"applicationType", p.applicationType},
       {"gatewayServerUri", p.gatewayServerUri},
-      {"discoveryProfileUri", p.discoveryProfileUri}};
+      {"discoveryProfileUri", p.discoveryProfileUri}
+  }; // clang-format on
 }
 
 // ==================== UA_MdnsDiscoveryConfiguration =====================
@@ -345,7 +392,9 @@ static void from_json(const json& j, UA_MdnsDiscoveryConfiguration& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_MdnsDiscoveryConfiguration& p) {
-  j = json{{"mdnsServerName", p.mdnsServerName}};
+  j = json{// clang-format off
+      {"mdnsServerName", p.mdnsServerName}
+  }; // clang-format on
 }
 
 // ====================== UA_ServerConfig_Discovery =======================
@@ -357,8 +406,10 @@ static void from_json(const json& j, UA_ServerConfig_Discovery& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_ServerConfig_Discovery& p) {
-  j = json{{"cleanupTimeout", p.discoveryCleanupTimeout},
-      {"mdnsEnable", p.mdnsEnabled}};
+  j = json{// clang-format off
+      {"cleanupTimeout", p.discoveryCleanupTimeout},
+      {"mdnsEnable", p.mdnsEnabled}
+  }; // clang-format on
 }
 
 // ====================== Historization =======================
@@ -373,9 +424,13 @@ static void from_json(const json& j, Historization& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const Historization& p) {
-  j = json{{"DataSourceName", p.dsn}, {"Username", p.user},
-      {"Password", p.auth}, {"RequestTimeoutInSeconds", p.request_timeout},
-      {"LogRequests", p.request_logging}};
+  j = json{// clang-format off
+      {"DataSourceName", p.dsn}, 
+      {"Username", p.user},
+      {"Password", p.auth}, 
+      {"RequestTimeoutInSeconds", p.request_timeout},
+      {"LogRequests", p.request_logging}
+  };// clang-format off
 }
 
 // ======================== Config ===========================
@@ -408,11 +463,15 @@ static void from_json(const json& j, Config& p) {
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const Config& p) {
-  j = json{{"allow_anonymous_access", p.allow_anonymous_access},
+  j = json{// clang-format off
+      {"allow_anonymous_access", p.allow_anonymous_access},
       {"access_credentials", p.access_credentials},
-      {"port_number", p.port_number}, {"networking", p.networking},
-      {"security_policy", p.security_policy}, {"build_info", p.build_info},
-      {"app_info", p.app_info}, {"server_certificate", p.server_certificate},
+      {"port_number", p.port_number}, 
+      {"networking", p.networking},
+      {"security_policy", p.security_policy}, 
+      {"build_info", p.build_info},
+      {"app_info", p.app_info}, 
+      {"server_certificate", p.server_certificate},
       {"shutdown_delay_ms", p.shutdown_delay_ms},
       {"rules_handling", p.rules_handling},
       {"secure_channels_limits", p.secure_channels_limits},
@@ -422,7 +481,9 @@ static void to_json(json& j, const Config& p) {
       {"subscription_limits", p.subscription_limits},
       {"monitored_items_limits", p.monitored_items_limits},
       {"max_publish_req_per_session", p.max_publish_req_per_session},
-      {"discovery", p.discovery}, {"historization", p.historization}};
+      {"discovery", p.discovery}, 
+      {"historization", p.historization}
+  }; // clang-format on
 }
 } // namespace nlohmann
 
