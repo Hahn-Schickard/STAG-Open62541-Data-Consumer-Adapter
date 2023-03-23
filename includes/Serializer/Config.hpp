@@ -16,6 +16,7 @@ typedef enum SecurityPolicyEnum {
   BASIC128_RSA15,
   BASIC256,
   BASIC256_SHA256,
+  AES128_SHA256_RSAO_AEP,
   ALL
 } SecurityPolicy;
 
