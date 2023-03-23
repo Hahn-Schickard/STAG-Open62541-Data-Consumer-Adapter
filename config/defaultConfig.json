@@ -91,5 +91,12 @@
             "min": 100.0
         }
     },
-    "thread_count": 1
+    "thread_count": 1,
+    "historization": {
+        "DataSourceName": "PostgreSQL",
+        "Username": "",
+        "Password": "",
+        "RequestTimeoutInSeconds": 60,
+        "LogRequests": false
+    }
 }
