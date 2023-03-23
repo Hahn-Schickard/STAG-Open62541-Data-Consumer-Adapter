@@ -54,7 +54,9 @@ Config makeDefaultConfig() {
       initDurationRange(50.0, 24.0 * 3600.0 * 1000.0), initUInt32Range(1, 100)};
   UA_ServerConfig_Discovery discovery = {0, false};
   UserCredentials user_credentials = {};
+  Historization historization = {"PostgreSQL", "", "", 60, false};
 
+  // clang-format off
   Config config = {
       true,
       user_credentials,
@@ -75,7 +77,9 @@ Config makeDefaultConfig() {
       monitored_items_limits,
       0,
       discovery,
+      historization
   };
+  // clang-format on
   return config;
 }
 
@@ -357,6 +361,23 @@ static void to_json(json& j, const UA_ServerConfig_Discovery& p) {
       {"mdnsEnable", p.mdnsEnabled}};
 }
 
+// ====================== Historization =======================
+// NOLINTNEXTLINE
+static void from_json(const json& j, Historization& p) {
+  p.dsn = j.at("DataSourceName").get<string>();
+  p.user = j.at("Username").get<string>();
+  p.auth = j.at("Password").get<string>();
+  p.request_timeout = j.at("RequestTimeoutInSeconds").get<size_t>();
+  p.request_logging = j.at("LogRequests").get<bool>();
+}
+
+// NOLINTNEXTLINE
+static void to_json(json& j, const Historization& p) {
+  j = json{{"DataSourceName", p.dsn}, {"Username", p.user},
+      {"Password", p.auth}, {"RequestTimeoutInSeconds", p.request_timeout},
+      {"LogRequests", p.request_logging}};
+}
+
 // ======================== Config ===========================
 // NOLINTNEXTLINE
 static void from_json(const json& j, Config& p) {
@@ -382,6 +403,7 @@ static void from_json(const json& j, Config& p) {
   p.max_publish_req_per_session =
       j.at("max_publish_req_per_session").get<UA_UInt32>();
   p.discovery = j.at("discovery").get<UA_ServerConfig_Discovery>();
+  p.historization = j.at("historization").get<Historization>();
 }
 
 // NOLINTNEXTLINE
@@ -400,7 +422,7 @@ static void to_json(json& j, const Config& p) {
       {"subscription_limits", p.subscription_limits},
       {"monitored_items_limits", p.monitored_items_limits},
       {"max_publish_req_per_session", p.max_publish_req_per_session},
-      {"discovery", p.discovery}};
+      {"discovery", p.discovery}, {"historization", p.historization}};
 }
 } // namespace nlohmann
 
