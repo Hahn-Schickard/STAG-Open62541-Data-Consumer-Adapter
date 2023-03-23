@@ -2,6 +2,7 @@
 #define __DCA_OPEN62541_CONFIG_HS_HPP
 
 #include <open62541/server.h>
+#include <string>
 
 #define ADAPTER_VERSION_MAJOR "0"
 #define ADAPTER_VERSION_MINOR "0"
@@ -76,6 +77,14 @@ typedef struct {
   UA_UInt32* mdnsIpAddressList;
 } UA_ServerConfig_Discovery;
 
+typedef struct {
+  std::string dsn;
+  std::string user;
+  std::string auth;
+  size_t request_timeout;
+  bool request_logging;
+} Historization;
+
 struct Config {
   UA_Boolean allow_anonymous_access;
   UserCredentials access_credentials;
@@ -96,6 +105,7 @@ struct Config {
   MonitoredItemsLimits monitored_items_limits;
   UA_UInt32 max_publish_req_per_session;
   UA_ServerConfig_Discovery discovery;
+  Historization historization;
 };
 } // namespace open62541
 
