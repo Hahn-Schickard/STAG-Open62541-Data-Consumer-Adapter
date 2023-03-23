@@ -171,29 +171,29 @@ Configuration::Configuration(const string& filepath) : Configuration(true) {
 #endif
 
 #ifdef UA_ENABLE_HISTORIZING
-    try {
-      auto db_config = config.historization;
-      historizer_ = make_unique<Historizer>(db_config.dsn, db_config.user,
-          db_config.auth, db_config.request_timeout, db_config.request_logging);
-      configuration_.historyDatabase = historizer_->createDatabase();
-      configuration_.accessHistoryDataCapability = true;
-      configuration_.accessHistoryEventsCapability = false;
-      configuration_.maxReturnDataValues = 0; // unlimited
-      configuration_.insertDataCapability = false;
-      configuration_.insertEventCapability = false;
-      configuration_.insertAnnotationsCapability = false;
-      configuration_.replaceDataCapability = false;
-      configuration_.replaceEventCapability = false;
-      configuration_.updateDataCapability = false;
-      configuration_.updateEventCapability = false;
-      configuration_.deleteRawCapability = false;
-      configuration_.deleteEventCapability = false;
-      configuration_.deleteAtTimeDataCapability = false;
-    } catch (exception& ex) {
-      logger_->error("Data Historization Service will not be available, due to "
-                     "an exception: {}",
-          ex.what());
-    }
+  try {
+    auto db_config = config.historization;
+    historizer_ = make_unique<Historizer>(db_config.dsn, db_config.user,
+        db_config.auth, db_config.request_timeout, db_config.request_logging);
+    configuration_->historyDatabase = historizer_->createDatabase();
+    configuration_->accessHistoryDataCapability = true;
+    configuration_->accessHistoryEventsCapability = false;
+    configuration_->maxReturnDataValues = 0; // unlimited
+    configuration_->insertDataCapability = false;
+    configuration_->insertEventCapability = false;
+    configuration_->insertAnnotationsCapability = false;
+    configuration_->replaceDataCapability = false;
+    configuration_->replaceEventCapability = false;
+    configuration_->updateDataCapability = false;
+    configuration_->updateEventCapability = false;
+    configuration_->deleteRawCapability = false;
+    configuration_->deleteEventCapability = false;
+    configuration_->deleteAtTimeDataCapability = false;
+  } catch (exception& ex) {
+    logger_->error("Data Historization Service will not be available, due to "
+                   "an exception: {}",
+        ex.what());
+  }
 #endif
 
   configuration_->maxMonitoredItems =
