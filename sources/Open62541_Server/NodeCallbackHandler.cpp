@@ -97,8 +97,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(UNUSED(UA_Server* server),
     auto callback_wrapper = it->second;
     try {
       auto variant_value = callback_wrapper->readable_();
-      match(
-          variant_value,
+      match(variant_value,
           [&](bool boolean_value) {
             if (callback_wrapper->data_type_ == DataType::BOOLEAN) {
               UA_Variant_setScalarCopy(
