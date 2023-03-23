@@ -8,7 +8,25 @@
 namespace open62541 {
 struct Historizer {
 
+  /**
+   * @brief Create default historizer object with default OODD::DatabaseDriver
+   * values
+   *
+   */
   Historizer();
+
+  /**
+   * @brief Create a historizer object with custom OODD::DatabaseDriver
+   * values
+   *
+   * @param dsn - data source name
+   * @param user - username for the target database
+   * @param auth - authentication key for the target database
+   * @param request_timeout - SQL request timeout value in seconds
+   * @param log - log SQL requests
+   */
+  Historizer(const std::string& dsn, const std::string& user,
+      const std::string& auth, size_t request_timeout, bool log);
 
   ~Historizer();
   /**
@@ -30,6 +48,8 @@ struct Historizer {
   UA_HistoryDatabase createDatabase();
 
 private:
+  Historizer(OODD::DatabaseDriverPtr db);
+
   /**
    * @brief Used as destructor for the UA_HistoryDatabase struct by UA_Server
    * instance

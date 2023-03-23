@@ -39,15 +39,21 @@ struct NoBoundData : runtime_error {
 LoggerPtr Historizer::logger_ = LoggerPtr(); // NOLINT
 DatabaseDriverPtr Historizer::db_ = DatabaseDriverPtr(); // NOLINT
 
-Historizer::Historizer() {
+Historizer::Historizer(OODD::DatabaseDriverPtr db) {
   logger_ = LoggerManager::registerTypedLogger(this);
-  db_ = makeDatabaseDriver("PostgreSQL");
+  db_ = move(db);
   db_->create("Historized_Nodes",
       vector<Column>{// clang-format off
             Column("Node_Id", ColumnDataType::TEXT),
             Column("Last_Updated", ColumnDataType::TIMESTAMP)
       }); // clang-format on
 }
+
+Historizer::Historizer() : Historizer(makeDatabaseDriver()) {}
+
+Historizer::Historizer(const string& dsn, const string& user,
+    const string& auth, size_t request_timeout, bool log)
+    : Historizer(makeDatabaseDriver(dsn, user, auth, request_timeout, log)) {}
 
 Historizer::~Historizer() {
   logger_.reset();
@@ -507,7 +513,7 @@ UA_Variant toUAVariant(DataType data) {
 UA_DateTime toUADateTime(DataType data) {
   if (holds_alternative<string>(data)) {
     using namespace date;
-    using namespace std::chrono;
+    using namespace chrono;
 
     istringstream string_stream{get<string>(data)};
     system_clock::time_point time_point;
