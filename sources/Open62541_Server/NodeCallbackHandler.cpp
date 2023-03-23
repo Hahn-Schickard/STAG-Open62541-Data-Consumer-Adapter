@@ -289,8 +289,8 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue(UNUSED(UA_Server* server),
       case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
         string error_msg = "GUID to Object Link conversion is not implemented";
         UA_LOG_WARNING(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+        [[fallthrough]];
       }
-      // fall-through
       default: {
         string error_msg = "Node " + toString(node_id) + " does not take " +
             string(value->value.type->typeName) +
