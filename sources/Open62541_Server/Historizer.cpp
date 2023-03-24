@@ -839,7 +839,7 @@ DataType operator/(const DataType& lhs, const intmax_t& rhs) {
 }
 
 vector<ColumnValue> interpolateValues(
-    UA_DateTime target_timestamp, bool simple_bounds, Rows first, Rows second) {
+    UA_DateTime target_timestamp, Rows first, Rows second) {
   vector<ColumnValue> result;
   // both maps MUST have 1 row each
   if (first.size() != 1 || second.size() != 1) {
@@ -881,23 +881,13 @@ vector<ColumnValue> interpolateValues(
 
   auto first_nearest_timestamp = toUADateTime(first_row[0].value());
   auto second_nearest_timestamp = toUADateTime(second_row[0].value());
-  DataType interpolated_data;
-  if (simple_bounds) {
-    // use linear interpolation between the nearest bounding values
-    intmax_t weight1 = second_nearest_timestamp - target_timestamp;
-    intmax_t weight2 = target_timestamp - first_nearest_timestamp;
-    intmax_t denominator = second_nearest_timestamp - first_nearest_timestamp;
-    interpolated_data =
-        ((first_nearest_value * weight1) + (second_nearest_value * weight2)) /
-        denominator;
-  } else {
-    // use formula from OPC UA Part 13 Aggregates specification section 3.1.8
-    intmax_t weight = target_timestamp - first_nearest_timestamp;
-    auto value_diff = second_nearest_value - first_nearest_value;
-    intmax_t denominator = second_nearest_timestamp - first_nearest_timestamp;
-    interpolated_data =
-        ((value_diff * weight) / denominator) + first_nearest_value;
-  }
+  // use formula from OPC UA Part 13 Aggregates specification section 3.1.8
+  intmax_t weight = target_timestamp - first_nearest_timestamp;
+  auto value_diff = second_nearest_value - first_nearest_value;
+  intmax_t denominator = second_nearest_timestamp - first_nearest_timestamp;
+  auto interpolated_data =
+      ((value_diff * weight) / denominator) + first_nearest_value;
+
   result.emplace_back(ColumnValue(data_point_name, interpolated_data));
   return result;
 }
@@ -1054,10 +1044,10 @@ UA_StatusCode Historizer::readAndAppendHistory(
             // useSimpleBounds=False dictates that we need to find first
             // Non-Bad Raw values to use for interpolation, however it is not
             // specified what is a Non-Bad Raw value, so we assume that the
-            // nearest RAW values to our target timestamp qualify as Non-Bad
+            // nearest RAW values to our target timestamp qualify as Non-Bad,
+            // thus we do not check historyReadDetails->useSimpleBounds flag
             interpolateValues(historyReadDetails->reqTimes[i],
-                historyReadDetails->useSimpleBounds, nearest_before_result,
-                nearest_after_result));
+                nearest_before_result, nearest_after_result));
         setHistorianBits(&status, DataLocation::INTERPOLATED);
       } else {
         results.merge(timestamp_results);
