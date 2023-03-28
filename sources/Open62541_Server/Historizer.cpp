@@ -1035,17 +1035,16 @@ UA_StatusCode Historizer::readAndAppendHistory(
         auto nearest_after_result = db_->select(toSanitizedString(&node_id),
             columns, ColumnFilter(FilterType::GREATER, timestamp), 1,
             "Source_Timestamp", false);
-        // indexes are only used to iterate over the results map, so we only
-        // need to make sure that they are all unique, since bounding values
-        // by defintion do not meet our aggregate criteria, their indexes will
-        // never be in the results maps, thus it is safe to use their indexes
+        // the following is safe because, indexes are only used to iterate over
+        // the results map, so we only need to make sure that they are all
+        // unique. Because bounding values by defintion do not meet our
+        // aggregate criteria, their indexes will never be in the results maps,
+        // thus they will always be unique
         auto index = nearest_after_result.begin()->first;
         results.emplace(index,
-            // useSimpleBounds=False dictates that we need to find first
-            // Non-Bad Raw values to use for interpolation, however it is not
-            // specified what is a Non-Bad Raw value, so we assume that the
-            // nearest RAW values to our target timestamp qualify as Non-Bad,
-            // thus we do not check historyReadDetails->useSimpleBounds flag
+            // we do not check historyReadDetails->useSimpleBounds flag,
+            // because all values are Non-Bad for our case and thus
+            // useSimpleBounds=False would not change the calculation
             interpolateValues(historyReadDetails->reqTimes[i],
                 nearest_before_result, nearest_after_result));
         setHistorianBits(&status, DataLocation::INTERPOLATED);
