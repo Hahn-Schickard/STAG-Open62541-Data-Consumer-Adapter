@@ -13,8 +13,10 @@ Open62541Server::Open62541Server()
     : Open62541Server(make_unique<Configuration>()) {}
 
 Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
-    : logger_(LoggerManager::registerTypedLogger(this)),
-      historizer_(configuration->obtainHistorizer()) {
+    : logger_(LoggerManager::registerTypedLogger(this)) {
+#ifdef UA_ENABLE_HISTORIZING
+  historizer_ = configuration->obtainHistorizer();
+#endif // UA_ENABLE_HISTORIZING
   registerLoggers();
   auto config = configuration->getConfig();
   /* Config is consumed, so no need to save it
@@ -112,4 +114,4 @@ UA_StatusCode Open62541Server::registerForHistorization(
     return UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
   }
 }
-#endif
+#endif // UA_ENABLE_HISTORIZING

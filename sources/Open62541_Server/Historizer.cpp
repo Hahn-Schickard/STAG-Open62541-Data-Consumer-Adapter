@@ -1,3 +1,4 @@
+#ifdef UA_ENABLE_HISTORIZING
 #include "Historizer.hpp"
 #include "HaSLL/LoggerManager.hpp"
 #include "Utility.hpp"
@@ -1104,3 +1105,4 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
   }
 }
 } // namespace open62541
+#endif // UA_ENABLE_HISTORIZING

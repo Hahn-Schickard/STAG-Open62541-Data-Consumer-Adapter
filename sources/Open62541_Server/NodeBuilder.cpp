@@ -260,7 +260,7 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
 #ifdef UA_ENABLE_HISTORIZING
     node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     node_attr.historizing = true;
-#endif
+#endif // UA_ENABLE_HISTORIZING
     status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
         make_shared<CallbackWrapper>(metric->getDataType(),
             bind(&Metric::getMetricValue, metric.base())));
@@ -273,7 +273,7 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
         node_attr, data_source, nullptr, nullptr);
 #ifdef UA_ENABLE_HISTORIZING
     server_->registerForHistorization(metrid_node_id, node_attr.value.type);
-#endif
+#endif // UA_ENABLE_HISTORIZING
   }
   if (status != UA_STATUSCODE_GOOD) {
     logger_->log(SeverityLevel::ERROR,
@@ -315,7 +315,7 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
 #ifdef UA_ENABLE_HISTORIZING
     node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     node_attr.historizing = true;
-#endif
+#endif // UA_ENABLE_HISTORIZING
     status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
         make_shared<CallbackWrapper>(metric->getDataType(),
             bind(&WritableMetric::getMetricValue, metric.base()),
@@ -330,7 +330,7 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
         type_definition, node_attr, data_source, nullptr, nullptr);
 #ifdef UA_ENABLE_HISTORIZING
     server_->registerForHistorization(metrid_node_id, node_attr.value.type);
-#endif
+#endif // UA_ENABLE_HISTORIZING
   }
 
   if (status != UA_STATUSCODE_GOOD) {

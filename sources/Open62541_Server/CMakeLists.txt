@@ -20,13 +20,18 @@ target_sources(${THIS} PRIVATE
 target_link_libraries(${THIS} PUBLIC
                               Information_Model::Information_Model
                               open62541::open62541
-                              OODD::OODD
                               date::date
                               Variant_Visitor::Variant_Visitor
                               HaSLL::HaSLL
                               HSCUL::HSCUL
                               Config_Serializer
 )
+
+
+if(HISTORIZATION)
+    target_link_libraries(${THIS} PUBLIC OODD::OODD)
+    target_compile_definitions(${THIS} PUBLIC UA_ENABLE_HISTORIZING)
+endif()
 
 target_include_directories(${THIS} PUBLIC
                            $<BUILD_INTERFACE:${INCLUDES_DIR}/Open62541_Server>

@@ -1,11 +1,11 @@
 #ifndef __OPCUA_HISTORIZER_HPP
 #define __OPCUA_HISTORIZER_HPP
-
 #include "HaSLL/Logger.hpp"
 #include "OODD/DatabaseDriver.hpp"
 #include "open62541/plugin/historydatabase.h"
 
 namespace open62541 {
+#ifdef UA_ENABLE_HISTORIZING
 struct Historizer {
 
   /**
@@ -162,5 +162,6 @@ private:
   static HaSLI::LoggerPtr logger_;
   static OODD::DatabaseDriverPtr db_;
 };
+#endif // UA_ENABLE_HISTORIZING
 } // namespace open62541
-#endif //__OPCUA_HISTORIZER_HPP
+#endif // __OPCUA_HISTORIZER_HPP

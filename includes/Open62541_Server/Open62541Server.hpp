@@ -7,7 +7,7 @@
 #include "Information_Model/Device.hpp"
 #ifdef UA_ENABLE_HISTORIZING
 #include "Historizer.hpp"
-#endif
+#endif // UA_ENABLE_HISTORIZING
 
 #include <memory>
 #include <mutex>
@@ -28,7 +28,7 @@ class Open62541Server {
 
   UA_StatusCode registerForHistorization(
       UA_NodeId nodeId, const UA_DataType* type);
-#endif
+#endif // UA_ENABLE_HISTORIZING
 
   void runnable();
 
