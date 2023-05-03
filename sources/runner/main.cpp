@@ -62,12 +62,18 @@ void print(NonemptyWritableMetricPtr element, size_t offset);
 void print(NonemptyMetricPtr element, size_t offset);
 void print(NonemptyDeviceElementGroupPtr elements, size_t offset);
 
+void registerDevices(shared_ptr<EventSourceFake> event_source);
+
 int main(int argc, char* argv[]) {
   try {
     auto repo = make_shared<SPD_LoggerRepository>("config/loggerConfig.json");
     LoggerManager::initialise(repo);
     auto logger = HaSLL::LoggerManager::registerLogger("Main");
     logger->log(SeverityLevel::TRACE, "Logging completed initialization!");
+    logger->log(SeverityLevel::INFO,
+        "Current Sever time, in number of 100 nanosecond intervals since "
+        "January 1, 1601 (UTC): {}",
+        UA_DateTime_now());
 
     signal(SIGINT, stopHandler);
     signal(SIGTERM, stopHandler);
@@ -82,56 +88,7 @@ int main(int argc, char* argv[]) {
     logger->log(SeverityLevel::TRACE, "OPC UA Adapter initialized!");
 
     adapter->start();
-
-    {
-      auto mock_builder =
-          make_shared<Information_Model::testing::DeviceMockBuilder>();
-
-      mock_builder->buildDeviceBase("9876", "Mocky", "Mocked test device");
-      logger->log(SeverityLevel::TRACE, "Started building Mock Device.");
-
-      auto subgroup_1_ref_id =
-          mock_builder->addDeviceElementGroup("Group 1", "First group");
-      logger->log(SeverityLevel::TRACE,
-          "Adding a Subgroup element with id {} to Mock Device.",
-          subgroup_1_ref_id);
-
-      auto boolean_ref_id =
-          mock_builder->addReadableMetric(subgroup_1_ref_id, "Boolean",
-              "Mocked readable metric", Information_Model::DataType::BOOLEAN,
-              []() -> DataVariant { return true; });
-      logger->log(SeverityLevel::TRACE,
-          "Adding a Boolean readable element with id {} to Mock Device.",
-          boolean_ref_id);
-
-      auto integer_ref_id = mock_builder->addReadableMetric("Integer",
-          "Mocked readable metric", Information_Model::DataType::INTEGER,
-          []() -> DataVariant { return (int64_t)48; }); // NOLINT
-      logger->log(SeverityLevel::TRACE,
-          "Adding an Integer readable element with id {} to Mock Device.",
-          integer_ref_id);
-
-      auto string_ref_id = mock_builder->addReadableMetric("String",
-          "Mocked readable metric", Information_Model::DataType::STRING,
-          []() -> DataVariant { return string("Hello World!"); });
-      logger->log(SeverityLevel::TRACE,
-          "Adding a String readable element with id {} to Mock Device.",
-          string_ref_id);
-
-      auto device = mock_builder->getResult();
-
-      mock_builder.reset();
-
-      if (device) {
-        print(NonemptyDevicePtr(device));
-      }
-
-      event_source->sendEvent(
-          std::make_shared<ModelRegistryEvent>(NonemptyDevicePtr(device)));
-      sleep(60);
-      event_source->sendEvent(
-          std::make_shared<ModelRegistryEvent>(device->getElementId()));
-    }
+    registerDevices(event_source);
 
     if (argc > 1) {
       uint server_lifetime = atoi(argv[1]);
@@ -199,4 +156,99 @@ void print(NonemptyDevicePtr device) {
   cout << "Device id: " << device->getElementId() << endl;
   cout << "Described as: " << device->getElementDescription() << endl;
   print(device->getDeviceElementGroup(), 0);
+}
+
+Information_Model::DevicePtr buildDevice1() {
+  auto mock_builder =
+      make_shared<Information_Model::testing::DeviceMockBuilder>();
+
+  mock_builder->buildDeviceBase(
+      "base_id_1", "Example 1", "This is an example temperature sensor system");
+  { // Power group
+    auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
+        "Power", "Groups information regarding the power supply");
+    mock_builder->addReadableMetric(subgroup_1_ref_id, "Power",
+        "Indicates if system is running on batter power",
+        Information_Model::DataType::BOOLEAN,
+        []() -> DataVariant { return true; });
+    auto subgroup_2_ref_id =
+        mock_builder->addDeviceElementGroup(subgroup_1_ref_id, "State",
+            "Groups information regarding the power supply");
+    mock_builder->addReadableMetric(subgroup_2_ref_id, "Error",
+        "Indicates the current error message, regarding power supply",
+        Information_Model::DataType::STRING, []() -> DataVariant {
+          return string("Main Power Supply Interrupted");
+        });
+    mock_builder->addWritableMetric(subgroup_2_ref_id, "Reset Power Supply",
+        "Resets power supply and any related error messages",
+        Information_Model::DataType::BOOLEAN,
+        []() -> DataVariant { return false; },
+        [](DataVariant) { /*There is nothing to do*/ });
+  }
+  mock_builder->addReadableMetric("Temperature",
+      "Current measured temperature value in °C",
+      Information_Model::DataType::DOUBLE,
+      []() -> DataVariant { return (double)20.1; }); // NOLINT
+
+  return mock_builder->getResult();
+}
+
+Information_Model::DevicePtr buildDevice2() {
+  auto mock_builder =
+      make_shared<Information_Model::testing::DeviceMockBuilder>();
+
+  mock_builder->buildDeviceBase("base_id_2", "Example 2",
+      "This is an example power measurement sensor system");
+  { // Phase 1 group
+    auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
+        "Phase 1", "Groups first phase's power measurements");
+    mock_builder->addReadableMetric(subgroup_1_ref_id, "Voltage",
+        "Current measured phase voltage in V",
+        Information_Model::DataType::DOUBLE,
+        []() -> DataVariant { return (double)239.1; });
+    mock_builder->addReadableMetric(subgroup_1_ref_id, "Current",
+        "Current measured phase current in A",
+        Information_Model::DataType::DOUBLE,
+        []() -> DataVariant { return (double)8.8; });
+  }
+  { // Phase 2 group
+    auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
+        "Phase 2", "Groups second phase's power measurements");
+    mock_builder->addReadableMetric(subgroup_1_ref_id, "Voltage",
+        "Current measured phase voltage in V",
+        Information_Model::DataType::DOUBLE,
+        []() -> DataVariant { return (double)239.1; });
+    mock_builder->addReadableMetric(subgroup_1_ref_id, "Current",
+        "Current measured phase current in A",
+        Information_Model::DataType::DOUBLE,
+        []() -> DataVariant { return (double)8.8; });
+  }
+  { // Phase 3 group
+    auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
+        "Phase 3", "Groups third phase's power measurements");
+    mock_builder->addReadableMetric(subgroup_1_ref_id, "Voltage",
+        "Current measured phase voltage in V",
+        Information_Model::DataType::DOUBLE,
+        []() -> DataVariant { return (double)239.1; });
+    mock_builder->addReadableMetric(subgroup_1_ref_id, "Current",
+        "Current measured phase current in A",
+        Information_Model::DataType::DOUBLE,
+        []() -> DataVariant { return (double)8.8; });
+  }
+  return mock_builder->getResult();
+}
+
+void registerDevice(Information_Model::DevicePtr device,
+    shared_ptr<EventSourceFake> event_source) {
+  if (device) {
+    print(NonemptyDevicePtr(device));
+
+    event_source->sendEvent(
+        std::make_shared<ModelRegistryEvent>(NonemptyDevicePtr(device)));
+  }
+}
+
+void registerDevices(shared_ptr<EventSourceFake> event_source) {
+  registerDevice(buildDevice1(), event_source);
+  registerDevice(buildDevice2(), event_source);
 }
