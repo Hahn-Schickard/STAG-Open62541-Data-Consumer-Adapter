@@ -311,7 +311,7 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
     logger_->log(SeverityLevel::TRACE,
         "Assigning {} read and write callbacks for {} node",
         toString(metric->getDataType()), toString(&metrid_node_id));
-    node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
+    node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
 #ifdef UA_ENABLE_HISTORIZING
     node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     node_attr.historizing = true;
