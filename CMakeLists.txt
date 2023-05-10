@@ -22,8 +22,7 @@ include(linter)
 include(compiler_settings)
 
 if(USE_CONAN)
-        include(conan_install)
-        execute_conan_install()
+        include(conan_provider)
 endif()
 
 #@+ ====================== User CMAKE_OPTIONS configuration ========================
