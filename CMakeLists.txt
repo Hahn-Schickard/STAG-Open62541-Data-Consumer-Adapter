@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.6)
 
+option(USE_CONAN "Enables integeated conan package manager module. (Requires conan and python3 to be installed)" ON)
+
+if(USE_CONAN)
+        set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan_provider.cmake)
+endif()
+
 #@+ ======================== User PROJECT_NAME configuration ============================
 set(THIS Open62541_Data_Consumer_Adapter)
 #@- =========================== END OF USER CONFIGURATION ===============================
@@ -13,17 +19,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(VERBOSE_FILE_INCLUSION "Prints all included header files" ON)
 option(STATIC_CODE_ANALYSIS "Enable Code Linter" ON)
-option(USE_CONAN "Enables integeated conan package manager module. (Requires conan and python3 to be installed)" ON)
 option(RUN_TESTS "Enables Unit tests runner (Requires GTest framework)" ON)
 
 include(GNUInstallDirs)
 include(macros)
 include(linter)
 include(compiler_settings)
-
-if(USE_CONAN)
-        include(conan_provider)
-endif()
 
 #@+ ====================== User CMAKE_OPTIONS configuration ========================
 # User defined options and cmake variables are set here
