@@ -1,5 +1,6 @@
-from conans import ConanFile, CMake, tools
-from conans.tools import load
+from conan import ConanFile
+from conan.tools.files import load, collect_libs
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 import re
 import os
 
@@ -40,8 +41,10 @@ class PackageConan(ConanFile):
         "NOTICE",
         "AUTHORS"
     ]
-    _cmake = None
-    generators = ['cmake', 'cmake_paths', 'cmake_find_package']
+    short_paths = True
+
+    def layout(self):
+        cmake_layout(self)
 
     def requirements(self):
         if self.options.historization:
@@ -61,30 +64,30 @@ class PackageConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.verbose = True
-        self._cmake.definitions['STATIC_CODE_ANALYSIS'] = False
-        self._cmake.definitions['RUN_TESTS'] = False
-        self._cmake.definitions['USE_CONAN'] = True
-        self._cmake.definitions['HISTORIZATION'] = self.options.historization
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables['STATIC_CODE_ANALYSIS'] = False
+        tc.variables['RUN_TESTS'] = False
+        tc.variables['USE_CONAN'] = True
+        tc.variables['HISTORIZATION'] = self.options.historization
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
         self.copy(pattern='LICENSE', dst='licenses', src=self.cwd)
         self.copy(pattern='NOTICE', dst='licenses', src=self.cwd)
         self.copy(pattern='AUTHORS', dst='licenses', src=self.cwd)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         self.output.info('Collected libs: \n{}'.format(
             '\n'.join(self.cpp_info.libs)))
