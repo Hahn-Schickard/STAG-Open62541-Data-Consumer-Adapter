@@ -22,8 +22,8 @@ class PackageConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "historization": [True, False]}
-    default_options = {"open62541:cpp_compatible": True,
-                       "open62541:multithreading": "Threadsafe",
+    default_options = {"open62541/*:cpp_compatible": True,
+                       "open62541/*:multithreading": "Threadsafe",
                        "shared": True,
                        "fPIC": True,
                        "historization": False}
@@ -56,7 +56,7 @@ class PackageConan(ConanFile):
         return os.path.dirname(os.path.realpath(__file__))
 
     def set_name(self):
-        content = load(os.path.join(self.cwd, 'CMakeLists.txt'))
+        content = load(self, path=os.path.join(self.cwd, 'CMakeLists.txt'))
         name = re.search('set\(THIS (.*)\)', content).group(1)
         self.name = name.strip()
 
