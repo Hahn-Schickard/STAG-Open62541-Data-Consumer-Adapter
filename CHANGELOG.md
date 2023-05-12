@@ -1,4 +1,33 @@
 # Changelog
+## [0.2.0] - 2023.05.12
+### Added
+ - fuzzy HSCUL dependency to v0.3
+ - optional fuzzy OODD dependency to v0.1
+ - historization option to conan recipe
+ - cmake HISTORIZATION option
+ - Historizer.hpp
+ - Historization service
+ - History View capability
+ - `UA_StatusCode NodeBuilder::deleteDeviceNode()`
+ - `AES128_SHA256_RSAO_AEP` enum value to SecurityPolicy struct in Config.hpp
+ - `UA_ServerConfig_Discovery` struct to Config.hpp
+ - `Historization` struct to Config.hpp
+ - Device deregistration event handling
+ - better Information_Model::Device examples
+
+### Changed 
+ - open62541 dependency to v1.3.4
+ - default OPC UA Config to contain STAG project information
+ - `UA_ServerConfig` into `std::unique_ptr<UA_ServerConfig>` in Configuration.hpp 
+ - `Configuration` struct implementation, to use new open62541 configuration functions
+
+### Removed
+ - `std::unique_ptr<const UA_ServerConfig> Configuration::getConfig()` 
+ - `Double_Use` logic error from Configuration.hpp 
+
+### Fixed
+ - fallthrough declarations in NodeCallbackHandler.cpp
+
 ## [0.1.7] - 2022.11.21
 ### Changed
  - conan packaging recipe
