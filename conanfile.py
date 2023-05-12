@@ -12,7 +12,6 @@ class PackageConan(ConanFile):
         "nlohmann_json/3.11.1",
         "open62541/1.3.4",
         "date/3.0.1",
-        "OODD/[~0.1]@hahn-schickard/stable",
         "HaSLL/[~0.3]@hahn-schickard/stable",
         "HSCUL/[~0.3]@hahn-schickard/stable",
         "Variant_Visitor/[~0.1]@hahn-schickard/stable",
@@ -20,12 +19,13 @@ class PackageConan(ConanFile):
     ]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
-               "fPIC": [True, False]}
+               "fPIC": [True, False],
+               "historization": [True, False]}
     default_options = {"open62541:cpp_compatible": True,
                        "open62541:multithreading": "Threadsafe",
-                       "open62541:historize": True,
                        "shared": True,
-                       "fPIC": True}
+                       "fPIC": True,
+                       "historization": False}
     default_user = "Hahn-Schickard"
     exports_sources = [
         "cmake*",
@@ -42,6 +42,11 @@ class PackageConan(ConanFile):
     ]
     _cmake = None
     generators = ['cmake', 'cmake_paths', 'cmake_find_package']
+
+    def requirements(self):
+        if self.options.historization:
+            self.requires("OODD/[~0.1]@hahn-schickard/stable")
+            self.options["open62541"].historize = True
 
     @property
     def cwd(self):
@@ -64,6 +69,7 @@ class PackageConan(ConanFile):
         self._cmake.definitions['STATIC_CODE_ANALYSIS'] = False
         self._cmake.definitions['RUN_TESTS'] = False
         self._cmake.definitions['USE_CONAN'] = True
+        self._cmake.definitions['HISTORIZATION'] = self.options.historization
         self._cmake.configure()
         return self._cmake
 

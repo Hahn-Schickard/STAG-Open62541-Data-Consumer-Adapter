@@ -2,7 +2,9 @@
 #define __DCAI_OPEN62541_SERVER_CONFIGURATION_HPP_
 
 #include "HaSLL/Logger.hpp"
+#ifdef UA_ENABLE_HISTORIZING
 #include "Historizer.hpp"
+#endif // UA_ENABLE_HISTORIZING
 
 #include <memory>
 #include <open62541/server.h>
@@ -20,13 +22,17 @@ struct Configuration {
   ~Configuration() = default;
 
   std::unique_ptr<UA_ServerConfig> getConfig();
+#ifdef UA_ENABLE_HISTORIZING
   std::unique_ptr<Historizer> obtainHistorizer();
+#endif // UA_ENABLE_HISTORIZING
 
 private:
   Configuration(bool basic);
 
   HaSLI::LoggerPtr logger_;
+#ifdef UA_ENABLE_HISTORIZING
   std::unique_ptr<Historizer> historizer_;
+#endif // UA_ENABLE_HISTORIZING
   std::unique_ptr<UA_ServerConfig> configuration_;
 };
 } // namespace open62541

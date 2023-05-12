@@ -7,21 +7,21 @@
     "app_info": {
         "applicationName": {
             "locale": "en",
-            "text": "open62541-based OPC UA Application"
+            "text": "STAG OPC UA Server"
         },
         "applicationType": "Server",
-        "applicationUri": "urn:open62541.server.application",
+        "applicationUri": "urn:stag.opcua_dca.server",
         "discoveryProfileUri": "",
         "gatewayServerUri": "",
-        "productUri": "http://open62541.org"
+        "productUri": "http://stag.hahn-schickard.de/"
     },
     "build_info": {
-        "buildDate": 132303066139827310,
-        "buildNumber": "Apr  2 2020 14:52:14",
-        "manufacturerName": "open62541",
-        "productName": "open62541 OPC UA Server",
-        "productUri": "http://open62541.org",
-        "softwareVersion": "0.0.0-rc"
+        "buildDate": 133275739310888920,
+        "buildNumber": "May  3 2023 09:52",
+        "manufacturerName": "Hahn-Schickard",
+        "productName": "STAG open62541 Data Consumer Adapter",
+        "productUri": "http://stag.hahn-schickard.de/",
+        "softwareVersion": "0.2.0-rc"
     },
     "discovery": {
         "cleanupTimeout": 0,

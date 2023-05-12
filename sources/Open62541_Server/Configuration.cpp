@@ -194,7 +194,7 @@ Configuration::Configuration(const string& filepath) : Configuration(true) {
                    "an exception: {}",
         ex.what());
   }
-#endif
+#endif // UA_ENABLE_HISTORIZING
 
   configuration_->maxMonitoredItems =
       config.monitored_items_limits.max_monitored_items;
@@ -243,7 +243,10 @@ unique_ptr<UA_ServerConfig> Configuration::getConfig() {
   return move(configuration_);
 }
 
+#ifdef UA_ENABLE_HISTORIZING
 unique_ptr<Historizer> Configuration::obtainHistorizer() {
   return move(historizer_);
 }
+#endif // UA_ENABLE_HISTORIZING
+
 } // namespace open62541

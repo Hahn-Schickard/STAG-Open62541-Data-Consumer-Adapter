@@ -28,6 +28,7 @@ endif()
 
 #@+ ====================== User CMAKE_OPTIONS configuration ========================
 # User defined options and cmake variables are set here
+option(HISTORIZATION "Enable historization service, required open62541 with defined UA_ENABLE_HISTORIZING macro value" OFF)
 #@- ===================== END OF USER CONFIGURATION ================================
 
 #@+ ==================== User CMAKE_INCLUDES configuration =======================
@@ -38,7 +39,6 @@ endif()
 list(APPEND DEPENDENCIES_LIST
             HaSLL
             HSCUL
-            OODD
             Variant_Visitor
             Data_Consumer_Adapter_Interface
             open62541
@@ -46,6 +46,9 @@ list(APPEND DEPENDENCIES_LIST
             date
             Threads
 )
+if(HISTORIZATION)
+        list(APPEND DEPENDENCIES_LIST OODD)
+endif()
 #@- ========================= END OF USER CONFIGURATION ============================
 
 FIND_INSTALLED_DEPENDENCIES("${DEPENDENCIES_LIST}")
