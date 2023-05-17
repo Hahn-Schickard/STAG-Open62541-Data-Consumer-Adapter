@@ -83,11 +83,15 @@ UA_StatusCode NodeCallbackHandler::removeNodeCallbacks(
   return status;
 }
 
-UA_StatusCode NodeCallbackHandler::readNodeValue(UNUSED(UA_Server* server),
-    UNUSED(const UA_NodeId* sessionId), UNUSED(void* sessionContext),
-    const UA_NodeId* node_id, UNUSED(void* nodeContext),
-    UNUSED(UA_Boolean includeSourceTimeStamp),
-    UNUSED(const UA_NumericRange* range), UA_DataValue* value) {
+UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
+    [[maybe_unused]] UA_Server* server,
+    [[maybe_unused]] const UA_NodeId* session_id,
+    [[maybe_unused]] void* session_context, 
+    const UA_NodeId* node_id,
+    [[maybe_unused]] void* node_context,
+    [[maybe_unused]] UA_Boolean include_source_time_stamp,
+    [[maybe_unused]] const UA_NumericRange* range, 
+    UA_DataValue* value) { // clang-format on
   UA_StatusCode status = UA_STATUSCODE_BADNOTREADABLE;
 
   auto it = node_calbacks_map_.find(*node_id);
@@ -202,10 +206,14 @@ UA_StatusCode NodeCallbackHandler::readNodeValue(UNUSED(UA_Server* server),
   return status;
 }
 
-UA_StatusCode NodeCallbackHandler::writeNodeValue(UNUSED(UA_Server* server),
-    UNUSED(const UA_NodeId* sessionId), UNUSED(void* sessionContext),
-    const UA_NodeId* node_id, UNUSED(void* nodeContext),
-    UNUSED(const UA_NumericRange* range), const UA_DataValue* value) {
+UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
+    [[maybe_unused]] UA_Server* server,
+    [[maybe_unused]] const UA_NodeId* session_id,
+    [[maybe_unused]] void* session_context, 
+    const UA_NodeId* node_id,
+    [[maybe_unused]] void* node_context,
+    [[maybe_unused]] const UA_NumericRange* range, 
+    const UA_DataValue* value) { // clang-format on
   UA_StatusCode status = UA_STATUSCODE_BADNOTWRITABLE;
   auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {

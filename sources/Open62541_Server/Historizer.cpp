@@ -45,8 +45,8 @@ Historizer::Historizer(OODD::DatabaseDriverPtr db) {
   db_ = move(db);
   db_->create("Historized_Nodes",
       vector<Column>{// clang-format off
-            Column("Node_Id", ColumnDataType::TEXT),
-            Column("Last_Updated", ColumnDataType::TIMESTAMP)
+            Column("Node_Id", OODD::DataType::TEXT, ColumnConstraint::PRIMARY_KEY),
+            Column("Last_Updated", OODD::DataType::TIMESTAMP)
       }); // clang-format on
 }
 
@@ -68,10 +68,10 @@ void Historizer::log(SeverityLevel level, string message, Types... args) {
   }
 }
 
-ColumnDataType getColumnDataType(const UA_DataType* variant) {
+OODD::DataType getColumnDataType(const UA_DataType* variant) {
   switch (variant->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-    return ColumnDataType::BOOLEAN;
+    return OODD::DataType::BOOLEAN;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
     [[fallthrough]];
@@ -80,13 +80,13 @@ ColumnDataType getColumnDataType(const UA_DataType* variant) {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    return ColumnDataType::SMALLINT;
+    return OODD::DataType::SMALLINT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    return ColumnDataType::INT;
+    return OODD::DataType::INT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
     [[fallthrough]];
@@ -97,16 +97,16 @@ ColumnDataType getColumnDataType(const UA_DataType* variant) {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    return ColumnDataType::BIGINT;
+    return OODD::DataType::BIGINT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    return ColumnDataType::TIMESTAMP;
+    return OODD::DataType::TIMESTAMP;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    return ColumnDataType::FLOAT;
+    return OODD::DataType::FLOAT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
     [[fallthrough]];
@@ -115,7 +115,7 @@ ColumnDataType getColumnDataType(const UA_DataType* variant) {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-    return ColumnDataType::TEXT;
+    return OODD::DataType::TEXT;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
     [[fallthrough]];
@@ -162,9 +162,9 @@ UA_StatusCode Historizer::registerNodeId(
       }
       db_->create(node_id,
           vector<Column>{// clang-format off
-            Column("Index", ColumnDataType::INT, ColumnModifier::AUTO_INCREMENT),
-            Column("Server_Timestamp", ColumnDataType::TIMESTAMP),
-            Column("Source_Timestamp", ColumnDataType::TIMESTAMP),
+            Column("Index", OODD::DataType::INT, ColumnConstraint::GENERATED_PRIMARY_KEY),
+            Column("Server_Timestamp", OODD::DataType::TIMESTAMP),
+            Column("Source_Timestamp", OODD::DataType::TIMESTAMP),
             Column("Value", getColumnDataType(type))
           }); // clang-format on
 
@@ -230,71 +230,71 @@ string getTimestamp(UA_DateTime timestamp) {
   return result;
 }
 
-DataType getNodeValue(UA_Variant variant) {
+OODD::DataValue getNodeValue(UA_Variant variant) {
   switch (variant.type->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
     auto value = *((bool*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
     auto value = (intmax_t) * ((UA_SByte*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
     auto value = (intmax_t) * ((UA_Int16*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
     auto value = (intmax_t) * ((UA_Int32*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
     auto value = (intmax_t) * ((UA_Int64*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
     auto value = (uintmax_t) * ((UA_Byte*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
     auto value = (uintmax_t) * ((UA_UInt16*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
     auto value = (uintmax_t) * ((UA_UInt32*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
     auto value = (uintmax_t) * ((UA_UInt64*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
     auto value = getTimestamp(*((UA_DateTime*)(variant.data)));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
     auto status_code = UA_StatusCode_name(*((UA_StatusCode*)(variant.data)));
     auto value = string(status_code);
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
     auto value = *((UA_Float*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
     auto value = *((UA_Double*)(variant.data));
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
     auto byte_string = (UA_ByteString*)(variant.data);
     auto value = vector<uint8_t>(
         byte_string->data, byte_string->data + byte_string->length);
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
     auto* ua_string = (UA_String*)(variant.data);
     auto value = string((char*)ua_string->data, ua_string->length);
-    return DataType(value);
+    return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
     [[fallthrough]];
@@ -475,7 +475,7 @@ UA_StatusCode appendUADataValue(UA_HistoryData* result,
   }
 }
 
-UA_Variant toUAVariant(DataType data) {
+UA_Variant toUAVariant(OODD::DataValue data) {
   UA_Variant result;
   UA_Variant_init(&result);
   match(data, // clang-format off
@@ -511,7 +511,7 @@ UA_Variant toUAVariant(DataType data) {
   return result;
 }
 
-UA_DateTime toUADateTime(DataType data) {
+UA_DateTime toUADateTime(OODD::DataValue data) {
   if (holds_alternative<string>(data)) {
     using namespace date;
     using namespace chrono;
@@ -537,7 +537,7 @@ UA_DateTime toUADateTime(DataType data) {
 
     return UA_DateTime_fromStruct(calendar_time);
   } else {
-    throw domain_error("DataType can not be converted into UA_DateTime. "
+    throw domain_error("OODD::DataValue can not be converted into UA_DateTime. "
                        "It does not contain a DateTime string.");
   }
 }
@@ -707,8 +707,8 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
    * setting any data*/
 }
 
-DataType operator*(const DataType& lhs, const intmax_t& rhs) {
-  DataType result;
+OODD::DataValue operator*(const OODD::DataValue& lhs, const intmax_t& rhs) {
+  OODD::DataValue result;
   match(lhs,
       [&](bool /*value*/) {
         throw logic_error("Can not multiply Boolean value");
@@ -724,8 +724,9 @@ DataType operator*(const DataType& lhs, const intmax_t& rhs) {
   return result;
 }
 
-DataType operator+(const DataType& lhs, const DataType& rhs) {
-  DataType result;
+OODD::DataValue operator+(
+    const OODD::DataValue& lhs, const OODD::DataValue& rhs) {
+  OODD::DataValue result;
   match(lhs,
       [&](bool /*value*/) {
         throw invalid_argument("Can not add to a boolean");
@@ -771,8 +772,9 @@ DataType operator+(const DataType& lhs, const DataType& rhs) {
   return result;
 }
 
-DataType operator-(const DataType& lhs, const DataType& rhs) {
-  DataType result;
+OODD::DataValue operator-(
+    const OODD::DataValue& lhs, const OODD::DataValue& rhs) {
+  OODD::DataValue result;
   match(lhs,
       [&](bool /*value*/) {
         throw invalid_argument("Can not subtract from a boolean");
@@ -822,8 +824,8 @@ DataType operator-(const DataType& lhs, const DataType& rhs) {
   return result;
 }
 
-DataType operator/(const DataType& lhs, const intmax_t& rhs) {
-  DataType result;
+OODD::DataValue operator/(const OODD::DataValue& lhs, const intmax_t& rhs) {
+  OODD::DataValue result;
   match(lhs,
       [&](bool /*value*/) {
         throw logic_error("Can not divide Boolean value");
@@ -849,7 +851,7 @@ vector<ColumnValue> interpolateValues(
 
   auto first_row = first.begin()->second;
   auto second_row = second.begin()->second;
-  DataType first_nearest_value, second_nearest_value;
+  OODD::DataValue first_nearest_value, second_nearest_value;
   string data_point_name;
   // set result timestamp columns and nearest_value DataTypes
   switch (first_row.size()) { // MUST either be equal to 1,2 or 3
@@ -1019,8 +1021,8 @@ UA_StatusCode Historizer::readAndAppendHistory(
        *
        */
       auto timestamp_results = db_->select(toSanitizedString(&node_id), columns,
-          ColumnFilter(FilterType::EQUAL, timestamp), nullopt,
-          "Source_Timestamp");
+          ColumnFilter(FilterType::EQUAL, "Source_Timestamp", timestamp),
+          nullopt, "Source_Timestamp");
 
       if (timestamp_results.empty()) {
         /**
@@ -1030,11 +1032,13 @@ UA_StatusCode Historizer::readAndAppendHistory(
          * point for next
          *
          */
-        auto nearest_before_result = db_->select(toSanitizedString(&node_id),
-            columns, ColumnFilter(FilterType::LESS, timestamp), 1,
-            "Source_Timestamp", true);
+        auto nearest_before_result =
+            db_->select(toSanitizedString(&node_id), columns,
+                ColumnFilter(FilterType::LESS, "Source_Timestamp", timestamp),
+                1, "Source_Timestamp", true);
         auto nearest_after_result = db_->select(toSanitizedString(&node_id),
-            columns, ColumnFilter(FilterType::GREATER, timestamp), 1,
+            columns,
+            ColumnFilter(FilterType::GREATER, "Source_Timestamp", timestamp), 1,
             "Source_Timestamp", false);
         // the following is safe because, indexes are only used to iterate over
         // the results map, so we only need to make sure that they are all

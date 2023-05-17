@@ -8,6 +8,7 @@
 using namespace std;
 using namespace HaSLI;
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 enum class Open62541_Logger {
   NETWORK,
   CHANNEL,
@@ -60,9 +61,7 @@ SeverityLevel getLoggingLevel(UA_LogLevel level) {
   case UA_LogLevel::UA_LOGLEVEL_WARNING: {
     return SeverityLevel::WARNING;
   }
-  default: {
-    return SeverityLevel::ERROR;
-  }
+  default: { return SeverityLevel::ERROR; }
   }
 }
 
@@ -74,7 +73,8 @@ void removeLoggers() {
   }
 }
 
-void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
+// NOLINTNEXTLINE(readability-identifier-naming)
+void HaSLL_Logger_log([[maybe_unused]] void* _logContext, UA_LogLevel level,
     UA_LogCategory category, const char* msg, va_list args) {
   const std::lock_guard<std::mutex> lock(logger_mutex);
 
@@ -147,9 +147,10 @@ void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
   }
 }
 
-void HaSLL_Logger_clear(UNUSED(void* logContext)) {
+void HaSLL_Logger_clear([[maybe_unused]] void* logContext) {
   // Nothing to clear
 }
 
+// NOLINTNEXTLINE
 const UA_Logger HaSLL_Logger_ = {HaSLL_Logger_log, NULL, HaSLL_Logger_clear};
-const UA_Logger* HaSLL_Logger = &HaSLL_Logger_;
+const UA_Logger* HaSLL_Logger = &HaSLL_Logger_; // NOLINT
