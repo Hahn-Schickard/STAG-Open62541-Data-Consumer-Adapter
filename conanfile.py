@@ -25,7 +25,7 @@ class PackageConan(ConanFile):
                        "open62541:multithreading": "Threadsafe",
                        "shared": True,
                        "fPIC": True,
-                       "historization": False}
+                       "historization": True}
     default_user = "Hahn-Schickard"
     exports_sources = [
         "cmake*",
@@ -45,7 +45,7 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         if self.options.historization:
-            self.requires("OODD/[~0.1]@hahn-schickard/stable")
+            self.requires("OODD/[~0.2]@hahn-schickard/stable")
             self.options["open62541"].historize = True
 
     @property
