@@ -24,7 +24,7 @@ UA_DurationRange initDurationRange(UA_Duration min, UA_Duration max) {
 
 Config makeDefaultConfig() {
   // clang-format off
-  UA_ConnectionConfig networking = {0, 65535, 65535, 0, 0};
+  UA_ConnectionConfig networking = {0, 65535, 65535, 0, 0, 0, 0};
   UA_BuildInfo build_info = {
       UA_String_fromChars("http://open62541.org"),
       UA_String_fromChars("open62541"),
@@ -69,7 +69,8 @@ Config makeDefaultConfig() {
       initDurationRange(50.0, 24.0 * 3600.0 * 1000.0),
       initUInt32Range(1, 100)
   };
-  UA_ServerConfig_Discovery discovery = {0, false};
+  UA_MdnsDiscoveryConfiguration mdsnc_config = {UA_STRING_NULL, 0, NULL};
+  UA_ServerConfig_Discovery discovery = {0, false, mdsnc_config, UA_STRING_NULL, 0, NULL};
   UserCredentials user_credentials = {};
   Historization historization = {"PostgreSQL", "", "", 60, false};
 

@@ -35,13 +35,15 @@ Configuration::Configuration(bool basic)
 }
 
 void addSecurityPolicy(UA_ServerConfig* config, SecurityPolicy policy) {
-  auto localCertificate = UA_BYTESTRING_NULL;
-  auto localPrivateKey = UA_BYTESTRING_NULL;
+  auto local_certificate = UA_BYTESTRING_NULL;
+#ifdef UA_ENABLE_ENCRYPTION
+  auto local_private_key = UA_BYTESTRING_NULL;
+#endif // UA_ENABLE_ENCRYPTION
 
   switch (policy) {
   case NONE: {
     auto status =
-        UA_ServerConfig_addSecurityPolicyNone(config, &localCertificate);
+        UA_ServerConfig_addSecurityPolicyNone(config, &local_certificate);
     if (status != UA_STATUSCODE_GOOD) {
       string error_msg = "Failed to set SecurityPolicy#None due to error " +
           string(UA_StatusCode_name(status));
@@ -52,7 +54,7 @@ void addSecurityPolicy(UA_ServerConfig* config, SecurityPolicy policy) {
 #ifdef UA_ENABLE_ENCRYPTION
   case BASIC128_RSA15: {
     UA_ServerConfig_addSecurityPolicyBasic128Rsa15(
-        config, &localCertificate, &localPrivateKey);
+        config, &local_certificate, &local_private_key);
     if (status != UA_STATUSCODE_GOOD) {
       string error_msg =
           "Failed to set SecurityPolicy#Basic128Rsa15 due to error " +
@@ -63,7 +65,7 @@ void addSecurityPolicy(UA_ServerConfig* config, SecurityPolicy policy) {
   }
   case BASIC256: {
     UA_ServerConfig_addSecurityPolicyBasic256(
-        config, &localCertificate, &localPrivateKey);
+        config, &local_certificate, &local_private_key);
     if (status != UA_STATUSCODE_GOOD) {
       string error_msg = "Failed to set SecurityPolicy#Basic256 due to error " +
           string(UA_StatusCode_name(status));
@@ -73,7 +75,7 @@ void addSecurityPolicy(UA_ServerConfig* config, SecurityPolicy policy) {
   }
   case BASIC256_SHA256: {
     UA_ServerConfig_addSecurityPolicyBasic256Sha256(
-        config, &localCertificate, &localPrivateKey);
+        config, &local_certificate, &local_private_key);
     if (status != UA_STATUSCODE_GOOD) {
       string error_msg =
           "Failed to set SecurityPolicy#Aes128Sha256RsaOaep due to error " +
@@ -84,7 +86,7 @@ void addSecurityPolicy(UA_ServerConfig* config, SecurityPolicy policy) {
   }
   case AES128_SHA256_RSAO_AEP: {
     UA_ServerConfig_addSecurityPolicyAes128Sha256RsaOaep(
-        config, &localCertificate, &localPrivateKey);
+        config, &local_certificate, &local_private_key);
     if (status != UA_STATUSCODE_GOOD) {
       string error_msg =
           "Failed to set SecurityPolicy#Aes128Sha256RsaOaep due to error " +
@@ -98,9 +100,9 @@ void addSecurityPolicy(UA_ServerConfig* config, SecurityPolicy policy) {
     UA_StatusCode status;
 #ifdef UA_ENABLE_ENCRYPTION
     status = UA_ServerConfig_addAllSecurityPolicies(
-        config, &localCertificate, &localPrivateKey);
+        config, &local_certificate, &local_private_key);
 #else
-    status = UA_ServerConfig_addSecurityPolicyNone(config, &localCertificate);
+    status = UA_ServerConfig_addSecurityPolicyNone(config, &local_certificate);
 #endif
     if (status != UA_STATUSCODE_GOOD) {
       string error_msg = "Failed to set SecurityPolicy#All due to error " +
