@@ -321,13 +321,20 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
     node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     node_attr.historizing = true;
 #endif // UA_ENABLE_HISTORIZING
-    status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
-        make_shared<CallbackWrapper>(metric->getDataType(),
-            bind(&WritableMetric::getMetricValue, metric.base()),
-            bind(&WritableMetric::setMetricValue, metric.base(),
-                placeholders::_1)));
     UA_DataSource data_source;
-    data_source.read = &NodeCallbackHandler::readNodeValue;
+    if (!metric->isWriteOnly()) {
+      status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
+          make_shared<CallbackWrapper>(metric->getDataType(),
+              bind(&WritableMetric::getMetricValue, metric.base()),
+              bind(&WritableMetric::setMetricValue, metric.base(),
+                  placeholders::_1)));
+      data_source.read = &NodeCallbackHandler::readNodeValue;
+    } else {
+      status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
+          make_shared<CallbackWrapper>(metric->getDataType(), nullptr,
+              bind(&WritableMetric::setMetricValue, metric.base(),
+                  placeholders::_1)));
+    }
     data_source.write = &NodeCallbackHandler::writeNodeValue;
 
     status = UA_Server_addDataSourceVariableNode(server_->getServer(),
