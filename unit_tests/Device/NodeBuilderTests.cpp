@@ -110,9 +110,9 @@ void parseDeviceGroup(Information_Model::DeviceBuilderInterface& builder,
     case 'W':
       (group.has_value()
               ? builder.addWritableMetric(group.value(), name, description,
-                    Types::IM_INDEX, Types::read, Types::write)
+                    Types::IM_INDEX, Types::write, Types::read)
               : builder.addWritableMetric(name, description, Types::IM_INDEX,
-                    Types::read, Types::write));
+                    Types::write, Types::read));
       break;
     default:
       throw "illegal spec";
@@ -316,7 +316,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
     Browse children(ua_server, ref_desc.nodeId.nodeId);
 
     match(
-        element->specific_interface,
+        element->functionality,
         [&](Information_Model::NonemptyDeviceElementGroupPtr group) {
           EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_OBJECT);
           checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_OBJECTTYPE);
@@ -355,6 +355,9 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
           status =
               UA_Server_writeValue(ua_server, ref_desc.nodeId.nodeId, value);
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
+        },
+        [&](Information_Model::NonemptyFunctionPtr) {
+          // @TODO: handle functions here
         });
   }
 

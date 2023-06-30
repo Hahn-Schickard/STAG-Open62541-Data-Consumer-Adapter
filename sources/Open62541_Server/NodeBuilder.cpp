@@ -99,15 +99,19 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(
   logger_->log(SeverityLevel::INFO, "Adding element {} to node {}",
       element->getElementName(), toString(&parent_id));
 
-  match(element->specific_interface,
-      [&](NonemptyDeviceElementGroupPtr group) {
+  match(
+      element->functionality,
+      [&](const NonemptyDeviceElementGroupPtr& group) {
         status = addGroupNode(element, group, parent_id);
       },
-      [&](NonemptyMetricPtr metric) {
+      [&](const NonemptyMetricPtr& metric) {
         status = addReadableNode(element, metric, parent_id);
       },
-      [&](NonemptyWritableMetricPtr metric) {
+      [&](const NonemptyWritableMetricPtr& metric) {
         status = addWritableNode(element, metric, parent_id);
+      },
+      [&](const NonemptyFunctionPtr& function) {
+        // @TODO: build functions here
       });
 
   if (status != UA_STATUSCODE_GOOD) {
@@ -164,7 +168,8 @@ UA_StatusCode NodeBuilder::addFunctionNode(
 
 void setVariant(UA_VariableAttributes& value_attribute, DataVariant variant) {
   // Postcondition: value_attribute.value is non-empty
-  match(variant,
+  match(
+      variant,
       [&](bool value) {
         UA_Variant_setScalarCopy(
             &value_attribute.value, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
