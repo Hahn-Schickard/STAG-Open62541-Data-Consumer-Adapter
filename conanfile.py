@@ -9,13 +9,10 @@ class PackageConan(ConanFile):
     topics = ('stag', 'dca', 'open62541')
     build_requires = 'gtest/[~1.11]'
     requires = [
-        "nlohmann_json/3.11.1",
         "open62541/1.3.4",
         "date/3.0.1",
-        "HaSLL/[~0.3]@hahn-schickard/stable",
-        "HSCUL/[~0.3]@hahn-schickard/stable",
         "Variant_Visitor/[~0.1]@hahn-schickard/stable",
-        "Data_Consumer_Adapter_Interface/[~0.1]@hahn-schickard/stable"
+        "Data_Consumer_Adapter_Interface/[~0.2]@hahn-schickard/stable"
     ]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
