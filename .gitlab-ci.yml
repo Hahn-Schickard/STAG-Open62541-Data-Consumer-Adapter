@@ -23,13 +23,13 @@ check_code_coverage:
 
 format:
   extends: .format
-  image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
-  needs: ["build:debian-bullseye"]
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
+  needs: ["build:debian-buster"]
 
 lint:
   extends: .lint
-  image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:latest
-  needs: ["build:debian-bullseye"]
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
+  needs: ["build:debian-buster"]
 
 document:
   extends: .document
