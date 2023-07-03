@@ -111,7 +111,9 @@ void addSecurityPolicy(UA_ServerConfig* config, SecurityPolicy policy) {
     }
     break;
   }
-  default: { throw Open62541_Config_Exception("Unsupported security policy"); }
+  default: {
+    throw Open62541_Config_Exception("Unsupported security policy");
+  }
   }
 }
 

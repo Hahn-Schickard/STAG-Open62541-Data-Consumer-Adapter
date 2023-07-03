@@ -61,7 +61,9 @@ SeverityLevel getLoggingLevel(UA_LogLevel level) {
   case UA_LogLevel::UA_LOGLEVEL_WARNING: {
     return SeverityLevel::WARNING;
   }
-  default: { return SeverityLevel::ERROR; }
+  default: {
+    return SeverityLevel::ERROR;
+  }
   }
 }
 

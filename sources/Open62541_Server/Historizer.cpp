@@ -393,7 +393,9 @@ vector<string> setColumnNames(UA_TimestampsToReturn timestampsToReturn) {
   }
   case UA_TIMESTAMPSTORETURN_NEITHER:
     [[fallthrough]];
-  default: { break; }
+  default: {
+    break;
+  }
   }
   result.emplace_back("Value");
 
@@ -478,7 +480,8 @@ UA_StatusCode appendUADataValue(UA_HistoryData* result,
 UA_Variant toUAVariant(OODD::DataValue data) {
   UA_Variant result;
   UA_Variant_init(&result);
-  match(data, // clang-format off
+  match(
+      data, // clang-format off
       [&result](bool value) { 
         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BOOLEAN]); 
       },
@@ -709,7 +712,8 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
 
 OODD::DataValue operator*(const OODD::DataValue& lhs, const intmax_t& rhs) {
   OODD::DataValue result;
-  match(lhs,
+  match(
+      lhs,
       [&](bool /*value*/) {
         throw logic_error("Can not multiply Boolean value");
       },
@@ -727,7 +731,8 @@ OODD::DataValue operator*(const OODD::DataValue& lhs, const intmax_t& rhs) {
 OODD::DataValue operator+(
     const OODD::DataValue& lhs, const OODD::DataValue& rhs) {
   OODD::DataValue result;
-  match(lhs,
+  match(
+      lhs,
       [&](bool /*value*/) {
         throw invalid_argument("Can not add to a boolean");
       },
@@ -775,7 +780,8 @@ OODD::DataValue operator+(
 OODD::DataValue operator-(
     const OODD::DataValue& lhs, const OODD::DataValue& rhs) {
   OODD::DataValue result;
-  match(lhs,
+  match(
+      lhs,
       [&](bool /*value*/) {
         throw invalid_argument("Can not subtract from a boolean");
       },
@@ -826,7 +832,8 @@ OODD::DataValue operator-(
 
 OODD::DataValue operator/(const OODD::DataValue& lhs, const intmax_t& rhs) {
   OODD::DataValue result;
-  match(lhs,
+  match(
+      lhs,
       [&](bool /*value*/) {
         throw logic_error("Can not divide Boolean value");
       },
@@ -957,7 +964,9 @@ string toString(DataLocation location) {
   case DataLocation::INTERPOLATED: {
     return "Interpolated";
   }
-  default: { return "Reserved"; }
+  default: {
+    return "Reserved";
+  }
   }
 }
 
