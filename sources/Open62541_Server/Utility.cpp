@@ -57,6 +57,14 @@ string toString(const UA_QualifiedName* name) {
   return result;
 }
 
+UA_String makeUAString(const string& input) {
+  UA_String result;
+  result.length = strlen(input.c_str());
+  result.data = (UA_Byte*)malloc(result.length);
+  memcpy(result.data, input.c_str(), result.length);
+  return result;
+}
+
 StatusCodeNotGood::StatusCodeNotGood(
     const string& msg, const UA_StatusCode& code)
     : runtime_error("Received status code: " +

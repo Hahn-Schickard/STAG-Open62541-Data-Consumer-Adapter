@@ -14,6 +14,7 @@ UA_NodeId toNodeId(Information_Model::DataType type);
 std::string toString(const UA_String* input);
 std::string toString(const UA_NodeId* node_id);
 std::string toString(const UA_QualifiedName* name);
+UA_String makeUAString(const std::string& input);
 
 struct StatusCodeNotGood : public std::runtime_error {
   StatusCodeNotGood(const std::string& msg, const UA_StatusCode& code);
