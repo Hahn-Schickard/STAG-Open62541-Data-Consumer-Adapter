@@ -316,8 +316,8 @@ OODD::DataValue getNodeValue(UA_Variant variant) {
   }
 }
 
-void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
-    const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
+void Historizer::setValue(UA_Server* /*server*/, void* /*hdb_context*/,
+    const UA_NodeId* /*session_id*/, void* /*session_context*/,
     const UA_NodeId* node_id, UA_Boolean historizing,
     const UA_DataValue* value) {
   if (db_) {
@@ -365,9 +365,9 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
   }
 }
 
-void Historizer::dataChanged(UA_Server* server, UA_UInt32 /*monitoredItemId*/,
-    void* /*monitoredItemContext*/, const UA_NodeId* node_id,
-    void* /*nodeContext*/, UA_UInt32 attribute_id, const UA_DataValue* value) {
+void Historizer::dataChanged(UA_Server* server, UA_UInt32 /*monitored_item_id*/,
+    void* /*monitored_item_context*/, const UA_NodeId* node_id,
+    void* /*node_context*/, UA_UInt32 attribute_id, const UA_DataValue* value) {
   if (db_) {
     UA_NodeId* session_id =
         nullptr; // obtain session id, its set to NULL in the
@@ -679,8 +679,8 @@ Rows Historizer::readHistory(
   }
 }
 
-void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
-    const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
+void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
+    const UA_NodeId* /*session_id*/, void* /*session_context*/,
     const UA_RequestHeader* request_header,
     const UA_ReadRawModifiedDetails* history_read_details,
     UA_TimestampsToReturn timestamps_to_return,
@@ -688,7 +688,7 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_HistoryReadValueId* nodes_to_read,
     UA_HistoryReadResponse* response,
     UA_HistoryData* const* const
-        historyData) { // NOLINT parameter name set by open62541
+        history_data) { // NOLINT parameter name set by open62541
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
   if (!release_continuation_points) {
     for (size_t i = 0; i < nodes_to_read_size; ++i) {
@@ -698,7 +698,7 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
             nodes_to_read[i].nodeId, &nodes_to_read[i].continuationPoint,
             &response->results[i].continuationPoint);
         response->results[i].statusCode =
-            expandHistoryResult(historyData[i], history_values);
+            expandHistoryResult(history_data[i], history_values);
       } catch (BadContinuationPoint& ex) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
@@ -713,7 +713,7 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
       }
     }
   } /**
-     * @todo: release response->results[i]->historyData ?
+     * @todo: release response->results[i]->history_data ?
      * as specified in:
      * https://github.com/open62541/open62541/blob/master/include/open62541/plugin/historydatabase.h#L73
      */
@@ -1039,7 +1039,7 @@ UA_StatusCode Historizer::readAndAppendHistory(
     UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestamps_to_return,
     UA_NodeId node_id, const UA_ByteString* /*continuation_point_in*/,
     [[maybe_unused]] UA_ByteString* continuation_point_out,
-    UA_HistoryData* historyData) { // NOLINT
+    UA_HistoryData* history_data) { // NOLINT
   if (db_) {
     auto columns = setColumnNames(timestamps_to_return);
 
@@ -1091,15 +1091,15 @@ UA_StatusCode Historizer::readAndAppendHistory(
         setHistorianBits(&status, DataLocation::RAW);
       }
     }
-    expandHistoryResult(historyData, results);
+    expandHistoryResult(history_data, results);
     return status;
   } else {
     throw DatabaseNotAvailable();
   }
 }
 
-void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
-    const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
+void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdb_context*/,
+    const UA_NodeId* /*session_id*/, void* /*session_context*/,
     const UA_RequestHeader* request_header,
     const UA_ReadAtTimeDetails* history_read_details,
     UA_TimestampsToReturn timestamps_to_return,
@@ -1107,7 +1107,7 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_HistoryReadValueId* nodes_to_read,
     UA_HistoryReadResponse* response,
     UA_HistoryData* const* const
-        historyData) { // NOLINT parameter name set by open62541
+        history_data) { // NOLINT parameter name set by open62541
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
   if (!release_continuation_points) {
     for (size_t i = 0; i < nodes_to_read_size; ++i) {
@@ -1116,7 +1116,7 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
             readAndAppendHistory(history_read_details,
                 request_header->timeoutHint, timestamps_to_return,
                 nodes_to_read[i].nodeId, &nodes_to_read[i].continuationPoint,
-                &response->results[i].continuationPoint, historyData[i]);
+                &response->results[i].continuationPoint, history_data[i]);
       } catch (logic_error& ex) {
         // Target Node Id values can not be interpolated due to mismatching
         // data types or non aggregable data types (text, opaque values,

@@ -38,7 +38,7 @@ struct Historizer {
    *
    */
   UA_StatusCode registerNodeId(
-      UA_Server* server, UA_NodeId nodeId, const UA_DataType* type);
+      UA_Server* server, UA_NodeId node_id, const UA_DataType* type);
 
   /**
    * @brief UA_HistoryDatabase constructor
@@ -58,23 +58,24 @@ private:
    */
   static void clear(UA_HistoryDatabase* database);
 
-  static bool isHistorized(const UA_NodeId* nodeId);
+  static bool isHistorized(const UA_NodeId* node_id);
 
   /**
    * @brief Called when a given node receives new data value.
    *
    * @param server - not used
-   * @param hdbContext - not used
-   * @param sessionId - used to identify the session the value is set for
-   * @param sessionContext - used to get session context if needed
-   * @param nodeId - target node id for which the new data value is set
+   * @param hdb_context - not used
+   * @param session_id - used to identify the session the value is set for
+   * @param session_context - used to get session context if needed
+   * @param node_id - target node id for which the new data value is set
    * @param historizing - nodes historization setting flag, if it false the
    * new value is ignored
    * @param value - new node value to historize
    */
-  static void setValue(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext, const UA_NodeId* nodeId,
-      UA_Boolean historizing, const UA_DataValue* value);
+  static void setValue(UA_Server* server, void* hdb_context,
+      const UA_NodeId* session_id, void* session_context,
+      const UA_NodeId* node_id, UA_Boolean historizing,
+      const UA_DataValue* value);
 
   /**
    * @brief Callback implementation for monitored item data change call
@@ -82,78 +83,78 @@ private:
    * @param server - the parent server, that node exists on
    * @param monitoredItemId - unkown
    * @param monitoredItemContext - not used
-   * @param nodeId - node id, the new value is set for
+   * @param node_id - node id, the new value is set for
    * @param nodeContext - not used
    * @param attributeId - unkown
    * @param value - new node value
    */
-  static void dataChanged(UA_Server* server, UA_UInt32 monitoredItemId,
-      void* monitoredItemContext, const UA_NodeId* nodeId, void* nodeContext,
-      UA_UInt32 attributeId, const UA_DataValue* value);
+  static void dataChanged(UA_Server* server, UA_UInt32 monitored_item_id,
+      void* monitored_item_context, const UA_NodeId* node_id,
+      void* node_context, UA_UInt32 attribute_id, const UA_DataValue* value);
 
   static OODD::Rows readHistory(
-      const UA_ReadRawModifiedDetails* historyReadDetails,
-      UA_UInt32 timeout_hint, UA_TimestampsToReturn timestampsToReturn,
-      UA_NodeId node_id, const UA_ByteString* continuationPoint_IN,
-      UA_ByteString* continuationPoint_OUT);
+      const UA_ReadRawModifiedDetails* history_read_details,
+      UA_UInt32 timeout_hint, UA_TimestampsToReturn timestamps_to_return,
+      UA_NodeId node_id, const UA_ByteString* continuation_point_in,
+      UA_ByteString* continuation_point_out);
 
   /**
    * @brief Called by UA_Server instance when a history read is requested with
    * isRawReadModified set to false
    *
    * @param server - not used
-   * @param hdbContext - not used
-   * @param sessionId -  not used
-   * @param sessionContext -  not used
-   * @param requestHeader -  not used
-   * @param historyReadDetails - specifies which values to return
-   * @param timestampsToReturn - specifies how to format the result
-   * @param releaseContinuationPoints - if true, returns no historic values
-   * @param nodesToReadSize - how many node ids to read
-   * @param nodesToRead - array of node ids to read
+   * @param hdb_context - not used
+   * @param session_id -  not used
+   * @param session_context -  not used
+   * @param request_header -  not used
+   * @param history_read_details - specifies which values to return
+   * @param timestamps_to_return - specifies how to format the result
+   * @param release_continuation_points - if true, returns no historic values
+   * @param nodes_to_read_size - how many node ids to read
+   * @param nodes_to_read - array of node ids to read
    * @param response - used to indicate request success/failure
-   * @param historyData - history result array
+   * @param history_data - history result array
    */
-  static void readRaw(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_RequestHeader* requestHeader,
-      const UA_ReadRawModifiedDetails* historyReadDetails,
-      UA_TimestampsToReturn timestampsToReturn,
-      UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-      const UA_HistoryReadValueId* nodesToRead,
+  static void readRaw(UA_Server* server, void* hdb_context,
+      const UA_NodeId* session_id, void* session_context,
+      const UA_RequestHeader* request_header,
+      const UA_ReadRawModifiedDetails* history_read_details,
+      UA_TimestampsToReturn timestamps_to_return,
+      UA_Boolean release_continuation_points, size_t nodes_to_read_size,
+      const UA_HistoryReadValueId* nodes_to_read,
       UA_HistoryReadResponse* response,
-      UA_HistoryData* const* const historyData);
+      UA_HistoryData* const* const history_data);
 
   static UA_StatusCode readAndAppendHistory(
-      const UA_ReadAtTimeDetails* historyReadDetails, UA_UInt32 timeout_hint,
-      UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
-      const UA_ByteString* continuationPoint_IN,
-      UA_ByteString* continuationPoint_OUT, UA_HistoryData* historyData);
+      const UA_ReadAtTimeDetails* history_read_details, UA_UInt32 timeout_hint,
+      UA_TimestampsToReturn timestamps_to_return, UA_NodeId node_id,
+      const UA_ByteString* continuation_point_in,
+      UA_ByteString* continuation_point_out, UA_HistoryData*);
   /**
    * @brief Not documented and not implemented by open62541
    *
    * @param server - the parent server, that node exists on
-   * @param hdbContext - not used
-   * @param sessionId - used to identify the session
-   * @param sessionContext - used to get session context if needed
-   * @param requestHeader - ua client request header
-   * @param historyReadDetails - specifies how to format the read result
-   * @param timestampsToReturn - specifies which timestamps to return
-   * @param releaseContinuationPoints - unknown @todo: figure this out
-   * @param nodesToReadSize - how many node ids to read
-   * @param nodesToRead - array of node ids to read
+   * @param hdb_context - not used
+   * @param session_id - used to identify the session
+   * @param session_context - used to get session context if needed
+   * @param request_header - ua client request header
+   * @param history_read_details - specifies how to format the read result
+   * @param timestamps_to_return - specifies which timestamps to return
+   * @param release_continuation_points - unknown @todo: figure this out
+   * @param nodes_to_read_size - how many node ids to read
+   * @param nodes_to_read - array of node ids to read
    * @param response - used to indicate request failure
-   * @param historyData - history result
+   * @param history_data - history result
    */
-  static void readAtTime(UA_Server* server, void* hdbContext,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_RequestHeader* requestHeader,
-      const UA_ReadAtTimeDetails* historyReadDetails,
-      UA_TimestampsToReturn timestampsToReturn,
-      UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-      const UA_HistoryReadValueId* nodesToRead,
+  static void readAtTime(UA_Server* server, void* hdb_context,
+      const UA_NodeId* session_id, void* session_context,
+      const UA_RequestHeader* request_header,
+      const UA_ReadAtTimeDetails* history_read_details,
+      UA_TimestampsToReturn timestamps_to_return,
+      UA_Boolean release_continuation_points, size_t nodes_to_read_size,
+      const UA_HistoryReadValueId* nodes_to_read,
       UA_HistoryReadResponse* response,
-      UA_HistoryData* const* const historyData);
+      UA_HistoryData* const* const history_data);
 
   template <typename... Types>
   static void log(
