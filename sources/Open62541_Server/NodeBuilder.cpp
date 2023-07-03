@@ -271,7 +271,8 @@ UA_StatusCode NodeBuilder::addReadableNode(
 #endif // UA_ENABLE_HISTORIZING
     status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
         make_shared<CallbackWrapper>(metric->getDataType(),
-            bind(&Metric::getMetricValue, metric.base())));
+            (CallbackWrapper::ReadCallback)bind(
+                &Metric::getMetricValue, metric.base())));
     checkStatusCode("While setting readable metric callbacks", status);
 
     UA_DataSource data_source;
@@ -329,14 +330,17 @@ UA_StatusCode NodeBuilder::addWritableNode(
     if (!metric->isWriteOnly()) {
       status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
           make_shared<CallbackWrapper>(metric->getDataType(),
-              bind(&WritableMetric::getMetricValue, metric.base()),
-              bind(&WritableMetric::setMetricValue, metric.base(),
+              (CallbackWrapper::ReadCallback)bind(
+                  &WritableMetric::getMetricValue, metric.base()),
+              (CallbackWrapper::WriteCallback)bind(
+                  &WritableMetric::setMetricValue, metric.base(),
                   placeholders::_1)));
       data_source.read = &NodeCallbackHandler::readNodeValue;
     } else {
       status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
-          make_shared<CallbackWrapper>(metric->getDataType(), nullptr,
-              bind(&WritableMetric::setMetricValue, metric.base(),
+          make_shared<CallbackWrapper>(metric->getDataType(),
+              (CallbackWrapper::WriteCallback)bind(
+                  &WritableMetric::setMetricValue, metric.base(),
                   placeholders::_1)));
       data_source.read = nullptr;
     }

@@ -17,16 +17,30 @@ namespace open62541 {
 struct CallbackWrapper {
   using ReadCallback = std::function<Information_Model::DataVariant()>;
   using WriteCallback = std::function<void(Information_Model::DataVariant)>;
+  using ExecuteCallback =
+      std::function<void(Information_Model::Function::Parameters)>;
+  using CallCallback = std::function<Information_Model::DataVariant(
+      Information_Model::Function::Parameters)>;
 
-  const Information_Model::DataType data_type_;
-  ReadCallback readable_;
-  std::optional<WriteCallback> writable_;
+  const Information_Model::DataType data_type_ =
+      Information_Model::DataType::UNKNOWN;
+  const ReadCallback readable_ = nullptr;
+  const WriteCallback writable_ = nullptr;
+  const ExecuteCallback executable_ = nullptr;
+  const CallCallback callable_ = nullptr;
 
-  CallbackWrapper();
+  CallbackWrapper() = default;
   CallbackWrapper(
       Information_Model::DataType type, const ReadCallback& read_callback);
+  CallbackWrapper(
+      Information_Model::DataType type, const WriteCallback& write_callback);
   CallbackWrapper(Information_Model::DataType type,
       const ReadCallback& read_callback, const WriteCallback& write_callback);
+  CallbackWrapper(Information_Model::DataType type,
+      const ExecuteCallback& execute_callback);
+  CallbackWrapper(Information_Model::DataType type,
+      const ExecuteCallback& execute_callback,
+      const CallCallback& cancel_callback);
 };
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 

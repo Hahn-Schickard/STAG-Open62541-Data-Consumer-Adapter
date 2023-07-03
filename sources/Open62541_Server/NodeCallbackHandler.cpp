@@ -10,25 +10,26 @@ bool operator==(const UA_NodeId& lhs, const UA_NodeId& rhs) {
 }
 
 namespace open62541 {
-CallbackWrapper::CallbackWrapper()
-    : CallbackWrapper(DataType::UNKNOWN, nullptr, nullptr) {}
-
 CallbackWrapper::CallbackWrapper(
     DataType type, const ReadCallback& read_callback)
-    : CallbackWrapper(type, read_callback, nullptr) {} // NOLINT
+    : data_type_(type), readable_(read_callback) {}
+
+CallbackWrapper::CallbackWrapper(
+    DataType type, const WriteCallback& write_callback)
+    : data_type_(type), writable_(write_callback) {}
 
 CallbackWrapper::CallbackWrapper(DataType type,
     const ReadCallback& read_callback, const WriteCallback& write_callback)
-    : data_type_(type) {
-  if (read_callback) {
-    readable_ = read_callback;
-  }
-  if (write_callback) {
-    writable_ = write_callback;
-  } else {
-    writable_ = nullopt;
-  }
-}
+    : data_type_(type), readable_(read_callback), writable_(write_callback) {}
+
+CallbackWrapper::CallbackWrapper(
+    Information_Model::DataType type, const ExecuteCallback& execute_callback)
+    : data_type_(type), executable_(execute_callback) {}
+
+CallbackWrapper::CallbackWrapper(Information_Model::DataType type,
+    const ExecuteCallback& execute_callback, const CallCallback& call_callback)
+    : data_type_(type), executable_(execute_callback),
+      callable_(call_callback) {}
 
 void NodeCallbackHandler::initialise(const UA_Logger* logger) {
   logger_ = logger;
@@ -102,94 +103,102 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
     UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     auto callback_wrapper = it->second;
     try {
-      auto variant_value = callback_wrapper->readable_();
-      match(
-          variant_value,
-          [&](bool boolean_value) {
-            if (callback_wrapper->data_type_ == DataType::BOOLEAN) {
-              UA_Variant_setScalarCopy(
-                  &value->value, &boolean_value, &UA_TYPES[UA_TYPES_BOOLEAN]);
-            } else {
-              throw runtime_error("Tried to read a Boolean data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](uintmax_t integer_value) {
-            if (callback_wrapper->data_type_ == DataType::UNSIGNED_INTEGER) {
-              UA_Variant_setScalarCopy(
-                  &value->value, &integer_value, &UA_TYPES[UA_TYPES_uintmax]);
-            } else {
-              throw runtime_error("Tried to read an Integer data type "
-                                  "when node data type is:" +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](intmax_t long_value) {
-            if (callback_wrapper->data_type_ == DataType::INTEGER) {
-              UA_Variant_setScalarCopy(
-                  &value->value, &long_value, &UA_TYPES[UA_TYPES_intmax]);
-            } else {
-              throw runtime_error("Tried to read a Long data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](double double_value) {
-            if (callback_wrapper->data_type_ == DataType::DOUBLE) {
-              UA_Variant_setScalarCopy(
-                  &value->value, &double_value, &UA_TYPES[UA_TYPES_DOUBLE]);
-            } else {
-              throw runtime_error("Tried to read a Double data type "
-                                  "when node data type is:" +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](DateTime time_value) {
-            if (callback_wrapper->data_type_ == DataType::TIME) {
-              UA_DateTime date_time =
-                  UA_DateTime_fromUnixTime(time_value.getValue());
-              UA_Variant_setScalarCopy(
-                  &value->value, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
-            } else {
-              throw runtime_error("Tried to read a Time data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](vector<uint8_t> opaque_value) {
-            if (callback_wrapper->data_type_ == DataType::OPAQUE) {
-              UA_ByteString byte_string;
-              byte_string.length = opaque_value.size();
-              byte_string.data = (UA_Byte*)malloc(byte_string.length);
-              memcpy(byte_string.data, opaque_value.data(), byte_string.length);
-              UA_Variant_setScalarCopy(
-                  &value->value, &byte_string, &UA_TYPES[UA_TYPES_BYTESTRING]);
-              UA_String_clear(&byte_string);
-            } else {
-              throw runtime_error("Tried to read an Opaque data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](const string& string_value) {
-            if (callback_wrapper->data_type_ == DataType::STRING) {
-              UA_String open62541_string;
-              open62541_string.length = strlen(string_value.c_str());
-              open62541_string.data = (UA_Byte*)malloc(open62541_string.length);
-              memcpy(open62541_string.data, string_value.c_str(),
-                  open62541_string.length);
-              UA_Variant_setScalarCopy(
-                  &value->value, &open62541_string, &UA_TYPES[UA_TYPES_STRING]);
-              UA_String_clear(&open62541_string);
-            } else {
-              throw runtime_error("Tried to read a String data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          });
-      value->hasValue = true;
-      status = UA_STATUSCODE_GOOD;
+      if (callback_wrapper->readable_) {
+        auto variant_value = callback_wrapper->readable_();
+        match(
+            variant_value,
+            [&](bool boolean_value) {
+              if (callback_wrapper->data_type_ == DataType::BOOLEAN) {
+                UA_Variant_setScalarCopy(
+                    &value->value, &boolean_value, &UA_TYPES[UA_TYPES_BOOLEAN]);
+              } else {
+                throw runtime_error("Tried to read a Boolean data type "
+                                    "when node data type is: " +
+                    toString(callback_wrapper->data_type_));
+              }
+            },
+            [&](uintmax_t integer_value) {
+              if (callback_wrapper->data_type_ == DataType::UNSIGNED_INTEGER) {
+                UA_Variant_setScalarCopy(
+                    &value->value, &integer_value, &UA_TYPES[UA_TYPES_uintmax]);
+              } else {
+                throw runtime_error("Tried to read an Integer data type "
+                                    "when node data type is:" +
+                    toString(callback_wrapper->data_type_));
+              }
+            },
+            [&](intmax_t long_value) {
+              if (callback_wrapper->data_type_ == DataType::INTEGER) {
+                UA_Variant_setScalarCopy(
+                    &value->value, &long_value, &UA_TYPES[UA_TYPES_intmax]);
+              } else {
+                throw runtime_error("Tried to read a Long data type "
+                                    "when node data type is: " +
+                    toString(callback_wrapper->data_type_));
+              }
+            },
+            [&](double double_value) {
+              if (callback_wrapper->data_type_ == DataType::DOUBLE) {
+                UA_Variant_setScalarCopy(
+                    &value->value, &double_value, &UA_TYPES[UA_TYPES_DOUBLE]);
+              } else {
+                throw runtime_error("Tried to read a Double data type "
+                                    "when node data type is:" +
+                    toString(callback_wrapper->data_type_));
+              }
+            },
+            [&](DateTime time_value) {
+              if (callback_wrapper->data_type_ == DataType::TIME) {
+                UA_DateTime date_time =
+                    UA_DateTime_fromUnixTime(time_value.getValue());
+                UA_Variant_setScalarCopy(
+                    &value->value, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
+              } else {
+                throw runtime_error("Tried to read a Time data type "
+                                    "when node data type is: " +
+                    toString(callback_wrapper->data_type_));
+              }
+            },
+            [&](vector<uint8_t> opaque_value) {
+              if (callback_wrapper->data_type_ == DataType::OPAQUE) {
+                UA_ByteString byte_string;
+                byte_string.length = opaque_value.size();
+                byte_string.data = (UA_Byte*)malloc(byte_string.length);
+                memcpy(
+                    byte_string.data, opaque_value.data(), byte_string.length);
+                UA_Variant_setScalarCopy(&value->value, &byte_string,
+                    &UA_TYPES[UA_TYPES_BYTESTRING]);
+                UA_String_clear(&byte_string);
+              } else {
+                throw runtime_error("Tried to read an Opaque data type "
+                                    "when node data type is: " +
+                    toString(callback_wrapper->data_type_));
+              }
+            },
+            [&](const string& string_value) {
+              if (callback_wrapper->data_type_ == DataType::STRING) {
+                UA_String open62541_string;
+                open62541_string.length = strlen(string_value.c_str());
+                open62541_string.data =
+                    (UA_Byte*)malloc(open62541_string.length);
+                memcpy(open62541_string.data, string_value.c_str(),
+                    open62541_string.length);
+                UA_Variant_setScalarCopy(&value->value, &open62541_string,
+                    &UA_TYPES[UA_TYPES_STRING]);
+                UA_String_clear(&open62541_string);
+              } else {
+                throw runtime_error("Tried to read a String data type "
+                                    "when node data type is: " +
+                    toString(callback_wrapper->data_type_));
+              }
+            });
+        value->hasValue = true;
+        status = UA_STATUSCODE_GOOD;
+      } else {
+        string error_msg = "Node " + toString(node_id) +
+            " does not have any registered read callback!";
+        UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      }
     } catch (const runtime_error& error) {
       string error_msg = "Type missmatch error occurred while reading Node " +
           toString(node_id) + " Error message: " + error.what();
@@ -222,11 +231,10 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
   auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     auto callback_wrapper = it->second;
-    if (callback_wrapper->writable_.has_value()) {
+    if (callback_wrapper->writable_) {
       string trace_msg = "Calling write callback for Node " + toString(node_id);
       UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
-      // NOLINTNEXTLINE(bugprone-unchecked-optional-access), checked in line 225
-      auto write_cb = callback_wrapper->writable_.value();
+      auto write_cb = callback_wrapper->writable_;
       switch (value->value.type->typeKind) {
       case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
         bool boolean_value = *((bool*)(value->value.data));
