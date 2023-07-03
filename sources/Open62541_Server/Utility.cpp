@@ -57,4 +57,22 @@ string toString(const UA_QualifiedName* name) {
   return result;
 }
 
+StatusCodeNotGood::StatusCodeNotGood(
+    const string msg, const UA_StatusCode& code)
+    : runtime_error("Received status code: " +
+          string(UA_StatusCode_name(code)) + (msg.empty() ? "" : " " + msg)),
+      status(code) {}
+
+void checkStatusCode(
+    const std::string msg, const UA_StatusCode& status, bool uncertain_is_bad) {
+  if (UA_StatusCode_isBad(status) ||
+      (UA_StatusCode_isUncertain(status) && uncertain_is_bad)) {
+    throw StatusCodeNotGood(msg, status);
+  }
+}
+
+void checkStatusCode(const UA_StatusCode& status, bool uncertain_is_bad) {
+  checkStatusCode(string(), status, uncertain_is_bad);
+}
+
 } // namespace open62541
