@@ -20,6 +20,7 @@ NodeBuilder::NodeBuilder(const shared_ptr<Open62541Server>& server)
 
 NodeBuilder::~NodeBuilder() { cleanup(); }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void NodeBuilder::cleanup() { NodeCallbackHandler::destroy(); }
 
 pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
