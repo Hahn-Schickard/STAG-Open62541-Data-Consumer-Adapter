@@ -731,8 +731,8 @@ OODD::DataValue operator*(const OODD::DataValue& lhs, const intmax_t& rhs) {
       },
       [&](uintmax_t value) { result = value * abs(rhs); },
       [&](intmax_t value) { result = value * rhs; },
-      [&](float value) { result = (float)(value * rhs); },
-      [&](double value) { result = (double)(value * rhs); },
+      [&](float value) { result = value * (float)(rhs); },
+      [&](double value) { result = value * (double)(rhs); },
       [&](const string& /*value*/) {
         throw logic_error("Can not multiply Text");
       },
@@ -853,10 +853,10 @@ OODD::DataValue operator/(const OODD::DataValue& lhs, const intmax_t& rhs) {
       [&](bool /*value*/) {
         throw logic_error("Can not divide Boolean value");
       },
-      [&](uintmax_t value) { result = (uintmax_t)(value / rhs); },
-      [&](intmax_t value) { result = (intmax_t)(value / rhs); },
-      [&](float value) { result = (float)(value / rhs); },
-      [&](double value) { result = (double)(value / rhs); },
+      [&](uintmax_t value) { result = value / (uintmax_t)(rhs); },
+      [&](intmax_t value) { result = value / rhs; },
+      [&](float value) { result = value / (float)(rhs); },
+      [&](double value) { result = value / (double)(rhs); },
       [&](const string& /*value*/) {
         throw logic_error("Can not divide Text");
       },
