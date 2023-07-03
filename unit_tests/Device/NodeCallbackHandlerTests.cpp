@@ -36,26 +36,26 @@ TEST_F(NodeCallbackHandlerTests, addCallbackNull) {
 
   struct {
     using Value_Type = ...; // The type that the tests use to specify values.
-    static constexpr size_t num_values; // >= 2
+    static constexpr size_t NUM_VALUES; // >= 2
     static Value_Type value(size_t i);
-      // precondition: i <= num_values
+      // precondition: i <= NUM_VALUES
       // value(i1) and value(i2) are semantically equal iff i1=i2
 
-    static constexpr Information_Model::DataType im_type;
+    static constexpr Information_Model::DataType IM_TYPE;
       // The index into Information_Model::Data_Variant
       // In the following, we use IM_Type to refer to
       // std::variant_alternative_t<
-      //   static_cast<size_t>(im_type),
+      //   static_cast<size_t>(IM_TYPE),
       //   Information_Model::DataVariant>
 
     using UA_Read_Type = ...; // The type used by open62541 when reading
-    static constexpr size_t ua_read_type; // The respective index into UA_TYPES
+    static constexpr size_t UA_READ_TYPE; // The respective index into UA_TYPES
     using UA_Write_Type = ...;
       // A possibly different type used by open62541 when writing
-    static constexpr size_t ua_write_type; // The respective index into UA_TYPES
+    static constexpr size_t UA_WRITE_TYPE; // The respective index into UA_TYPES
 
-    static IM_Type Value2IM(Value_Type);
-    static UA_Write_Type Value2Write(Value_Type);
+    static IM_Type value2IM(Value_Type);
+    static UA_Write_Type value2Write(Value_Type);
     static bool equal(const IM_Type &, const UA_Read_Type &);
   }
 */
@@ -65,17 +65,17 @@ template <class Super, // Information_Model type, also used for reading
     Information_Model::DataType im_type_, size_t ua_super_type,
     size_t ua_sub_type>
 struct SubtypeConversion {
-  static constexpr size_t num_values = 2;
+  static constexpr size_t NUM_VALUES = 2;
 
-  static constexpr Information_Model::DataType im_type = im_type_;
+  static constexpr Information_Model::DataType IM_TYPE = im_type_;
 
   using UA_Read_Type = Super;
   using UA_Write_Type = Sub;
-  static constexpr size_t ua_read_type = ua_super_type;
-  static constexpr size_t ua_write_type = ua_sub_type;
+  static constexpr size_t UA_READ_TYPE = ua_super_type;
+  static constexpr size_t UA_WRITE_TYPE = ua_sub_type;
 
-  static Super Value2IM(Sub x) { return x; }
-  static UA_Write_Type Value2Write(Sub x) { return x; }
+  static Super value2IM(Sub x) { return x; }
+  static UA_Write_Type value2Write(Sub x) { return x; }
   static bool equal(const Super& v1, const UA_Read_Type& v2) {
     return v1 == v2;
   }
@@ -101,7 +101,7 @@ struct FloatConversion
 
 struct StringConversion {
   using Value_Type = const char*;
-  static constexpr size_t num_values = 3;
+  static constexpr size_t NUM_VALUES = 3;
   static Value_Type value(size_t i) {
     switch (i) {
     case 0:
@@ -115,16 +115,16 @@ struct StringConversion {
     }
   }
 
-  static constexpr Information_Model::DataType im_type =
+  static constexpr Information_Model::DataType IM_TYPE =
       Information_Model::DataType::STRING;
 
   using UA_Read_Type = UA_String;
   using UA_Write_Type = UA_String;
-  static constexpr size_t ua_read_type = UA_TYPES_STRING;
-  static constexpr size_t ua_write_type = UA_TYPES_STRING;
+  static constexpr size_t UA_READ_TYPE = UA_TYPES_STRING;
+  static constexpr size_t UA_WRITE_TYPE = UA_TYPES_STRING;
 
-  static std::string Value2IM(Value_Type x) { return x; }
-  static UA_Write_Type Value2Write(Value_Type s) { return UA_STRING((char*)s); }
+  static std::string value2IM(Value_Type x) { return x; }
+  static UA_Write_Type value2Write(Value_Type s) { return UA_STRING((char*)s); }
   static bool equal(const std::string& v1, const UA_Read_Type& v2) {
     return (v1.length() == v2.length) &&
         (0 == memcmp(v1.data(), v2.data, v2.length));
@@ -133,23 +133,23 @@ struct StringConversion {
 
 struct TimeConversion {
   using Value_Type = std::time_t;
-  static constexpr size_t num_values = 2;
+  static constexpr size_t NUM_VALUES = 2;
   static Value_Type value(size_t i) {
     return std::chrono::system_clock::to_time_t(i == 0
             ? std::chrono::time_point<std::chrono::system_clock>::min()
             : std::chrono::time_point<std::chrono::system_clock>::max());
   }
 
-  static constexpr Information_Model::DataType im_type =
+  static constexpr Information_Model::DataType IM_TYPE =
       Information_Model::DataType::TIME;
 
   using UA_Read_Type = UA_DateTime;
   using UA_Write_Type = UA_DateTime;
-  static constexpr size_t ua_read_type = UA_TYPES_DATETIME;
-  static constexpr size_t ua_write_type = UA_TYPES_DATETIME;
+  static constexpr size_t UA_READ_TYPE = UA_TYPES_DATETIME;
+  static constexpr size_t UA_WRITE_TYPE = UA_TYPES_DATETIME;
 
-  static Information_Model::DateTime Value2IM(Value_Type t) { return t; }
-  static UA_Write_Type Value2Write(Value_Type t) {
+  static Information_Model::DateTime value2IM(Value_Type t) { return t; }
+  static UA_Write_Type value2Write(Value_Type t) {
     return UA_DateTime_fromUnixTime(t);
   }
   static bool equal(
@@ -160,7 +160,7 @@ struct TimeConversion {
 
 struct ByteStringConversion {
   using Value_Type = std::string;
-  static constexpr size_t num_values = 4;
+  static constexpr size_t NUM_VALUES = 4;
   static Value_Type value(size_t i) {
     switch (i) {
     case 0:
@@ -176,22 +176,22 @@ struct ByteStringConversion {
     }
   }
 
-  static constexpr Information_Model::DataType im_type =
+  static constexpr Information_Model::DataType IM_TYPE =
       Information_Model::DataType::OPAQUE;
 
   using UA_Read_Type = UA_ByteString;
   using UA_Write_Type = UA_ByteString;
-  static constexpr size_t ua_read_type = UA_TYPES_BYTESTRING;
-  static constexpr size_t ua_write_type = UA_TYPES_BYTESTRING;
+  static constexpr size_t UA_READ_TYPE = UA_TYPES_BYTESTRING;
+  static constexpr size_t UA_WRITE_TYPE = UA_TYPES_BYTESTRING;
 
-  static std::vector<uint8_t> Value2IM(Value_Type s) {
+  static std::vector<uint8_t> value2IM(const Value_Type& s) {
     std::vector<uint8_t> ret;
     for (auto c : s) {
       ret.push_back(c);
     }
     return ret;
   }
-  static UA_Write_Type Value2Write(Value_Type s) {
+  static UA_Write_Type value2Write(const Value_Type& s) {
     UA_ByteString ret;
     EXPECT_EQ(UA_STATUSCODE_GOOD, UA_ByteString_allocBuffer(&ret, s.length()));
     memcpy(ret.data, s.data(), s.length());
@@ -207,25 +207,29 @@ using AllConversions = ::testing::Types<
     IntegralConversion<bool, bool, Information_Model::DataType::BOOLEAN,
         UA_TYPES_BOOLEAN, UA_TYPES_BOOLEAN, true, false>,
     IntegralConversion<intmax_t, int8_t, Information_Model::DataType::INTEGER,
+        // NOLINTNEXTLINE(readability-magic-numbers)
         UA_TYPES_intmax, UA_TYPES_SBYTE, 42, -1>,
     IntegralConversion<uintmax_t, uint8_t,
         Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
-        UA_TYPES_BYTE, 13, 91>,
+        UA_TYPES_BYTE, 13, 91>, // NOLINT(readability-magic-numbers)
     IntegralConversion<intmax_t, int16_t, Information_Model::DataType::INTEGER,
+        // NOLINTNEXTLINE(readability-magic-numbers)
         UA_TYPES_intmax, UA_TYPES_INT16, 42, -1>,
     IntegralConversion<uintmax_t, uint16_t,
         Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
-        UA_TYPES_UINT16, 13, 91>,
+        UA_TYPES_UINT16, 13, 91>, // NOLINT(readability-magic-numbers)
     IntegralConversion<intmax_t, int32_t, Information_Model::DataType::INTEGER,
+        // NOLINTNEXTLINE(readability-magic-numbers)
         UA_TYPES_intmax, UA_TYPES_INT32, 42, -1>,
     IntegralConversion<uintmax_t, uint32_t,
         Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
-        UA_TYPES_UINT32, 13, 91>,
+        UA_TYPES_UINT32, 13, 91>, // NOLINT(readability-magic-numbers)
     IntegralConversion<intmax_t, int64_t, Information_Model::DataType::INTEGER,
+        // NOLINTNEXTLINE(readability-magic-numbers)
         UA_TYPES_intmax, UA_TYPES_INT64, 42, -1>,
     IntegralConversion<uintmax_t, uint64_t,
         Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
-        UA_TYPES_UINT64, 13, 91>,
+        UA_TYPES_UINT64, 13, 91>, // NOLINT(readability-magic-numbers)
     FloatConversion<float, UA_TYPES_FLOAT>,
     FloatConversion<double, UA_TYPES_DOUBLE>,
     IntegralConversion<uintmax_t, UA_StatusCode,
@@ -238,7 +242,7 @@ struct NodeCallbackHandlerDataConversionTests
     : public NodeCallbackHandlerTests {
   using Type = Type_;
 
-  using IM_Type = std::variant_alternative_t<static_cast<size_t>(Type::im_type),
+  using IM_Type = std::variant_alternative_t<static_cast<size_t>(Type::IM_TYPE),
       Information_Model::DataVariant>;
 
   UA_NodeId node1, node2;
@@ -247,14 +251,16 @@ struct NodeCallbackHandlerDataConversionTests
   // the (single) resource that all callbacks use
 
   std::shared_ptr<CallbackWrapper> read_only_callbacks =
-      std::make_shared<CallbackWrapper>(Type::im_type,
+      std::make_shared<CallbackWrapper>(Type::IM_TYPE,
           [this]() -> Information_Model::DataVariant { return im_value; });
 
   std::shared_ptr<CallbackWrapper> read_write_callbacks =
       std::make_shared<CallbackWrapper>(
-          Type::im_type,
+          Type::IM_TYPE,
           [this]() -> Information_Model::DataVariant { return im_value; },
-          [this](Information_Model::DataVariant value) { im_value = value; });
+          [this](const Information_Model::DataVariant& value) {
+            im_value = value;
+          });
 
   NodeCallbackHandlerDataConversionTests() {
     node1 = UA_NODEID_NULL;
@@ -265,12 +271,12 @@ struct NodeCallbackHandlerDataConversionTests
 private:
   Information_Model::DataVariant init_im_value(size_t value_index) {
     return Information_Model::DataVariant(
-        std::in_place_index<static_cast<size_t>(Type::im_type)>,
-        Type::Value2IM(Type::value(value_index)));
+        std::in_place_index<static_cast<size_t>(Type::IM_TYPE)>,
+        Type::value2IM(Type::value(value_index)));
   }
 
   void init_ua_value(UA_DataValue& dst, size_t value_index) {
-    auto ua_val = Type::Value2Write(Type::value(value_index));
+    auto ua_val = Type::value2Write(Type::value(value_index));
     dst.hasValue = true;
     dst.hasStatus = false;
     dst.hasSourceTimestamp = false;
@@ -279,7 +285,7 @@ private:
     dst.hasServerPicoseconds = false;
     EXPECT_EQ(UA_STATUSCODE_GOOD,
         UA_Variant_setScalarCopy(
-            &dst.value, &ua_val, &UA_TYPES[Type::ua_write_type]));
+            &dst.value, &ua_val, &UA_TYPES[Type::UA_WRITE_TYPE]));
   }
 
   UA_StatusCode invoke_read(const UA_NodeId& node, UA_DataValue& ua_value) {
@@ -309,10 +315,10 @@ private:
     EXPECT_EQ(UA_STATUSCODE_GOOD, invoke_read(node, ua_value));
     EXPECT_TRUE(ua_value.hasValue);
     EXPECT_TRUE(UA_Variant_hasScalarType(
-        &ua_value.value, &UA_TYPES[Type::ua_read_type]));
-    for (size_t i = 0; i < Type::num_values; ++i) {
+        &ua_value.value, &UA_TYPES[Type::UA_READ_TYPE]));
+    for (size_t i = 0; i < Type::NUM_VALUES; ++i) {
       EXPECT_EQ(i == nominal_value,
-          Type::equal(Type::Value2IM(Type::value(i)),
+          Type::equal(Type::value2IM(Type::value(i)),
               *((typename Type::UA_Read_Type*)ua_value.value.data)))
           << i << "," << nominal_value;
     }
@@ -325,7 +331,7 @@ public:
   }
 
   void test_read_only_callbacks(const UA_NodeId& node) {
-    for (size_t value = 0; value < Type::num_values; ++value) {
+    for (size_t value = 0; value < Type::NUM_VALUES; ++value) {
       im_value = init_im_value(value);
       check_read(node, value);
     }
@@ -335,7 +341,7 @@ public:
   void test_read_write_callbacks(const UA_NodeId& node) {
     UA_DataValue ua_v;
 
-    for (size_t value = 0; value < Type::num_values; ++value) {
+    for (size_t value = 0; value < Type::NUM_VALUES; ++value) {
       init_ua_value(ua_v, value);
       EXPECT_EQ(UA_STATUSCODE_GOOD, invoke_write(node, ua_v));
 

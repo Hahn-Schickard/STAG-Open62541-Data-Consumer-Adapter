@@ -89,12 +89,12 @@ void Open62541Server::runnable() {
   }
 }
 
-UA_UInt16 Open62541Server::getServerNamespace() {
+UA_UInt16 Open62541Server::getServerNamespace() const {
   return server_namespace_index_;
 }
 
-const UA_Logger* Open62541Server::getServerLogger() {
-  auto config = UA_Server_getConfig(open62541_server_);
+const UA_Logger* Open62541Server::getServerLogger() const {
+  auto* config = UA_Server_getConfig(open62541_server_);
   return &config->logger;
 }
 
@@ -107,9 +107,9 @@ bool Open62541Server::isRunning() {
 
 #ifdef UA_ENABLE_HISTORIZING
 UA_StatusCode Open62541Server::registerForHistorization(
-    UA_NodeId nodeId, const UA_DataType* type) {
+    UA_NodeId node_id, const UA_DataType* type) {
   if (historizer_) {
-    return historizer_->registerNodeId(open62541_server_, nodeId, type);
+    return historizer_->registerNodeId(open62541_server_, node_id, type);
   } else {
     return UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
   }

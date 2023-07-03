@@ -13,11 +13,12 @@ namespace open62541 {
 CallbackWrapper::CallbackWrapper()
     : CallbackWrapper(DataType::UNKNOWN, nullptr, nullptr) {}
 
-CallbackWrapper::CallbackWrapper(DataType type, ReadCallback read_callback)
+CallbackWrapper::CallbackWrapper(
+    DataType type, const ReadCallback& read_callback)
     : CallbackWrapper(type, read_callback, nullptr) {} // NOLINT
 
-CallbackWrapper::CallbackWrapper(
-    DataType type, ReadCallback read_callback, WriteCallback write_callback)
+CallbackWrapper::CallbackWrapper(DataType type,
+    const ReadCallback& read_callback, const WriteCallback& write_callback)
     : data_type_(type) {
   if (read_callback) {
     readable_ = read_callback;
@@ -46,7 +47,7 @@ CallbackWrapperPtr NodeCallbackHandler::findCallbackWrapper(
 }
 
 UA_StatusCode NodeCallbackHandler::addNodeCallbacks(
-    UA_NodeId node_id, CallbackWrapperPtr callback_wrapper) {
+    UA_NodeId node_id, const CallbackWrapperPtr& callback_wrapper) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTSUPPORTED;
   if (!callback_wrapper) {
     UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, "Precondition violated");
@@ -54,7 +55,7 @@ UA_StatusCode NodeCallbackHandler::addNodeCallbacks(
   } else if (!findCallbackWrapper(&node_id)) {
     string trace_msg = "Adding callback_wrapper for Node " + toString(&node_id);
     UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
-    node_calbacks_map_.emplace(node_id, move(callback_wrapper));
+    node_calbacks_map_.emplace(node_id, callback_wrapper);
     status = UA_STATUSCODE_GOOD;
   } else {
     string error_msg =
@@ -83,6 +84,7 @@ UA_StatusCode NodeCallbackHandler::removeNodeCallbacks(
   return status;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
     [[maybe_unused]] UA_Server* server,
     [[maybe_unused]] const UA_NodeId* session_id,
@@ -101,7 +103,8 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
     auto callback_wrapper = it->second;
     try {
       auto variant_value = callback_wrapper->readable_();
-      match(variant_value,
+      match(
+          variant_value,
           [&](bool boolean_value) {
             if (callback_wrapper->data_type_ == DataType::BOOLEAN) {
               UA_Variant_setScalarCopy(
@@ -206,6 +209,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
   return status;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
     [[maybe_unused]] UA_Server* server,
     [[maybe_unused]] const UA_NodeId* session_id,
@@ -218,9 +222,10 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
   auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     auto callback_wrapper = it->second;
-    if (it->second->writable_.has_value()) {
+    if (callback_wrapper->writable_.has_value()) {
       string trace_msg = "Calling write callback for Node " + toString(node_id);
       UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access), checked in line 225
       auto write_cb = callback_wrapper->writable_.value();
       switch (value->value.type->typeKind) {
       case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {

@@ -8,9 +8,9 @@ using namespace HaSLI;
 using namespace std;
 using namespace open62541;
 
-namespace DCAI {
+namespace Data_Consumer_Adapter {
 OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source)
-    : DataConsumerAdapterInterface(event_source, "Open62541 Adapter"), // NOLINT
+    : DCAI(event_source, "Open62541 Adapter"), // NOLINT
       server_(make_shared<Open62541Server>()),
       node_builder_(make_unique<NodeBuilder>(server_)) {}
 
@@ -21,12 +21,11 @@ OpcuaAdapter::OpcuaAdapter(
           make_unique<open62541::Configuration>(config_filepath))),
       node_builder_(make_unique<NodeBuilder>(server_)) {}
 
-void OpcuaAdapter::start() {
+void OpcuaAdapter::start(vector<DevicePtr> devices) {
   if (server_->start()) {
-    DataConsumerAdapterInterface::start();
+    DataConsumerAdapterInterface::start(devices);
   } else {
-    this->logger_->log(
-        SeverityLevel::ERROR, "Failed to initialize OPC UA Adapter!");
+    logger->log(SeverityLevel::ERROR, "Failed to initialize OPC UA Adapter!");
   }
 }
 
@@ -34,29 +33,23 @@ void OpcuaAdapter::stop() {
   if (server_->stop()) {
     DataConsumerAdapterInterface::stop();
   } else {
-    this->logger_->log(
-        SeverityLevel::ERROR, "Failed to initialize OPC UA Adapter!");
+    logger->log(SeverityLevel::ERROR, "Failed to initialize OPC UA Adapter!");
   }
 }
 
-void OpcuaAdapter::handleEvent(shared_ptr<ModelRegistryEvent> event) {
-  if (event) {
-    match(
-        *event,
-        [&](const string& id) {
-          this->logger_->log(SeverityLevel::TRACE,
-              "OPC UA Adapter received DEVICE_REMOVED event for device with id "
-              "{}",
-              id);
-          node_builder_->deleteDeviceNode(id);
-        },
-        [&](NonemptyDevicePtr device) {
-          this->logger_->log(SeverityLevel::TRACE,
-              "OPC UA Adapter received NEW_DEVICE_REGISTERED event for device "
-              "with id",
-              device->getElementId());
-          node_builder_->addDeviceNode(device);
-        });
-  }
+void OpcuaAdapter::registrate(NonemptyDevicePtr device) {
+  logger->log(SeverityLevel::TRACE,
+      "OPC UA Adapter received NEW_DEVICE_REGISTERED event for device "
+      "with id",
+      device->getElementId());
+  node_builder_->addDeviceNode(device);
 }
-} // namespace DCAI
+
+void OpcuaAdapter::deregistrate(const string& device_id) {
+  logger->log(SeverityLevel::TRACE,
+      "OPC UA Adapter received DEVICE_REMOVED event for device with id "
+      "{}",
+      device_id);
+  node_builder_->deleteDeviceNode(device_id);
+}
+} // namespace Data_Consumer_Adapter

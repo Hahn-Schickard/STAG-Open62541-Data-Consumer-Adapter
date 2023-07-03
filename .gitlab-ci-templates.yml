@@ -82,7 +82,22 @@ stages:
 
 .lint:
   extends: .setup
-  dependencies: null
+  stage: check
+  tags:
+    - conan
+  script:
+    - python3 utility/run-clang-tidy.py -build build --all-threads --verbose --export-fixes
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
+  artifacts:
+    when: on_failure
+    name: "Commit:${CI_COMMIT_SHORT_SHA}_Linter_Fixes"
+    paths:
+      - clang-tidy-fixes/
+    expire_in: 1 days
+  allow_failure: true
+
+.format:
+  extends: .setup
   stage: check
   tags:
     - conan
@@ -91,7 +106,7 @@ stages:
   image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
   artifacts:
     when: on_failure
-    name: "Commit:${CI_COMMIT_SHORT_SHA}_Linter_Fixes"
+    name: "Commit:${CI_COMMIT_SHORT_SHA}_Formatter_Fixes"
     paths:
       - clang-format-fixes/
     expire_in: 1 days
@@ -107,7 +122,7 @@ stages:
   artifacts:
     name: "Commit:${CI_COMMIT_SHORT_SHA}_Code_Documentation"
     paths:
-      - docs/code_documentation/
+      - docs/code_documentation/html
     expire_in: 1 days
 
 .package:

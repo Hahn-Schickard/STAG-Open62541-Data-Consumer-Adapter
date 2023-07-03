@@ -24,77 +24,120 @@ UA_DurationRange initDurationRange(UA_Duration min, UA_Duration max) {
 
 Config makeDefaultConfig() {
   // clang-format off
-  UA_ConnectionConfig networking = {0, 65535, 65535, 0, 0, 0, 0};
+  UA_ConnectionConfig networking = {
+    .protocolVersion = 0,
+    .recvBufferSize = 65535, // NOLINT(readability-magic-numbers)
+    .sendBufferSize = 65535, // NOLINT(readability-magic-numbers)
+    .localMaxMessageSize = 0, // unlimited
+    .remoteMaxMessageSize = 0, // unlimited
+    .localMaxChunkCount = 0, // unlimited
+    .remoteMaxChunkCount = 0 // unlimited
+  };
   UA_BuildInfo build_info = {
-      UA_String_fromChars("http://open62541.org"),
-      UA_String_fromChars("open62541"),
-      UA_String_fromChars("open62541 OPC UA Server"),
-      UA_String_fromChars(VERSION(
+      .productUri = UA_String_fromChars("http://open62541.org"),
+      .manufacturerName = UA_String_fromChars("open62541"),
+      .productName = UA_String_fromChars("open62541 OPC UA Server"),
+      .softwareVersion = UA_String_fromChars(VERSION(
           ADAPTER_VERSION_MAJOR, ADAPTER_VERSION_MINOR,
           ADAPTER_VERSION_PATCH, ADAPTER_VERSION_LABEL)),
-      UA_String_fromChars(__DATE__ " " __TIME__), 
-      UA_DateTime_now()
+      .buildNumber = UA_String_fromChars(__DATE__ " " __TIME__), 
+      .buildDate = UA_DateTime_now()
     };
   UA_ApplicationDescription app_info = {
-      UA_String_fromChars("urn:open62541.server.application"),
-      UA_String_fromChars("http://open62541.org"),
-      UA_LOCALIZEDTEXT_ALLOC("en", "open62541-based OPC UA Application"),
-      UA_ApplicationType::UA_APPLICATIONTYPE_SERVER,
-      UA_STRING_NULL,
-      UA_STRING_NULL,
-      0,
-      NULL //NOLINT
+      .applicationUri = UA_String_fromChars(
+        "urn:open62541.server.application"),
+      .productUri = UA_String_fromChars("http://open62541.org"),
+      .applicationName = UA_LOCALIZEDTEXT_ALLOC(
+        "en", "open62541-based OPC UA Application"),
+      .applicationType = 
+        UA_ApplicationType::UA_APPLICATIONTYPE_SERVER,
+      .gatewayServerUri = UA_STRING_NULL,
+      .discoveryProfileUri = UA_STRING_NULL,
+      .discoveryUrlsSize = 0,
+      .discoveryUrls = nullptr
   };
   SecureChannelsLimits secure_channels_limits = {
-      40, (10 * 60 * 1000) /* 10 minutes */
+    // NOLINTNEXTLINE(readability-magic-numbers)
+      .max_secure_channels = 40, 
+    // NOLINTNEXTLINE(readability-magic-numbers)
+      .max_security_token_lifetime_ms = 600000 /* 10 minutes */
   };
   SessionsLimits session_limits = {
-      100, (60.0 * 60.0 * 1000.0) /* 1h */
+    // NOLINTNEXTLINE(readability-magic-numbers)
+      .max_sessions = 100, 
+    // NOLINTNEXTLINE(readability-magic-numbers)
+      .max_session_timeout_ms = 3600000 /* 1h */
   };
   OperationalLimits operation_limits = {};
   SubscriptionsLimits subscription_limits = {
-      0,
-      0,
-      initDurationRange(100.0, (3600.0 * 1000.0)),
-      initUInt32Range(3, 15000),
-      initUInt32Range(1, 100),
-      1000,
-      true,
-      0, 
-      0
+      .max_subscriptions = 0, // unlimited
+      .max_subscriptions_per_session = 0, // unlimited
+      .publishing_interval_limits_ms = initDurationRange(
+    //    100ms to 1h
+          100.0, 3600000.0), // NOLINT(readability-magic-numbers)
+    // NOLINTNEXTLINE(readability-magic-numbers)
+      .life_time_count_limits = initUInt32Range(3, 15000),
+    // NOLINTNEXTLINE(readability-magic-numbers)
+      .keep_alive_count_limits = initUInt32Range(1, 100),
+    // NOLINTNEXTLINE(readability-magic-numbers)
+      .max_notifications_per_publish = 1000,
+      .enable_retransmission_queue = true,
+      .max_retransmission_queue_size = 0, // unlimited
+      .max_events_per_node = 0  // unlimited
   };
   MonitoredItemsLimits monitored_items_limits = {
-      0,
-      0,
-      initDurationRange(50.0, 24.0 * 3600.0 * 1000.0),
-      initUInt32Range(1, 100)
+      .max_monitored_items = 0, // unlimited
+      .max_monitored_items_per_subscription = 0, // unlimited
+      .sampling_interval_limits_ms = initDurationRange(
+    //    50ms to 24h
+          50.0, 86400000.0), // NOLINT(readability-magic-numbers)
+    // NOLINTNEXTLINE(readability-magic-numbers)
+      .queue_size_limits = initUInt32Range(1, 100)
   };
-  UA_MdnsDiscoveryConfiguration mdsnc_config = {UA_STRING_NULL, 0, NULL};
-  UA_ServerConfig_Discovery discovery = {0, false, mdsnc_config, UA_STRING_NULL, 0, NULL};
+  UA_MdnsDiscoveryConfiguration mdsnc_config = {
+    .mdnsServerName = UA_STRING_NULL,
+    .serverCapabilitiesSize = 0, 
+    .serverCapabilities = nullptr
+  };
+  UA_ServerConfig_Discovery discovery = {
+    .discoveryCleanupTimeout = 0, 
+    .mdnsEnabled = false, 
+    .mdnsConfig = mdsnc_config, 
+    .mdnsInterfaceIP = UA_STRING_NULL, 
+    .mdnsIpAddressListSize = 0, 
+    .mdnsIpAddressList = nullptr
+  };
   UserCredentials user_credentials = {};
-  Historization historization = {"PostgreSQL", "", "", 60, false};
+  Historization historization = {
+    .dsn = "PostgreSQL",
+    .user =  "",
+    .auth =  "", 
+  // NOLINTNEXTLINE(readability-magic-numbers)
+    .request_timeout = 60, // 1 min
+    .request_logging = false
+  };
 
   Config config = {
-      true,
-      user_credentials,
-      1,
-      8888,
-      networking,
-      SecurityPolicy::NONE,
-      build_info,
-      app_info,
-      UA_STRING_NULL,
-      0.0,
-      UA_RuleHandling::UA_RULEHANDLING_DEFAULT,
-      secure_channels_limits,
-      session_limits,
-      operation_limits,
-      0,
-      subscription_limits,
-      monitored_items_limits,
-      0,
-      discovery,
-      historization
+      .allow_anonymous_access = true,
+      .access_credentials = user_credentials,
+      .thread_count = 1,
+      .port_number = 8888, //NOLINT(readability-magic-numbers)
+      .networking = networking,
+      .security_policy = SecurityPolicy::NONE,
+      .build_info = build_info,
+      .app_info = app_info,
+      .server_certificate = UA_STRING_NULL,
+      .shutdown_delay_ms = 0.0,
+      .rules_handling = UA_RuleHandling::UA_RULEHANDLING_DEFAULT,
+      .secure_channels_limits = secure_channels_limits,
+      .session_limits = session_limits,
+      .operation_limits = operation_limits,
+      .max_references_per_node = 0,
+      .subscription_limits = subscription_limits,
+      .monitored_items_limits = monitored_items_limits,
+      .max_publish_req_per_session = 0,
+      .discovery = discovery,
+      .historization = historization
   };
   // clang-format on
   return config;
@@ -489,14 +532,14 @@ static void to_json(json& j, const Config& p) {
 } // namespace nlohmann
 
 const Config open62541::deserializeConfig(const string& file_path) {
-  Config config = makeDefaultConfig();
   ifstream input_file_stream(file_path);
   if (input_file_stream) {
     nlohmann::json j;
     input_file_stream >> j;
-    config = j.get<Config>();
+    return j.get<Config>();
+  } else {
+    return makeDefaultConfig();
   }
-  return config;
 }
 
 void open62541::serializeConfig(const string& file_path, const Config& config) {
