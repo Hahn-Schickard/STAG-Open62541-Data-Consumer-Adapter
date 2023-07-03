@@ -13,11 +13,12 @@ namespace open62541 {
 CallbackWrapper::CallbackWrapper()
     : CallbackWrapper(DataType::UNKNOWN, nullptr, nullptr) {}
 
-CallbackWrapper::CallbackWrapper(DataType type, ReadCallback read_callback)
+CallbackWrapper::CallbackWrapper(
+    DataType type, const ReadCallback& read_callback)
     : CallbackWrapper(type, read_callback, nullptr) {} // NOLINT
 
-CallbackWrapper::CallbackWrapper(
-    DataType type, ReadCallback read_callback, WriteCallback write_callback)
+CallbackWrapper::CallbackWrapper(DataType type,
+    const ReadCallback& read_callback, const WriteCallback& write_callback)
     : data_type_(type) {
   if (read_callback) {
     readable_ = read_callback;
@@ -46,7 +47,7 @@ CallbackWrapperPtr NodeCallbackHandler::findCallbackWrapper(
 }
 
 UA_StatusCode NodeCallbackHandler::addNodeCallbacks(
-    UA_NodeId node_id, CallbackWrapperPtr callback_wrapper) {
+    UA_NodeId node_id, const CallbackWrapperPtr& callback_wrapper) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTSUPPORTED;
   if (!callback_wrapper) {
     UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, "Precondition violated");
@@ -83,6 +84,7 @@ UA_StatusCode NodeCallbackHandler::removeNodeCallbacks(
   return status;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
     [[maybe_unused]] UA_Server* server,
     [[maybe_unused]] const UA_NodeId* session_id,
@@ -207,6 +209,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
   return status;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
     [[maybe_unused]] UA_Server* server,
     [[maybe_unused]] const UA_NodeId* session_id,

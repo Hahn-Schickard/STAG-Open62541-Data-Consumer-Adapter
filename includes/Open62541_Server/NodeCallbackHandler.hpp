@@ -23,9 +23,10 @@ struct CallbackWrapper {
   std::optional<WriteCallback> writable_;
 
   CallbackWrapper();
-  CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback);
-  CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback,
-      WriteCallback write_callback);
+  CallbackWrapper(
+      Information_Model::DataType type, const ReadCallback& read_callback);
+  CallbackWrapper(Information_Model::DataType type,
+      const ReadCallback& read_callback, const WriteCallback& write_callback);
 };
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 
@@ -63,7 +64,7 @@ public:
    * @pre callback_wrapper is non-empty.
    */
   static UA_StatusCode addNodeCallbacks(
-      UA_NodeId node_id, CallbackWrapperPtr callback_wrapper);
+      UA_NodeId node_id, const CallbackWrapperPtr& callback_wrapper);
 
   /**
    * @pre There is a callback bound to nodeId.

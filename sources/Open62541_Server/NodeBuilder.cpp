@@ -13,7 +13,7 @@ using namespace HaSLI;
 using namespace Information_Model;
 using namespace open62541;
 
-NodeBuilder::NodeBuilder(shared_ptr<Open62541Server> server)
+NodeBuilder::NodeBuilder(const shared_ptr<Open62541Server>& server)
     : logger_(LoggerManager::registerTypedLogger(this)), server_(server) {
   NodeCallbackHandler::initialise(server->getServerLogger());
 }
@@ -23,7 +23,8 @@ NodeBuilder::~NodeBuilder() { cleanup(); }
 void NodeBuilder::cleanup() { NodeCallbackHandler::destroy(); }
 
 pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
-    NonemptyNamedElementPtr element, optional<UA_NodeId> parent_node_id) {
+    const NonemptyNamedElementPtr& element,
+    optional<UA_NodeId> parent_node_id) {
   bool is_root = !parent_node_id.has_value();
 
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
@@ -65,7 +66,7 @@ pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
   return make_pair(status, node_id);
 }
 
-UA_StatusCode NodeBuilder::addDeviceNode(NonemptyDevicePtr device) {
+UA_StatusCode NodeBuilder::addDeviceNode(const NonemptyDevicePtr& device) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   auto result = addObjectNode(device);
   status = result.first;
@@ -94,7 +95,7 @@ UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
 }
 
 UA_StatusCode NodeBuilder::addDeviceNodeElement(
-    NonemptyDeviceElementPtr element, UA_NodeId parent_id) {
+    const NonemptyDeviceElementPtr& element, const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   logger_->log(SeverityLevel::INFO, "Adding element {} to node {}",
       element->getElementName(), toString(&parent_id));
@@ -123,8 +124,10 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(
   return status;
 }
 
-UA_StatusCode NodeBuilder::addGroupNode(NonemptyNamedElementPtr meta_info,
-    NonemptyDeviceElementGroupPtr device_element_group, UA_NodeId parent_id) {
+UA_StatusCode NodeBuilder::addGroupNode(
+    const NonemptyNamedElementPtr& meta_info,
+    const NonemptyDeviceElementGroupPtr& device_element_group,
+    const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   if (!device_element_group->getSubelements().empty()) {
     auto result = addObjectNode(meta_info, parent_id);
@@ -158,7 +161,7 @@ UA_StatusCode NodeBuilder::addGroupNode(NonemptyNamedElementPtr meta_info,
 }
 
 UA_StatusCode NodeBuilder::addFunctionNode(
-    DeviceElementPtr function, UA_NodeId parent_id) {
+    const DeviceElementPtr& function, const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADNOTIMPLEMENTED;
   logger_->log(SeverityLevel::WARNING, "Method element is not implemented!",
       toString(&parent_id), function->getElementName());
@@ -166,7 +169,8 @@ UA_StatusCode NodeBuilder::addFunctionNode(
   return status;
 }
 
-void setVariant(UA_VariableAttributes& value_attribute, DataVariant variant) {
+void setVariant(
+    UA_VariableAttributes& value_attribute, const DataVariant& variant) {
   // Postcondition: value_attribute.value is non-empty
   match(
       variant,
@@ -209,9 +213,9 @@ void setVariant(UA_VariableAttributes& value_attribute, DataVariant variant) {
 
 template <class MetricType>
 UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
-    Information_Model::NonemptyNamedElementPtr meta_info,
-    NonemptyPointer::NonemptyPtr<std::shared_ptr<MetricType>> metric,
-    std::string metric_type_description) {
+    const Information_Model::NonemptyNamedElementPtr& meta_info,
+    const NonemptyPointer::NonemptyPtr<shared_ptr<MetricType>>& metric,
+    const string& metric_type_description) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   try {
@@ -234,8 +238,9 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
   return status;
 }
 
-UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
-    NonemptyMetricPtr metric, UA_NodeId parent_id) {
+UA_StatusCode NodeBuilder::addReadableNode(
+    const NonemptyNamedElementPtr& meta_info, const NonemptyMetricPtr& metric,
+    const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
@@ -289,8 +294,9 @@ UA_StatusCode NodeBuilder::addReadableNode(NonemptyNamedElementPtr meta_info,
   return status;
 }
 
-UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
-    NonemptyWritableMetricPtr metric, UA_NodeId parent_id) {
+UA_StatusCode NodeBuilder::addWritableNode(
+    const NonemptyNamedElementPtr& meta_info,
+    const NonemptyWritableMetricPtr& metric, const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
@@ -337,12 +343,14 @@ UA_StatusCode NodeBuilder::addWritableNode(NonemptyNamedElementPtr meta_info,
     }
     data_source.write = &NodeCallbackHandler::writeNodeValue;
 
-    status = UA_Server_addDataSourceVariableNode(server_->getServer(),
-        metrid_node_id, parent_id, reference_type_id, metric_browse_name,
-        type_definition, node_attr, data_source, nullptr, nullptr);
+    if (status == UA_STATUSCODE_GOOD) {
+      status = UA_Server_addDataSourceVariableNode(server_->getServer(),
+          metrid_node_id, parent_id, reference_type_id, metric_browse_name,
+          type_definition, node_attr, data_source, nullptr, nullptr);
 #ifdef UA_ENABLE_HISTORIZING
-    server_->registerForHistorization(metrid_node_id, node_attr.value.type);
+      server_->registerForHistorization(metrid_node_id, node_attr.value.type);
 #endif // UA_ENABLE_HISTORIZING
+    }
   }
 
   if (status != UA_STATUSCODE_GOOD) {
