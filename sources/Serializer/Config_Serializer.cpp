@@ -54,7 +54,7 @@ Config makeDefaultConfig() {
       .gatewayServerUri = UA_STRING_NULL,
       .discoveryProfileUri = UA_STRING_NULL,
       .discoveryUrlsSize = 0,
-      .discoveryUrls = NULL
+      .discoveryUrls = nullptr
   };
   SecureChannelsLimits secure_channels_limits = {
     // NOLINTNEXTLINE(readability-magic-numbers)
@@ -97,7 +97,7 @@ Config makeDefaultConfig() {
   UA_MdnsDiscoveryConfiguration mdsnc_config = {
     .mdnsServerName = UA_STRING_NULL,
     .serverCapabilitiesSize = 0, 
-    .serverCapabilities = NULL
+    .serverCapabilities = nullptr
   };
   UA_ServerConfig_Discovery discovery = {
     .discoveryCleanupTimeout = 0, 
@@ -105,7 +105,7 @@ Config makeDefaultConfig() {
     .mdnsConfig = mdsnc_config, 
     .mdnsInterfaceIP = UA_STRING_NULL, 
     .mdnsIpAddressListSize = 0, 
-    .mdnsIpAddressList = NULL
+    .mdnsIpAddressList = nullptr
   };
   UserCredentials user_credentials = {};
   Historization historization = {
@@ -121,7 +121,7 @@ Config makeDefaultConfig() {
       .allow_anonymous_access = true,
       .access_credentials = user_credentials,
       .thread_count = 1,
-      .port_number = 8888,
+      .port_number = 8888, //NOLINT(readability-magic-numbers)
       .networking = networking,
       .security_policy = SecurityPolicy::NONE,
       .build_info = build_info,

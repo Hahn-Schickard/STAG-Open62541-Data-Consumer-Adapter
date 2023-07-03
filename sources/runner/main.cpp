@@ -53,7 +53,7 @@ public:
       : EventSource(
             bind(&EventSourceFake::handleException, this, placeholders::_1)) {}
 
-  void sendEvent(ModelRepositoryEventPtr event) { notify(event); } // NOLINT
+  void sendEvent(const ModelRepositoryEventPtr& event) { notify(event); }
 };
 
 void print(const NonemptyDevicePtr& device);
@@ -62,7 +62,7 @@ void print(const NonemptyWritableMetricPtr& element, size_t offset);
 void print(const NonemptyMetricPtr& element, size_t offset);
 void print(const NonemptyDeviceElementGroupPtr& elements, size_t offset);
 
-void registerDevices(shared_ptr<EventSourceFake> event_source);
+void registerDevices(const shared_ptr<EventSourceFake>& event_source);
 
 int main(int argc, char* argv[]) {
   try {
@@ -75,8 +75,8 @@ int main(int argc, char* argv[]) {
         "January 1, 1601 (UTC): {}",
         UA_DateTime_now());
 
-    signal(SIGINT, stopHandler);
-    signal(SIGTERM, stopHandler);
+    signal(SIGINT, stopHandler); // NOLINT(cert-err33-c)
+    signal(SIGTERM, stopHandler); // NOLINT(cert-err33-c)
 
     logger->log(SeverityLevel::TRACE,
         "Termination and Interruption signals assigned to stop handler!");
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
     registerDevices(event_source);
 
     if (argc > 1) {
-      uint server_lifetime = atoi(argv[1]);
+      uint server_lifetime = atoi(argv[1]); // NOLINT(cert-err34-c)
       cout << "Open62541 server will automatically shut down in "
            << server_lifetime << " seconds." << endl;
       sleep(server_lifetime);
@@ -169,7 +169,7 @@ void print(const NonemptyDevicePtr& device) {
   print(device->getDeviceElementGroup(), ELEMENT_OFFSET);
 }
 
-Information_Model::DevicePtr buildDevice1() {
+Information_Model::NonemptyDevicePtr buildDevice1() {
   auto mock_builder =
       make_shared<Information_Model::testing::DeviceMockBuilder>();
 
@@ -194,7 +194,7 @@ Information_Model::DevicePtr buildDevice1() {
         subgroup_2_ref_id, "Reset Power Supply",
         "Resets power supply and any related error messages",
         Information_Model::DataType::BOOLEAN,
-        [](DataVariant) { /*There is nothing to do*/ },
+        [](const DataVariant&) { /*There is nothing to do*/ },
         []() -> DataVariant { return false; });
   }
   mock_builder->addReadableMetric("Temperature",
@@ -202,10 +202,10 @@ Information_Model::DevicePtr buildDevice1() {
       Information_Model::DataType::DOUBLE,
       []() -> DataVariant { return (double)20.1; }); // NOLINT
 
-  return mock_builder->getResult();
+  return Information_Model::NonemptyDevicePtr(mock_builder->getResult());
 }
 
-Information_Model::DevicePtr buildDevice2() {
+Information_Model::NonemptyDevicePtr buildDevice2() {
   auto mock_builder =
       make_shared<Information_Model::testing::DeviceMockBuilder>();
 
@@ -216,51 +216,60 @@ Information_Model::DevicePtr buildDevice2() {
         "Phase 1", "Groups first phase's power measurements");
     mock_builder->addReadableMetric(subgroup_1_ref_id, "Voltage",
         "Current measured phase voltage in V",
-        Information_Model::DataType::DOUBLE,
-        []() -> DataVariant { return (double)239.1; });
+        Information_Model::DataType::DOUBLE, []() -> DataVariant {
+          // NOLINTNEXTLINE(readability-magic-numbers)
+          return (double)239.1;
+        });
     mock_builder->addReadableMetric(subgroup_1_ref_id, "Current",
         "Current measured phase current in A",
-        Information_Model::DataType::DOUBLE,
-        []() -> DataVariant { return (double)8.8; });
+        Information_Model::DataType::DOUBLE, []() -> DataVariant {
+          // NOLINTNEXTLINE(readability-magic-numbers)
+          return (double)8.8;
+        });
   }
   { // Phase 2 group
     auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
         "Phase 2", "Groups second phase's power measurements");
     mock_builder->addReadableMetric(subgroup_1_ref_id, "Voltage",
         "Current measured phase voltage in V",
-        Information_Model::DataType::DOUBLE,
-        []() -> DataVariant { return (double)239.1; });
+        Information_Model::DataType::DOUBLE, []() -> DataVariant {
+          // NOLINTNEXTLINE(readability-magic-numbers)
+          return (double)239.1;
+        });
     mock_builder->addReadableMetric(subgroup_1_ref_id, "Current",
         "Current measured phase current in A",
-        Information_Model::DataType::DOUBLE,
-        []() -> DataVariant { return (double)8.8; });
+        Information_Model::DataType::DOUBLE, []() -> DataVariant {
+          // NOLINTNEXTLINE(readability-magic-numbers)
+          return (double)8.8;
+        });
   }
   { // Phase 3 group
     auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
         "Phase 3", "Groups third phase's power measurements");
     mock_builder->addReadableMetric(subgroup_1_ref_id, "Voltage",
         "Current measured phase voltage in V",
-        Information_Model::DataType::DOUBLE,
-        []() -> DataVariant { return (double)239.1; });
+        Information_Model::DataType::DOUBLE, []() -> DataVariant {
+          // NOLINTNEXTLINE(readability-magic-numbers)
+          return (double)239.1;
+        });
     mock_builder->addReadableMetric(subgroup_1_ref_id, "Current",
         "Current measured phase current in A",
-        Information_Model::DataType::DOUBLE,
-        []() -> DataVariant { return (double)8.8; });
+        Information_Model::DataType::DOUBLE, []() -> DataVariant {
+          // NOLINTNEXTLINE(readability-magic-numbers)
+          return (double)8.8;
+        });
   }
-  return mock_builder->getResult();
+  return Information_Model::NonemptyDevicePtr(mock_builder->getResult());
 }
 
-void registerDevice(Information_Model::DevicePtr device,
-    shared_ptr<EventSourceFake> event_source) {
-  if (device) {
-    print(NonemptyDevicePtr(device));
+void registerDevice(const Information_Model::NonemptyDevicePtr& device,
+    const shared_ptr<EventSourceFake>& event_source) {
+  print(device);
 
-    event_source->sendEvent(
-        std::make_shared<ModelRepositoryEvent>(NonemptyDevicePtr(device)));
-  }
+  event_source->sendEvent(std::make_shared<ModelRepositoryEvent>(device));
 }
 
-void registerDevices(shared_ptr<EventSourceFake> event_source) {
+void registerDevices(const shared_ptr<EventSourceFake>& event_source) {
   registerDevice(buildDevice1(), event_source);
   registerDevice(buildDevice2(), event_source);
 }

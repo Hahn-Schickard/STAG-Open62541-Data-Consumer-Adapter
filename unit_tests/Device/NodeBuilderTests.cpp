@@ -23,12 +23,12 @@ std::string to_string(UA_Server* server, const UA_ReferenceDescription& ref) {
 
   std::string typedef_name;
   {
-    UA_QualifiedName typedef_name_;
+    UA_QualifiedName opcua_typedef_name;
     statuscode = UA_Server_readBrowseName(
-        server, ref.typeDefinition.nodeId, &typedef_name_);
+        server, ref.typeDefinition.nodeId, &opcua_typedef_name);
     switch (statuscode) {
     case UA_STATUSCODE_GOOD:
-      typedef_name = toString(&typedef_name_);
+      typedef_name = toString(&opcua_typedef_name);
       break;
     case UA_STATUSCODE_BADNODEIDUNKNOWN:
       typedef_name = "?";
@@ -169,7 +169,7 @@ public:
       ++index_;
       return *this;
     }
-    UA_ReferenceDescription& operator*() {
+    UA_ReferenceDescription& operator*() const {
       return browse_.result_.references[index_];
     }
     friend class Browse;
@@ -187,8 +187,9 @@ public:
     browse_description.browseDirection = UA_BROWSEDIRECTION_FORWARD;
     browse_description.referenceTypeId = UA_NODEID_NULL;
     browse_description.includeSubtypes = UA_TRUE;
+    // NOLINTNEXTLINE(readability-magic-numbers)
     browse_description.nodeClassMask = 65535;
-    browse_description.resultMask = 65535;
+    browse_description.resultMask = 65535; // NOLINT(readability-magic-numbers)
     result_ = UA_Server_browse(ua_server_, MAX_REFERENCES, &browse_description);
     EXPECT_EQ(result_.statusCode, UA_STATUSCODE_GOOD)
         << UA_StatusCode_name(result_.statusCode);
@@ -196,8 +197,9 @@ public:
 
     num_children_ = result_.referencesSize;
 
-    for (size_t i = 0; i < num_children_; ++i)
+    for (size_t i = 0; i < num_children_; ++i) {
       unexpected_.insert(i);
+    }
   }
 
   ~Browse() {
@@ -213,13 +215,15 @@ public:
   /*
     @brief Marks some elements as expected
   */
-  void ignore(std::function<bool(const UA_ReferenceDescription&)> filter) {
+  void ignore(
+      const std::function<bool(const UA_ReferenceDescription&)>& filter) {
     auto i = unexpected_.begin();
     while (i != unexpected_.end()) {
       auto next = i;
       ++next;
-      if (filter(result_.references[*i]))
+      if (filter(result_.references[*i])) {
         unexpected_.erase(i);
+      }
       i = next;
     }
   }
@@ -227,15 +231,16 @@ public:
   /*
     @brief Marks one element as expected and tests it further
   */
-  void expect(std::string filter_description,
-      std::function<bool(const UA_ReferenceDescription&)> filter,
-      std::function<void(const UA_ReferenceDescription&)> test) {
-    for (auto i : unexpected_)
+  void expect(const std::string& filter_description,
+      const std::function<bool(const UA_ReferenceDescription&)>& filter,
+      const std::function<void(const UA_ReferenceDescription&)>& test) {
+    for (auto i : unexpected_) {
       if (filter(result_.references[i])) {
         unexpected_.erase(i);
         test(result_.references[i]);
         return;
       }
+    }
     ADD_FAILURE() << filter_description << " not found";
   }
 
@@ -255,11 +260,11 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
         ua_server(server->getServer()), node_builder(server) {}
 
   // For use as a filter predicate
-  bool compareId(const UA_NodeId& ua, std::string im) {
+  bool compareId(const UA_NodeId& ua, const std::string& im) {
     if (ua.identifierType != UA_NODEIDTYPE_STRING)
       return false;
-    auto im_ = UA_STRING((char*)im.c_str());
-    return UA_String_equal(&ua.identifier.string, &im_);
+    auto open6254_im = UA_STRING((char*)im.c_str());
+    return UA_String_equal(&ua.identifier.string, &open6254_im);
   }
 
   void checkReferenceType(
@@ -308,6 +313,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
     EXPECT_TRUE(UA_String_equal(&description.text, &expected_description));
   }
 
+  // NOLINTNEXTLINE(readability-function-cognitive-complexity)
   void checkDeviceElement(const UA_ReferenceDescription& ref_desc,
       Information_Model::NonemptyDeviceElementPtr element) {
     SCOPED_TRACE("DeviceElement " + to_string(ua_server, ref_desc));
@@ -317,7 +323,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
 
     match(
         element->functionality,
-        [&](Information_Model::NonemptyDeviceElementGroupPtr group) {
+        [&](const Information_Model::NonemptyDeviceElementGroupPtr& group) {
           EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_OBJECT);
           checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_OBJECTTYPE);
           children.ignore([](const UA_ReferenceDescription& child) -> bool {
@@ -326,7 +332,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
 
           checkDeviceElementGroup(ref_desc, children, group);
         },
-        [&](Information_Model::NonemptyMetricPtr) {
+        [&](const Information_Model::NonemptyMetricPtr&) {
           EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
           checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
           children.ignore([](const UA_ReferenceDescription& child) -> bool {
@@ -339,7 +345,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
           EXPECT_EQ(value.type, Types::UA_TYPE);
         },
-        [&](Information_Model::NonemptyWritableMetricPtr) {
+        [&](const Information_Model::NonemptyWritableMetricPtr&) {
           EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
           checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
           children.ignore([](const UA_ReferenceDescription& child) -> bool {
@@ -356,7 +362,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
               UA_Server_writeValue(ua_server, ref_desc.nodeId.nodeId, value);
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
         },
-        [&](Information_Model::NonemptyFunctionPtr) {
+        [&](const Information_Model::NonemptyFunctionPtr&) {
           // @TODO: handle functions here
         });
   }

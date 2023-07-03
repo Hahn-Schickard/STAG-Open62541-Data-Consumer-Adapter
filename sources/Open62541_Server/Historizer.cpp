@@ -73,6 +73,7 @@ OODD::DataType getColumnDataType(const UA_DataType* variant) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
     return OODD::DataType::BOOLEAN;
   }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
     [[fallthrough]];
   }
@@ -82,12 +83,14 @@ OODD::DataType getColumnDataType(const UA_DataType* variant) {
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
     return OODD::DataType::SMALLINT;
   }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
     return OODD::DataType::INT;
   }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
     [[fallthrough]];
   }
@@ -102,12 +105,14 @@ OODD::DataType getColumnDataType(const UA_DataType* variant) {
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
     return OODD::DataType::TIMESTAMP;
   }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
     return OODD::DataType::FLOAT;
   }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
     [[fallthrough]];
   }
@@ -117,6 +122,7 @@ OODD::DataType getColumnDataType(const UA_DataType* variant) {
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
     return OODD::DataType::TEXT;
   }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
     [[fallthrough]];
   }
@@ -133,34 +139,34 @@ string getCurrentTimestamp() {
   return date::format("%F %T", timestamp);
 }
 
-string toSanitizedString(const UA_NodeId* nodeId) {
-  return "\"" + toString(nodeId) + "\"";
+string toSanitizedString(const UA_NodeId* node_id) {
+  return "\"" + toString(node_id) + "\"";
 }
 
-bool Historizer::isHistorized(const UA_NodeId* nodeId) {
-  auto node_id = toString(nodeId);
-  auto result = db_->select(
-      "Historized_Nodes", ColumnFilter(FilterType::EQUAL, "Node_Id", node_id));
+bool Historizer::isHistorized(const UA_NodeId* node_id) {
+  auto node_id_string = toString(node_id);
+  auto result = db_->select("Historized_Nodes",
+      ColumnFilter(FilterType::EQUAL, "Node_Id", node_id_string));
   return !result.empty();
 }
 
 UA_StatusCode Historizer::registerNodeId(
-    UA_Server* server, UA_NodeId nodeId, const UA_DataType* type) {
-  auto node_id = toSanitizedString(&nodeId);
+    UA_Server* server, UA_NodeId node_id, const UA_DataType* type) {
   try {
     if (db_) {
-      if (isHistorized(&nodeId)) {
+      if (isHistorized(&node_id)) {
         db_->update("Historized_Nodes",
-            ColumnFilter(FilterType::EQUAL, "Node_Id", toString(&nodeId)),
+            ColumnFilter(FilterType::EQUAL, "Node_Id", toString(&node_id)),
             ColumnValue("Last_Updated", getCurrentTimestamp()));
       } else {
         db_->insert("Historized_Nodes",
             vector<ColumnValue>{// clang-format off
-              ColumnValue("Node_Id", toString(&nodeId)), // column value is automatically sanitized
+              ColumnValue("Node_Id", toString(&node_id)), // column value is automatically sanitized
               ColumnValue("Last_Updated", getCurrentTimestamp())
           }); // clang-format on
       }
-      db_->create(node_id,
+      auto node_id_string = toSanitizedString(&node_id);
+      db_->create(node_id_string,
           vector<Column>{// clang-format off
             Column("Index", OODD::DataType::INT, ColumnConstraint::GENERATED_PRIMARY_KEY),
             Column("Server_Timestamp", OODD::DataType::TIMESTAMP),
@@ -168,7 +174,8 @@ UA_StatusCode Historizer::registerNodeId(
             Column("Value", getColumnDataType(type))
           }); // clang-format on
 
-      auto monitor_request = UA_MonitoredItemCreateRequest_default(nodeId);
+      auto monitor_request = UA_MonitoredItemCreateRequest_default(node_id);
+      // NOLINTNEXTLINE(readability-magic-numbers)
       monitor_request.requestedParameters.samplingInterval = 1000000.0;
       monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
       auto result = UA_Server_createDataChangeMonitoredItem(server,
@@ -183,7 +190,7 @@ UA_StatusCode Historizer::registerNodeId(
     log(SeverityLevel::CRITICAL,
         "An unhandled exception occurred while trying to register {} node. "
         "Exception: {}",
-        node_id, ex.what());
+        toString(&node_id), ex.what());
     return UA_STATUSCODE_BADUNEXPECTEDERROR;
   }
 }
@@ -237,6 +244,7 @@ OODD::DataValue getNodeValue(UA_Variant variant) {
     return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    // NOLINTNEXTLINE(bugprone-signed-char-misuse,cert-str34-c)
     auto value = (intmax_t) * ((UA_SByte*)(variant.data));
     return OODD::DataValue(value);
   }
@@ -273,7 +281,8 @@ OODD::DataValue getNodeValue(UA_Variant variant) {
     return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-    auto status_code = UA_StatusCode_name(*((UA_StatusCode*)(variant.data)));
+    const auto* status_code =
+        UA_StatusCode_name(*((UA_StatusCode*)(variant.data)));
     auto value = string(status_code);
     return OODD::DataValue(value);
   }
@@ -286,7 +295,7 @@ OODD::DataValue getNodeValue(UA_Variant variant) {
     return OODD::DataValue(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-    auto byte_string = (UA_ByteString*)(variant.data);
+    auto* byte_string = (UA_ByteString*)(variant.data);
     auto value = vector<uint8_t>(
         byte_string->data, byte_string->data + byte_string->length);
     return OODD::DataValue(value);
@@ -309,9 +318,8 @@ OODD::DataValue getNodeValue(UA_Variant variant) {
 
 void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
-    const UA_NodeId* nodeId, UA_Boolean historizing,
+    const UA_NodeId* node_id, UA_Boolean historizing,
     const UA_DataValue* value) {
-  string node_id = toSanitizedString(nodeId);
   if (db_) {
     if (historizing) {
       if (value != nullptr) {
@@ -325,59 +333,61 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdbContext*/,
             source_time = getTimestamp(value->sourceTimestamp);
           }
           auto data = getNodeValue(value->value); // get data
-          db_->insert(node_id,
+          auto node_id_string = toSanitizedString(node_id);
+          db_->insert(node_id_string,
               vector<ColumnValue>{// clang-format off
               ColumnValue("Source_Timestamp", source_time),
               ColumnValue("Server_Timestamp", server_time), 
               ColumnValue("Value", data)
             }); // clang-format on
           db_->update("Historized_Nodes",
-              ColumnFilter(FilterType::EQUAL, "Node_Id", toString(nodeId)),
+              ColumnFilter(FilterType::EQUAL, "Node_Id", toString(node_id)),
               ColumnValue("Last_Updated", getCurrentTimestamp()));
         } catch (exception& ex) {
           log(SeverityLevel::ERROR,
               "Failed to historize Node {} value due to an exception. "
               "Exception: {}",
-              node_id, ex.what());
+              toString(node_id), ex.what());
         }
       } else {
         log(SeverityLevel::ERROR,
-            "Failed to historize Node {} value. No data provided.", node_id);
+            "Failed to historize Node {} value. No data provided.",
+            toString(node_id));
       }
     } else {
       log(SeverityLevel::INFO, "Node {} is not configured for historization",
-          node_id);
+          toString(node_id));
     }
   } else {
     log(SeverityLevel::CRITICAL,
         "Tried to historize Node {}, but internal database is unavailable",
-        node_id);
+        toString(node_id));
   }
 }
 
 void Historizer::dataChanged(UA_Server* server, UA_UInt32 /*monitoredItemId*/,
-    void* /*monitoredItemContext*/, const UA_NodeId* nodeId,
-    void* /*nodeContext*/, UA_UInt32 attributeId, const UA_DataValue* value) {
+    void* /*monitoredItemContext*/, const UA_NodeId* node_id,
+    void* /*nodeContext*/, UA_UInt32 attribute_id, const UA_DataValue* value) {
   if (db_) {
     UA_NodeId* session_id =
         nullptr; // obtain session id, its set to NULL in the
                  // example code, so might be imposable to do so
     UA_Boolean historize = false;
-    if ((attributeId & UA_ATTRIBUTEID_HISTORIZING) != 0) {
+    if ((attribute_id & UA_ATTRIBUTEID_HISTORIZING) != 0) {
       historize = true;
     }
 
-    setValue(server, nullptr, session_id, nullptr, nodeId, historize, value);
+    setValue(server, nullptr, session_id, nullptr, node_id, historize, value);
   } else {
     log(SeverityLevel::CRITICAL,
         "Tried to historize Node {}, but internal database is unavailable",
-        toString(nodeId));
+        toString(node_id));
   }
 }
 
-vector<string> setColumnNames(UA_TimestampsToReturn timestampsToReturn) {
+vector<string> setColumnNames(UA_TimestampsToReturn timestamps_to_return) {
   vector<string> result;
-  switch (timestampsToReturn) {
+  switch (timestamps_to_return) {
   case UA_TIMESTAMPSTORETURN_SOURCE: {
     result.emplace_back("Source_Timestamp");
     break;
@@ -438,13 +448,13 @@ vector<ColumnFilter> setColumnFilters(
 
 vector<ColumnFilter> setColumnFilters(UA_Boolean include_bounds,
     UA_DateTime start_time, UA_DateTime end_time,
-    const UA_ByteString* continuationPoint) {
+    const UA_ByteString* continuation_point) {
   vector<ColumnFilter> result =
       setColumnFilters(include_bounds, start_time, end_time);
 
-  if (continuationPoint != nullptr) {
+  if (continuation_point != nullptr) {
     auto continuation_index =
-        string((char*)continuationPoint->data, continuationPoint->length);
+        string((char*)continuation_point->data, continuation_point->length);
     if (!continuation_index.empty()) {
       result.emplace_back(FilterType::GREATER, "Index", continuation_index);
     }
@@ -477,7 +487,7 @@ UA_StatusCode appendUADataValue(UA_HistoryData* result,
   }
 }
 
-UA_Variant toUAVariant(OODD::DataValue data) {
+UA_Variant toUAVariant(const OODD::DataValue& data) {
   UA_Variant result;
   UA_Variant_init(&result);
   match(
@@ -497,12 +507,12 @@ UA_Variant toUAVariant(OODD::DataValue data) {
       [&result](double value) { 
         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
       },
-      [&result](string cpp_string) { 
+      [&result](const string& cpp_string) { 
         UA_String value = UA_String_fromChars(cpp_string.c_str());
         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_STRING]);
         UA_String_clear(&value); // clear original content, since a copy is already within the variant
       },
-      [&result](vector<uint8_t> opaque) { 
+      [&result](const vector<uint8_t>& opaque) { 
          UA_ByteString value;
          value.length = opaque.size();
          value.data = (UA_Byte*)malloc(value.length);
@@ -526,6 +536,7 @@ UA_DateTime toUADateTime(OODD::DataValue data) {
     UA_DateTimeStruct calendar_time;
     auto day_point = floor<days>(time_point);
     auto calender_date = year_month_day{day_point};
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions)
     calendar_time.year = int{calender_date.year()};
     calendar_time.month = unsigned{calender_date.month()};
     calendar_time.day = unsigned{calender_date.day()};
@@ -594,7 +605,7 @@ UA_StatusCode expandHistoryResult(UA_HistoryData* result, Rows rows) {
 }
 
 /**
- * @todo: expand ContinuationPoint to store either the index of next value or
+ * @todo: expand continuation_point to store either the index of next value or
  * a future result for async select statements
  */
 UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
@@ -615,21 +626,21 @@ UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
 }
 
 Rows Historizer::readHistory(
-    const UA_ReadRawModifiedDetails* historyReadDetails,
-    UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestampsToReturn,
-    UA_NodeId node_id, const UA_ByteString* continuationPoint_IN,
-    [[maybe_unused]] UA_ByteString* continuationPoint_OUT) { // NOLINT
+    const UA_ReadRawModifiedDetails* history_read_details,
+    UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestamps_to_return,
+    UA_NodeId node_id, const UA_ByteString* continuation_point_in,
+    [[maybe_unused]] UA_ByteString* continuation_point_out) { // NOLINT
   if (db_) {
-    auto columns = setColumnNames(timestampsToReturn);
-    auto filters = setColumnFilters(historyReadDetails->returnBounds,
-        historyReadDetails->startTime, historyReadDetails->endTime,
-        continuationPoint_IN);
+    auto columns = setColumnNames(timestamps_to_return);
+    auto filters = setColumnFilters(history_read_details->returnBounds,
+        history_read_details->startTime, history_read_details->endTime,
+        continuation_point_in);
 
-    auto read_limit = historyReadDetails->numValuesPerNode;
+    auto read_limit = history_read_details->numValuesPerNode;
     bool reverse_order = false;
-    if (((historyReadDetails->startTime == 0) &&
-            ((read_limit != 0) && historyReadDetails->endTime != 0)) ||
-        (historyReadDetails->startTime > historyReadDetails->endTime)) {
+    if (((history_read_details->startTime == 0) &&
+            ((read_limit != 0) && history_read_details->endTime != 0)) ||
+        (history_read_details->startTime > history_read_details->endTime)) {
       // if start time was not specified (start time is equal to
       // DateTime.MinValue), but end time AND read_limit is, OR end time is
       // less than start time, than the historical values should be in reverse
@@ -646,11 +657,11 @@ Rows Historizer::readHistory(
        *
        */
       results = db_->select(toSanitizedString(&node_id), columns, filters,
-          historyReadDetails->numValuesPerNode, "Source_Timestamp",
+          history_read_details->numValuesPerNode, "Source_Timestamp",
           reverse_order, &overrun_point);
       if (overrun_point.hasMoreValues()) {
-        // continuationPoint_OUT is read by the Client, not the Server
-        continuationPoint_OUT = // NOLINT
+        // continuation_point_out is read by the Client, not the Server
+        continuation_point_out = // NOLINT
             makeContinuationPoint(overrun_point.getOverrunRecord());
       }
     } else {
@@ -670,20 +681,21 @@ Rows Historizer::readHistory(
 
 void Historizer::readRaw(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
-    const UA_RequestHeader* requestHeader,
-    const UA_ReadRawModifiedDetails* historyReadDetails,
-    UA_TimestampsToReturn timestampsToReturn,
-    UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-    const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
+    const UA_RequestHeader* request_header,
+    const UA_ReadRawModifiedDetails* history_read_details,
+    UA_TimestampsToReturn timestamps_to_return,
+    UA_Boolean release_continuation_points, size_t nodes_to_read_size,
+    const UA_HistoryReadValueId* nodes_to_read,
+    UA_HistoryReadResponse* response,
     UA_HistoryData* const* const
         historyData) { // NOLINT parameter name set by open62541
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
-  if (!releaseContinuationPoints) {
-    for (size_t i = 0; i < nodesToReadSize; ++i) {
+  if (!release_continuation_points) {
+    for (size_t i = 0; i < nodes_to_read_size; ++i) {
       try {
-        auto history_values = readHistory(historyReadDetails,
-            requestHeader->timeoutHint, timestampsToReturn,
-            nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
+        auto history_values = readHistory(history_read_details,
+            request_header->timeoutHint, timestamps_to_return,
+            nodes_to_read[i].nodeId, &nodes_to_read[i].continuationPoint,
             &response->results[i].continuationPoint);
         response->results[i].statusCode =
             expandHistoryResult(historyData[i], history_values);
@@ -721,8 +733,10 @@ OODD::DataValue operator*(const OODD::DataValue& lhs, const intmax_t& rhs) {
       [&](intmax_t value) { result = value * rhs; },
       [&](float value) { result = value * rhs; },
       [&](double value) { result = value * rhs; },
-      [&](string /*value*/) { throw logic_error("Can not multiply Text"); },
-      [&](vector<uint8_t> /*value*/) {
+      [&](const string& /*value*/) {
+        throw logic_error("Can not multiply Text");
+      },
+      [&](const vector<uint8_t>& /*value*/) {
         throw logic_error("Can not multiply Opaque data");
       });
   return result;
@@ -770,8 +784,10 @@ OODD::DataValue operator+(
           throw invalid_argument("Can not add non double value to a double");
         }
       },
-      [&](string /*value*/) { throw logic_error("Can not add to Text"); },
-      [&](vector<uint8_t> /*value*/) {
+      [&](const string& /*value*/) {
+        throw logic_error("Can not add to Text");
+      },
+      [&](const vector<uint8_t>& /*value*/) {
         throw logic_error("Can not add to Opaque data");
       });
   return result;
@@ -821,10 +837,10 @@ OODD::DataValue operator-(
               "Can not subtract non double value from a double");
         }
       },
-      [&](string /*value*/) {
+      [&](const string& /*value*/) {
         throw logic_error("Can not subtract from Text");
       },
-      [&](vector<uint8_t> /*value*/) {
+      [&](const vector<uint8_t>& /*value*/) {
         throw logic_error("Can not subtract from Opaque data");
       });
   return result;
@@ -839,10 +855,18 @@ OODD::DataValue operator/(const OODD::DataValue& lhs, const intmax_t& rhs) {
       },
       [&](uintmax_t value) { result = value / rhs; },
       [&](intmax_t value) { result = value / rhs; },
-      [&](float value) { result = value / rhs; },
-      [&](double value) { result = value / rhs; },
-      [&](string /*value*/) { throw logic_error("Can not divide Text"); },
-      [&](vector<uint8_t> /*value*/) {
+      [&](float value) {
+        // NOLINTNEXTINE(bugprone-narrowing-conversions)
+        result = value / rhs;
+      },
+      [&](double value) {
+        // NOLINTNEXTINE(bugprone-narrowing-conversions)
+        result = value / rhs;
+      },
+      [&](const string& /*value*/) {
+        throw logic_error("Can not divide Text");
+      },
+      [&](const vector<uint8_t>& /*value*/) {
         throw logic_error("Can not divide Opaque data");
       });
   return result;
@@ -898,7 +922,7 @@ vector<ColumnValue> interpolateValues(
   auto interpolated_data =
       ((value_diff * weight) / denominator) + first_nearest_value;
 
-  result.emplace_back(ColumnValue(data_point_name, interpolated_data));
+  result.emplace_back(data_point_name, interpolated_data);
   return result;
 }
 
@@ -1011,19 +1035,19 @@ UA_Boolean hasMultipleValues(const UA_StatusCode status) {
 } // namespace HistorianBits
 
 UA_StatusCode Historizer::readAndAppendHistory(
-    const UA_ReadAtTimeDetails* historyReadDetails, UA_UInt32 /*timeout_hint*/,
-    UA_TimestampsToReturn timestampsToReturn, UA_NodeId node_id,
-    const UA_ByteString* /*continuationPoint_IN*/,
-    [[maybe_unused]] UA_ByteString* continuationPoint_OUT,
+    const UA_ReadAtTimeDetails* history_read_details,
+    UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestamps_to_return,
+    UA_NodeId node_id, const UA_ByteString* /*continuation_point_in*/,
+    [[maybe_unused]] UA_ByteString* continuation_point_out,
     UA_HistoryData* historyData) { // NOLINT
   if (db_) {
-    auto columns = setColumnNames(timestampsToReturn);
+    auto columns = setColumnNames(timestamps_to_return);
 
     UA_StatusCode status = UA_STATUSCODE_GOOD;
     using namespace HistorianBits;
     Rows results;
-    for (size_t i = 0; i < historyReadDetails->reqTimesSize; ++i) {
-      auto timestamp = getTimestamp(historyReadDetails->reqTimes[i]);
+    for (size_t i = 0; i < history_read_details->reqTimesSize; ++i) {
+      auto timestamp = getTimestamp(history_read_details->reqTimes[i]);
       /**
        * @todo: use an async select request or a batch read, and check if
        * timeout_hint elapsed, if it did set a continuation point
@@ -1056,10 +1080,10 @@ UA_StatusCode Historizer::readAndAppendHistory(
         // thus they will always be unique
         auto index = nearest_after_result.begin()->first;
         results.emplace(index,
-            // we do not check historyReadDetails->useSimpleBounds flag,
+            // we do not check history_read_details->useSimpleBounds flag,
             // because all values are Non-Bad for our case and thus
             // useSimpleBounds=False would not change the calculation
-            interpolateValues(historyReadDetails->reqTimes[i],
+            interpolateValues(history_read_details->reqTimes[i],
                 nearest_before_result, nearest_after_result));
         setHistorianBits(&status, DataLocation::INTERPOLATED);
       } else {
@@ -1076,21 +1100,23 @@ UA_StatusCode Historizer::readAndAppendHistory(
 
 void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdbContext*/,
     const UA_NodeId* /*sessionId*/, void* /*sessionContext*/,
-    const UA_RequestHeader* requestHeader,
-    const UA_ReadAtTimeDetails* historyReadDetails,
-    UA_TimestampsToReturn timestampsToReturn,
-    UA_Boolean releaseContinuationPoints, size_t nodesToReadSize,
-    const UA_HistoryReadValueId* nodesToRead, UA_HistoryReadResponse* response,
+    const UA_RequestHeader* request_header,
+    const UA_ReadAtTimeDetails* history_read_details,
+    UA_TimestampsToReturn timestamps_to_return,
+    UA_Boolean release_continuation_points, size_t nodes_to_read_size,
+    const UA_HistoryReadValueId* nodes_to_read,
+    UA_HistoryReadResponse* response,
     UA_HistoryData* const* const
         historyData) { // NOLINT parameter name set by open62541
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
-  if (!releaseContinuationPoints) {
-    for (size_t i = 0; i < nodesToReadSize; ++i) {
+  if (!release_continuation_points) {
+    for (size_t i = 0; i < nodes_to_read_size; ++i) {
       try {
-        response->results[i].statusCode = readAndAppendHistory(
-            historyReadDetails, requestHeader->timeoutHint, timestampsToReturn,
-            nodesToRead[i].nodeId, &nodesToRead[i].continuationPoint,
-            &response->results[i].continuationPoint, historyData[i]);
+        response->results[i].statusCode =
+            readAndAppendHistory(history_read_details,
+                request_header->timeoutHint, timestamps_to_return,
+                nodes_to_read[i].nodeId, &nodes_to_read[i].continuationPoint,
+                &response->results[i].continuationPoint, historyData[i]);
       } catch (logic_error& ex) {
         // Target Node Id values can not be interpolated due to mismatching
         // data types or non aggregable data types (text, opaque values,

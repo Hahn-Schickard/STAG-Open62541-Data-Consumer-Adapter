@@ -231,8 +231,9 @@ Configuration::Configuration(const string& filepath) : Configuration(true) {
     addSecurityPolicy(configuration_.get(), config.security_policy);
     auto policy_uri =
         configuration_->securityPolicies[0].policyUri; // none policy
-    UA_AccessControl_default(configuration_.get(), true, NULL, &policy_uri, 0,
-        NULL); // allow_anonymous_access
+    UA_AccessControl_default(configuration_.get(), true, nullptr, &policy_uri,
+        0,
+        nullptr); // allow_anonymous_access
     UA_ServerConfig_addEndpoint(configuration_.get(),
         UA_SECURITY_POLICY_NONE_URI, UA_MESSAGESECURITYMODE_NONE);
   } catch (exception& ex) {

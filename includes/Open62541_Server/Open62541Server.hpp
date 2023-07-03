@@ -50,8 +50,8 @@ public:
   bool start();
   bool stop();
   bool isRunning();
-  UA_UInt16 getServerNamespace();
-  const UA_Logger* getServerLogger();
+  UA_UInt16 getServerNamespace() const;
+  const UA_Logger* getServerLogger() const;
   UA_Server* getServer();
 };
 } // namespace open62541

@@ -55,7 +55,7 @@ UA_StatusCode NodeCallbackHandler::addNodeCallbacks(
   } else if (!findCallbackWrapper(&node_id)) {
     string trace_msg = "Adding callback_wrapper for Node " + toString(&node_id);
     UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
-    node_calbacks_map_.emplace(node_id, move(callback_wrapper));
+    node_calbacks_map_.emplace(node_id, callback_wrapper);
     status = UA_STATUSCODE_GOOD;
   } else {
     string error_msg =
@@ -222,7 +222,7 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
   auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     auto callback_wrapper = it->second;
-    if (it->second->writable_.has_value()) {
+    if (callback_wrapper->writable_.has_value()) {
       string trace_msg = "Calling write callback for Node " + toString(node_id);
       UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
       auto write_cb = callback_wrapper->writable_.value();

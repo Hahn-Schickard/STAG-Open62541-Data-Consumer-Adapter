@@ -75,7 +75,7 @@ UA_StatusCode NodeBuilder::addDeviceNode(const NonemptyDevicePtr& device) {
             " " + device->getElementName() + " device",
         status);
     auto device_element_group = device->getDeviceElementGroup();
-    for (auto device_element : device_element_group->getSubelements()) {
+    for (const auto& device_element : device_element_group->getSubelements()) {
       status = addDeviceNodeElement(device_element, result.second);
       checkStatusCode("While adding DeviceElement " +
               device_element->getElementId() + " " +
@@ -146,7 +146,7 @@ UA_StatusCode NodeBuilder::addGroupNode(
           "Group element {}:{} contains {} subelements.",
           meta_info->getElementName(), toString(&result.second),
           elements.size());
-      for (auto element : elements) {
+      for (const auto& element : elements) {
         status = addDeviceNodeElement(element, result.second);
       }
     } catch (const StatusCodeNotGood& ex) {
@@ -277,6 +277,7 @@ UA_StatusCode NodeBuilder::addReadableNode(
 
     UA_DataSource data_source;
     data_source.read = &NodeCallbackHandler::readNodeValue;
+    data_source.write = nullptr;
 
     auto* server_ptr = server_->getServer();
     status = UA_Server_addDataSourceVariableNode(server_ptr, metrid_node_id,
@@ -340,6 +341,7 @@ UA_StatusCode NodeBuilder::addWritableNode(
           make_shared<CallbackWrapper>(metric->getDataType(), nullptr,
               bind(&WritableMetric::setMetricValue, metric.base(),
                   placeholders::_1)));
+      data_source.read = nullptr;
     }
     checkStatusCode("While setting writable metric callbacks", status);
     data_source.write = &NodeCallbackHandler::writeNodeValue;
