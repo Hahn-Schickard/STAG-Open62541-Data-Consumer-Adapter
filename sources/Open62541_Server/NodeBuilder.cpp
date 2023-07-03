@@ -241,8 +241,6 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
 UA_StatusCode NodeBuilder::addReadableNode(
     const NonemptyNamedElementPtr& meta_info, const NonemptyMetricPtr& metric,
     const UA_NodeId& parent_id) {
-  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), meta_info->getElementId().c_str());
   logger_->log(SeverityLevel::TRACE,
@@ -261,7 +259,7 @@ UA_StatusCode NodeBuilder::addReadableNode(
 
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(node_attr, meta_info, metric, "readable metric");
+  auto status = setValue(node_attr, meta_info, metric, "readable metric");
   try {
     checkStatusCode("While setting default readable metric value", status);
     logger_->log(SeverityLevel::TRACE, "Assigning {} read callback for {} node",
@@ -299,8 +297,6 @@ UA_StatusCode NodeBuilder::addReadableNode(
 UA_StatusCode NodeBuilder::addWritableNode(
     const NonemptyNamedElementPtr& meta_info,
     const NonemptyWritableMetricPtr& metric, const UA_NodeId& parent_id) {
-  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), meta_info->getElementId().c_str());
   logger_->log(SeverityLevel::TRACE,
@@ -318,7 +314,7 @@ UA_StatusCode NodeBuilder::addWritableNode(
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
-  status = setValue(node_attr, meta_info, metric, "writable metric");
+  auto status = setValue(node_attr, meta_info, metric, "writable metric");
   try {
     checkStatusCode("While setting default writable metric value", status);
     logger_->log(SeverityLevel::TRACE,
