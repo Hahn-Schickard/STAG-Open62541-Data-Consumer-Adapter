@@ -346,6 +346,16 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
   return status;
 }
 
+UA_StatusCode NodeCallbackHandler::callNodeMethod(UA_Server* server,
+    const UA_NodeId* session_id, void* session_context,
+    const UA_NodeId* method_id, void* method_context,
+    const UA_NodeId* object_id, void* object_context, size_t input_size,
+    const UA_Variant* input, size_t output_size, UA_Variant* output) {
+  UA_StatusCode status = UA_STATUSCODE_BADNOTWRITABLE;
+  /**@TODO: implement callNodeMethod*/
+  return status;
+}
+
 unordered_map<UA_NodeId, CallbackWrapperPtr, UA_NodeId_Hasher>
     NodeCallbackHandler::node_calbacks_map_; // NOLINT
 const UA_Logger* NodeCallbackHandler::logger_; // NOLINT

@@ -122,6 +122,12 @@ public:
       const UA_NodeId* session_id, void* session_context,
       const UA_NodeId* node_id, void* node_context,
       const UA_NumericRange* range, const UA_DataValue* value);
+
+  static UA_StatusCode callNodeMethod(UA_Server* server,
+      const UA_NodeId* session_id, void* session_context,
+      const UA_NodeId* method_id, void* method_context,
+      const UA_NodeId* object_id, void* object_context, size_t input_size,
+      const UA_Variant* input, size_t output_size, UA_Variant* output);
 };
 } // namespace open62541
 
