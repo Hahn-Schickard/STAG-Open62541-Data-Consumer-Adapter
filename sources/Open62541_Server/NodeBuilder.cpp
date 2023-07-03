@@ -116,7 +116,7 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(
         status = addWritableNode(element, metric, parent_id);
       },
       [&](const NonemptyFunctionPtr& function) {
-        // @TODO: build functions here
+        status = addMethodNode(element, function, parent_id);
       });
 
   if (status != UA_STATUSCODE_GOOD) {
@@ -358,6 +358,87 @@ UA_StatusCode NodeBuilder::addWritableNode(
     logger_->log(SeverityLevel::ERROR,
         "Failed to create a Node for Writable Metric: {}. Status: {}",
         meta_info->getElementName(), ex.what());
+  }
+  return status;
+}
+
+UA_StatusCode NodeBuilder::addMethodNode(
+    const NonemptyNamedElementPtr& meta_info,
+    const NonemptyFunctionPtr& function, const UA_NodeId& parent_id) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+  auto method_node_id = UA_NODEID_STRING_ALLOC(
+      server_->getServerNamespace(), meta_info->getElementId().c_str());
+  if (function->result_type != DataType::NONE ||
+      function->result_type != DataType::UNKNOWN) {
+    auto call_cb =
+        bind(static_cast<DataVariant (Function::*)(
+                 const Function::Parameters&, uintmax_t)>(&Function::call),
+            function.base(), placeholders::_1, (uintmax_t)1000);
+    status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
+        make_shared<CallbackWrapper>(function->result_type, move(call_cb)));
+  } else {
+    auto execute_cb =
+        bind(&Function::execute, function.base(), placeholders::_1);
+    status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
+        make_shared<CallbackWrapper>(function->result_type, move(execute_cb)));
+  }
+  UA_Argument* input_args = nullptr;
+  try {
+    checkStatusCode("While setting function callbacks", status);
+    auto arg_count = function->parameters.size();
+    if (arg_count > 0) {
+      input_args = (UA_Argument*)malloc(arg_count * sizeof(UA_Argument));
+      for (size_t i = 0; i < function->parameters.size(); ++i) {
+        UA_Argument_init(&input_args[i]);
+        auto parameter = function->parameters.at(i);
+        input_args[i].name = makeUAString(toString(parameter.first));
+        input_args[i].dataType = toNodeId(parameter.first);
+        input_args[i].valueRank =
+            UA_VALUERANK_SCALAR; // opaques are ByteStrings
+        auto arg_desc =
+            (parameter.second ? "Optional " : "") + toString(parameter.first);
+        input_args[i].description =
+            UA_LOCALIZEDTEXT_ALLOC("EN_US", arg_desc.c_str());
+      }
+      UA_Argument* output = nullptr;
+      uint8_t output_count = 0;
+      if (function->result_type != DataType::NONE) {
+        output_count = 1;
+        UA_Argument_init(output);
+        output->name = makeUAString(toString(function->result_type));
+        output->dataType = toNodeId(function->result_type);
+        output->valueRank = UA_VALUERANK_SCALAR; // all returns are scalar
+        auto ouput_desc = toString(function->result_type);
+        output->description =
+            UA_LOCALIZEDTEXT_ALLOC("EN_US", ouput_desc.c_str());
+      }
+      auto reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
+      auto method_browse_name = UA_QUALIFIEDNAME_ALLOC(
+          server_->getServerNamespace(), meta_info->getElementName().c_str());
+
+      UA_MethodAttributes node_attr = UA_MethodAttributes_default;
+      node_attr.description = UA_LOCALIZEDTEXT_ALLOC(
+          "en-US", meta_info->getElementDescription().c_str());
+      node_attr.displayName =
+          UA_LOCALIZEDTEXT_ALLOC("en-US", meta_info->getElementName().c_str());
+      node_attr.executable = true;
+      node_attr.userExecutable = true;
+
+      status = UA_Server_addMethodNode(server_->getServer(), method_node_id,
+          parent_id, reference_type_id, method_browse_name, node_attr,
+          &NodeCallbackHandler::callNodeMethod, arg_count, input_args,
+          output_count, output, nullptr, nullptr);
+      checkStatusCode("While adding method node to server", status);
+    }
+  } catch (const StatusCodeNotGood& ex) {
+    logger_->log(SeverityLevel::ERROR,
+        "Failed to create a MethodNode for Function: {}. Status: {}",
+        meta_info->getElementName(), ex.what());
+  }
+
+  if (input_args != nullptr) {
+    free(input_args); // input args have been copied into method node or are not
+                      // needed, so we can clear these values
   }
   return status;
 }
