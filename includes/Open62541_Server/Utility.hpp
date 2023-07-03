@@ -16,12 +16,12 @@ std::string toString(const UA_NodeId* node_id);
 std::string toString(const UA_QualifiedName* name);
 
 struct StatusCodeNotGood : public std::runtime_error {
-  StatusCodeNotGood(const std::string msg, const UA_StatusCode& code);
+  StatusCodeNotGood(const std::string& msg, const UA_StatusCode& code);
 
   const UA_StatusCode status;
 };
 
-void checkStatusCode(const std::string msg, const UA_StatusCode& status,
+void checkStatusCode(const std::string& msg, const UA_StatusCode& status,
     bool uncertain_is_bad = false);
 void checkStatusCode(
     const UA_StatusCode& status, bool uncertain_is_bad = false);
