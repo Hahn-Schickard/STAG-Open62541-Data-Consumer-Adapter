@@ -95,8 +95,7 @@ void HaSLL_Logger_log([[maybe_unused]] void* _logContext, UA_LogLevel level,
     message.resize(len + 1); // Add space for NULL terminator
     // clang-tidy bug for vsnprintf() @see
     // https://bugs.llvm.org/show_bug.cgi?id=41311
-    // NOLINTNEXTLINE(clang-analyzer-valist.Unterminated, cert-err33-c,
-    // readability-container-data-pointer)
+    // NOLINTNEXTLINE(clang-analyzer-valist.*, cert-err33-c, readability-*)
     vsnprintf(&message[0], len + 1, msg, args); // write args into the message
     message.resize(len); // Remove the NULL terminator
   } // else -> message will be empty

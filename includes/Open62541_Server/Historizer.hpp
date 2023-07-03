@@ -37,7 +37,7 @@ struct Historizer {
    * https://github.com/open62541/open62541/blob/master/plugins/historydata/ua_history_data_gathering_default.c#L59
    *
    */
-  UA_StatusCode registerNodeId(
+  static UA_StatusCode registerNodeId(
       UA_Server* server, UA_NodeId node_id, const UA_DataType* type);
 
   /**
@@ -45,7 +45,7 @@ struct Historizer {
    *
    * @return UA_HistoryDatabase
    */
-  UA_HistoryDatabase createDatabase();
+  static UA_HistoryDatabase createDatabase();
 
 private:
   Historizer(OODD::DatabaseDriverPtr db);

@@ -61,7 +61,7 @@ template <Information_Model::DataType im, size_t ua> struct DataTypes {
     return Information_Model::DataVariant(
         std::in_place_index<(size_t)IM_INDEX>);
   }
-  static void write(Information_Model::DataVariant) {}
+  static void write(const Information_Model::DataVariant&) {}
 };
 
 /**
@@ -164,7 +164,9 @@ public:
     Iterator(Browse& browse, size_t index) : browse_(browse), index_(index) {}
 
   public:
-    bool operator!=(const Iterator& other) { return index_ != other.index_; }
+    bool operator!=(const Iterator& other) const {
+      return index_ != other.index_;
+    }
     Iterator& operator++() {
       ++index_;
       return *this;
@@ -261,8 +263,9 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
 
   // For use as a filter predicate
   bool compareId(const UA_NodeId& ua, const std::string& im) {
-    if (ua.identifierType != UA_NODEIDTYPE_STRING)
+    if (ua.identifierType != UA_NODEIDTYPE_STRING) {
       return false;
+    }
     auto open6254_im = UA_STRING((char*)im.c_str());
     return UA_String_equal(&ua.identifier.string, &open6254_im);
   }

@@ -179,7 +179,7 @@ UA_StatusCode Historizer::registerNodeId(
       monitor_request.requestedParameters.samplingInterval = 1000000.0;
       monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
       auto result = UA_Server_createDataChangeMonitoredItem(server,
-          UA_TIMESTAMPSTORETURN_BOTH, monitor_request, NULL,
+          UA_TIMESTAMPSTORETURN_BOTH, monitor_request, nullptr,
           &Historizer::dataChanged);
       return result.statusCode;
     } else {
@@ -370,7 +370,7 @@ void Historizer::dataChanged(UA_Server* server, UA_UInt32 /*monitored_item_id*/,
     void* /*node_context*/, UA_UInt32 attribute_id, const UA_DataValue* value) {
   if (db_) {
     UA_NodeId* session_id =
-        nullptr; // obtain session id, its set to NULL in the
+        nullptr; // obtain session id, its set to nullptr in the
                  // example code, so might be imposable to do so
     UA_Boolean historize = false;
     if ((attribute_id & UA_ATTRIBUTEID_HISTORIZING) != 0) {
@@ -731,8 +731,8 @@ OODD::DataValue operator*(const OODD::DataValue& lhs, const intmax_t& rhs) {
       },
       [&](uintmax_t value) { result = value * abs(rhs); },
       [&](intmax_t value) { result = value * rhs; },
-      [&](float value) { result = value * rhs; },
-      [&](double value) { result = value * rhs; },
+      [&](float value) { result = (float)(value * rhs); },
+      [&](double value) { result = (double)(value * rhs); },
       [&](const string& /*value*/) {
         throw logic_error("Can not multiply Text");
       },
@@ -853,16 +853,10 @@ OODD::DataValue operator/(const OODD::DataValue& lhs, const intmax_t& rhs) {
       [&](bool /*value*/) {
         throw logic_error("Can not divide Boolean value");
       },
-      [&](uintmax_t value) { result = value / rhs; },
-      [&](intmax_t value) { result = value / rhs; },
-      [&](float value) {
-        // NOLINTNEXTINE(bugprone-narrowing-conversions)
-        result = value / rhs;
-      },
-      [&](double value) {
-        // NOLINTNEXTINE(bugprone-narrowing-conversions)
-        result = value / rhs;
-      },
+      [&](uintmax_t value) { result = (uintmax_t)(value / rhs); },
+      [&](intmax_t value) { result = (intmax_t)(value / rhs); },
+      [&](float value) { result = (float)(value / rhs); },
+      [&](double value) { result = (double)(value / rhs); },
       [&](const string& /*value*/) {
         throw logic_error("Can not divide Text");
       },

@@ -532,14 +532,14 @@ static void to_json(json& j, const Config& p) {
 } // namespace nlohmann
 
 const Config open62541::deserializeConfig(const string& file_path) {
-  Config config = makeDefaultConfig();
   ifstream input_file_stream(file_path);
   if (input_file_stream) {
     nlohmann::json j;
     input_file_stream >> j;
-    config = j.get<Config>();
+    return j.get<Config>();
+  } else {
+    return makeDefaultConfig();
   }
-  return config;
 }
 
 void open62541::serializeConfig(const string& file_path, const Config& config) {

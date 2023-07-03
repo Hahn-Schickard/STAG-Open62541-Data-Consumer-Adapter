@@ -225,6 +225,7 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
     if (callback_wrapper->writable_.has_value()) {
       string trace_msg = "Calling write callback for Node " + toString(node_id);
       UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access), checked in line 225
       auto write_cb = callback_wrapper->writable_.value();
       switch (value->value.type->typeKind) {
       case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
