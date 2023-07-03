@@ -87,6 +87,7 @@ void HaSLL_Logger_log([[maybe_unused]] void* _logContext, UA_LogLevel level,
   std::string message;
   va_list args_copy;
   va_copy(args_copy, args); // make a copy for the buffer size calculation
+  // NOLINTNEXTLINE(clang-analyzer-valist.*)
   auto len = vsnprintf(
       // NOLINTNEXTLINE(modernize-use-nullptr)
       0, 0, msg, args_copy); // get the amount of bytes needed to write
