@@ -27,7 +27,6 @@ pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
     optional<UA_NodeId> parent_node_id) {
   bool is_root = !parent_node_id.has_value();
 
-  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   logger_->log(SeverityLevel::INFO, "Adding a new node: {}, with id: {}",
       element->getElementName(), element->getElementId());
 
@@ -60,7 +59,7 @@ pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
   node_attr.displayName =
       UA_LOCALIZEDTEXT_ALLOC("EN_US", element->getElementName().c_str());
 
-  status = UA_Server_addObjectNode(server_->getServer(), node_id,
+  auto status = UA_Server_addObjectNode(server_->getServer(), node_id,
       parent_node_id.value(), reference_type_id, browse_name, type_definition,
       node_attr, nullptr, nullptr);
   return make_pair(status, node_id);
@@ -71,19 +70,23 @@ UA_StatusCode NodeBuilder::addDeviceNode(const NonemptyDevicePtr& device) {
   auto result = addObjectNode(device);
   status = result.first;
 
-  if (status == UA_STATUSCODE_GOOD) {
+  try {
+    checkStatusCode("While creating Object Node for " + device->getElementId() +
+            " " + device->getElementName() + " device",
+        status);
     auto device_element_group = device->getDeviceElementGroup();
     for (auto device_element : device_element_group->getSubelements()) {
       status = addDeviceNodeElement(device_element, result.second);
+      checkStatusCode("While adding DeviceElement " +
+              device_element->getElementId() + " " +
+              device_element->getElementName() + " node",
+          status);
     }
-  }
-
-  if (status != UA_STATUSCODE_GOOD) {
+  } catch (const StatusCodeNotGood& ex) {
     logger_->log(SeverityLevel::ERROR,
         "Failed to create a Node for Device: {}. Status: {}",
-        device->getElementName(), UA_StatusCode_name(status));
+        device->getElementName(), ex.what());
   }
-
   return status;
 }
 
@@ -132,8 +135,11 @@ UA_StatusCode NodeBuilder::addGroupNode(
   if (!device_element_group->getSubelements().empty()) {
     auto result = addObjectNode(meta_info, parent_id);
     status = result.first;
-
-    if (status == UA_STATUSCODE_GOOD) {
+    try {
+      checkStatusCode("Parent's " + toString(&parent_id) + " group element " +
+              meta_info->getElementName() + " with id " +
+              meta_info->getElementId() + " is empty.",
+          status);
       auto elements = device_element_group->getSubelements();
 
       logger_->log(SeverityLevel::INFO,
@@ -143,20 +149,12 @@ UA_StatusCode NodeBuilder::addGroupNode(
       for (auto element : elements) {
         status = addDeviceNodeElement(element, result.second);
       }
+    } catch (const StatusCodeNotGood& ex) {
+      logger_->log(SeverityLevel::ERROR,
+          "Failed to create a Node for Device Element Group: {}. Status: {}",
+          meta_info->getElementName(), ex.what());
     }
-  } else {
-    logger_->log(SeverityLevel::WARNING,
-        "Parent's {} group element {} with id {} is empty!",
-        toString(&parent_id), meta_info->getElementName(),
-        meta_info->getElementId());
   }
-
-  if (status != UA_STATUSCODE_GOOD) {
-    logger_->log(SeverityLevel::ERROR,
-        "Failed to create a Node for Device Element Group: {}. Status: {}",
-        meta_info->getElementName(), UA_StatusCode_name(status));
-  }
-
   return status;
 }
 
@@ -171,34 +169,35 @@ UA_StatusCode NodeBuilder::addFunctionNode(
 
 void setVariant(
     UA_VariableAttributes& value_attribute, const DataVariant& variant) {
+  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   // Postcondition: value_attribute.value is non-empty
   match(
       variant,
       [&](bool value) {
-        UA_Variant_setScalarCopy(
+        status = UA_Variant_setScalarCopy(
             &value_attribute.value, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
       },
       [&](uint64_t value) {
-        UA_Variant_setScalarCopy(
+        status = UA_Variant_setScalarCopy(
             &value_attribute.value, &value, &UA_TYPES[UA_TYPES_UINT64]);
       },
       [&](int64_t value) {
-        UA_Variant_setScalarCopy(
+        status = UA_Variant_setScalarCopy(
             &value_attribute.value, &value, &UA_TYPES[UA_TYPES_INT64]);
       },
       [&](double value) {
-        UA_Variant_setScalarCopy(
+        status = UA_Variant_setScalarCopy(
             &value_attribute.value, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
       },
       [&](DateTime value) {
         auto date_time = UA_DateTime_toStruct(value.getValue());
-        UA_Variant_setScalarCopy(
+        status = UA_Variant_setScalarCopy(
             &value_attribute.value, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
       },
       [&](vector<uint8_t> value) {
         string tmp(value.begin(), value.end());
         auto byte_string = UA_BYTESTRING_ALLOC(tmp.c_str());
-        UA_Variant_setScalarCopy(&value_attribute.value, &byte_string,
+        status = UA_Variant_setScalarCopy(&value_attribute.value, &byte_string,
             &UA_TYPES[UA_TYPES_BYTESTRING]);
       },
       [&](const string& value) {
@@ -206,9 +205,10 @@ void setVariant(
         open62541_string.length = strlen(value.c_str());
         open62541_string.data = (UA_Byte*)malloc(open62541_string.length);
         memcpy(open62541_string.data, value.c_str(), open62541_string.length);
-        UA_Variant_setScalarCopy(&value_attribute.value, &open62541_string,
-            &UA_TYPES[UA_TYPES_STRING]);
+        status = UA_Variant_setScalarCopy(&value_attribute.value,
+            &open62541_string, &UA_TYPES[UA_TYPES_STRING]);
       });
+  checkStatusCode("While setting variant value", status);
 }
 
 template <class MetricType>
@@ -227,11 +227,10 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
         UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->getElementName().c_str());
     value_attribute.dataType = toNodeId(metric->getDataType());
     status = UA_STATUSCODE_GOOD;
-  } catch (exception& ex) {
+  } catch (const exception& ex) {
     logger_->log(SeverityLevel::ERROR,
         "An exception occurred while trying to set " + metric_type_description +
-            " value! "
-            "Exception: {}",
+            " value! Exception: {}",
         ex.what());
   }
 
@@ -262,8 +261,8 @@ UA_StatusCode NodeBuilder::addReadableNode(
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
   status = setValue(node_attr, meta_info, metric, "readable metric");
-
-  if (status == UA_STATUSCODE_GOOD) {
+  try {
+    checkStatusCode("While setting default readable metric value", status);
     logger_->log(SeverityLevel::TRACE, "Assigning {} read callback for {} node",
         toString(metric->getDataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
@@ -274,6 +273,8 @@ UA_StatusCode NodeBuilder::addReadableNode(
     status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
         make_shared<CallbackWrapper>(metric->getDataType(),
             bind(&Metric::getMetricValue, metric.base())));
+    checkStatusCode("While setting readable metric callbacks", status);
+
     UA_DataSource data_source;
     data_source.read = &NodeCallbackHandler::readNodeValue;
 
@@ -281,16 +282,15 @@ UA_StatusCode NodeBuilder::addReadableNode(
     status = UA_Server_addDataSourceVariableNode(server_ptr, metrid_node_id,
         parent_id, reference_type_id, metric_browse_name, type_definition,
         node_attr, data_source, nullptr, nullptr);
+    checkStatusCode("While adding readable variable node to server", status);
 #ifdef UA_ENABLE_HISTORIZING
     server_->registerForHistorization(metrid_node_id, node_attr.value.type);
 #endif // UA_ENABLE_HISTORIZING
-  }
-  if (status != UA_STATUSCODE_GOOD) {
+  } catch (const StatusCodeNotGood& ex) {
     logger_->log(SeverityLevel::ERROR,
         "Failed to create a Node for Readable Metric: {}. Status: {}",
-        meta_info->getElementName(), UA_StatusCode_name(status));
+        meta_info->getElementName(), ex.what());
   }
-
   return status;
 }
 
@@ -317,8 +317,8 @@ UA_StatusCode NodeBuilder::addWritableNode(
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
 
   status = setValue(node_attr, meta_info, metric, "writable metric");
-
-  if (status == UA_STATUSCODE_GOOD) {
+  try {
+    checkStatusCode("While setting default writable metric value", status);
     logger_->log(SeverityLevel::TRACE,
         "Assigning {} read and write callbacks for {} node",
         toString(metric->getDataType()), toString(&metrid_node_id));
@@ -341,23 +341,20 @@ UA_StatusCode NodeBuilder::addWritableNode(
               bind(&WritableMetric::setMetricValue, metric.base(),
                   placeholders::_1)));
     }
+    checkStatusCode("While setting writable metric callbacks", status);
     data_source.write = &NodeCallbackHandler::writeNodeValue;
 
-    if (status == UA_STATUSCODE_GOOD) {
-      status = UA_Server_addDataSourceVariableNode(server_->getServer(),
-          metrid_node_id, parent_id, reference_type_id, metric_browse_name,
-          type_definition, node_attr, data_source, nullptr, nullptr);
+    status = UA_Server_addDataSourceVariableNode(server_->getServer(),
+        metrid_node_id, parent_id, reference_type_id, metric_browse_name,
+        type_definition, node_attr, data_source, nullptr, nullptr);
+    checkStatusCode("While adding writable variable node to server", status);
 #ifdef UA_ENABLE_HISTORIZING
-      server_->registerForHistorization(metrid_node_id, node_attr.value.type);
+    server_->registerForHistorization(metrid_node_id, node_attr.value.type);
 #endif // UA_ENABLE_HISTORIZING
-    }
-  }
-
-  if (status != UA_STATUSCODE_GOOD) {
+  } catch (const StatusCodeNotGood& ex) {
     logger_->log(SeverityLevel::ERROR,
         "Failed to create a Node for Writable Metric: {}. Status: {}",
-        meta_info->getElementName(), UA_StatusCode_name(status));
+        meta_info->getElementName(), ex.what());
   }
-
   return status;
 }
