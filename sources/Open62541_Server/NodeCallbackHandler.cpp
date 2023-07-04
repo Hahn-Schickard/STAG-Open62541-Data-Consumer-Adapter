@@ -193,13 +193,82 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
   return status;
 }
 
-UA_StatusCode NodeCallbackHandler::callNodeMethod(UA_Server* server,
-    const UA_NodeId* session_id, void* session_context,
-    const UA_NodeId* method_id, void* method_context,
-    const UA_NodeId* object_id, void* object_context, size_t input_size,
-    const UA_Variant* input, size_t output_size, UA_Variant* output) {
-  UA_StatusCode status = UA_STATUSCODE_BADNOTWRITABLE;
-  /**@TODO: implement callNodeMethod*/
+UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
+    [[maybe_unused]] UA_Server* server,
+    [[maybe_unused]] const UA_NodeId* session_id,
+    [[maybe_unused]] void* session_context, 
+    const UA_NodeId* method_id,
+    [[maybe_unused]] void* method_context,
+    [[maybe_unused]] const UA_NodeId* object_id, 
+    [[maybe_unused]] void* object_context,
+    size_t input_size, 
+    const UA_Variant* input, 
+    size_t output_size,
+    UA_Variant* output) { // clang-format on
+  UA_StatusCode status = UA_STATUSCODE_BADNOTEXECUTABLE;
+  auto it = node_calbacks_map_.find(*method_id);
+  if (it != node_calbacks_map_.end()) {
+    auto callback_wrapper = it->second;
+    try {
+      if (callback_wrapper->parameters_.size() == input_size) {
+        Function::Parameters args;
+        for (size_t i = 0; i < input_size; ++i) {
+          auto data_variant = toDataVariant(input[i]);
+          addSupportedParameter(
+              args, callback_wrapper->parameters_, i, data_variant);
+        }
+        if (output_size > 0) {
+          if (auto call = callback_wrapper->callable_) {
+            string trace_msg =
+                "Calling call callback for Method " + toString(method_id);
+            UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+            auto result_variant = call(args);
+            auto ua_variant = toUAVariant(result_variant);
+            UA_Variant_copy(&ua_variant, output);
+            UA_Variant_clear(&ua_variant);
+          } else {
+            string error_msg = "Method " + toString(method_id) +
+                " does not have any registered call callback!";
+            UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+          }
+        } else {
+          if (auto execute = callback_wrapper->executable_) {
+            string trace_msg =
+                "Calling execute callback for Method " + toString(method_id);
+            UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+            execute(args);
+          } else {
+            string error_msg = "Method " + toString(method_id) +
+                " does not have any registered execute callback!";
+            UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+          }
+        }
+      } else {
+        status = UA_STATUSCODE_BADTOOMANYARGUMENTS;
+      }
+    } catch (const invalid_argument& ex) {
+      string error_msg = "Provided Method " + toString(method_id) +
+          " argument is not supported:  " + ex.what();
+      UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      status = UA_STATUSCODE_BADINVALIDARGUMENT;
+    } catch (const range_error& ex) {
+      string error_msg = "Provided Method " + toString(method_id) +
+          " argument is out of range:  " + ex.what();
+      UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      status = UA_STATUSCODE_BADOUTOFRANGE;
+    } catch (const exception& ex) {
+      string error_msg = "An unhandled exception occurred while trying to "
+                         "call/execute Method " +
+          toString(method_id) + " Exception: " + ex.what();
+      UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      status = UA_STATUSCODE_BADNOCOMMUNICATION;
+    }
+  } else {
+    string error_msg = "Method " + toString(method_id) +
+        " does not have any registered callbacks!";
+    UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+    status = UA_STATUSCODE_BADNODEIDUNKNOWN;
+  }
   return status;
 }
 
