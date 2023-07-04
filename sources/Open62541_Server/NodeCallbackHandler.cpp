@@ -106,8 +106,11 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
     UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     auto callback_wrapper = it->second;
     try {
-      if (callback_wrapper->readable_) {
-        auto data_variant = callback_wrapper->readable_();
+      if (auto read = callback_wrapper->readable_) {
+        string trace_msg =
+            "Calling read callback for Node " + toString(node_id);
+        UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+        auto data_variant = read();
         if (toDataType(data_variant) == callback_wrapper->data_type_) {
           value->value = toUAVariant(data_variant);
           value->hasValue = true;
