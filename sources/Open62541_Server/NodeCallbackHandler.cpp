@@ -138,7 +138,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
     string error_msg = "Node " + toString(node_id) +
         " does not have any registered read callbacks!";
     UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
-    status = UA_STATUSCODE_BADNOTFOUND;
+    status = UA_STATUSCODE_BADNODEIDUNKNOWN;
   }
   return status;
 }
@@ -180,7 +180,7 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
     string error_msg = "Node " + toString(node_id) +
         " does not have any registered callbacks!";
     UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
-    status = UA_STATUSCODE_BADNOTFOUND;
+    status = UA_STATUSCODE_BADNODEIDUNKNOWN;
   }
   return status;
 }
