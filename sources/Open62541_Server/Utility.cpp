@@ -91,4 +91,39 @@ void checkStatusCode(const UA_StatusCode& status, bool uncertain_is_bad) {
   checkStatusCode(string(), status, uncertain_is_bad);
 }
 
+UA_Variant toUAVariant(const DataVariant& variant) {
+  UA_Variant result;
+  match(
+      variant,
+      [&result](bool value) {
+        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
+      },
+      [&result](uintmax_t value) {
+        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_uintmax]);
+      },
+      [&result](intmax_t value) {
+        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_intmax]);
+      },
+      [&result](double value) {
+        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
+      },
+      [&result](const DateTime& value) {
+        UA_DateTime date_time = UA_DateTime_fromUnixTime(value.getValue());
+        UA_Variant_setScalarCopy(
+            &result, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
+      },
+      [&result](const string& value) {
+        auto ua_string = makeUAString(value);
+        UA_Variant_setScalarCopy(
+            &result, &ua_string, &UA_TYPES[UA_TYPES_STRING]);
+        UA_String_clear(&ua_string);
+      },
+      [&result](const vector<uint8_t>& value) {
+        auto ua_byte_string = makeUAByteString(value);
+        UA_Variant_setScalarCopy(
+            &result, &ua_byte_string, &UA_TYPES[UA_TYPES_BYTESTRING]);
+        UA_String_clear(&ua_byte_string);
+      });
+  return result;
+}
 } // namespace open62541

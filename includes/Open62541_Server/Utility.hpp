@@ -28,6 +28,8 @@ void checkStatusCode(const std::string& msg, const UA_StatusCode& status,
 void checkStatusCode(
     const UA_StatusCode& status, bool uncertain_is_bad = false);
 
+UA_Variant toUAVariant(const Information_Model::DataVariant& variant);
+
 /** The UA_TYPES constant that corresponds to intmax_t */
 constexpr const size_t UA_TYPES_intmax =
     std::numeric_limits<intmax_t>::digits == 63   ? UA_TYPES_INT64
