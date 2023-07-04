@@ -65,6 +65,14 @@ UA_String makeUAString(const string& input) {
   return result;
 }
 
+UA_ByteString makeUAByteString(const vector<uint8_t>& input) {
+  UA_ByteString result;
+  result.length = input.size();
+  result.data = (UA_Byte*)malloc(result.length);
+  memcpy(result.data, input.data(), result.length);
+  return result;
+}
+
 StatusCodeNotGood::StatusCodeNotGood(
     const string& msg, const UA_StatusCode& code)
     : runtime_error("Received status code: " +
