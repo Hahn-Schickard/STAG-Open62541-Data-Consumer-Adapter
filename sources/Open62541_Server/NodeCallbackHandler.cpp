@@ -154,102 +154,16 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
       string trace_msg = "Calling write callback for Node " + toString(node_id);
       UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
       auto write_cb = callback_wrapper->writable_;
-      switch (value->value.type->typeKind) {
-      case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-        bool boolean_value = *((bool*)(value->value.data));
-        write_cb(DataVariant(boolean_value));
+      auto data_variant = toDataVariant(value->value);
+      try {
+        write_cb(data_variant);
         status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-        write_cb(DataVariant((intmax_t) * ((UA_SByte*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-        write_cb(DataVariant((intmax_t) * ((UA_Int16*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-        write_cb(DataVariant((intmax_t) * ((UA_Int32*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-        write_cb(DataVariant((intmax_t) * ((UA_Int64*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-        UA_DateTime time_value = *((UA_DateTime*)(value->value.data));
-        write_cb(DataVariant(DateTime(UA_DateTime_toUnixTime(time_value))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-        write_cb(DataVariant((uintmax_t) * ((UA_Byte*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-        write_cb(DataVariant((uintmax_t) * ((UA_UInt16*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-        write_cb(DataVariant((uintmax_t) * ((UA_UInt32*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-        write_cb(DataVariant((uintmax_t) * ((UA_UInt64*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-        write_cb(
-            DataVariant((uintmax_t) * ((UA_StatusCode*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-        write_cb(DataVariant(*((UA_Float*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-        write_cb(DataVariant(*((UA_Double*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-        auto* bytestring = (UA_ByteString*)(value->value.data);
-        write_cb(DataVariant(std::vector<uint8_t>(
-            bytestring->data, bytestring->data + bytestring->length)));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-        auto* ua_string = (UA_String*)(value->value.data);
-        auto string_value = string((char*)ua_string->data, ua_string->length);
-        write_cb(DataVariant(string_value));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
-        string error_msg = "GUID to Object Link conversion is not implemented";
-        UA_LOG_WARNING(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
-        [[fallthrough]];
-      }
-      default: {
-        string error_msg = "Node " + toString(node_id) + " does not take " +
-            string(value->value.type->typeName) +
-            "as its argument for write callback!";
+      } catch (const exception& ex) {
+        string error_msg =
+            "An unhandled exception occurred while trying to write to Node " +
+            toString(node_id) + " Exception: " + ex.what();
         UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
-        status = UA_STATUSCODE_BADINVALIDARGUMENT;
-        break;
-      }
+        status = UA_STATUSCODE_BADINTERNALERROR;
       }
     } else {
       string error_msg = "Node " + toString(node_id) +
