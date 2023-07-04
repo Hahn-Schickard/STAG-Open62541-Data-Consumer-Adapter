@@ -24,6 +24,7 @@ struct CallbackWrapper {
 
   const Information_Model::DataType data_type_ =
       Information_Model::DataType::UNKNOWN;
+  const Information_Model::Function::ParameterTypes parameters_;
   const ReadCallback readable_ = nullptr;
   const WriteCallback writable_ = nullptr;
   const ExecuteCallback executable_ = nullptr;
@@ -37,8 +38,10 @@ struct CallbackWrapper {
   CallbackWrapper(Information_Model::DataType type,
       const ReadCallback& read_callback, const WriteCallback& write_callback);
   CallbackWrapper(Information_Model::DataType type,
+      const Information_Model::Function::ParameterTypes parameters,
       const ExecuteCallback& execute_callback);
   CallbackWrapper(Information_Model::DataType type,
+      const Information_Model::Function::ParameterTypes parameters,
       const ExecuteCallback& execute_callback,
       const CallCallback& cancel_callback);
 };

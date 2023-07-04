@@ -22,13 +22,16 @@ CallbackWrapper::CallbackWrapper(DataType type,
     const ReadCallback& read_callback, const WriteCallback& write_callback)
     : data_type_(type), readable_(read_callback), writable_(write_callback) {}
 
-CallbackWrapper::CallbackWrapper(
-    Information_Model::DataType type, const ExecuteCallback& execute_callback)
-    : data_type_(type), executable_(execute_callback) {}
+CallbackWrapper::CallbackWrapper(Information_Model::DataType type,
+    const Function::ParameterTypes parameters,
+    const ExecuteCallback& execute_callback)
+    : data_type_(type), parameters_(parameters), executable_(execute_callback) {
+}
 
 CallbackWrapper::CallbackWrapper(Information_Model::DataType type,
+    const Function::ParameterTypes parameters,
     const ExecuteCallback& execute_callback, const CallCallback& call_callback)
-    : data_type_(type), executable_(execute_callback),
+    : data_type_(type), parameters_(parameters), executable_(execute_callback),
       callable_(call_callback) {}
 
 void NodeCallbackHandler::initialise(const UA_Logger* logger) {
