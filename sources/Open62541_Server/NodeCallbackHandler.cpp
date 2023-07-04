@@ -156,14 +156,22 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
   auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     auto callback_wrapper = it->second;
-    if (callback_wrapper->writable_) {
+    if (auto write = callback_wrapper->writable_) {
       string trace_msg = "Calling write callback for Node " + toString(node_id);
       UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
-      auto write_cb = callback_wrapper->writable_;
-      auto data_variant = toDataVariant(value->value);
       try {
-        write_cb(data_variant);
-        status = UA_STATUSCODE_GOOD;
+        auto data_variant = toDataVariant(value->value);
+        if (toDataType(data_variant) == callback_wrapper->data_type_) {
+          write(data_variant);
+          status = UA_STATUSCODE_GOOD;
+        } else {
+          string error_msg = "Expected to send " +
+              toString(callback_wrapper->data_type_) +
+              " data type, but sending " + toString(toDataType(data_variant)) +
+              " instead while writing Node " + toString(node_id) + " value";
+          UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+          status = UA_STATUSCODE_BADTYPEMISMATCH;
+        }
       } catch (const exception& ex) {
         string error_msg =
             "An unhandled exception occurred while trying to write to Node " +
