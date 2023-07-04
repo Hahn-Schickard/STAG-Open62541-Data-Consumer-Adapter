@@ -1,5 +1,6 @@
 #include "Utility.hpp"
 
+#include <open62541/types.h>
 #include <open62541/types_generated.h>
 #include <stdexcept>
 
@@ -125,5 +126,85 @@ UA_Variant toUAVariant(const DataVariant& variant) {
         UA_String_clear(&ua_byte_string);
       });
   return result;
+}
+
+DataVariant toDataVariant(const UA_Variant& variant) {
+  switch (variant.type->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
+    bool value = *((bool*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    intmax_t value = (intmax_t) * ((UA_SByte*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    intmax_t value = (intmax_t) * ((UA_Int16*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    intmax_t value = (intmax_t) * ((UA_Int32*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    intmax_t value = (intmax_t) * ((UA_Int64*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
+    UA_DateTime time_value = *((UA_DateTime*)(variant.data));
+    DateTime value(UA_DateTime_toUnixTime(time_value));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    uintmax_t value = (uintmax_t) * ((UA_Byte*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    uintmax_t value = (uintmax_t) * ((UA_UInt16*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    uintmax_t value = (uintmax_t) * ((UA_UInt32*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    uintmax_t value = (uintmax_t) * ((UA_UInt64*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
+    UA_StatusCode status_code = *((UA_StatusCode*)(variant.data));
+    auto value = string(UA_StatusCode_name(status_code));
+    if (!value.empty()) {
+      return DataVariant(value);
+    } else {
+      // if no human readable string is available, return the code as an integer
+      return DataVariant((uintmax_t)status_code);
+    }
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    auto value = (double)*((UA_Float*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    auto value = (double)*((UA_Double*)(variant.data));
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
+    auto* byte_string = (UA_ByteString*)(variant.data);
+    auto value = vector<uint8_t>(
+        byte_string->data, byte_string->data + byte_string->length);
+    return DataVariant(value);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
+    auto* ua_string = (UA_String*)(variant.data);
+    auto value = toString(ua_string);
+    return DataVariant(value);
+  }
+  default: {
+    string error_msg = string(variant.type->typeName) +
+        " into Information_Model::DataVariant conversion is not supported";
+    throw runtime_error(error_msg);
+  }
+  }
 }
 } // namespace open62541

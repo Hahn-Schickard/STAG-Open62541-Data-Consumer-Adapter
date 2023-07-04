@@ -29,6 +29,7 @@ void checkStatusCode(
     const UA_StatusCode& status, bool uncertain_is_bad = false);
 
 UA_Variant toUAVariant(const Information_Model::DataVariant& variant);
+Information_Model::DataVariant toDataVariant(const UA_Variant& variant);
 
 /** The UA_TYPES constant that corresponds to intmax_t */
 constexpr const size_t UA_TYPES_intmax =
