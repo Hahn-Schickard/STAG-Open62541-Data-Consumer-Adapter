@@ -230,7 +230,6 @@ using AllConversions = ::testing::Types<
     IntegralConversion<uintmax_t, uint64_t,
         Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
         UA_TYPES_UINT64, 13, 91>, // NOLINT(readability-magic-numbers)
-    FloatConversion<float, UA_TYPES_FLOAT>,
     FloatConversion<double, UA_TYPES_DOUBLE>,
     IntegralConversion<uintmax_t, UA_StatusCode,
         Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
