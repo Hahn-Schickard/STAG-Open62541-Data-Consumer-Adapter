@@ -23,7 +23,6 @@ target_link_libraries(${THIS} PUBLIC
                               date::date
                               Variant_Visitor::Variant_Visitor
                               HaSLL::HaSLL
-                              HSCUL::HSCUL
                               Config_Serializer
 )
 
