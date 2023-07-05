@@ -383,6 +383,7 @@ UA_StatusCode NodeBuilder::addMethodNode(
         make_shared<CallbackWrapper>(function->result_type, function->parameters, move(execute_cb)));
   }
   UA_Argument* input_args = nullptr;
+  UA_Argument* output = nullptr;
   try {
     checkStatusCode("While setting function callbacks", status);
     auto arg_count = function->parameters.size();
@@ -400,11 +401,10 @@ UA_StatusCode NodeBuilder::addMethodNode(
         input_args[i].description =
             UA_LOCALIZEDTEXT_ALLOC("EN_US", arg_desc.c_str());
       }
-      UA_Argument* output = nullptr;
       uint8_t output_count = 0;
       if (function->result_type != DataType::NONE) {
         output_count = 1;
-        UA_Argument_init(output);
+        output = UA_Argument_new();
         output->name = makeUAString(toString(function->result_type));
         output->dataType = toNodeId(function->result_type);
         output->valueRank = UA_VALUERANK_SCALAR; // all returns are scalar
