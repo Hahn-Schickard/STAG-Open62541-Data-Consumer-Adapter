@@ -370,14 +370,14 @@ UA_StatusCode NodeBuilder::addMethodNode(
       server_->getServerNamespace(), meta_info->getElementId().c_str());
   if (function->result_type != DataType::NONE ||
       function->result_type != DataType::UNKNOWN) {
-    auto call_cb =
+    CallbackWrapper::CallCallback call_cb =
         bind(static_cast<DataVariant (Function::*)(
                  const Function::Parameters&, uintmax_t)>(&Function::call),
             function.base(), placeholders::_1, (uintmax_t)1000);
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
         make_shared<CallbackWrapper>(function->result_type, function->parameters, move(call_cb)));
   } else {
-    auto execute_cb =
+    CallbackWrapper::ExecuteCallback execute_cb =
         bind(&Function::execute, function.base(), placeholders::_1);
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
         make_shared<CallbackWrapper>(function->result_type, function->parameters, move(execute_cb)));
