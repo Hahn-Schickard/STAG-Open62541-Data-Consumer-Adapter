@@ -322,12 +322,14 @@ UA_StatusCode NodeBuilder::addFunctionNode(
                  const Function::Parameters&, uintmax_t)>(&Function::call),
             function.base(), placeholders::_1, (uintmax_t)1000);
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
-        make_shared<CallbackWrapper>(function->result_type, function->parameters, move(call_cb)));
+        make_shared<CallbackWrapper>(
+            function->result_type, function->parameters, move(call_cb)));
   } else {
     CallbackWrapper::ExecuteCallback execute_cb =
         bind(&Function::execute, function.base(), placeholders::_1);
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
-        make_shared<CallbackWrapper>(function->result_type, function->parameters, move(execute_cb)));
+        make_shared<CallbackWrapper>(
+            function->result_type, function->parameters, move(execute_cb)));
   }
   UA_Argument* input_args = nullptr;
   UA_Argument* output = nullptr;
