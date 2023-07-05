@@ -17,16 +17,31 @@ namespace open62541 {
 struct CallbackWrapper {
   using ReadCallback = std::function<Information_Model::DataVariant()>;
   using WriteCallback = std::function<void(Information_Model::DataVariant)>;
+  using ExecuteCallback =
+      std::function<void(Information_Model::Function::Parameters)>;
+  using CallCallback = std::function<Information_Model::DataVariant(
+      Information_Model::Function::Parameters)>;
 
-  const Information_Model::DataType data_type_;
-  ReadCallback readable_;
-  std::optional<WriteCallback> writable_;
+  const Information_Model::DataType data_type_ =
+      Information_Model::DataType::UNKNOWN;
+  const Information_Model::Function::ParameterTypes parameters_;
+  const ReadCallback readable_ = nullptr;
+  const WriteCallback writable_ = nullptr;
+  const ExecuteCallback executable_ = nullptr;
+  const CallCallback callable_ = nullptr;
 
-  CallbackWrapper();
+  CallbackWrapper(){};
+  CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback);
   CallbackWrapper(
-      Information_Model::DataType type, const ReadCallback& read_callback);
+      Information_Model::DataType type, WriteCallback write_callback);
+  CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback,
+      WriteCallback write_callback);
   CallbackWrapper(Information_Model::DataType type,
-      const ReadCallback& read_callback, const WriteCallback& write_callback);
+      const Information_Model::Function::ParameterTypes& parameters,
+      ExecuteCallback execute_callback);
+  CallbackWrapper(Information_Model::DataType type,
+      const Information_Model::Function::ParameterTypes& parameters,
+      CallCallback call_callback);
 };
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 
@@ -108,6 +123,12 @@ public:
       const UA_NodeId* session_id, void* session_context,
       const UA_NodeId* node_id, void* node_context,
       const UA_NumericRange* range, const UA_DataValue* value);
+
+  static UA_StatusCode callNodeMethod(UA_Server* server,
+      const UA_NodeId* session_id, void* session_context,
+      const UA_NodeId* method_id, void* method_context,
+      const UA_NodeId* object_id, void* object_context, size_t input_size,
+      const UA_Variant* input, size_t output_size, UA_Variant* output);
 };
 } // namespace open62541
 

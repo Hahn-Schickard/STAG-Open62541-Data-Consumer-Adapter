@@ -10,25 +10,30 @@ bool operator==(const UA_NodeId& lhs, const UA_NodeId& rhs) {
 }
 
 namespace open62541 {
-CallbackWrapper::CallbackWrapper()
-    : CallbackWrapper(DataType::UNKNOWN, nullptr, nullptr) {}
+CallbackWrapper::CallbackWrapper(DataType type, ReadCallback read_callback)
+    : data_type_(type), readable_(move(read_callback)) {}
+
+CallbackWrapper::CallbackWrapper(DataType type, WriteCallback write_callback)
+    : data_type_(type), writable_(move(write_callback)) {}
 
 CallbackWrapper::CallbackWrapper(
-    DataType type, const ReadCallback& read_callback)
-    : CallbackWrapper(type, read_callback, nullptr) {} // NOLINT
+    DataType type, ReadCallback read_callback, WriteCallback write_callback)
+    : data_type_(type), readable_(move(read_callback)),
+      writable_(move(write_callback)) {}
 
-CallbackWrapper::CallbackWrapper(DataType type,
-    const ReadCallback& read_callback, const WriteCallback& write_callback)
-    : data_type_(type) {
-  if (read_callback) {
-    readable_ = read_callback;
-  }
-  if (write_callback) {
-    writable_ = write_callback;
-  } else {
-    writable_ = nullopt;
-  }
-}
+CallbackWrapper::CallbackWrapper(Information_Model::DataType type,
+    // NOLINTNEXTLINE(modernize-pass-by-value)
+    const Function::ParameterTypes& parameters,
+    ExecuteCallback execute_callback)
+    : data_type_(type), parameters_(parameters),
+      executable_(move(execute_callback)) {}
+
+CallbackWrapper::CallbackWrapper(Information_Model::DataType type,
+    // NOLINTNEXTLINE(modernize-pass-by-value)
+    const Function::ParameterTypes& parameters, //
+    CallCallback call_callback)
+    : data_type_(type), parameters_(parameters),
+      callable_(move(call_callback)) {}
 
 void NodeCallbackHandler::initialise(const UA_Logger* logger) {
   logger_ = logger;
@@ -102,99 +107,28 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
     UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     auto callback_wrapper = it->second;
     try {
-      auto variant_value = callback_wrapper->readable_();
-      match(
-          variant_value,
-          [&](bool boolean_value) {
-            if (callback_wrapper->data_type_ == DataType::BOOLEAN) {
-              UA_Variant_setScalarCopy(
-                  &value->value, &boolean_value, &UA_TYPES[UA_TYPES_BOOLEAN]);
-            } else {
-              throw runtime_error("Tried to read a Boolean data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](uintmax_t integer_value) {
-            if (callback_wrapper->data_type_ == DataType::UNSIGNED_INTEGER) {
-              UA_Variant_setScalarCopy(
-                  &value->value, &integer_value, &UA_TYPES[UA_TYPES_uintmax]);
-            } else {
-              throw runtime_error("Tried to read an Integer data type "
-                                  "when node data type is:" +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](intmax_t long_value) {
-            if (callback_wrapper->data_type_ == DataType::INTEGER) {
-              UA_Variant_setScalarCopy(
-                  &value->value, &long_value, &UA_TYPES[UA_TYPES_intmax]);
-            } else {
-              throw runtime_error("Tried to read a Long data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](double double_value) {
-            if (callback_wrapper->data_type_ == DataType::DOUBLE) {
-              UA_Variant_setScalarCopy(
-                  &value->value, &double_value, &UA_TYPES[UA_TYPES_DOUBLE]);
-            } else {
-              throw runtime_error("Tried to read a Double data type "
-                                  "when node data type is:" +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](DateTime time_value) {
-            if (callback_wrapper->data_type_ == DataType::TIME) {
-              UA_DateTime date_time =
-                  UA_DateTime_fromUnixTime(time_value.getValue());
-              UA_Variant_setScalarCopy(
-                  &value->value, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
-            } else {
-              throw runtime_error("Tried to read a Time data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](vector<uint8_t> opaque_value) {
-            if (callback_wrapper->data_type_ == DataType::OPAQUE) {
-              UA_ByteString byte_string;
-              byte_string.length = opaque_value.size();
-              byte_string.data = (UA_Byte*)malloc(byte_string.length);
-              memcpy(byte_string.data, opaque_value.data(), byte_string.length);
-              UA_Variant_setScalarCopy(
-                  &value->value, &byte_string, &UA_TYPES[UA_TYPES_BYTESTRING]);
-              UA_String_clear(&byte_string);
-            } else {
-              throw runtime_error("Tried to read an Opaque data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          },
-          [&](const string& string_value) {
-            if (callback_wrapper->data_type_ == DataType::STRING) {
-              UA_String open62541_string;
-              open62541_string.length = strlen(string_value.c_str());
-              open62541_string.data = (UA_Byte*)malloc(open62541_string.length);
-              memcpy(open62541_string.data, string_value.c_str(),
-                  open62541_string.length);
-              UA_Variant_setScalarCopy(
-                  &value->value, &open62541_string, &UA_TYPES[UA_TYPES_STRING]);
-              UA_String_clear(&open62541_string);
-            } else {
-              throw runtime_error("Tried to read a String data type "
-                                  "when node data type is: " +
-                  toString(callback_wrapper->data_type_));
-            }
-          });
-      value->hasValue = true;
-      status = UA_STATUSCODE_GOOD;
-    } catch (const runtime_error& error) {
-      string error_msg = "Type missmatch error occurred while reading Node " +
-          toString(node_id) + " Error message: " + error.what();
-      UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
-      status = UA_STATUSCODE_BADTYPEMISMATCH;
+      if (auto read = callback_wrapper->readable_) {
+        string trace_msg =
+            "Calling read callback for Node " + toString(node_id);
+        UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+        auto data_variant = read();
+        if (toDataType(data_variant) == callback_wrapper->data_type_) {
+          value->value = toUAVariant(data_variant);
+          value->hasValue = true;
+          status = UA_STATUSCODE_GOOD;
+        } else {
+          string error_msg = "Expected to receive " +
+              toString(callback_wrapper->data_type_) +
+              " data type, but received " + toString(toDataType(data_variant)) +
+              " instead while reading Node " + toString(node_id) + " value";
+          UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+          status = UA_STATUSCODE_BADTYPEMISMATCH;
+        }
+      } else {
+        string error_msg = "Node " + toString(node_id) +
+            " does not have any registered read callback!";
+        UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      }
     } catch (const exception& exp) {
       string error_msg = "An exception occurred, while reading Node " +
           toString(node_id) + " exception: " + exp.what();
@@ -205,6 +139,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
     string error_msg = "Node " + toString(node_id) +
         " does not have any registered read callbacks!";
     UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+    status = UA_STATUSCODE_BADNODEIDUNKNOWN;
   }
   return status;
 }
@@ -222,107 +157,28 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
   auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     auto callback_wrapper = it->second;
-    if (callback_wrapper->writable_.has_value()) {
+    if (auto write = callback_wrapper->writable_) {
       string trace_msg = "Calling write callback for Node " + toString(node_id);
       UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
-      // NOLINTNEXTLINE(bugprone-unchecked-optional-access), checked in line 225
-      auto write_cb = callback_wrapper->writable_.value();
-      switch (value->value.type->typeKind) {
-      case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-        bool boolean_value = *((bool*)(value->value.data));
-        write_cb(DataVariant(boolean_value));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-        write_cb(DataVariant((intmax_t) * ((UA_SByte*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-        write_cb(DataVariant((intmax_t) * ((UA_Int16*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-        write_cb(DataVariant((intmax_t) * ((UA_Int32*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-        write_cb(DataVariant((intmax_t) * ((UA_Int64*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-        UA_DateTime time_value = *((UA_DateTime*)(value->value.data));
-        write_cb(DataVariant(DateTime(UA_DateTime_toUnixTime(time_value))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-        write_cb(DataVariant((uintmax_t) * ((UA_Byte*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-        write_cb(DataVariant((uintmax_t) * ((UA_UInt16*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-        write_cb(DataVariant((uintmax_t) * ((UA_UInt32*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-        write_cb(DataVariant((uintmax_t) * ((UA_UInt64*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-        write_cb(
-            DataVariant((uintmax_t) * ((UA_StatusCode*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-        write_cb(DataVariant(*((UA_Float*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-        write_cb(DataVariant(*((UA_Double*)(value->value.data))));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-        auto* bytestring = (UA_ByteString*)(value->value.data);
-        write_cb(DataVariant(std::vector<uint8_t>(
-            bytestring->data, bytestring->data + bytestring->length)));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-        auto* ua_string = (UA_String*)(value->value.data);
-        auto string_value = string((char*)ua_string->data, ua_string->length);
-        write_cb(DataVariant(string_value));
-        status = UA_STATUSCODE_GOOD;
-        break;
-      }
-      case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
-        string error_msg = "GUID to Object Link conversion is not implemented";
-        UA_LOG_WARNING(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
-        [[fallthrough]];
-      }
-      default: {
-        string error_msg = "Node " + toString(node_id) + " does not take " +
-            string(value->value.type->typeName) +
-            "as its argument for write callback!";
+      try {
+        auto data_variant = toDataVariant(value->value);
+        if (toDataType(data_variant) == callback_wrapper->data_type_) {
+          write(data_variant);
+          status = UA_STATUSCODE_GOOD;
+        } else {
+          string error_msg = "Expected to send " +
+              toString(callback_wrapper->data_type_) +
+              " data type, but sending " + toString(toDataType(data_variant)) +
+              " instead while writing Node " + toString(node_id) + " value";
+          UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+          status = UA_STATUSCODE_BADTYPEMISMATCH;
+        }
+      } catch (const exception& ex) {
+        string error_msg =
+            "An unhandled exception occurred while trying to write to Node " +
+            toString(node_id) + " Exception: " + ex.what();
         UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
-        status = UA_STATUSCODE_BADINVALIDARGUMENT;
-        break;
-      }
+        status = UA_STATUSCODE_BADINTERNALERROR;
       }
     } else {
       string error_msg = "Node " + toString(node_id) +
@@ -333,7 +189,86 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
     string error_msg = "Node " + toString(node_id) +
         " does not have any registered callbacks!";
     UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
-    status = UA_STATUSCODE_BADNOTFOUND;
+    status = UA_STATUSCODE_BADNODEIDUNKNOWN;
+  }
+  return status;
+}
+
+UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
+    [[maybe_unused]] UA_Server* server,
+    [[maybe_unused]] const UA_NodeId* session_id,
+    [[maybe_unused]] void* session_context, 
+    const UA_NodeId* method_id,
+    [[maybe_unused]] void* method_context,
+    [[maybe_unused]] const UA_NodeId* object_id, 
+    [[maybe_unused]] void* object_context,
+    size_t input_size, 
+    const UA_Variant* input, 
+    size_t output_size,
+    UA_Variant* output) { // clang-format on
+  UA_StatusCode status = UA_STATUSCODE_BADNOTEXECUTABLE;
+  auto it = node_calbacks_map_.find(*method_id);
+  if (it != node_calbacks_map_.end()) {
+    auto callback_wrapper = it->second;
+    try {
+      if (callback_wrapper->parameters_.size() == input_size) {
+        Function::Parameters args;
+        for (size_t i = 0; i < input_size; ++i) {
+          auto data_variant = toDataVariant(input[i]);
+          addSupportedParameter(
+              args, callback_wrapper->parameters_, i, data_variant);
+        }
+        if (output_size > 0) {
+          if (auto call = callback_wrapper->callable_) {
+            string trace_msg =
+                "Calling call callback for Method " + toString(method_id);
+            UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+            auto result_variant = call(args);
+            auto ua_variant = toUAVariant(result_variant);
+            UA_Variant_copy(&ua_variant, output);
+            UA_Variant_clear(&ua_variant);
+          } else {
+            string error_msg = "Method " + toString(method_id) +
+                " does not have any registered call callback!";
+            UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+          }
+        } else {
+          if (auto execute = callback_wrapper->executable_) {
+            string trace_msg =
+                "Calling execute callback for Method " + toString(method_id);
+            UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+            execute(args);
+          } else {
+            string error_msg = "Method " + toString(method_id) +
+                " does not have any registered execute callback!";
+            UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+          }
+        }
+      } else {
+        status = UA_STATUSCODE_BADTOOMANYARGUMENTS;
+      }
+    } catch (const invalid_argument& ex) {
+      string error_msg = "Provided Method " + toString(method_id) +
+          " argument is not supported:  " + ex.what();
+      UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      status = UA_STATUSCODE_BADINVALIDARGUMENT;
+    } catch (const range_error& ex) {
+      string error_msg = "Provided Method " + toString(method_id) +
+          " argument is out of range:  " + ex.what();
+      UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      status = UA_STATUSCODE_BADOUTOFRANGE;
+    } catch (const exception& ex) {
+      string error_msg = "An unhandled exception occurred while trying to "
+                         "call/execute Method " +
+          toString(method_id) + " Exception: " + ex.what();
+      UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      status = UA_STATUSCODE_BADNOCOMMUNICATION;
+    }
+  } else {
+    string error_msg = "Method " + toString(method_id) +
+        " does not have any registered callbacks!";
+    UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+    status = UA_STATUSCODE_BADNODEIDUNKNOWN;
   }
   return status;
 }
