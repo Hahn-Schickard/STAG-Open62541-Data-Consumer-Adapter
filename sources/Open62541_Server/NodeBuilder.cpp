@@ -159,50 +159,6 @@ UA_StatusCode NodeBuilder::addGroupNode(
   return status;
 }
 
-void setVariant(
-    UA_VariableAttributes& value_attribute, const DataVariant& variant) {
-  UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-  // Postcondition: value_attribute.value is non-empty
-  match(
-      variant,
-      [&](bool value) {
-        status = UA_Variant_setScalarCopy(
-            &value_attribute.value, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
-      },
-      [&](uint64_t value) {
-        status = UA_Variant_setScalarCopy(
-            &value_attribute.value, &value, &UA_TYPES[UA_TYPES_UINT64]);
-      },
-      [&](int64_t value) {
-        status = UA_Variant_setScalarCopy(
-            &value_attribute.value, &value, &UA_TYPES[UA_TYPES_INT64]);
-      },
-      [&](double value) {
-        status = UA_Variant_setScalarCopy(
-            &value_attribute.value, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
-      },
-      [&](DateTime value) {
-        auto date_time = UA_DateTime_toStruct(value.getValue());
-        status = UA_Variant_setScalarCopy(
-            &value_attribute.value, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
-      },
-      [&](vector<uint8_t> value) {
-        string tmp(value.begin(), value.end());
-        auto byte_string = UA_BYTESTRING_ALLOC(tmp.c_str());
-        status = UA_Variant_setScalarCopy(&value_attribute.value, &byte_string,
-            &UA_TYPES[UA_TYPES_BYTESTRING]);
-      },
-      [&](const string& value) {
-        UA_String open62541_string;
-        open62541_string.length = strlen(value.c_str());
-        open62541_string.data = (UA_Byte*)malloc(open62541_string.length);
-        memcpy(open62541_string.data, value.c_str(), open62541_string.length);
-        status = UA_Variant_setScalarCopy(&value_attribute.value,
-            &open62541_string, &UA_TYPES[UA_TYPES_STRING]);
-      });
-  checkStatusCode("While setting variant value", status);
-}
-
 template <class MetricType>
 UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
     const Information_Model::NonemptyNamedElementPtr& meta_info,
@@ -212,7 +168,7 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
 
   try {
     auto variant = metric->getMetricValue();
-    setVariant(value_attribute, variant);
+    value_attribute.value = toUAVariant(variant);
     value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
         "EN_US", meta_info->getElementDescription().c_str());
     value_attribute.displayName =
