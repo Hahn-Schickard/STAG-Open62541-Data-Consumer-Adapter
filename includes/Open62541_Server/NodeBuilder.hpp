@@ -29,10 +29,6 @@ class NodeBuilder {
           device_element_group,
       const UA_NodeId& parent_id);
 
-  UA_StatusCode addFunctionNode(
-      const Information_Model::DeviceElementPtr& function,
-      const UA_NodeId& parent_id);
-
   UA_StatusCode addReadableNode(
       const Information_Model::NonemptyNamedElementPtr& meta_info,
       const Information_Model::NonemptyMetricPtr& metric,
@@ -43,7 +39,7 @@ class NodeBuilder {
       const Information_Model::NonemptyWritableMetricPtr& metric,
       const UA_NodeId& parent_id);
 
-  UA_StatusCode addMethodNode(
+  UA_StatusCode addFunctionNode(
       const Information_Model::NonemptyNamedElementPtr& meta_info,
       const Information_Model::NonemptyFunctionPtr& function,
       const UA_NodeId& parent_id);

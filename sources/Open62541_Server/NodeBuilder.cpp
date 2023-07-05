@@ -116,7 +116,7 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(
         status = addWritableNode(element, metric, parent_id);
       },
       [&](const NonemptyFunctionPtr& function) {
-        status = addMethodNode(element, function, parent_id);
+        status = addFunctionNode(element, function, parent_id);
       });
 
   if (status != UA_STATUSCODE_GOOD) {
@@ -156,15 +156,6 @@ UA_StatusCode NodeBuilder::addGroupNode(
           meta_info->getElementName(), ex.what());
     }
   }
-  return status;
-}
-
-UA_StatusCode NodeBuilder::addFunctionNode(
-    const DeviceElementPtr& function, const UA_NodeId& parent_id) {
-  UA_StatusCode status = UA_STATUSCODE_BADNOTIMPLEMENTED;
-  logger_->log(SeverityLevel::WARNING, "Method element is not implemented!",
-      toString(&parent_id), function->getElementName());
-  //@TODO: Implement addFunctionNode stub
   return status;
 }
 
@@ -362,7 +353,7 @@ UA_StatusCode NodeBuilder::addWritableNode(
   return status;
 }
 
-UA_StatusCode NodeBuilder::addMethodNode(
+UA_StatusCode NodeBuilder::addFunctionNode(
     const NonemptyNamedElementPtr& meta_info,
     const NonemptyFunctionPtr& function, const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
