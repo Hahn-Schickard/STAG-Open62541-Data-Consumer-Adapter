@@ -135,19 +135,19 @@ DataVariant toDataVariant(const UA_Variant& variant) {
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    intmax_t value = (intmax_t) * ((UA_SByte*)(variant.data));
+    intmax_t value = *((UA_SByte*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    intmax_t value = (intmax_t) * ((UA_Int16*)(variant.data));
+    intmax_t value = *((UA_Int16*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    intmax_t value = (intmax_t) * ((UA_Int32*)(variant.data));
+    intmax_t value = *((UA_Int32*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    intmax_t value = (intmax_t) * ((UA_Int64*)(variant.data));
+    intmax_t value = *((UA_Int64*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
@@ -156,19 +156,19 @@ DataVariant toDataVariant(const UA_Variant& variant) {
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-    uintmax_t value = (uintmax_t) * ((UA_Byte*)(variant.data));
+    uintmax_t value = *((UA_Byte*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    uintmax_t value = (uintmax_t) * ((UA_UInt16*)(variant.data));
+    uintmax_t value = *((UA_UInt16*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    uintmax_t value = (uintmax_t) * ((UA_UInt32*)(variant.data));
+    uintmax_t value = *((UA_UInt32*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    uintmax_t value = (uintmax_t) * ((UA_UInt64*)(variant.data));
+    uintmax_t value = *((UA_UInt64*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
@@ -182,11 +182,11 @@ DataVariant toDataVariant(const UA_Variant& variant) {
     }
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-    auto value = (double)*((UA_Float*)(variant.data));
+    double value = *((UA_Float*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    auto value = (double)*((UA_Double*)(variant.data));
+    double value = *((UA_Double*)(variant.data));
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
