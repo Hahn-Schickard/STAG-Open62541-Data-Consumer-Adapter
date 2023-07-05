@@ -395,7 +395,7 @@ UA_StatusCode NodeBuilder::addMethodNode(
         input_args[i].name = makeUAString(toString(parameter.first));
         input_args[i].dataType = toNodeId(parameter.first);
         input_args[i].valueRank =
-            UA_VALUERANK_SCALAR; // opaques are ByteStrings
+            UA_VALUERANK_SCALAR; // each input type is scalar
         auto arg_desc =
             (parameter.second ? "Optional " : "") + toString(parameter.first);
         input_args[i].description =
@@ -436,6 +436,7 @@ UA_StatusCode NodeBuilder::addMethodNode(
         meta_info->getElementName(), ex.what());
   }
 
+  // clean local pointer instances to avoid memory leaks
   if (input_args != nullptr) {
     // input args are copied into method node or are not used in case of failure
     free(input_args);
