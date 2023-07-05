@@ -320,7 +320,8 @@ UA_StatusCode NodeBuilder::addFunctionNode(
     CallbackWrapper::CallCallback call_cb =
         bind(static_cast<DataVariant (Function::*)(
                  const Function::Parameters&, uintmax_t)>(&Function::call),
-            function.base(), placeholders::_1, (uintmax_t)1000);
+            function.base(), placeholders::_1,
+            (uintmax_t)1000); // NOLINT(readability-magic-numbers) call-timeout
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
         make_shared<CallbackWrapper>(
             function->result_type, function->parameters, move(call_cb)));

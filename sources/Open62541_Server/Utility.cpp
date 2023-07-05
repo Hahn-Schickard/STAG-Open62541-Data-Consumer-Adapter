@@ -135,7 +135,8 @@ DataVariant toDataVariant(const UA_Variant& variant) {
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    intmax_t value = *((UA_SByte*)(variant.data));
+    // NOLINTNEXTLINE(bugprone-signed-char-misuse,cert-str34-c)
+    intmax_t value = *((UA_SByte*)(variant.data)); // this is not a char
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {

@@ -194,6 +194,7 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
   return status;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
     [[maybe_unused]] UA_Server* server,
     [[maybe_unused]] const UA_NodeId* session_id,
