@@ -45,7 +45,7 @@ class NodeBuilder {
 
   UA_StatusCode addMethodNode(
       const Information_Model::NonemptyNamedElementPtr& meta_info,
-      const Information_Model::NonemptyFunctionPtr& metric,
+      const Information_Model::NonemptyFunctionPtr& function,
       const UA_NodeId& parent_id);
 
   template <class MetricType> // either Metric or WritableMetric
