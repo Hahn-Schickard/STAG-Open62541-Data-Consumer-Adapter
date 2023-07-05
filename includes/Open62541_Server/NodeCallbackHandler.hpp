@@ -30,20 +30,18 @@ struct CallbackWrapper {
   const ExecuteCallback executable_ = nullptr;
   const CallCallback callable_ = nullptr;
 
-  CallbackWrapper() = default;
+  CallbackWrapper(){};
+  CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback);
   CallbackWrapper(
-      Information_Model::DataType type, const ReadCallback& read_callback);
-  CallbackWrapper(
-      Information_Model::DataType type, const WriteCallback& write_callback);
+      Information_Model::DataType type, WriteCallback write_callback);
+  CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback,
+      WriteCallback write_callback);
   CallbackWrapper(Information_Model::DataType type,
-      const ReadCallback& read_callback, const WriteCallback& write_callback);
+      const Information_Model::Function::ParameterTypes& parameters,
+      ExecuteCallback execute_callback);
   CallbackWrapper(Information_Model::DataType type,
-      const Information_Model::Function::ParameterTypes parameters,
-      const ExecuteCallback& execute_callback);
-  CallbackWrapper(Information_Model::DataType type,
-      const Information_Model::Function::ParameterTypes parameters,
-      const ExecuteCallback& execute_callback,
-      const CallCallback& cancel_callback);
+      const Information_Model::Function::ParameterTypes& parameters,
+      CallCallback call_callback);
 };
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 

@@ -10,29 +10,30 @@ bool operator==(const UA_NodeId& lhs, const UA_NodeId& rhs) {
 }
 
 namespace open62541 {
-CallbackWrapper::CallbackWrapper(
-    DataType type, const ReadCallback& read_callback)
-    : data_type_(type), readable_(read_callback) {}
+CallbackWrapper::CallbackWrapper(DataType type, ReadCallback read_callback)
+    : data_type_(type), readable_(move(read_callback)) {}
+
+CallbackWrapper::CallbackWrapper(DataType type, WriteCallback write_callback)
+    : data_type_(type), writable_(move(write_callback)) {}
 
 CallbackWrapper::CallbackWrapper(
-    DataType type, const WriteCallback& write_callback)
-    : data_type_(type), writable_(write_callback) {}
-
-CallbackWrapper::CallbackWrapper(DataType type,
-    const ReadCallback& read_callback, const WriteCallback& write_callback)
-    : data_type_(type), readable_(read_callback), writable_(write_callback) {}
+    DataType type, ReadCallback read_callback, WriteCallback write_callback)
+    : data_type_(type), readable_(move(read_callback)),
+      writable_(move(write_callback)) {}
 
 CallbackWrapper::CallbackWrapper(Information_Model::DataType type,
-    const Function::ParameterTypes parameters,
-    const ExecuteCallback& execute_callback)
-    : data_type_(type), parameters_(parameters), executable_(execute_callback) {
-}
+    // NOLINTNEXTLINE(modernize-pass-by-value)
+    const Function::ParameterTypes& parameters,
+    ExecuteCallback execute_callback)
+    : data_type_(type), parameters_(parameters),
+      executable_(move(execute_callback)) {}
 
 CallbackWrapper::CallbackWrapper(Information_Model::DataType type,
-    const Function::ParameterTypes parameters,
-    const ExecuteCallback& execute_callback, const CallCallback& call_callback)
-    : data_type_(type), parameters_(parameters), executable_(execute_callback),
-      callable_(call_callback) {}
+    // NOLINTNEXTLINE(modernize-pass-by-value)
+    const Function::ParameterTypes& parameters, //
+    CallCallback call_callback)
+    : data_type_(type), parameters_(parameters),
+      callable_(move(call_callback)) {}
 
 void NodeCallbackHandler::initialise(const UA_Logger* logger) {
   logger_ = logger;
