@@ -437,8 +437,12 @@ UA_StatusCode NodeBuilder::addMethodNode(
   }
 
   if (input_args != nullptr) {
-    free(input_args); // input args have been copied into method node or are not
-                      // needed, so we can clear these values
+    // input args are copied into method node or are not used in case of failure
+    free(input_args);
+  }
+  if (output != nullptr) {
+    // output is copied into method node or not used in case of failure
+    UA_Argument_delete(output);
   }
   return status;
 }
