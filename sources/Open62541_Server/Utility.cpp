@@ -178,7 +178,7 @@ DataVariant toDataVariant(const UA_Variant& variant) {
       return DataVariant(value);
     } else {
       // if no human readable string is available, return the code as an integer
-      return DataVariant((uintmax_t)status_code);
+      return DataVariant(to_string(status_code));
     }
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
