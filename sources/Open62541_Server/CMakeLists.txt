@@ -20,10 +20,8 @@ target_sources(${THIS} PRIVATE
 target_link_libraries(${THIS} PUBLIC
                               Information_Model::Information_Model
                               open62541::open62541
-                              date::date
                               Variant_Visitor::Variant_Visitor
                               HaSLL::HaSLL
-                              HSCUL::HSCUL
                               Config_Serializer
 )
 

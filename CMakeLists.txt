@@ -1,16 +1,19 @@
 cmake_minimum_required(VERSION 3.6)
 
-option(USE_CONAN "Enables integeated conan package manager module. (Requires conan and python3 to be installed)" ON)
+option(CMAKE_CONAN "Enables integeated conan package manager module. (Requires conan and python3 to be installed)" ON)
 
-if(USE_CONAN)
-        set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan_provider.cmake)
+if(CMAKE_CONAN)
+        set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan.cmake)
 endif()
 
 #@+ ======================== User PROJECT_NAME configuration ============================
-set(THIS Open62541_Data_Consumer_Adapter)
+set(THIS Data_Consumer_Adapter_pen62541)
 #@- =========================== END OF USER CONFIGURATION ===============================
 
 project(${THIS} CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(INCLUDES_DIR "${PROJECT_SOURCE_DIR}/includes")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -37,13 +40,10 @@ option(HISTORIZATION "Enable historization service, required open62541 with defi
 
 #@+ ======================== User PACKAGES configuration ===========================
 list(APPEND DEPENDENCIES_LIST
-            HaSLL
-            HSCUL
-            Variant_Visitor
             Data_Consumer_Adapter_Interface
+            HaSLL
             open62541
             nlohmann_json
-            date
             Threads
 )
 if(HISTORIZATION)
