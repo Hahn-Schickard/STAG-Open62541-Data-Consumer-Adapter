@@ -531,7 +531,7 @@ static void to_json(json& j, const Config& p) {
 }
 } // namespace nlohmann
 
-const Config open62541::deserializeConfig(const string& file_path) {
+Config open62541::deserializeConfig(const string& file_path) {
   ifstream input_file_stream(file_path);
   if (input_file_stream) {
     nlohmann::json j;
