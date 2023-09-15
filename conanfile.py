@@ -59,7 +59,8 @@ class PackageConan(ConanFile):
         self.requires("data_consumer_adapter_interface/[~0.2]@hahn-schickard/stable",
                       headers=True, libs=True, transitive_headers=True, transitive_libs=True)
         if self.options.historization:
-            self.requires("oodd/[~0.1]@hahn-schickard/stable",
+            self.requires("date/3.0.1")
+            self.requires("oodd/[~0.2]@hahn-schickard/stable",
                           headers=True, libs=True, transitive_headers=True, transitive_libs=True)
         self.test_requires("gtest/[~1.11]")
         # @- END USER REQUIREMENTS
@@ -83,6 +84,7 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables['STATIC_CODE_ANALYSIS'] = False
         tc.variables['RUN_TESTS'] = False
+        tc.variables['COVERAGE_TRACKING'] = False
         tc.variables['CMAKE_CONAN'] = False
         tc.variables['HISTORIZATION'] = self.options.historization
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
@@ -104,8 +106,8 @@ class PackageConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.set_property("cmake_find_mode", "both")
         # @+ START USER DEFINES
-        self.cpp_info.set_property("cmake_file_name", to_camel_case(self.name))
-        cmake_target_name = to_camel_case(
-            self.name) + "::" + to_camel_case(self.name)
-        self.cpp_info.set_property("cmake_target_name", cmake_target_name)
+        project_name = to_camel_case(self.name)
         # @- END USER DEFINES
+        self.cpp_info.set_property("cmake_file_name", project_name)
+        cmake_target_name = project_name + "::" + project_name
+        self.cpp_info.set_property("cmake_target_name", cmake_target_name)
