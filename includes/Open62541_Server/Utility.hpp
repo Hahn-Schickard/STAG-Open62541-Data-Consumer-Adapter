@@ -8,18 +8,28 @@
 #include <open62541/types.h>
 #include <string>
 
-#ifdef __GNUC__
-#define UNUSED(x) x##_UNUSED __attribute__((__unused__))
-#else
-#define UNUSED(x) x##_UNUSED
-#endif
-
 namespace open62541 {
 
 UA_NodeId toNodeId(Information_Model::DataType type);
 std::string toString(const UA_String* input);
 std::string toString(const UA_NodeId* node_id);
 std::string toString(const UA_QualifiedName* name);
+UA_String makeUAString(const std::string& input);
+UA_ByteString makeUAByteString(const std::vector<uint8_t>& input);
+
+struct StatusCodeNotGood : public std::runtime_error {
+  StatusCodeNotGood(const std::string& msg, const UA_StatusCode& code);
+
+  const UA_StatusCode status;
+};
+
+void checkStatusCode(const std::string& msg, const UA_StatusCode& status,
+    bool uncertain_is_bad = false);
+void checkStatusCode(
+    const UA_StatusCode& status, bool uncertain_is_bad = false);
+
+UA_Variant toUAVariant(const Information_Model::DataVariant& variant);
+Information_Model::DataVariant toDataVariant(const UA_Variant& variant);
 
 /** The UA_TYPES constant that corresponds to intmax_t */
 constexpr const size_t UA_TYPES_intmax =

@@ -1,4 +1,70 @@
 # Changelog
+## [0.3.0] - 2023.07.05 
+### Added
+ - `OpcuaAdapter::registrate()` method
+ - `OpcuaAdapter::deregistrate()` method
+ - `CallbackWrapper::ExecuteCallback` 
+ - `CallbackWrapper::CallCallback` 
+ - `NodeCallbackHandler::callNodeMethod()` method
+ - `UA_String makeUAString(const std::string& input)` function to **Utility.hpp**
+ - `UA_ByteString makeUAByteString(const std::vector<uint8_t>& input)` function to **Utility.hpp**
+ - `StatusCodeNotGood` exception to **Utility.hpp**
+ - `void checkStatusCode(const std::string& msg, const UA_StatusCode& status, bool uncertain_is_bad = false)` function to **Utility.hpp**
+ - `void checkStatusCode(const UA_StatusCode& status, bool uncertain_is_bad = false)` function to **Utility.hpp**
+ - `UA_Variant toUAVariant(const Information_Model::DataVariant& variant)` function to **Utility.hpp**
+ - `Information_Model::DataVariant toDataVariant(const UA_Variant& variant)` function to **Utility.hpp**
+ - write only metric support to `NodeBuilder::addWritableNode()` method
+ - `NodeBuilder::addFunctionNode()` method implementation
+ - data type check for `NodeCallbackHandler::writeNodeValue()` method calls
+
+### Changed 
+ - OODD dependency to fuzzy v0.2
+ - `OpcuaAdapter::start()` method to accept `std::vector<Information_Model::DevicePtr>` 
+ - `Historizer::registerNodeId()` method to be static
+ - `Historizer::createDatabase()` method to be static
+ - `NodeBuilder::add*()` methods to accept const references
+ - `NodeBuilder::add*()` methods to use `checkStatusCode()` function
+ - `NodeCallbackHandler::readNodeValue()` method implementation to use `toDataType()`
+ - `NodeCallbackHandler::writeNodeValue()` method implementation to use `toDataVariant()`
+ - **Config_Serializer** implementation to use struct field names in order to increase readability
+
+### Removed
+ - direct nlohmann_json in favor of using indirect one via HaSLL
+ - direct HaSLL in favor of using indirect one via Data_Consumer_Adapter_Interface
+ - direct HSCUL dependency
+ - `OpcuaAdapter::handleEvent()` method
+ - `FloatConversion<float, UA_TYPES_FLOAT>` test case from **NodeCallbackHandlerTests**
+ - `IntegralConversion<uintmax_t, UA_StatusCode, ...>` test case from **NodeCallbackHandlerTests**
+
+## [0.2.0] - 2023.05.12
+### Added
+ - fuzzy HSCUL dependency to v0.3
+ - optional fuzzy OODD dependency to v0.1
+ - historization option to conan recipe
+ - cmake HISTORIZATION option
+ - Historizer.hpp
+ - Historization service
+ - History View capability
+ - `UA_StatusCode NodeBuilder::deleteDeviceNode()`
+ - `AES128_SHA256_RSAO_AEP` enum value to SecurityPolicy struct in Config.hpp
+ - `UA_ServerConfig_Discovery` struct to Config.hpp
+ - `Historization` struct to Config.hpp
+ - Device deregistration event handling
+ - better Information_Model::Device examples
+
+### Changed 
+ - open62541 dependency to v1.3.4
+ - default OPC UA Config to contain STAG project information
+ - `UA_ServerConfig` into `std::unique_ptr<UA_ServerConfig>` in Configuration.hpp 
+ - `Configuration` struct implementation, to use new open62541 configuration functions
+
+### Removed
+ - `std::unique_ptr<const UA_ServerConfig> Configuration::getConfig()` 
+ - `Double_Use` logic error from Configuration.hpp 
+
+### Fixed
+ - fallthrough declarations in NodeCallbackHandler.cpp
+
 ## [0.1.7] - 2022.11.21
 ### Changed
  - conan packaging recipe

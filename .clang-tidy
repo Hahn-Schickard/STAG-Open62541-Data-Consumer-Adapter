@@ -1,6 +1,7 @@
 Checks: >
   -*,
   bugprone-*,
+  -bugprone-easily-swappable-parameters,
   cert-*,
   clang-analyzer-*,
   modernize-*,
@@ -14,6 +15,7 @@ Checks: >
   -readability-else-after-return,
   -readability-named-parameter,
   -readability-identifier-length,
+  -readability-isolate-declaration,
   -readability-uppercase-literal*
 CheckOptions:
  - { key: readability-function-cognitive-complexity.IgnoreMacros,       value: true             }

@@ -124,6 +124,11 @@ format:
   image: ${DOCKER_REGISTRY}/hs-conan-debian-bookworm-slim:6.0.0
   needs: ["build:debian-bookworm"]
 
+format:
+  extends: .format
+  image: ${DOCKER_REGISTRY}/hs-conan-debian-buster-slim:latest
+  needs: ["build:debian-buster"]
+
 lint:
   extends: .lint
   image: ${DOCKER_REGISTRY}/hs-conan-debian-bookworm-slim:6.0.0

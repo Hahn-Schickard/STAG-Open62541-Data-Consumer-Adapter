@@ -9,7 +9,7 @@
 #include <thread>
 
 using namespace std;
-using namespace DCAI;
+using namespace Data_Consumer_Adapter;
 using namespace HaSLL;
 
 void printException(const exception& e, int level = 0) {
@@ -22,7 +22,7 @@ void printException(const exception& e, int level = 0) {
   }
 }
 
-class EventSourceFake : public Event_Model::EventSource<ModelRegistryEvent> {
+class EventSourceFake : public Event_Model::EventSource<ModelRepositoryEvent> {
   void handleException(exception_ptr eptr) {
     if (eptr) {
       rethrow_exception(eptr);
@@ -34,7 +34,7 @@ public:
       : EventSource(
             bind(&EventSourceFake::handleException, this, placeholders::_1)) {}
 
-  void sendEvent(ModelRegistryEventPtr event) { notify(event); }
+  void sendEvent(ModelRepositoryEventPtr event) { notify(event); }
 };
 
 int main() {

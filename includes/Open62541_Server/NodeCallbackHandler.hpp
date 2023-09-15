@@ -17,15 +17,31 @@ namespace open62541 {
 struct CallbackWrapper {
   using ReadCallback = std::function<Information_Model::DataVariant()>;
   using WriteCallback = std::function<void(Information_Model::DataVariant)>;
+  using ExecuteCallback =
+      std::function<void(Information_Model::Function::Parameters)>;
+  using CallCallback = std::function<Information_Model::DataVariant(
+      Information_Model::Function::Parameters)>;
 
-  const Information_Model::DataType data_type_;
-  ReadCallback readable_;
-  std::optional<WriteCallback> writable_;
+  const Information_Model::DataType data_type_ =
+      Information_Model::DataType::UNKNOWN;
+  const Information_Model::Function::ParameterTypes parameters_;
+  const ReadCallback readable_ = nullptr;
+  const WriteCallback writable_ = nullptr;
+  const ExecuteCallback executable_ = nullptr;
+  const CallCallback callable_ = nullptr;
 
-  CallbackWrapper();
+  CallbackWrapper(){};
   CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback);
+  CallbackWrapper(
+      Information_Model::DataType type, WriteCallback write_callback);
   CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback,
       WriteCallback write_callback);
+  CallbackWrapper(Information_Model::DataType type,
+      const Information_Model::Function::ParameterTypes& parameters,
+      ExecuteCallback execute_callback);
+  CallbackWrapper(Information_Model::DataType type,
+      const Information_Model::Function::ParameterTypes& parameters,
+      CallCallback call_callback);
 };
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 
@@ -63,7 +79,7 @@ public:
    * @pre callback_wrapper is non-empty.
    */
   static UA_StatusCode addNodeCallbacks(
-      UA_NodeId node_id, CallbackWrapperPtr callback_wrapper);
+      UA_NodeId node_id, const CallbackWrapperPtr& callback_wrapper);
 
   /**
    * @pre There is a callback bound to nodeId.
@@ -85,9 +101,9 @@ public:
    * @return UA_StatusCode
    */
   static UA_StatusCode readNodeValue(UA_Server* server,
-      const UA_NodeId* session_id, void* sessionContext,
-      const UA_NodeId* nodeId, void* nodeContext,
-      UA_Boolean includeSourceTimeStamp, const UA_NumericRange* range,
+      const UA_NodeId* session_id, void* session_context,
+      const UA_NodeId* node_id, void* node_context,
+      UA_Boolean include_source_time_stamp, const UA_NumericRange* range,
       UA_DataValue* value);
 
   /**
@@ -104,9 +120,15 @@ public:
    * @return UA_StatusCode
    */
   static UA_StatusCode writeNodeValue(UA_Server* server,
-      const UA_NodeId* sessionId, void* sessionContext,
-      const UA_NodeId* node_id, void* nodeContext, const UA_NumericRange* range,
-      const UA_DataValue* value);
+      const UA_NodeId* session_id, void* session_context,
+      const UA_NodeId* node_id, void* node_context,
+      const UA_NumericRange* range, const UA_DataValue* value);
+
+  static UA_StatusCode callNodeMethod(UA_Server* server,
+      const UA_NodeId* session_id, void* session_context,
+      const UA_NodeId* method_id, void* method_context,
+      const UA_NodeId* object_id, void* object_context, size_t input_size,
+      const UA_Variant* input, size_t output_size, UA_Variant* output);
 };
 } // namespace open62541
 

@@ -13,7 +13,7 @@ void removeLoggers();
 extern void HaSLL_Logger_log(void* _, UA_LogLevel level,
     UA_LogCategory category, const char* msg, va_list args);
 
-extern void HaSLL_Logger_clear(void* logContext);
+extern void HaSLL_Logger_clear(void* log_context);
 }
 
 #endif //__OPCUA_NULL_LOGGER_HPP

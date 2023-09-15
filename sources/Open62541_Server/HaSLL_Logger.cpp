@@ -8,6 +8,7 @@
 using namespace std;
 using namespace HaSLI;
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 enum class Open62541_Logger {
   NETWORK,
   CHANNEL,
@@ -74,7 +75,8 @@ void removeLoggers() {
   }
 }
 
-void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
+// NOLINTNEXTLINE(readability-identifier-naming)
+void HaSLL_Logger_log([[maybe_unused]] void* _logContext, UA_LogLevel level,
     UA_LogCategory category, const char* msg, va_list args) {
   const std::lock_guard<std::mutex> lock(logger_mutex);
 
@@ -85,11 +87,16 @@ void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
   std::string message;
   va_list args_copy;
   va_copy(args_copy, args); // make a copy for the buffer size calculation
+  // NOLINTNEXTLINE(clang-analyzer-valist.*)
   auto len = vsnprintf(
+      // NOLINTNEXTLINE(modernize-use-nullptr)
       0, 0, msg, args_copy); // get the amount of bytes needed to write
   // vsnprintf returns a negative value if an error occurred
   if (len > 0) {
     message.resize(len + 1); // Add space for NULL terminator
+    // clang-tidy bug for vsnprintf() @see
+    // https://bugs.llvm.org/show_bug.cgi?id=41311
+    // NOLINTNEXTLINE(clang-analyzer-valist.*, cert-err33-c, readability-*)
     vsnprintf(&message[0], len + 1, msg, args); // write args into the message
     message.resize(len); // Remove the NULL terminator
   } // else -> message will be empty
@@ -147,9 +154,10 @@ void HaSLL_Logger_log(UNUSED(void* _logContext), UA_LogLevel level,
   }
 }
 
-void HaSLL_Logger_clear(UNUSED(void* logContext)) {
+void HaSLL_Logger_clear([[maybe_unused]] void* log_context) {
   // Nothing to clear
 }
 
+// NOLINTNEXTLINE
 const UA_Logger HaSLL_Logger_ = {HaSLL_Logger_log, NULL, HaSLL_Logger_clear};
-const UA_Logger* HaSLL_Logger = &HaSLL_Logger_;
+const UA_Logger* HaSLL_Logger = &HaSLL_Logger_; // NOLINT
