@@ -1,4 +1,5 @@
 variables:
-  RUN_VALGRIND: "true"
-  VALGRIND_TARGET: "build/sources/runner/Runner"
-  VALGRIND_TARGET_ARGS: "5"
+ RUN_EXE_COVERAGE: "False"
+ EXE_TARGET: "build/sources/runner/Runner"
+ EXE_TARGET_ARGS: ""
+ TEST_RUNNER_TARGET: "build/unit_tests/Unit_Tests_Runner"
