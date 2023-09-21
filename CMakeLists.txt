@@ -23,6 +23,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(VERBOSE_FILE_INCLUSION "Prints all included header files" ON)
 option(STATIC_CODE_ANALYSIS "Enable Code Linter" ON)
 option(RUN_TESTS "Enables Unit tests runner (Requires GTest framework)" ON)
+option(COVERAGE_TRACKING "Enable code test coverage tracking with gcov" ON)
 
 include(GNUInstallDirs)
 include(macros)
