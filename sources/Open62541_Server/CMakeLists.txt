@@ -20,7 +20,6 @@ target_sources(${THIS} PRIVATE
 target_link_libraries(${THIS} PUBLIC
                               Information_Model::Information_Model
                               open62541::open62541
-                              date::date
                               Variant_Visitor::Variant_Visitor
                               HaSLL::HaSLL
                               Config_Serializer
@@ -28,7 +27,10 @@ target_link_libraries(${THIS} PUBLIC
 
 
 if(HISTORIZATION)
-    target_link_libraries(${THIS} PUBLIC OODD::OODD)
+    target_link_libraries(${THIS} PUBLIC
+                                  date::date
+                                  OODD::OODD
+    )
     target_compile_definitions(${THIS} PUBLIC UA_ENABLE_HISTORIZING)
 endif()
 
@@ -45,7 +47,6 @@ PRINT_TARGET_PROPERTIES(${THIS})
 
 install(
     TARGETS ${THIS}
-    EXPORT ${PROJECT_NAME}Targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )

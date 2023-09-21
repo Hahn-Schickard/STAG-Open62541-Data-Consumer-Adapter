@@ -5,17 +5,30 @@ set(THIS Unit_Tests_Runner)
 file(GLOB Device_Test_Suite "${CMAKE_CURRENT_LIST_DIR}/Device/*")
 file(GLOB Shared_Resources "${CMAKE_CURRENT_LIST_DIR}/*.?pp")
 
+#@+ ====================== User TEST_SUITES configuration ==========================
+list(APPEND TEST_SUITES
+                       ${Device_Test_Suite}
+                       ${Shared_Resources}
+)
+#@- ========================= END OF USER CONFIGURATION ============================
+
 find_package(GTest REQUIRED)
 
 add_executable(${THIS})
 target_sources(${THIS} PRIVATE
-                       ${Shared_Resources}
-                       ${Device_Test_Suite}
+                       "testRunner.cpp"
+                       ${TEST_SUITES}
 )
 
-target_link_libraries(${THIS} PUBLIC
+#@+ ==================== User TEST_DEPENDCIES configuration =======================
+list(APPEND TEST_DEPENDCIES
                               OPCUA_Adapter
-                              GTest::GTest
+)
+#@- ========================= END OF USER CONFIGURATION ===========================
+
+target_link_libraries(${THIS} PUBLIC
+                              ${TEST_DEPENDCIES}
+                              GTest::gtest
 )
 
 add_test(
