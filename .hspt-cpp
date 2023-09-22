@@ -1,8 +1,8 @@
 {
     "project_template": "cpp",
     "project_template_version": "0.2.5",
-    "project_name_long": "Data Consumer Adapter Open62541",
-    "project_name_short": "Data_Consumer_Adapter_pen62541",
+    "project_name_long": "Open62541 Data Consumer Adapter",
+    "project_name_short": "Open62541_Data_Consumer_Adapter",
     "project_description": "This module wraps [open62541](https://github.com/open62541/open62541) implementation as a Data Consumer Adapter for the STAG [System Runner](https://git.hahn-schickard.de/hahn-schickard/software-sollutions/application-engineering/internal/opc_ua_dev_group/gateway-project/system-runner)",
     "license": "Apache v2",
     "ci_configuration": "multi-system",
