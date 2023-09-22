@@ -22,6 +22,12 @@ build:ubuntu-20.04:
   extends: .build
   image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-20.04:6.0.0
 
+build:fedora-32:
+  extends: .build
+  image:
+    name: ${DOCKER_REGISTRY}/hs-conan-fedora-32:6.0.0
+    entrypoint: ["/bin/sh", "-c"]
+
 build:fedora-34:
   extends: .build
   image:
@@ -55,6 +61,13 @@ test:ubuntu-20.04:
   image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-20.04:6.0.0
   needs: ["build:ubuntu-20.04"]
 
+test:fedora-32:
+  extends: .test
+  image:
+    name: ${DOCKER_REGISTRY}/hs-conan-fedora-32:6.0.0
+    entrypoint: ["/bin/sh", "-c"]
+  needs: ["build:fedora-32"]
+
 test:fedora-34:
   extends: .test
   image:
@@ -87,6 +100,13 @@ analyze_exe_memory:ubuntu-20.04:
   image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-20.04:6.0.0
   needs: ["build:ubuntu-20.04"]
 
+analyze_exe_memory:fedora-32:
+  extends: .analyze_exe_memory
+  image:
+    name: ${DOCKER_REGISTRY}/hs-conan-fedora-32:6.0.0
+    entrypoint: ["/bin/sh", "-c"]
+  needs: ["build:fedora-32"]
+
 analyze_exe_memory:fedora-34:
   extends: .analyze_exe_memory
   image:
@@ -118,6 +138,13 @@ analyze_test_runner_memory:ubuntu-20.04:
   extends: .analyze_test_runner_memory
   image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-20.04:6.0.0
   needs: ["build:ubuntu-20.04"]
+
+analyze_test_runner_memory:fedora-32:
+  extends: .analyze_test_runner_memory
+  image:
+    name: ${DOCKER_REGISTRY}/hs-conan-fedora-32:6.0.0
+    entrypoint: ["/bin/sh", "-c"]
+  needs: ["build:fedora-32"]
 
 analyze_test_runner_memory:fedora-34:
   extends: .analyze_test_runner_memory
@@ -164,6 +191,12 @@ package:ubuntu-18.04:
 package:ubuntu-20.04:
   extends: .package
   image: ${DOCKER_REGISTRY}/hs-conan-ubuntu-20.04:6.0.0
+
+package:fedora-32:
+  extends: .package
+  image:
+    name: ${DOCKER_REGISTRY}/hs-conan-fedora-32:6.0.0
+    entrypoint: ["/bin/sh", "-c"]
 
 package:fedora-34:
   extends: .package
