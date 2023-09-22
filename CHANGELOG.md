@@ -14,6 +14,7 @@
  - doxygen documentation style
  - README.md
  - `const Config deserializeConfig(const std::string& file_path)` function to no longer return `const Config`
+ - `historization` field to be optional in `open62541::Config` struct
 
 ### Removed
  - CMake package configuration
