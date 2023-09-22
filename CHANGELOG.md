@@ -1,4 +1,25 @@
 # Changelog
+## [0.3.1] - 2023.09.22
+### Added
+ - `COVERAGE_TRACKING` cmake option 
+ - `CMAKE_CXX_STANDARD` variable
+ - plantuml support to doxygen
+ - `CMAKE_EXE_LINKER_FLAGS` to use old dynamic linker tags
+
+### Changed
+ - conan recipe to use conan v2 syntax
+ - conan cmake integration to use conan v2 engine
+ - CMake requirement to 3.24
+ - CONTRIBUTING.md
+ - doxygen documentation style
+ - README.md
+ - `const Config deserializeConfig(const std::string& file_path)` function to no longer return `const Config`
+
+### Removed
+ - CMake package configuration
+ - CMake `FIND_INSTALLED_DEPENDENCIES` macro
+ - CMake `EXPORT` targets
+
 ## [0.3.0] - 2023.07.05 
 ### Added
  - `OpcuaAdapter::registrate()` method
