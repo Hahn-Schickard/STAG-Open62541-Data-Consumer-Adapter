@@ -4,6 +4,7 @@
 #include <fstream>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <optional>
 
 using namespace std;
 using namespace open62541;
@@ -458,23 +459,28 @@ static void to_json(json& j, const UA_ServerConfig_Discovery& p) {
 
 // ====================== Historization =======================
 // NOLINTNEXTLINE
-static void from_json(const json& j, Historization& p) {
-  p.dsn = j.at("DataSourceName").get<string>();
-  p.user = j.at("Username").get<string>();
-  p.auth = j.at("Password").get<string>();
-  p.request_timeout = j.at("RequestTimeoutInSeconds").get<size_t>();
-  p.request_logging = j.at("LogRequests").get<bool>();
+static void from_json(const json& j, optional<Historization>& p) {
+  Historization h;
+  h.dsn = j.at("DataSourceName").get<string>();
+  h.user = j.at("Username").get<string>();
+  h.auth = j.at("Password").get<string>();
+  h.request_timeout = j.at("RequestTimeoutInSeconds").get<size_t>();
+  h.request_logging = j.at("LogRequests").get<bool>();
+  p = h;
 }
 
 // NOLINTNEXTLINE
-static void to_json(json& j, const Historization& p) {
-  j = json{// clang-format off
-      {"DataSourceName", p.dsn}, 
-      {"Username", p.user},
-      {"Password", p.auth}, 
-      {"RequestTimeoutInSeconds", p.request_timeout},
-      {"LogRequests", p.request_logging}
-  };// clang-format off
+static void to_json(json& j, const optional<Historization>& p) {
+  if (p.has_value()) {
+    auto h = p.value();
+    j = json{// clang-format off
+      {"DataSourceName", h.dsn}, 
+      {"Username", h.user},
+      {"Password", h.auth}, 
+      {"RequestTimeoutInSeconds", h.request_timeout},
+      {"LogRequests", h.request_logging}
+  }; // clang-format on
+  }
 }
 
 // ======================== Config ===========================
@@ -502,7 +508,11 @@ static void from_json(const json& j, Config& p) {
   p.max_publish_req_per_session =
       j.at("max_publish_req_per_session").get<UA_UInt32>();
   p.discovery = j.at("discovery").get<UA_ServerConfig_Discovery>();
-  p.historization = j.at("historization").get<Historization>();
+  if (auto it = j.find("historization"); it != j.end()) {
+    p.historization = j.at("historization").get<optional<Historization>>();
+  } else {
+    p.historization = nullopt;
+  }
 }
 
 // NOLINTNEXTLINE

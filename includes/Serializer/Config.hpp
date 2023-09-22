@@ -2,6 +2,7 @@
 #define __DCA_OPEN62541_CONFIG_HS_HPP
 
 #include <open62541/server.h>
+#include <optional>
 #include <string>
 
 #define ADAPTER_VERSION_MAJOR "0"
@@ -106,7 +107,7 @@ struct Config {
   MonitoredItemsLimits monitored_items_limits;
   UA_UInt32 max_publish_req_per_session;
   UA_ServerConfig_Discovery discovery;
-  Historization historization;
+  std::optional<Historization> historization;
 };
 } // namespace open62541
 
