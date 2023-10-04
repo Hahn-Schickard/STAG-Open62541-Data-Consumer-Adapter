@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     registerDevices(event_source);
 
     if (argc > 1) {
-      uint server_lifetime = atoi(argv[1]); // NOLINT(cert-err34-c)
+      auto server_lifetime = stoi(argv[1]);
       cout << "Open62541 server will automatically shut down in "
            << server_lifetime << " seconds." << endl;
       sleep(server_lifetime);
