@@ -2,7 +2,7 @@
     "log_to_standard_output": false,
     "logfile_name": "logfile.log",
     "logfile_path": "./log",
-    "logging_level": "debug",
+    "logging_level": "trace",
     "item_queue_size": 8192,
     "thread_count": 2,
     "maximum_file_count": 25,
