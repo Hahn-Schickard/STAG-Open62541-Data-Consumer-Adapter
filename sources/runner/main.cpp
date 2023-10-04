@@ -169,12 +169,15 @@ void print(const NonemptyDevicePtr& device) {
   print(device->getDeviceElementGroup(), ELEMENT_OFFSET);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp)
+const static vector<string> device_ids{"base_id_1", "base_id_2"};
+
 Information_Model::NonemptyDevicePtr buildDevice1() {
   auto mock_builder =
       make_shared<Information_Model::testing::DeviceMockBuilder>();
 
-  mock_builder->buildDeviceBase(
-      "base_id_1", "Example 1", "This is an example temperature sensor system");
+  mock_builder->buildDeviceBase(device_ids[0], "Example 1",
+      "This is an example temperature sensor system");
   { // Power group
     auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
         "Power", "Groups information regarding the power supply");
@@ -209,7 +212,7 @@ Information_Model::NonemptyDevicePtr buildDevice2() {
   auto mock_builder =
       make_shared<Information_Model::testing::DeviceMockBuilder>();
 
-  mock_builder->buildDeviceBase("base_id_2", "Example 2",
+  mock_builder->buildDeviceBase(device_ids[1], "Example 2",
       "This is an example power measurement sensor system");
   { // Phase 1 group
     auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
