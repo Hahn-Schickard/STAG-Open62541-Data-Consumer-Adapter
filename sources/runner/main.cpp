@@ -65,6 +65,7 @@ void print(const NonemptyMetricPtr& element, size_t offset);
 void print(const NonemptyDeviceElementGroupPtr& elements, size_t offset);
 
 void registerDevices(const shared_ptr<EventSourceFake>& event_source);
+void deregisterDevices(const shared_ptr<EventSourceFake>& event_source);
 
 int main(int argc, char* argv[]) {
   try {
@@ -281,4 +282,13 @@ void registerDevice(const Information_Model::NonemptyDevicePtr& device,
 void registerDevices(const shared_ptr<EventSourceFake>& event_source) {
   registerDevice(buildDevice1(), event_source);
   registerDevice(buildDevice2(), event_source);
+}
+
+void deregisterDevices(const shared_ptr<EventSourceFake>& event_source) {
+  for (const auto& device_id : device_ids) {
+    cout << "Deregistrating device: " << device_id << endl;
+    event_source->sendEvent( // deregistrade first device
+        std::make_shared<ModelRepositoryEvent>(device_id));
+    this_thread::sleep_for(5s);
+  }
 }
