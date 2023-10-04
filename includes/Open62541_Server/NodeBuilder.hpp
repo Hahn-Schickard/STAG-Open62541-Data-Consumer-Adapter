@@ -50,8 +50,6 @@ class NodeBuilder {
       const NonemptyPointer::NonemptyPtr<std::shared_ptr<MetricType>>& metric,
       const std::string& metric_type_description);
 
-  UA_StatusCode deleteNode(const UA_NodeId& node_id);
-
 public:
   NodeBuilder(const std::shared_ptr<Open62541Server>& server);
   ~NodeBuilder();
