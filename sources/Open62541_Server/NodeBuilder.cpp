@@ -92,7 +92,6 @@ UA_StatusCode NodeBuilder::addDeviceNode(const NonemptyDevicePtr& device) {
 }
 
 UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
-  UA_StatusCode status = UA_STATUSCODE_GOOD;
   auto node_id =
       UA_NODEID_STRING_ALLOC(server_->getServerNamespace(), device_id.c_str());
   logger_->log(SeverityLevel::TRACE, "Removing Node {}", toString(&node_id));
