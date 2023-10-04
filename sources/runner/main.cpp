@@ -6,10 +6,12 @@
 
 #include "OpcuaAdapter.hpp"
 
+#include <chrono>
 #include <csignal>
 #include <exception>
 #include <gmock/gmock.h>
 #include <iostream>
+#include <thread>
 
 using namespace std;
 using namespace HaSLL;
@@ -90,12 +92,15 @@ int main(int argc, char* argv[]) {
 
     adapter->start();
     registerDevices(event_source);
+    this_thread::sleep_for(10s);
+    logger->log(SeverityLevel::TRACE, "Sending device deregistered event");
+    deregisterDevices(event_source);
 
     if (argc > 1) {
       auto server_lifetime = stoi(argv[1]);
       cout << "Open62541 server will automatically shut down in "
            << server_lifetime << " seconds." << endl;
-      sleep(server_lifetime);
+      this_thread::sleep_for(chrono::seconds(server_lifetime));
       stopServer();
     } else {
       while (true) {
