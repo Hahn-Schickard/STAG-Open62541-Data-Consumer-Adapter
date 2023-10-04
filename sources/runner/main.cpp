@@ -46,7 +46,7 @@ void printException(const exception& e, int level = 0) {
 class EventSourceFake : public Event_Model::EventSource<ModelRepositoryEvent> {
   void handleException(exception_ptr eptr) { // NOLINT
     if (eptr) {
-      std::rethrow_exception(eptr);
+      rethrow_exception(eptr);
     }
   }
 
