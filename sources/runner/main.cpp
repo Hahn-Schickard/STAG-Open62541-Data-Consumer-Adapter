@@ -18,11 +18,11 @@ using namespace Data_Consumer_Adapter;
 
 using ::testing::NiceMock;
 
-OpcuaAdapter* adapter;
+unique_ptr<OpcuaAdapter> adapter;
 
 void stopServer() {
   adapter->stop();
-  delete adapter;
+  adapter.reset();
 }
 
 static void stopHandler(int /*sig*/) {
@@ -84,7 +84,8 @@ int main(int argc, char* argv[]) {
     auto event_source = make_shared<EventSourceFake>();
     logger->log(SeverityLevel::TRACE, "Fake event source initialized!");
 
-    adapter = new OpcuaAdapter(event_source, "config/defaultConfig.json");
+    adapter =
+        make_unique<OpcuaAdapter>(event_source, "config/defaultConfig.json");
     logger->log(SeverityLevel::TRACE, "OPC UA Adapter initialized!");
 
     adapter->start();
