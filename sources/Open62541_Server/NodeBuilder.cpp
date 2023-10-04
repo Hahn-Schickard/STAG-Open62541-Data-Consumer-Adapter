@@ -97,10 +97,36 @@ UA_StatusCode NodeBuilder::deleteNode(const UA_NodeId& node_id) {
 }
 
 UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
-  auto node_id =
+  UA_StatusCode status = UA_STATUSCODE_GOOD;
+  auto device_node_id =
       UA_NODEID_STRING_ALLOC(server_->getServerNamespace(), device_id.c_str());
-  logger_->log(SeverityLevel::TRACE, "Removing Node {}", toString(&node_id));
-  return UA_Server_deleteNode(server_->getServer(), node_id, true);
+  UA_BrowseDescription browse_descriptor{// clang-format off
+      .nodeId = device_node_id,
+      .browseDirection = UA_BROWSEDIRECTION_FORWARD,
+      // get all reference types
+      .referenceTypeId = UA_NODEID_NULL,
+      .includeSubtypes = true,
+      .nodeClassMask =
+          UA_NODECLASS_OBJECT |
+          UA_NODECLASS_VARIABLE |
+          UA_NODECLASS_METHOD,
+      // we just need nodeId
+      .resultMask = UA_BROWSERESULTMASK_NONE
+  }; // clang-format on
+  auto browse_result =
+      UA_Server_browse(server_->getServer(), 0, &browse_descriptor);
+  if (browse_result.statusCode != UA_STATUSCODE_GOOD) {
+    logger_->log(
+        SeverityLevel::INFO, "No nodes found for device {}", device_id);
+    return browse_result.statusCode;
+  } else {
+    for (size_t i = 0; i < browse_result.referencesSize; ++i) {
+      auto element_node_id = browse_result.references[i].nodeId.nodeId;
+      status += deleteNode(element_node_id);
+    }
+  }
+  status += deleteNode(device_node_id);
+  return status;
 }
 
 UA_StatusCode NodeBuilder::addDeviceNodeElement(
