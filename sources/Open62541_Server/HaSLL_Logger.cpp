@@ -25,19 +25,19 @@ std::mutex logger_mutex;
 void registerLoggers() {
   if (loggers.empty()) {
     loggers.emplace(Open62541_Logger::NETWORK,
-        LoggerManager::registerLogger("Open62541 Network Layer"));
+        LoggerManager::registerLogger("Open62541::Network"));
     loggers.emplace(Open62541_Logger::CHANNEL,
-        LoggerManager::registerLogger("Open62541 Channel Layer"));
+        LoggerManager::registerLogger("Open62541::Channel"));
     loggers.emplace(Open62541_Logger::SESSION,
-        LoggerManager::registerLogger("Open62541 Session Layer"));
+        LoggerManager::registerLogger("Open62541::Session"));
     loggers.emplace(Open62541_Logger::SERVER,
-        LoggerManager::registerLogger("Open62541 Server Layer"));
+        LoggerManager::registerLogger("Open62541::Server"));
     loggers.emplace(Open62541_Logger::CLIENT,
-        LoggerManager::registerLogger("Open62541 Client Layer"));
+        LoggerManager::registerLogger("Open62541::Client"));
     loggers.emplace(Open62541_Logger::USER,
-        LoggerManager::registerLogger("Open62541 User Layer"));
+        LoggerManager::registerLogger("Open62541::User"));
     loggers.emplace(Open62541_Logger::SECURITY,
-        LoggerManager::registerLogger("Open62541 Security Layer"));
+        LoggerManager::registerLogger("Open62541::Security"));
   }
 }
 

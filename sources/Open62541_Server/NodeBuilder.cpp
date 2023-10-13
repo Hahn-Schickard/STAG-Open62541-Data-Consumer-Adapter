@@ -91,11 +91,43 @@ UA_StatusCode NodeBuilder::addDeviceNode(const NonemptyDevicePtr& device) {
   return status;
 }
 
+UA_StatusCode NodeBuilder::removeDataSources(const UA_NodeId* node_id) {
+  UA_StatusCode result = UA_STATUSCODE_BAD;
+  UA_BrowseDescription browse_description{// clang-format off
+      .nodeId = *node_id,
+      .browseDirection = UA_BROWSEDIRECTION_FORWARD,
+      .referenceTypeId = UA_NODEID_NULL,
+      .includeSubtypes = UA_TRUE,
+      .nodeClassMask = UA_NODECLASS_OBJECT | UA_NODECLASS_VARIABLE | UA_NODECLASS_METHOD,
+      .resultMask = UA_BROWSERESULTMASK_NODECLASS
+  }; // clang-format on
+
+  logger_->log(SeverityLevel::TRACE,
+      "Browsing Node {} for subnodes with callbacks", toString(node_id));
+  auto browse_result =
+      UA_Server_browse(server_->getServer(), 0, &browse_description);
+
+  for (size_t i = 0; i < browse_result.referencesSize; ++i) {
+    auto node_reference = browse_result.references[i];
+    if (node_reference.nodeClass != UA_NODECLASS_OBJECT) {
+      result = NodeCallbackHandler::removeNodeCallbacks(
+          &node_reference.nodeId.nodeId);
+    } else {
+      result = removeDataSources(&node_reference.nodeId.nodeId);
+    }
+  }
+  return result;
+}
+
 UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
-  auto node_id =
+  auto device_node_id =
       UA_NODEID_STRING_ALLOC(server_->getServerNamespace(), device_id.c_str());
-  logger_->log(SeverityLevel::TRACE, "Removing Node {}", toString(&node_id));
-  return UA_Server_deleteNode(server_->getServer(), node_id, true);
+  logger_->log(
+      SeverityLevel::TRACE, "Removing Node {}", toString(&device_node_id));
+
+  removeDataSources(&device_node_id);
+
+  return UA_Server_deleteNode(server_->getServer(), device_node_id, true);
 }
 
 UA_StatusCode NodeBuilder::addDeviceNodeElement(

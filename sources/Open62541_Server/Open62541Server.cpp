@@ -2,7 +2,6 @@
 
 #include "Config_Serializer.hpp"
 #include "HaSLL/LoggerManager.hpp"
-#include "HaSLL_Logger.hpp"
 
 using namespace std;
 using namespace HaSLI;
@@ -17,7 +16,6 @@ Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
 #ifdef UA_ENABLE_HISTORIZING
   historizer_ = configuration->obtainHistorizer();
 #endif // UA_ENABLE_HISTORIZING
-  registerLoggers();
   auto config = configuration->getConfig();
   /* Config is consumed, so no need to save it
    * Inside UA_Server_newWithConfig assigns the config as follows
@@ -30,10 +28,7 @@ Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
   server_namespace_index_ = 1;
 }
 
-Open62541Server::~Open62541Server() {
-  removeLoggers();
-  UA_Server_delete(open62541_server_);
-}
+Open62541Server::~Open62541Server() { UA_Server_delete(open62541_server_); }
 
 bool Open62541Server::start() {
   try {

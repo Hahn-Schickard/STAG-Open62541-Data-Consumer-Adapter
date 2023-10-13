@@ -37,6 +37,7 @@ CallbackWrapper::CallbackWrapper(Information_Model::DataType type,
 
 void NodeCallbackHandler::initialise(const UA_Logger* logger) {
   logger_ = logger;
+  UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, "NodeCallbackHandler initalized");
 }
 
 void NodeCallbackHandler::destroy() { node_calbacks_map_.clear(); }
@@ -59,7 +60,7 @@ UA_StatusCode NodeCallbackHandler::addNodeCallbacks(
     status = UA_STATUSCODE_BADDEVICEFAILURE;
   } else if (!findCallbackWrapper(&node_id)) {
     string trace_msg = "Adding callback_wrapper for Node " + toString(&node_id);
-    UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+    UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     node_calbacks_map_.emplace(node_id, callback_wrapper);
     status = UA_STATUSCODE_GOOD;
   } else {
@@ -77,7 +78,7 @@ UA_StatusCode NodeCallbackHandler::removeNodeCallbacks(
   auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     string trace_msg = "Removing callbacks for Node " + toString(node_id);
-    UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+    UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     node_calbacks_map_.erase(it);
     status = UA_STATUSCODE_GOOD;
   } else {
@@ -91,7 +92,7 @@ UA_StatusCode NodeCallbackHandler::removeNodeCallbacks(
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
-    [[maybe_unused]] UA_Server* server,
+    UA_Server* server,
     [[maybe_unused]] const UA_NodeId* session_id,
     [[maybe_unused]] void* session_context, 
     const UA_NodeId* node_id,
@@ -131,8 +132,13 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
       }
     } catch (const exception& exp) {
       string error_msg = "An exception occurred, while reading Node " +
-          toString(node_id) + " exception: " + exp.what();
+          toString(node_id) + " vale exception: " + exp.what();
       UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      removeNodeCallbacks(node_id);
+      string warning_msg = "Removing Node " + toString(node_id) +
+          " due to an unhandled exception";
+      UA_LOG_WARNING(logger_, UA_LOGCATEGORY_SERVER, warning_msg.c_str());
+      UA_Server_deleteNode(server, *node_id, true);
       status = UA_STATUSCODE_BADINTERNALERROR;
     }
   } else {
@@ -146,7 +152,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
-    [[maybe_unused]] UA_Server* server,
+    UA_Server* server,
     [[maybe_unused]] const UA_NodeId* session_id,
     [[maybe_unused]] void* session_context, 
     const UA_NodeId* node_id,
@@ -178,6 +184,11 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
             "An unhandled exception occurred while trying to write to Node " +
             toString(node_id) + " Exception: " + ex.what();
         UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+        removeNodeCallbacks(node_id);
+        string warning_msg = "Removing Node " + toString(node_id) +
+            " due to an unhandled exception";
+        UA_LOG_WARNING(logger_, UA_LOGCATEGORY_SERVER, warning_msg.c_str());
+        UA_Server_deleteNode(server, *node_id, true);
         status = UA_STATUSCODE_BADINTERNALERROR;
       }
     } else {
@@ -196,7 +207,7 @@ UA_StatusCode NodeCallbackHandler::writeNodeValue( // clang-format off
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
-    [[maybe_unused]] UA_Server* server,
+    UA_Server* server,
     [[maybe_unused]] const UA_NodeId* session_id,
     [[maybe_unused]] void* session_context, 
     const UA_NodeId* method_id,
@@ -263,6 +274,11 @@ UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
                          "call/execute Method " +
           toString(method_id) + " Exception: " + ex.what();
       UA_LOG_ERROR(logger_, UA_LOGCATEGORY_SERVER, error_msg.c_str());
+      removeNodeCallbacks(method_id);
+      string warning_msg = "Removing Node " + toString(method_id) +
+          " due to an unhandled exception";
+      UA_LOG_WARNING(logger_, UA_LOGCATEGORY_SERVER, warning_msg.c_str());
+      UA_Server_deleteNode(server, *method_id, true);
       status = UA_STATUSCODE_BADNOCOMMUNICATION;
     }
   } else {

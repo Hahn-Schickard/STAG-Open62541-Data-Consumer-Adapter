@@ -96,6 +96,8 @@ int main(int argc, char* argv[]) {
     this_thread::sleep_for(10s);
     logger->log(SeverityLevel::TRACE, "Sending device deregistered event");
     deregisterDevices(event_source);
+    this_thread::sleep_for(5s);
+    registerDevices(event_source);
 
     if (argc > 1) {
       auto server_lifetime = stoi(argv[1]);
@@ -105,7 +107,7 @@ int main(int argc, char* argv[]) {
       stopServer();
     } else {
       while (true) {
-        ;
+        this_thread::sleep_for(1s);
       }
     }
   } catch (const exception& ex) {
