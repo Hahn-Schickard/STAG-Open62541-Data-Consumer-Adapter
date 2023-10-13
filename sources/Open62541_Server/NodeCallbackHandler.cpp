@@ -37,6 +37,7 @@ CallbackWrapper::CallbackWrapper(Information_Model::DataType type,
 
 void NodeCallbackHandler::initialise(const UA_Logger* logger) {
   logger_ = logger;
+  UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, "NodeCallbackHandler initalized");
 }
 
 void NodeCallbackHandler::destroy() { node_calbacks_map_.clear(); }
@@ -59,7 +60,7 @@ UA_StatusCode NodeCallbackHandler::addNodeCallbacks(
     status = UA_STATUSCODE_BADDEVICEFAILURE;
   } else if (!findCallbackWrapper(&node_id)) {
     string trace_msg = "Adding callback_wrapper for Node " + toString(&node_id);
-    UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+    UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     node_calbacks_map_.emplace(node_id, callback_wrapper);
     status = UA_STATUSCODE_GOOD;
   } else {
@@ -77,7 +78,7 @@ UA_StatusCode NodeCallbackHandler::removeNodeCallbacks(
   auto it = node_calbacks_map_.find(*node_id);
   if (it != node_calbacks_map_.end()) {
     string trace_msg = "Removing callbacks for Node " + toString(node_id);
-    UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
+    UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
     node_calbacks_map_.erase(it);
     status = UA_STATUSCODE_GOOD;
   } else {
