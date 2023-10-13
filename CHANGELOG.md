@@ -1,4 +1,19 @@
 # Changelog
+## [0.3.2] - 2023.10.13
+### Added 
+ - `NodeBuilder::removeDataSources()` method 
+
+### Fixed
+ - NodeBuilder not removing data source callbacks on deregistration event
+
+### Changed 
+ - HaSLL logger registration/deregistration to be handled by `OpcuaAdapter`
+ - `NodeCallbackHandler::add/removeCallback()` methods to use info logger instead of trace
+ - Logger names to not have any whitespaces
+ - `NodeCallbackHandler::readNodeValue()` method to remove nodes when callback throws an unhandled exception
+ - `NodeCallbackHandler::writeNodeValue()` method to remove nodes when callback throws an unhandled exception
+ - `NodeCallbackHandler::callNodeMethod()` method to remove nodes when callback throws an unhandled exception
+
 ## [0.3.1] - 2023.09.22
 ### Added
  - `COVERAGE_TRACKING` cmake option 
