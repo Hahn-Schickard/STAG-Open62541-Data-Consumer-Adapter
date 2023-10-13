@@ -1,5 +1,6 @@
 #include "OpcuaAdapter.hpp"
 
+#include "HaSLL_Logger.hpp"
 #include "Variant_Visitor.hpp"
 
 using namespace Information_Model;
@@ -10,16 +11,24 @@ using namespace open62541;
 
 namespace Data_Consumer_Adapter {
 OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source)
-    : DCAI(event_source, "Open62541 Adapter"), // NOLINT
-      server_(make_shared<Open62541Server>()),
-      node_builder_(make_unique<NodeBuilder>(server_)) {}
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+    : DCAI(event_source, "Open62541_Adapter") {
+  registerLoggers();
+  server_ = make_shared<Open62541Server>();
+  node_builder_ = make_unique<NodeBuilder>(server_);
+}
 
 OpcuaAdapter::OpcuaAdapter(
     ModelEventSourcePtr event_source, const string& config_filepath)
-    : DataConsumerAdapterInterface(event_source, "Open62541 Adapter"), // NOLINT
-      server_(make_shared<Open62541Server>(
-          make_unique<open62541::Configuration>(config_filepath))),
-      node_builder_(make_unique<NodeBuilder>(server_)) {}
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+    : DCAI(event_source, "Open62541_Adapter") {
+  registerLoggers();
+  server_ = make_shared<Open62541Server>(
+      make_unique<open62541::Configuration>(config_filepath));
+  node_builder_ = make_unique<NodeBuilder>(server_);
+}
+
+OpcuaAdapter::~OpcuaAdapter() { removeLoggers(); }
 
 void OpcuaAdapter::start(vector<DevicePtr> devices) {
   if (server_->start()) {

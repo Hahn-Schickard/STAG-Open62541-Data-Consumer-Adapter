@@ -19,6 +19,7 @@ public:
   OpcuaAdapter(ModelEventSourcePtr event_source);
   OpcuaAdapter(
       ModelEventSourcePtr event_source, const std::string& config_filepath);
+  ~OpcuaAdapter();
 
   void start(std::vector<Information_Model::DevicePtr> devices = {}) override;
   void stop() override;
