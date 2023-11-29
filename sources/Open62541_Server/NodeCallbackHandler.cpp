@@ -40,7 +40,12 @@ void NodeCallbackHandler::initialise(const UA_Logger* logger) {
   UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, "NodeCallbackHandler initalized");
 }
 
-void NodeCallbackHandler::destroy() { node_calbacks_map_.clear(); }
+void NodeCallbackHandler::destroy() {
+  for (auto it = node_calbacks_map_.begin(); it != node_calbacks_map_.end();
+       ++it) {
+    node_calbacks_map_.erase(it->first, true);
+  }
+}
 
 CallbackWrapperPtr NodeCallbackHandler::findCallbackWrapper(
     const UA_NodeId* node_id) {
@@ -290,7 +295,7 @@ UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
   return status;
 }
 
-unordered_map<UA_NodeId, CallbackWrapperPtr, UA_NodeId_Hasher>
-    NodeCallbackHandler::node_calbacks_map_; // NOLINT
+Threadsafe::UnorderedMap<UA_NodeId, CallbackWrapperPtr>
+    NodeCallbackHandler::node_calbacks_map_; // NOLINT(cert-err58-cpp)
 const UA_Logger* NodeCallbackHandler::logger_; // NOLINT
 } // namespace open62541
