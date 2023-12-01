@@ -40,12 +40,7 @@ void NodeCallbackHandler::initialise(const UA_Logger* logger) {
   UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, "NodeCallbackHandler initalized");
 }
 
-void NodeCallbackHandler::destroy() {
-  for (auto it = node_calbacks_map_.begin(); it != node_calbacks_map_.end();
-       ++it) {
-    node_calbacks_map_.erase(it->first, true);
-  }
-}
+void NodeCallbackHandler::destroy() { node_calbacks_map_.clear(true); }
 
 CallbackWrapperPtr NodeCallbackHandler::findCallbackWrapper(
     const UA_NodeId* node_id) {
