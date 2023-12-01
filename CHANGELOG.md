@@ -1,4 +1,8 @@
 # Changelog
+## [0.3.3] - 2023.12.01
+### Changed 
+ - `NodeCallbackHandler::node_calbacks_map_` to `Threadsafe::UnorderedMap<UA_NodeId, CallbackWrapperPtr>`
+
 ## [0.3.2] - 2023.10.13
 ### Added 
  - `NodeBuilder::removeDataSources()` method 
