@@ -21,6 +21,7 @@ target_link_libraries(${THIS} PUBLIC
                               Information_Model::Information_Model
                               open62541::open62541
                               Variant_Visitor::Variant_Visitor
+                              Threadsafe_Containers::Threadsafe_Containers
                               HaSLL::HaSLL
                               Config_Serializer
 )

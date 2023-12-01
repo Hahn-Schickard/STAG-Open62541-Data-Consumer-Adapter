@@ -3,6 +3,8 @@
 
 #include "Information_Model/Metric.hpp"
 #include "Information_Model/WritableMetric.hpp"
+#include "Threadsafe_Containers/UnorderedMap.hpp"
+
 #include "Open62541Server.hpp"
 
 #include "open62541/plugin/log.h"
@@ -11,7 +13,14 @@
 #include <open62541/server.h>
 #include <optional>
 #include <string>
-#include <unordered_map>
+
+template <> class std::hash<Threadsafe::HashableConstReference<UA_NodeId>> {
+public:
+  size_t operator()(
+      const Threadsafe::HashableConstReference<UA_NodeId>& node_id) const {
+    return UA_NodeId_hash(&node_id.ref());
+  }
+};
 
 namespace open62541 {
 struct CallbackWrapper {
@@ -45,15 +54,9 @@ struct CallbackWrapper {
 };
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 
-struct UA_NodeId_Hasher {
-  size_t operator()(UA_NodeId const& node_id) const noexcept {
-    return UA_NodeId_hash(&node_id);
-  }
-};
-
 class NodeCallbackHandler {
   using NodeCalbackMap =
-      std::unordered_map<UA_NodeId, CallbackWrapperPtr, UA_NodeId_Hasher>;
+      Threadsafe::UnorderedMap<UA_NodeId, CallbackWrapperPtr>;
   static NodeCalbackMap node_calbacks_map_;
   // Invariant: No CallbackWrapperPtr is empty
   static const UA_Logger* logger_;
