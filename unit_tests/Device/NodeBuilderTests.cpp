@@ -6,16 +6,9 @@
 #include "NodeBuilder.hpp"
 #include "Utility.hpp"
 
-namespace NodeBuilderTests {
-
 using namespace open62541;
 
-std::string to_string(const UA_ExpandedNodeId& id) {
-  return std::to_string(id.serverIndex) + ":" + toString(&id.namespaceUri) +
-      ":" + toString(&id.nodeId);
-}
-
-std::string to_string(UA_Server* server, const UA_ReferenceDescription& ref) {
+std::string toString(UA_Server* server, const UA_ReferenceDescription& ref) {
   UA_QualifiedName type_name;
   auto statuscode =
       UA_Server_readBrowseName(server, ref.referenceTypeId, &type_name);
@@ -41,10 +34,10 @@ std::string to_string(UA_Server* server, const UA_ReferenceDescription& ref) {
   return "{referenceTypeID=" + toString(&ref.referenceTypeId) + "(" +
       toString(&type_name) + "); " +
       "isForward=" + (ref.isForward ? "true" : "false") + "; " +
-      "nodeId=" + to_string(ref.nodeId) + "; " + "browseName=\"" +
+      "nodeId=" + toString(ref.nodeId) + "; " + "browseName=\"" +
       toString(&ref.browseName) + "\"; " +
       "nodeClass=" + std::to_string(ref.nodeClass) + "; " +
-      "typeDefinition=" + to_string(ref.typeDefinition) + "(" + typedef_name +
+      "typeDefinition=" + toString(ref.typeDefinition) + "(" + typedef_name +
       ")}";
 }
 
@@ -74,7 +67,7 @@ class NameGenerator {
   }
 
 public:
-  std::string ref_id() const { return make("ref_id_"); }
+  std::string refId() const { return make("ref_id_"); }
   std::string name() const { return make("name "); }
   std::string description() const { return make("description "); }
   void next() { ++counter_; }
@@ -137,7 +130,7 @@ Information_Model::NonemptyDevicePtr parseDevice(const char* spec) {
   Information_Model::testing::DeviceMockBuilder builder;
   NameGenerator names;
 
-  builder.buildDeviceBase(names.ref_id(), names.name(), names.description());
+  builder.buildDeviceBase(names.refId(), names.name(), names.description());
   parseDeviceGroup<Types>(builder, names, spec, std::optional<std::string>());
 
   return Information_Model::NonemptyDevicePtr(builder.getResult());
@@ -207,7 +200,7 @@ public:
   ~Browse() {
     for (auto i : unexpected_) {
       auto& ref = result_.references[i];
-      ADD_FAILURE() << "unexpected reference " << to_string(ua_server_, ref);
+      ADD_FAILURE() << "unexpected reference " << toString(ua_server_, ref);
     }
   }
 
@@ -246,7 +239,7 @@ public:
     ADD_FAILURE() << filter_description << " not found";
   }
 
-  size_t num_children() const { return num_children_; }
+  size_t numChildren() const { return num_children_; }
 };
 
 /**
@@ -286,7 +279,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
 
   void checkNamedElement(const UA_ReferenceDescription& ref_desc,
       Information_Model::NonemptyNamedElementPtr element) {
-    SCOPED_TRACE("NamedElement " + to_string(ua_server, ref_desc));
+    SCOPED_TRACE("NamedElement " + toString(ua_server, ref_desc));
 
     EXPECT_TRUE(ref_desc.isForward);
 
@@ -319,7 +312,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
   // NOLINTNEXTLINE(readability-function-cognitive-complexity)
   void checkDeviceElement(const UA_ReferenceDescription& ref_desc,
       Information_Model::NonemptyDeviceElementPtr element) {
-    SCOPED_TRACE("DeviceElement " + to_string(ua_server, ref_desc));
+    SCOPED_TRACE("DeviceElement " + toString(ua_server, ref_desc));
     checkNamedElement(ref_desc, element);
     checkReferenceType(ref_desc, UA_NS0ID_HASCOMPONENT);
     Browse children(ua_server, ref_desc.nodeId.nodeId);
@@ -385,7 +378,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
   void checkDeviceElementGroup(const UA_ReferenceDescription& ref_desc,
       Browse& children,
       Information_Model::NonemptyDeviceElementGroupPtr group) {
-    SCOPED_TRACE("DeviceElementGroup " + to_string(ua_server, ref_desc));
+    SCOPED_TRACE("DeviceElementGroup " + toString(ua_server, ref_desc));
 
     // check children
     auto im_elements = group->getSubelements();
@@ -404,7 +397,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
 
   void checkDevice(const UA_ReferenceDescription& ref_desc,
       Information_Model::NonemptyDevicePtr device) {
-    SCOPED_TRACE("Device " + to_string(ua_server, ref_desc) +
+    SCOPED_TRACE("Device " + toString(ua_server, ref_desc) +
         toString(&ref_desc.nodeId.nodeId));
     checkNamedElement(ref_desc, device);
     checkReferenceType(ref_desc, UA_NS0ID_ORGANIZES);
@@ -439,7 +432,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
     // Move everything from root_before out of the way
     for (auto old_ref : root_before) {
       root_after.expect(
-          to_string(old_ref.nodeId) + " (old)",
+          toString(old_ref.nodeId) + " (old)",
           [&](const UA_ReferenceDescription& ref_desc) -> bool {
             return UA_ExpandedNodeId_equal(&ref_desc.nodeId, &old_ref.nodeId);
           },
@@ -515,5 +508,3 @@ TYPED_TEST_SUITE(NodeBuilderTests, AllTypes);
 TYPED_TEST(NodeBuilderTests, addDeviceNodeTypes) {
   TestFixture::testAddDeviceNode("(RW)");
 }
-
-} // namespace NodeBuilderTests

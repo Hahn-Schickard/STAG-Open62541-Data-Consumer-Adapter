@@ -58,6 +58,11 @@ string toString(const UA_QualifiedName* name) {
   return result;
 }
 
+string toString(const UA_ExpandedNodeId& id) {
+  return to_string(id.serverIndex) + ":" + toString(&id.namespaceUri) + ":" +
+      toString(&id.nodeId);
+}
+
 UA_String makeUAString(const string& input) {
   UA_String result;
   result.length = strlen(input.c_str());
