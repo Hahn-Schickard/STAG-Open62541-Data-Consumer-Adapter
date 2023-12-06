@@ -47,7 +47,7 @@ bool Open62541Server::start() {
           SeverityLevel::ERROR, "Could not start Open62541 server thread!");
       return false;
     }
-  } catch (exception& ex) {
+  } catch (const exception& ex) {
     logger_->log(SeverityLevel::CRITICAL,
         "Caught an exception while starting the server: {}", ex.what());
     return false;
@@ -80,7 +80,7 @@ void Open62541Server::runnable() {
       logger_->log(SeverityLevel::ERROR,
           "ERROR:{} Failed to start open62541 server thread!", status);
     }
-  } catch (exception& ex) {
+  } catch (const exception& ex) {
     logger_->log(SeverityLevel::CRITICAL,
         "Caught an exception during server lifetime: {}", ex.what());
   }
