@@ -1,4 +1,17 @@
 # Changelog
+## [0.3.4] - 2023.12.06
+### Changed
+ - logging function calls in `OpcuaAdapter` to avoid using `SeverityLevel` enum
+ - logging function calls in `Open62541Server` to avoid using `SeverityLevel` enum
+ - logging function calls in `NodeBuilder` to avoid using `SeverityLevel` enum
+ - logging function calls in main.cpp to avoid using `SeverityLevel` enum
+ - `Open62541Server::stop()` method to return **true** if open62541 server is not running
+ - `OpcuaAdapter::stop()` method to first check if open62541 server is running before stopping it
+
+### Fixed
+ - `Open62541Server::runnable()` critical log message formatting
+ - `Open62541Server::start()` critical log message formatting
+
 ## [0.3.3] - 2023.12.01
 ### Changed 
  - `NodeCallbackHandler::node_calbacks_map_` to `Threadsafe::UnorderedMap<UA_NodeId, CallbackWrapperPtr>`
