@@ -28,14 +28,13 @@ pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
     optional<UA_NodeId> parent_node_id) {
   bool is_root = !parent_node_id.has_value();
 
-  logger_->log(SeverityLevel::INFO, "Adding a new node: {}, with id: {}",
-      element->getElementName(), element->getElementId());
+  logger_->info("Adding a new node: {}, with id: {}", element->getElementName(),
+      element->getElementId());
 
   auto node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), element->getElementId().c_str());
-  logger_->log(SeverityLevel::TRACE,
-      "Assigning {} NodeId to element: {}, with id: {}", toString(&node_id),
-      element->getElementName(), element->getElementId());
+  logger_->trace("Assigning {} NodeId to element: {}, with id: {}",
+      toString(&node_id), element->getElementName(), element->getElementId());
 
   auto reference_type_id = UA_NODEID_NUMERIC(
       0, (is_root ? UA_NS0ID_ORGANIZES : UA_NS0ID_HASCOMPONENT));
@@ -47,8 +46,7 @@ pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
 
   auto browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), element->getElementName().c_str());
-  logger_->log(SeverityLevel::TRACE,
-      "Assigning browse name: {} to element: {}, with id: {}",
+  logger_->trace("Assigning browse name: {} to element: {}, with id: {}",
       toString(&browse_name), element->getElementName(),
       element->getElementId());
 
@@ -84,8 +82,7 @@ UA_StatusCode NodeBuilder::addDeviceNode(const NonemptyDevicePtr& device) {
           status);
     }
   } catch (const StatusCodeNotGood& ex) {
-    logger_->log(SeverityLevel::ERROR,
-        "Failed to create a Node for Device: {}. Status: {}",
+    logger_->error("Failed to create a Node for Device: {}. Status: {}",
         device->getElementName(), ex.what());
   }
   return status;
@@ -102,7 +99,7 @@ UA_StatusCode NodeBuilder::removeDataSources(const UA_NodeId* node_id) {
       .resultMask = UA_BROWSERESULTMASK_NODECLASS
   }; // clang-format on
 
-  logger_->log(SeverityLevel::TRACE,
+  logger_->trace(
       "Browsing Node {} for subnodes with callbacks", toString(node_id));
   auto browse_result =
       UA_Server_browse(server_->getServer(), 0, &browse_description);
@@ -122,8 +119,7 @@ UA_StatusCode NodeBuilder::removeDataSources(const UA_NodeId* node_id) {
 UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
   auto device_node_id =
       UA_NODEID_STRING_ALLOC(server_->getServerNamespace(), device_id.c_str());
-  logger_->log(
-      SeverityLevel::TRACE, "Removing Node {}", toString(&device_node_id));
+  logger_->trace("Removing Node {}", toString(&device_node_id));
 
   removeDataSources(&device_node_id);
 
@@ -133,8 +129,8 @@ UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
 UA_StatusCode NodeBuilder::addDeviceNodeElement(
     const NonemptyDeviceElementPtr& element, const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-  logger_->log(SeverityLevel::INFO, "Adding element {} to node {}",
-      element->getElementName(), toString(&parent_id));
+  logger_->info("Adding element {} to node {}", element->getElementName(),
+      toString(&parent_id));
 
   match(
       element->functionality,
@@ -152,8 +148,7 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(
       });
 
   if (status != UA_STATUSCODE_GOOD) {
-    logger_->log(SeverityLevel::ERROR,
-        "Failed to create a Node for Device Element: {}. Status: {}",
+    logger_->error("Failed to create a Node for Device Element: {}. Status: {}",
         element->getElementName(), UA_StatusCode_name(status));
   }
 
@@ -175,15 +170,14 @@ UA_StatusCode NodeBuilder::addGroupNode(
           status);
       auto elements = device_element_group->getSubelements();
 
-      logger_->log(SeverityLevel::INFO,
-          "Group element {}:{} contains {} subelements.",
+      logger_->info("Group element {}:{} contains {} subelements.",
           meta_info->getElementName(), toString(&result.second),
           elements.size());
       for (const auto& element : elements) {
         status = addDeviceNodeElement(element, result.second);
       }
     } catch (const StatusCodeNotGood& ex) {
-      logger_->log(SeverityLevel::ERROR,
+      logger_->error(
           "Failed to create a Node for Device Element Group: {}. Status: {}",
           meta_info->getElementName(), ex.what());
     }
@@ -208,9 +202,8 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
     value_attribute.dataType = toNodeId(metric->getDataType());
     status = UA_STATUSCODE_GOOD;
   } catch (const exception& ex) {
-    logger_->log(SeverityLevel::ERROR,
-        "An exception occurred while trying to set " + metric_type_description +
-            " value! Exception: {}",
+    logger_->error("An exception occurred while trying to set " +
+            metric_type_description + " value! Exception: {}",
         ex.what());
   }
 
@@ -222,15 +215,13 @@ UA_StatusCode NodeBuilder::addReadableNode(
     const UA_NodeId& parent_id) {
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), meta_info->getElementId().c_str());
-  logger_->log(SeverityLevel::TRACE,
-      "Assigning {} NodeId to metric: {}, with id: {}",
+  logger_->trace("Assigning {} NodeId to metric: {}, with id: {}",
       toString(&metrid_node_id), meta_info->getElementName(),
       meta_info->getElementId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), meta_info->getElementName().c_str());
-  logger_->log(SeverityLevel::TRACE,
-      "Assigning browse name: {} to metric: {}, with id: {}",
+  logger_->trace("Assigning browse name: {} to metric: {}, with id: {}",
       toString(&metric_browse_name), meta_info->getElementName(),
       meta_info->getElementId());
   UA_NodeId type_definition =
@@ -241,7 +232,7 @@ UA_StatusCode NodeBuilder::addReadableNode(
   auto status = setValue(node_attr, meta_info, metric, "readable metric");
   try {
     checkStatusCode("While setting default readable metric value", status);
-    logger_->log(SeverityLevel::TRACE, "Assigning {} read callback for {} node",
+    logger_->trace("Assigning {} read callback for {} node",
         toString(metric->getDataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
 #ifdef UA_ENABLE_HISTORIZING
@@ -267,7 +258,7 @@ UA_StatusCode NodeBuilder::addReadableNode(
     server_->registerForHistorization(metrid_node_id, node_attr.value.type);
 #endif // UA_ENABLE_HISTORIZING
   } catch (const StatusCodeNotGood& ex) {
-    logger_->log(SeverityLevel::ERROR,
+    logger_->error(
         "Failed to create a Node for Readable Metric: {}. Status: {}",
         meta_info->getElementName(), ex.what());
   }
@@ -279,15 +270,13 @@ UA_StatusCode NodeBuilder::addWritableNode(
     const NonemptyWritableMetricPtr& metric, const UA_NodeId& parent_id) {
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), meta_info->getElementId().c_str());
-  logger_->log(SeverityLevel::TRACE,
-      "Assigning {} NodeId to metric: {}, with id: {}",
+  logger_->trace("Assigning {} NodeId to metric: {}, with id: {}",
       toString(&metrid_node_id), meta_info->getElementName(),
       meta_info->getElementId());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
       server_->getServerNamespace(), meta_info->getElementName().c_str());
-  logger_->log(SeverityLevel::TRACE,
-      "Assigning browse name: {} to metric: {}, with id: {}",
+  logger_->trace("Assigning browse name: {} to metric: {}, with id: {}",
       toString(&metric_browse_name), meta_info->getElementName(),
       meta_info->getElementId());
   UA_NodeId type_definition =
@@ -297,8 +286,7 @@ UA_StatusCode NodeBuilder::addWritableNode(
   auto status = setValue(node_attr, meta_info, metric, "writable metric");
   try {
     checkStatusCode("While setting default writable metric value", status);
-    logger_->log(SeverityLevel::TRACE,
-        "Assigning {} read and write callbacks for {} node",
+    logger_->trace("Assigning {} read and write callbacks for {} node",
         toString(metric->getDataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
 #ifdef UA_ENABLE_HISTORIZING
@@ -334,7 +322,7 @@ UA_StatusCode NodeBuilder::addWritableNode(
     server_->registerForHistorization(metrid_node_id, node_attr.value.type);
 #endif // UA_ENABLE_HISTORIZING
   } catch (const StatusCodeNotGood& ex) {
-    logger_->log(SeverityLevel::ERROR,
+    logger_->error(
         "Failed to create a Node for Writable Metric: {}. Status: {}",
         meta_info->getElementName(), ex.what());
   }
@@ -413,8 +401,7 @@ UA_StatusCode NodeBuilder::addFunctionNode(
       checkStatusCode("While adding method node to server", status);
     }
   } catch (const StatusCodeNotGood& ex) {
-    logger_->log(SeverityLevel::ERROR,
-        "Failed to create a MethodNode for Function: {}. Status: {}",
+    logger_->error("Failed to create a MethodNode for Function: {}. Status: {}",
         meta_info->getElementName(), ex.what());
   }
 

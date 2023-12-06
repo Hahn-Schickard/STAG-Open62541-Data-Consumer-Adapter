@@ -72,8 +72,8 @@ int main(int argc, char* argv[]) {
     auto repo = make_shared<SPD_LoggerRepository>("config/loggerConfig.json");
     LoggerManager::initialise(repo);
     auto logger = HaSLL::LoggerManager::registerLogger("Main");
-    logger->log(SeverityLevel::TRACE, "Logging completed initialization!");
-    logger->log(SeverityLevel::INFO,
+    logger->trace("Logging completed initialization!");
+    logger->info(
         "Current Sever time, in number of 100 nanosecond intervals since "
         "January 1, 1601 (UTC): {}",
         UA_DateTime_now());
@@ -81,20 +81,20 @@ int main(int argc, char* argv[]) {
     signal(SIGINT, stopHandler); // NOLINT(cert-err33-c)
     signal(SIGTERM, stopHandler); // NOLINT(cert-err33-c)
 
-    logger->log(SeverityLevel::TRACE,
+    logger->trace(
         "Termination and Interruption signals assigned to stop handler!");
 
     auto event_source = make_shared<EventSourceFake>();
-    logger->log(SeverityLevel::TRACE, "Fake event source initialized!");
+    logger->trace("Fake event source initialized!");
 
     adapter =
         make_unique<OpcuaAdapter>(event_source, "config/defaultConfig.json");
-    logger->log(SeverityLevel::TRACE, "OPC UA Adapter initialized!");
+    logger->trace("OPC UA Adapter initialized!");
 
     adapter->start();
     registerDevices(event_source);
     this_thread::sleep_for(10s);
-    logger->log(SeverityLevel::TRACE, "Sending device deregistered event");
+    logger->trace("Sending device deregistered event");
     deregisterDevices(event_source);
     this_thread::sleep_for(5s);
     registerDevices(event_source);
