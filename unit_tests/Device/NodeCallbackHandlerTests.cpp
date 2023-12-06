@@ -3,8 +3,6 @@
 #include "NodeCallbackHandler.hpp"
 #include "Utility.hpp"
 
-namespace NodeCallbackHandlerTests {
-
 using namespace open62541;
 
 struct NodeCallbackHandlerTests : public ::testing::Test {
@@ -434,5 +432,3 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, removeNonexistingCallbacks) {
   EXPECT_NE(
       UA_STATUSCODE_GOOD, NodeCallbackHandler::removeNodeCallbacks(&node));
 }
-
-} // namespace NodeCallbackHandlerTests
