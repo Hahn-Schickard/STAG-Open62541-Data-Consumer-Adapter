@@ -96,7 +96,10 @@ struct FloatConversion
     : public SubtypeConversion<double, Sub, Information_Model::DataType::DOUBLE,
           UA_TYPES_DOUBLE, ua_sub_type> {
   using Value_Type = Sub;
-  static Value_Type value(size_t i) { return (i == 0 ? 2.72 : -3.14); }
+  static Value_Type value(size_t i) {
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    return (i == 0 ? 2.72 : -3.14);
+  }
 };
 
 struct StringConversion {
@@ -265,13 +268,13 @@ struct NodeCallbackHandlerDataConversionTests
   }
 
 private:
-  Information_Model::DataVariant init_im_value(size_t value_index) {
+  Information_Model::DataVariant initImValue(size_t value_index) {
     return Information_Model::DataVariant(
         std::in_place_index<static_cast<size_t>(Type::IM_TYPE)>,
         Type::value2IM(Type::value(value_index)));
   }
 
-  void init_ua_value(UA_DataValue& dst, size_t value_index) {
+  void initUaValue(UA_DataValue& dst, size_t value_index) {
     auto ua_val = Type::value2Write(Type::value(value_index));
     dst.hasValue = true;
     dst.hasStatus = false;
@@ -284,31 +287,31 @@ private:
             &dst.value, &ua_val, &UA_TYPES[Type::UA_WRITE_TYPE]));
   }
 
-  UA_StatusCode invoke_read(const UA_NodeId& node, UA_DataValue& ua_value) {
+  UA_StatusCode invokeRead(const UA_NodeId& node, UA_DataValue& ua_value) {
     return NodeCallbackHandler::readNodeValue(nullptr, nullptr, nullptr, &node,
         nullptr, UA_FALSE, nullptr, &ua_value);
   }
 
-  UA_StatusCode invoke_write(
+  UA_StatusCode invokeWrite(
       const UA_NodeId& node, const UA_DataValue& ua_value) {
     return NodeCallbackHandler::writeNodeValue(
         nullptr, nullptr, nullptr, &node, nullptr, nullptr, &ua_value);
   }
 
-  void check_no_read_callback(const UA_NodeId& node) {
+  void checkNoReadCallback(const UA_NodeId& node) {
     UA_DataValue ua_value;
-    EXPECT_NE(UA_STATUSCODE_GOOD, invoke_read(node, ua_value));
+    EXPECT_NE(UA_STATUSCODE_GOOD, invokeRead(node, ua_value));
   }
 
-  void check_no_write_callback(const UA_NodeId& node) {
+  void checkNoWriteCallback(const UA_NodeId& node) {
     UA_DataValue ua_value;
-    init_ua_value(ua_value, 0);
-    EXPECT_NE(UA_STATUSCODE_GOOD, invoke_write(node, ua_value));
+    initUaValue(ua_value, 0);
+    EXPECT_NE(UA_STATUSCODE_GOOD, invokeWrite(node, ua_value));
   }
 
-  void check_read(const UA_NodeId& node, size_t nominal_value) {
+  void checkRead(const UA_NodeId& node, size_t nominal_value) {
     UA_DataValue ua_value;
-    EXPECT_EQ(UA_STATUSCODE_GOOD, invoke_read(node, ua_value));
+    EXPECT_EQ(UA_STATUSCODE_GOOD, invokeRead(node, ua_value));
     EXPECT_TRUE(ua_value.hasValue);
     EXPECT_TRUE(UA_Variant_hasScalarType(
         &ua_value.value, &UA_TYPES[Type::UA_READ_TYPE]));
@@ -321,28 +324,28 @@ private:
   }
 
 public:
-  void test_no_callbacks(const UA_NodeId& node) {
-    check_no_read_callback(node);
-    check_no_write_callback(node);
+  void testNoCallbacks(const UA_NodeId& node) {
+    checkNoReadCallback(node);
+    checkNoWriteCallback(node);
   }
 
-  void test_read_only_callbacks(const UA_NodeId& node) {
+  void testReadOnlyCallbacks(const UA_NodeId& node) {
     for (size_t value = 0; value < Type::NUM_VALUES; ++value) {
-      im_value = init_im_value(value);
-      check_read(node, value);
+      im_value = initImValue(value);
+      checkRead(node, value);
     }
-    check_no_write_callback(node);
+    checkNoWriteCallback(node);
   }
 
-  void test_read_write_callbacks(const UA_NodeId& node) {
+  void testReadWriteCallbacks(const UA_NodeId& node) {
     UA_DataValue ua_v;
 
     for (size_t value = 0; value < Type::NUM_VALUES; ++value) {
-      init_ua_value(ua_v, value);
-      EXPECT_EQ(UA_STATUSCODE_GOOD, invoke_write(node, ua_v));
+      initUaValue(ua_v, value);
+      EXPECT_EQ(UA_STATUSCODE_GOOD, invokeWrite(node, ua_v));
 
-      EXPECT_EQ(im_value, init_im_value(value));
-      check_read(node, value);
+      EXPECT_EQ(im_value, initImValue(value));
+      checkRead(node, value);
     }
   }
 };
@@ -355,8 +358,8 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addNoCallback) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(
           TestFixture::node1, std::make_shared<CallbackWrapper>()));
-  TestFixture::test_no_callbacks(TestFixture::node1);
-  TestFixture::test_no_callbacks(TestFixture::node2);
+  TestFixture::testNoCallbacks(TestFixture::node1);
+  TestFixture::testNoCallbacks(TestFixture::node2);
 }
 
 // NOLINTNEXTLINE
@@ -364,8 +367,8 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addReadCallback) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(
           TestFixture::node1, TestFixture::read_only_callbacks));
-  TestFixture::test_read_only_callbacks(TestFixture::node1);
-  TestFixture::test_no_callbacks(TestFixture::node2);
+  TestFixture::testReadOnlyCallbacks(TestFixture::node1);
+  TestFixture::testNoCallbacks(TestFixture::node2);
 }
 
 // NOLINTNEXTLINE
@@ -373,8 +376,8 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addRWCallbacks) {
   EXPECT_EQ(UA_STATUSCODE_GOOD,
       NodeCallbackHandler::addNodeCallbacks(
           TestFixture::node1, TestFixture::read_write_callbacks));
-  TestFixture::test_read_write_callbacks(TestFixture::node1);
-  TestFixture::test_no_callbacks(TestFixture::node2);
+  TestFixture::testReadWriteCallbacks(TestFixture::node1);
+  TestFixture::testNoCallbacks(TestFixture::node2);
 }
 
 // NOLINTNEXTLINE
@@ -386,8 +389,8 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addTwoCallbacks) {
       NodeCallbackHandler::addNodeCallbacks(
           TestFixture::node2, TestFixture::read_write_callbacks));
 
-  TestFixture::test_read_only_callbacks(TestFixture::node1);
-  TestFixture::test_read_write_callbacks(TestFixture::node2);
+  TestFixture::testReadOnlyCallbacks(TestFixture::node1);
+  TestFixture::testReadWriteCallbacks(TestFixture::node2);
 }
 
 // NOLINTNEXTLINE
@@ -399,7 +402,7 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, addCallbacksTwice) {
       NodeCallbackHandler::addNodeCallbacks(
           TestFixture::node1, TestFixture::read_write_callbacks));
 
-  TestFixture::test_read_only_callbacks(TestFixture::node1);
+  TestFixture::testReadOnlyCallbacks(TestFixture::node1);
 }
 
 // NOLINTNEXTLINE
@@ -417,8 +420,8 @@ TYPED_TEST(NodeCallbackHandlerDataConversionTests, removeCallbacks) {
   EXPECT_EQ(
       UA_STATUSCODE_GOOD, NodeCallbackHandler::removeNodeCallbacks(&node));
 
-  TestFixture::test_no_callbacks(TestFixture::node1);
-  TestFixture::test_read_write_callbacks(TestFixture::node2);
+  TestFixture::testNoCallbacks(TestFixture::node1);
+  TestFixture::testReadWriteCallbacks(TestFixture::node2);
 }
 
 // NOLINTNEXTLINE
