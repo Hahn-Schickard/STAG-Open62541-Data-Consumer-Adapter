@@ -39,11 +39,13 @@ void OpcuaAdapter::start(vector<DevicePtr> devices) {
 }
 
 void OpcuaAdapter::stop() {
-  if (server_->stop()) {
-    DataConsumerAdapterInterface::stop();
-  } else {
-    logger->error("Failed to stop OPC UA Adapter!");
+  if (!server_->isRunning()) {
+    logger->info("Open62541 server is not running");
   }
+  if (!server_->stop()) {
+    logger->error("Failed to stop Open62541 server");
+  }
+  DataConsumerAdapterInterface::stop();
 }
 
 void OpcuaAdapter::registrate(NonemptyDevicePtr device) {
