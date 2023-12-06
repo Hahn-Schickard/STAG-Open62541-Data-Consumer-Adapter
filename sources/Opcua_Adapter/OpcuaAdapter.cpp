@@ -34,7 +34,7 @@ void OpcuaAdapter::start(vector<DevicePtr> devices) {
   if (server_->start()) {
     DataConsumerAdapterInterface::start(devices);
   } else {
-    logger->error("Failed to start OPC UA Adapter!");
+    logger->error("Failed to start Open62541 server");
   }
 }
 
