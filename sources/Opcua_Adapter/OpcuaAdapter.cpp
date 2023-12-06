@@ -34,7 +34,7 @@ void OpcuaAdapter::start(vector<DevicePtr> devices) {
   if (server_->start()) {
     DataConsumerAdapterInterface::start(devices);
   } else {
-    logger->log(SeverityLevel::ERROR, "Failed to initialize OPC UA Adapter!");
+    logger->error("Failed to start OPC UA Adapter!");
   }
 }
 
@@ -42,12 +42,12 @@ void OpcuaAdapter::stop() {
   if (server_->stop()) {
     DataConsumerAdapterInterface::stop();
   } else {
-    logger->log(SeverityLevel::ERROR, "Failed to initialize OPC UA Adapter!");
+    logger->error("Failed to stop OPC UA Adapter!");
   }
 }
 
 void OpcuaAdapter::registrate(NonemptyDevicePtr device) {
-  logger->log(SeverityLevel::TRACE,
+  logger->trace(
       "OPC UA Adapter received NEW_DEVICE_REGISTERED event for device "
       "with id",
       device->getElementId());
@@ -55,7 +55,7 @@ void OpcuaAdapter::registrate(NonemptyDevicePtr device) {
 }
 
 void OpcuaAdapter::deregistrate(const string& device_id) {
-  logger->log(SeverityLevel::TRACE,
+  logger->trace(
       "OPC UA Adapter received DEVICE_REMOVED event for device with id "
       "{}",
       device_id);

@@ -32,7 +32,7 @@ Open62541Server::~Open62541Server() { UA_Server_delete(open62541_server_); }
 
 bool Open62541Server::start() {
   try {
-    logger_->log(SeverityLevel::INFO, "Starting open62541 server!");
+    logger_->info("Starting open62541 server!");
     if (isRunning()) {
       stop();
     }
@@ -40,15 +40,14 @@ bool Open62541Server::start() {
     server_thread_ = thread(&Open62541Server::runnable, this);
 
     if (server_thread_.joinable()) {
-      logger_->log(SeverityLevel::TRACE, "Open62541 server thread is running!");
+      logger_->trace("Open62541 server thread is running!");
       return true;
     } else {
-      logger_->log(
-          SeverityLevel::ERROR, "Could not start Open62541 server thread!");
+      logger_->error("Could not start Open62541 server thread!");
       return false;
     }
   } catch (const exception& ex) {
-    logger_->log(SeverityLevel::CRITICAL,
+    logger_->critical(
         "Caught an exception while starting the server: {}", ex.what());
     return false;
   }
@@ -56,20 +55,18 @@ bool Open62541Server::start() {
 
 bool Open62541Server::stop() {
   if (isRunning()) {
-    logger_->log(SeverityLevel::INFO, "Stopping open62541 server!");
+    logger_->info("Stopping open62541 server!");
     is_running_ = false;
     server_thread_.join();
-    logger_->log(SeverityLevel::TRACE, "Joined open62541 server thread!");
+    logger_->trace("Joined open62541 server thread!");
     UA_StatusCode status = UA_Server_run_shutdown(open62541_server_);
     if (status == UA_STATUSCODE_GOOD) {
-      logger_->log(SeverityLevel::TRACE, "open62541 server shutdown!");
+      logger_->info("Stopped open62541 server!");
       return true;
     } else {
-      logger_->log(
-          SeverityLevel::ERROR, "Could not shutdown open62541 server!");
+      logger_->error("Could not shutdown open62541 server!");
     }
   }
-  logger_->log(SeverityLevel::INFO, "Stopped open62541 server!");
   return false;
 }
 
@@ -77,11 +74,11 @@ void Open62541Server::runnable() {
   try {
     UA_StatusCode status = UA_Server_run(open62541_server_, &is_running_);
     if (status != UA_STATUSCODE_GOOD) {
-      logger_->log(SeverityLevel::ERROR,
+      logger_->error(
           "ERROR:{} Failed to start open62541 server thread!", status);
     }
   } catch (const exception& ex) {
-    logger_->log(SeverityLevel::CRITICAL,
+    logger_->critical(
         "Caught an exception during server lifetime: {}", ex.what());
   }
 }
