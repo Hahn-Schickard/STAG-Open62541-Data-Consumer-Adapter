@@ -48,7 +48,8 @@ bool Open62541Server::start() {
       return false;
     }
   } catch (exception& ex) {
-    logger_->log(SeverityLevel::CRITICAL, "Caught an exception: []", ex.what());
+    logger_->log(SeverityLevel::CRITICAL,
+        "Caught an exception while starting the server: {}", ex.what());
     return false;
   }
 }
@@ -80,7 +81,8 @@ void Open62541Server::runnable() {
           "ERROR:{} Failed to start open62541 server thread!", status);
     }
   } catch (exception& ex) {
-    logger_->log(SeverityLevel::CRITICAL, "Caught an exception: []", ex.what());
+    logger_->log(SeverityLevel::CRITICAL,
+        "Caught an exception during server lifetime: {}", ex.what());
   }
 }
 
