@@ -65,9 +65,10 @@ bool Open62541Server::stop() {
       return true;
     } else {
       logger_->error("Could not shutdown open62541 server!");
+      return false;
     }
   }
-  return false;
+  return true;
 }
 
 void Open62541Server::runnable() {
