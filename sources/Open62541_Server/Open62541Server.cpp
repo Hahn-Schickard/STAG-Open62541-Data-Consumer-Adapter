@@ -72,16 +72,19 @@ bool Open62541Server::stop() {
 }
 
 void Open62541Server::runnable() {
-  try {
-    UA_StatusCode status = UA_Server_run(open62541_server_, &is_running_);
-    if (status != UA_STATUSCODE_GOOD) {
-      logger_->error(
-          "ERROR:{} Failed to start open62541 server thread!", status);
+  do {
+    try {
+      logger_->info("Starting open62541 server thread");
+      UA_StatusCode status = UA_Server_run(open62541_server_, &is_running_);
+      if (status != UA_STATUSCODE_GOOD) {
+        logger_->error(
+            "ERROR:{} Failed to start open62541 server thread!", status);
+      }
+    } catch (const exception& ex) {
+      logger_->critical(
+          "Caught an exception during server lifetime: {}", ex.what());
     }
-  } catch (const exception& ex) {
-    logger_->critical(
-        "Caught an exception during server lifetime: {}", ex.what());
-  }
+  } while (isRunning());
 }
 
 UA_UInt16 Open62541Server::getServerNamespace() const {
