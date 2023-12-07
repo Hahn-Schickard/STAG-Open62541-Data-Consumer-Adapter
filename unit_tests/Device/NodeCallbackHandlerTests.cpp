@@ -167,6 +167,11 @@ struct ByteStringConversion {
     case 0:
       return std::string();
     case 1:
+      /**
+       * This string is used as a c string buffer in tests, thus we allocate
+       * more memory as used by the std::string ctor
+       */
+      // NOLINTNEXTLINE(bugprone-string-constructor)
       return std::string("", 1);
     case 2:
       return std::string("\000\377", 2);
