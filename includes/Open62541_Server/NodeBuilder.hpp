@@ -15,6 +15,7 @@ class NodeBuilder {
   HaSLI::LoggerPtr logger_;
   std::shared_ptr<Open62541Server> server_;
 
+  /// The caller is responsible for calling `UA_NodeId_clear` on the `UA_NodeId`
   std::pair<UA_StatusCode, UA_NodeId> addObjectNode(
       const Information_Model::NonemptyNamedElementPtr& element,
       std::optional<UA_NodeId> parent_node_id = std::nullopt);
@@ -44,6 +45,8 @@ class NodeBuilder {
       const Information_Model::NonemptyFunctionPtr& function,
       const UA_NodeId& parent_id);
 
+  /// The caller is responsible for calling `UA_VariableAttributes_clear`
+  /// on `value_attribute`
   template <class MetricType> // either Metric or WritableMetric
   UA_StatusCode setValue(UA_VariableAttributes& value_attribute,
       const Information_Model::NonemptyNamedElementPtr& meta_info,

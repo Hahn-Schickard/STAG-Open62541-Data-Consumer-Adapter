@@ -50,7 +50,9 @@ string toString(const UA_NodeId* node_id) {
   if (UA_NodeId_print(node_id, &ua_string) != UA_STATUSCODE_GOOD) {
     throw runtime_error("Failed to conver UA_NodeId to a string!");
   }
-  return toString(&ua_string);
+  auto ret = toString(&ua_string);
+  UA_String_clear(&ua_string);
+  return ret;
 }
 
 string toString(const UA_QualifiedName* name) {
@@ -97,6 +99,7 @@ void checkStatusCode(const UA_StatusCode& status, bool uncertain_is_bad) {
   checkStatusCode(string(), status, uncertain_is_bad);
 }
 
+/// The caller is responsible for calling `UA_Variant_clear` on the result
 UA_Variant toUAVariant(const DataVariant& variant) {
   UA_Variant result;
   match(
