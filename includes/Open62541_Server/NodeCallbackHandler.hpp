@@ -93,6 +93,8 @@ public:
    * @brief Read callback used by OPC UA Clients to read the current value of a
    * specific node
    *
+   * The caller is responsible for calling `UA_DataValue_clear` on `value`
+   *
    * @param server - unused
    * @param sessionId - unused
    * @param sessionContext - unused

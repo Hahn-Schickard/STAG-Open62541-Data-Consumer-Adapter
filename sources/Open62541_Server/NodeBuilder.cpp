@@ -335,7 +335,9 @@ UA_StatusCode NodeBuilder::addWritableNode(
         "Failed to create a Node for Writable Metric: {}. Status: {}",
         meta_info->getElementName(), ex.what());
   }
+  UA_NodeId_clear(&metrid_node_id);
   UA_QualifiedName_clear(&metric_browse_name);
+  UA_VariableAttributes_clear(&node_attr);
   return status;
 }
 

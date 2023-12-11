@@ -99,7 +99,6 @@ void checkStatusCode(const UA_StatusCode& status, bool uncertain_is_bad) {
   checkStatusCode(string(), status, uncertain_is_bad);
 }
 
-/// The caller is responsible for calling `UA_Variant_clear` on the result
 UA_Variant toUAVariant(const DataVariant& variant) {
   UA_Variant result;
   match(

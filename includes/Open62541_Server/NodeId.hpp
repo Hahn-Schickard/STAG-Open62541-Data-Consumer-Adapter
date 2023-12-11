@@ -10,7 +10,7 @@ namespace open62541 {
  */
 class NodeId {
 private:
-  UA_NodeId ua_;
+  UA_NodeId ua_node_id_;
 public:
   NodeId() = delete;
   NodeId(NodeId const&);
@@ -19,7 +19,6 @@ public:
   ~NodeId();
 
   const UA_NodeId& base() const;
-  UA_NodeId& base();
 
   bool operator==(NodeId const& other) const;
 };

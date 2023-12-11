@@ -1,4 +1,8 @@
 # Changelog
+## [0.3.5] - xxxx.xx.xx
+### Fixed
+ - memory leaks
+
 ## [0.3.4] - 2023.12.06
 ### Changed
  - logging function calls in `OpcuaAdapter` to avoid using `SeverityLevel` enum

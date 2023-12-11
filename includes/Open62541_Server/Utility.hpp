@@ -29,6 +29,7 @@ void checkStatusCode(const std::string& msg, const UA_StatusCode& status,
 void checkStatusCode(
     const UA_StatusCode& status, bool uncertain_is_bad = false);
 
+/// The caller is responsible for calling `UA_Variant_clear` on the result
 UA_Variant toUAVariant(const Information_Model::DataVariant& variant);
 Information_Model::DataVariant toDataVariant(const UA_Variant& variant);
 
