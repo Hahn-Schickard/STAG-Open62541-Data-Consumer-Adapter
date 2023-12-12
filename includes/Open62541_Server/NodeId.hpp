@@ -11,10 +11,10 @@ namespace open62541 {
 class NodeId {
 private:
   UA_NodeId ua_node_id_;
+
 public:
   NodeId() = delete;
   NodeId(NodeId const&);
-  NodeId(NodeId&&);
   NodeId(UA_NodeId const&);
   ~NodeId();
 

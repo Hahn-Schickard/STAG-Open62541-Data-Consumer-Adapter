@@ -163,6 +163,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(UA_RuleHandling,
 
 namespace nlohmann {
 // ======================== UA_String ============================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, UA_String& p) {
   string text = j.get<string>();
@@ -227,6 +228,7 @@ static void to_json(json& j, const UA_UInt32Range& p) {
 }
 
 // ======================== SecureChannelsLimts ============================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, UserCredentials& p) {
   p.username = j.at("username").get<UA_String>();
@@ -484,6 +486,7 @@ static void to_json(json& j, const optional<Historization>& p) {
 }
 
 // ======================== Config ===========================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, Config& p) {
   p.allow_anonymous_access = j.at("allow_anonymous_access").get<UA_Boolean>();
@@ -541,6 +544,7 @@ static void to_json(json& j, const Config& p) {
 }
 } // namespace nlohmann
 
+// The caller is responsible for deallocating the result
 Config open62541::deserializeConfig(const string& file_path) {
   ifstream input_file_stream(file_path);
   if (input_file_stream) {

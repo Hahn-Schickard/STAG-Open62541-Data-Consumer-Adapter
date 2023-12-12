@@ -108,6 +108,8 @@ struct Config {
   UA_UInt32 max_publish_req_per_session;
   UA_ServerConfig_Discovery discovery;
   std::optional<Historization> historization;
+
+  ~Config();
 };
 } // namespace open62541
 

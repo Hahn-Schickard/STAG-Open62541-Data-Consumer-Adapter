@@ -35,7 +35,7 @@ std::string toString(UA_Server* server, const UA_ReferenceDescription& ref) {
   }
 
   return "{referenceTypeID=" + toString(&ref.referenceTypeId) + "(" +
-      type_name + "); " +
+      type_name + "); " + //
       "isForward=" + (ref.isForward ? "true" : "false") + "; " +
       "nodeId=" + toString(ref.nodeId) + "; " + "browseName=\"" +
       toString(&ref.browseName) + "\"; " +
@@ -189,7 +189,7 @@ public:
     browse_description.nodeClassMask = 65535;
     browse_description.resultMask = 65535; // NOLINT(readability-magic-numbers)
     result_ = UA_Server_browse(ua_server_, MAX_REFERENCES, &browse_description);
-    
+
     EXPECT_EQ(result_.statusCode, UA_STATUSCODE_GOOD)
         << UA_StatusCode_name(result_.statusCode);
     EXPECT_LT(result_.referencesSize, MAX_REFERENCES);

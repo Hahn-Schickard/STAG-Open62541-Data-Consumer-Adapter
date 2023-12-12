@@ -118,6 +118,8 @@ UA_StatusCode NodeBuilder::removeDataSources(const UA_NodeId* node_id) {
       result = removeDataSources(&node_reference.nodeId.nodeId);
     }
   }
+
+  UA_BrowseResult_clear(&browse_result);
   return result;
 }
 
@@ -128,7 +130,10 @@ UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
 
   removeDataSources(&device_node_id);
 
-  return UA_Server_deleteNode(server_->getServer(), device_node_id, true);
+  auto ret = UA_Server_deleteNode(server_->getServer(), device_node_id, true);
+
+  UA_NodeId_clear(&device_node_id);
+  return ret;
 }
 
 UA_StatusCode NodeBuilder::addDeviceNodeElement(

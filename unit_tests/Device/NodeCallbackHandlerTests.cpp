@@ -91,6 +91,7 @@ struct IntegralConversion : public SubtypeConversion<Super, Sub, im_type_,
                                 ua_super_type, ua_sub_type> {
   using Value_Type = Sub;
   static Value_Type value(size_t i) { return (i == 0 ? value_1 : value_2); }
+  // NOLINTNEXTLINE(readability-identifier-naming)
   static void UA_Write_Type_clear(Sub*) {}
 };
 
@@ -103,6 +104,7 @@ struct FloatConversion
     // NOLINTNEXTLINE(readability-magic-numbers)
     return (i == 0 ? 2.72 : -3.14);
   }
+  // NOLINTNEXTLINE(readability-identifier-naming)
   static void UA_Write_Type_clear(Sub*) {}
 };
 
@@ -129,6 +131,7 @@ struct StringConversion {
   using UA_Write_Type = UA_String;
   static constexpr size_t UA_READ_TYPE = UA_TYPES_STRING;
   static constexpr size_t UA_WRITE_TYPE = UA_TYPES_STRING;
+  // NOLINTNEXTLINE(readability-identifier-naming)
   static void UA_Write_Type_clear(UA_Write_Type* ptr) { UA_String_clear(ptr); }
 
   static std::string value2IM(Value_Type x) { return x; }
@@ -157,6 +160,7 @@ struct TimeConversion {
   using UA_Write_Type = UA_DateTime;
   static constexpr size_t UA_READ_TYPE = UA_TYPES_DATETIME;
   static constexpr size_t UA_WRITE_TYPE = UA_TYPES_DATETIME;
+  // NOLINTNEXTLINE(readability-identifier-naming)
   static void UA_Write_Type_clear(UA_Write_Type* ptr) {
     UA_DateTime_clear(ptr);
   }
@@ -201,6 +205,7 @@ struct ByteStringConversion {
   using UA_Write_Type = UA_ByteString;
   static constexpr size_t UA_READ_TYPE = UA_TYPES_BYTESTRING;
   static constexpr size_t UA_WRITE_TYPE = UA_TYPES_BYTESTRING;
+  // NOLINTNEXTLINE(readability-identifier-naming)
   static void UA_Write_Type_clear(UA_Write_Type* ptr) {
     UA_ByteString_clear(ptr);
   }

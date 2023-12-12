@@ -55,8 +55,7 @@ struct CallbackWrapper {
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 
 class NodeCallbackHandler {
-  using NodeCalbackMap =
-      Threadsafe::UnorderedMap<NodeId, CallbackWrapperPtr>;
+  using NodeCalbackMap = Threadsafe::UnorderedMap<NodeId, CallbackWrapperPtr>;
   static NodeCalbackMap node_calbacks_map_;
   // Invariant: No CallbackWrapperPtr is empty
   static const UA_Logger* logger_;
