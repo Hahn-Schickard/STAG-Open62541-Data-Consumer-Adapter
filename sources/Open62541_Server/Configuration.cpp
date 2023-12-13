@@ -120,9 +120,15 @@ void addSecurityPolicy(UA_ServerConfig* config, SecurityPolicy policy) {
 Configuration::Configuration(const string& filepath) : Configuration(true) {
   auto config = deserializeConfig(filepath);
 
+  UA_BuildInfo_clear(&configuration_->buildInfo);
   configuration_->buildInfo = config.build_info;
+
+  UA_ApplicationDescription_clear(&configuration_->applicationDescription);
   configuration_->applicationDescription = config.app_info;
+
+  UA_String_clear(&configuration_->serverCertificate);
   configuration_->serverCertificate = config.server_certificate;
+
   configuration_->shutdownDelay = config.shutdown_delay_ms;
   configuration_->verifyRequestTimestamp = config.rules_handling;
 
@@ -180,7 +186,10 @@ Configuration::Configuration(const string& filepath) : Configuration(true) {
       auto db_config = config.historization.value();
       historizer_ = make_unique<Historizer>(db_config.dsn, db_config.user,
           db_config.auth, db_config.request_timeout, db_config.request_logging);
+
+      configuration_->historyDatabase.clear(&configuration_->historyDatabase);
       configuration_->historyDatabase = historizer_->createDatabase();
+
       configuration_->accessHistoryDataCapability = true;
       configuration_->accessHistoryEventsCapability = false;
       configuration_->maxReturnDataValues = 0; // unlimited
@@ -217,11 +226,17 @@ Configuration::Configuration(const string& filepath) : Configuration(true) {
       config.discovery.discoveryCleanupTimeout;
 #ifdef UA_ENABLE_DISCOVERY_MULTICAST
   configuration_->mdnsEnabled = config.discovery.mdnsEnabled;
+
+  UA_MdnsDiscoveryConfiguration_clear(&configuration_->mdnsConfig);
   configuration_->mdnsConfig = config.discovery.mdnsConfig;
+
+  UA_String_clear(&configuration_->mdnsInterfaceIP);
   configuration_->mdnsInterfaceIP = config.discovery.mdnsInterfaceIP;
 #if !defined(UA_HAS_GETIFADDR)
   configuration_->mdnsIpAddressListSize =
       config.discovery.mdnsIpAddressListSize;
+
+  UA_free(configuration_->mdnsIpAddressList);
   configuration_->mdnsIpAddressList = config.discovery.mdnsIpAddressList;
 #endif //! UA_HAS_GETIFADDR
 #endif // UA_ENABLE_DISCOVERY_MULTICAST

@@ -4,11 +4,15 @@
 
 #include <open62541/server.h>
 
+#include "Utility.hpp"
+
 namespace open62541 {
 
 NodeId::NodeId(UA_NodeId const& source) {
   if (UA_NodeId_copy(&source, &ua_node_id_) != UA_STATUSCODE_GOOD) {
-    throw std::bad_alloc();
+    // The status code can only be `UA_STATUSCODE_BADOUTOFMEMORY`
+    throw std::runtime_error(
+        "Out of memory while trying to copy" + toString(&source));
   }
 }
 
