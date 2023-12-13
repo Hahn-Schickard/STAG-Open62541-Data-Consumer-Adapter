@@ -9,9 +9,6 @@ namespace open62541 {
  * @brief A C++-style wrapper around `UA_NodeId`
  */
 class NodeId {
-private:
-  UA_NodeId ua_node_id_;
-
 public:
   NodeId() = delete;
   NodeId(NodeId const&);
@@ -21,6 +18,9 @@ public:
   const UA_NodeId& base() const;
 
   bool operator==(NodeId const& other) const;
+
+private:
+  UA_NodeId ua_node_id_;
 };
 
 } // namespace open62541

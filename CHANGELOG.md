@@ -1,7 +1,19 @@
 # Changelog
 ## [0.3.5] - xxxx.xx.xx
+### Added
+ - `NodeId`
+ - `~Config`
+
 ### Fixed
- - memory leaks
+ - memory leak in `NodeCallbackHandler::node_calbacks_map_` where the (non-
+   existing) destructor of the open62541 data type `UA_NodeId` did not clear
+   the data allocated for the `UA_NodeId`
+ - memory leaks in `Configuration::Configuration(const string& filepath)` where
+   the fields already initialized by `Configuration::Configuration(bool)` and
+   then overwritten were not cleared.
+ - memory leaks where temporary objects of type `UA_BrowseResult`,
+   `UA_DataValue`, `UA_LocalizedText`, `UA_NodeId`, `UA_QualifiedName`,
+   `UA_String`, `UA_VariableAttributes`, and `UA_Variant` were not cleared
 
 ## [0.3.4] - 2023.12.06
 ### Changed
