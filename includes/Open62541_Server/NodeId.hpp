@@ -12,7 +12,8 @@ class NodeId {
 public:
   NodeId() = delete;
   NodeId(NodeId const&);
-  NodeId(UA_NodeId const&);
+  NodeId(UA_NodeId const&); /// @throws std::runtime_error if allocation fails
+
   ~NodeId();
 
   const UA_NodeId& base() const;
