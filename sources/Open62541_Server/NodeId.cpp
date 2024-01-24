@@ -8,7 +8,7 @@
 
 namespace open62541 {
 
-NodeId::NodeId(UA_NodeId const& source) {
+NodeId::NodeId(const UA_NodeId& source) {
   if (UA_NodeId_copy(&source, &ua_node_id_) != UA_STATUSCODE_GOOD) {
     // The status code can only be `UA_STATUSCODE_BADOUTOFMEMORY`
     throw std::runtime_error(
@@ -16,13 +16,13 @@ NodeId::NodeId(UA_NodeId const& source) {
   }
 }
 
-NodeId::NodeId(NodeId const& source) : NodeId(source.ua_node_id_) {}
+NodeId::NodeId(const NodeId& source) : NodeId(source.ua_node_id_) {}
 
 NodeId::~NodeId() { UA_NodeId_clear(&ua_node_id_); }
 
 const UA_NodeId& NodeId::base() const { return ua_node_id_; }
 
-bool NodeId::operator==(NodeId const& other) const {
+bool NodeId::operator==(const NodeId& other) const {
   return UA_NodeId_equal(&ua_node_id_, &other.ua_node_id_);
 }
 

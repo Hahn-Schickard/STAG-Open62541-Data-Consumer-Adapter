@@ -11,14 +11,14 @@ namespace open62541 {
 class NodeId {
 public:
   NodeId() = delete;
-  NodeId(NodeId const&);
-  NodeId(UA_NodeId const&); /// @throws std::runtime_error if allocation fails
+  NodeId(const NodeId&);
+  NodeId(const UA_NodeId&); /// @throws std::runtime_error if allocation fails
 
   ~NodeId();
 
   const UA_NodeId& base() const;
 
-  bool operator==(NodeId const& other) const;
+  bool operator==(const NodeId& other) const;
 
 private:
   UA_NodeId ua_node_id_;
