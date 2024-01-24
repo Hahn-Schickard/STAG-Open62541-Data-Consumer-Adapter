@@ -5,6 +5,7 @@
 #include "Information_Model/WritableMetric.hpp"
 #include "Threadsafe_Containers/UnorderedMap.hpp"
 
+#include "NodeId.hpp"
 #include "Open62541Server.hpp"
 
 #include "open62541/plugin/log.h"
@@ -14,11 +15,10 @@
 #include <optional>
 #include <string>
 
-template <> class std::hash<Threadsafe::HashableConstReference<UA_NodeId>> {
+template <> class std::hash<open62541::NodeId> {
 public:
-  size_t operator()(
-      const Threadsafe::HashableConstReference<UA_NodeId>& node_id) const {
-    return UA_NodeId_hash(&node_id.ref());
+  size_t operator()(open62541::NodeId const& node_id) const {
+    return UA_NodeId_hash(&node_id.base());
   }
 };
 
@@ -55,8 +55,7 @@ struct CallbackWrapper {
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 
 class NodeCallbackHandler {
-  using NodeCalbackMap =
-      Threadsafe::UnorderedMap<UA_NodeId, CallbackWrapperPtr>;
+  using NodeCalbackMap = Threadsafe::UnorderedMap<NodeId, CallbackWrapperPtr>;
   static NodeCalbackMap node_calbacks_map_;
   // Invariant: No CallbackWrapperPtr is empty
   static const UA_Logger* logger_;
@@ -92,6 +91,8 @@ public:
   /**
    * @brief Read callback used by OPC UA Clients to read the current value of a
    * specific node
+   *
+   * The caller is responsible for calling `UA_DataValue_clear` on `value`
    *
    * @param server - unused
    * @param sessionId - unused

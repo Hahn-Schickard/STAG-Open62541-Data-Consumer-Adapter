@@ -9,10 +9,12 @@
 using namespace open62541;
 
 std::string toString(UA_Server* server, const UA_ReferenceDescription& ref) {
-  UA_QualifiedName type_name;
+  UA_QualifiedName ua_type_name;
   auto statuscode =
-      UA_Server_readBrowseName(server, ref.referenceTypeId, &type_name);
+      UA_Server_readBrowseName(server, ref.referenceTypeId, &ua_type_name);
   EXPECT_EQ(statuscode, UA_STATUSCODE_GOOD) << UA_StatusCode_name(statuscode);
+  std::string type_name = toString(&ua_type_name);
+  UA_QualifiedName_clear(&ua_type_name);
 
   std::string typedef_name;
   {
@@ -29,10 +31,11 @@ std::string toString(UA_Server* server, const UA_ReferenceDescription& ref) {
     default:
       ADD_FAILURE() << UA_StatusCode_name(statuscode);
     }
+    UA_QualifiedName_clear(&opcua_typedef_name);
   }
 
   return "{referenceTypeID=" + toString(&ref.referenceTypeId) + "(" +
-      toString(&type_name) + "); " +
+      type_name + "); " + //
       "isForward=" + (ref.isForward ? "true" : "false") + "; " +
       "nodeId=" + toString(ref.nodeId) + "; " + "browseName=\"" +
       toString(&ref.browseName) + "\"; " +
@@ -186,6 +189,7 @@ public:
     browse_description.nodeClassMask = 65535;
     browse_description.resultMask = 65535; // NOLINT(readability-magic-numbers)
     result_ = UA_Server_browse(ua_server_, MAX_REFERENCES, &browse_description);
+
     EXPECT_EQ(result_.statusCode, UA_STATUSCODE_GOOD)
         << UA_StatusCode_name(result_.statusCode);
     EXPECT_LT(result_.referencesSize, MAX_REFERENCES);
@@ -202,6 +206,7 @@ public:
       auto& ref = result_.references[i];
       ADD_FAILURE() << "unexpected reference " << toString(ua_server_, ref);
     }
+    UA_BrowseResult_clear(&result_);
   }
 
   Iterator begin() { return Iterator(*this, 0); }
@@ -290,6 +295,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
         UA_String_equal(&ref_desc.browseName.name, &expected_browse_name))
         << toString(&ref_desc.browseName.name) << " vs "
         << toString(&expected_browse_name);
+    UA_String_clear(&expected_browse_name);
 
     // check displayName
     auto expected_display_name =
@@ -298,6 +304,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
         UA_String_equal(&ref_desc.displayName.text, &expected_display_name))
         << toString(&ref_desc.displayName.text) << " vs "
         << toString(&expected_display_name);
+    UA_String_clear(&expected_display_name);
 
     // check description
     auto expected_description =
@@ -307,6 +314,8 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
         ua_server, ref_desc.nodeId.nodeId, &description);
     EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
     EXPECT_TRUE(UA_String_equal(&description.text, &expected_description));
+    UA_String_clear(&expected_description);
+    UA_LocalizedText_clear(&description);
   }
 
   // NOLINTNEXTLINE(readability-function-cognitive-complexity)
@@ -340,6 +349,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
               UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
           EXPECT_EQ(value.type, Types::UA_TYPE);
+          UA_Variant_clear(&value);
         },
         [&](const Information_Model::NonemptyWritableMetricPtr&) {
           EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
@@ -357,6 +367,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
           status =
               UA_Server_writeValue(ua_server, ref_desc.nodeId.nodeId, value);
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
+          UA_Variant_clear(&value);
         },
         [&](const Information_Model::NonemptyFunctionPtr&) {
           // @TODO: handle functions here

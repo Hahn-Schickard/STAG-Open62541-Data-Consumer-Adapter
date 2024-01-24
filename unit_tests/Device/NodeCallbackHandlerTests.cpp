@@ -51,9 +51,13 @@ TEST_F(NodeCallbackHandlerTests, addCallbackNull) {
     using UA_Write_Type = ...;
       // A possibly different type used by open62541 when writing
     static constexpr size_t UA_WRITE_TYPE; // The respective index into UA_TYPES
+    static void UA_Write_Type_clear(UA_Write_Type*);
 
     static IM_Type value2IM(Value_Type);
+
+    // The caller is responsible for calling `UA_Write_Type_clear` on the result
     static UA_Write_Type value2Write(Value_Type);
+
     static bool equal(const IM_Type &, const UA_Read_Type &);
   }
 */
@@ -87,6 +91,8 @@ struct IntegralConversion : public SubtypeConversion<Super, Sub, im_type_,
                                 ua_super_type, ua_sub_type> {
   using Value_Type = Sub;
   static Value_Type value(size_t i) { return (i == 0 ? value_1 : value_2); }
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  static void UA_Write_Type_clear(Sub*) {}
 };
 
 template <class Sub, size_t ua_sub_type>
@@ -98,6 +104,8 @@ struct FloatConversion
     // NOLINTNEXTLINE(readability-magic-numbers)
     return (i == 0 ? 2.72 : -3.14);
   }
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  static void UA_Write_Type_clear(Sub*) {}
 };
 
 struct StringConversion {
@@ -123,9 +131,13 @@ struct StringConversion {
   using UA_Write_Type = UA_String;
   static constexpr size_t UA_READ_TYPE = UA_TYPES_STRING;
   static constexpr size_t UA_WRITE_TYPE = UA_TYPES_STRING;
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  static void UA_Write_Type_clear(UA_Write_Type* ptr) { UA_String_clear(ptr); }
 
   static std::string value2IM(Value_Type x) { return x; }
-  static UA_Write_Type value2Write(Value_Type s) { return UA_STRING((char*)s); }
+  static UA_Write_Type value2Write(Value_Type s) {
+    return UA_STRING_ALLOC((char*)s);
+  }
   static bool equal(const std::string& v1, const UA_Read_Type& v2) {
     return (v1.length() == v2.length) &&
         (0 == memcmp(v1.data(), v2.data, v2.length));
@@ -148,6 +160,10 @@ struct TimeConversion {
   using UA_Write_Type = UA_DateTime;
   static constexpr size_t UA_READ_TYPE = UA_TYPES_DATETIME;
   static constexpr size_t UA_WRITE_TYPE = UA_TYPES_DATETIME;
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  static void UA_Write_Type_clear(UA_Write_Type* ptr) {
+    UA_DateTime_clear(ptr);
+  }
 
   static Information_Model::DateTime value2IM(Value_Type t) { return t; }
   static UA_Write_Type value2Write(Value_Type t) {
@@ -189,6 +205,10 @@ struct ByteStringConversion {
   using UA_Write_Type = UA_ByteString;
   static constexpr size_t UA_READ_TYPE = UA_TYPES_BYTESTRING;
   static constexpr size_t UA_WRITE_TYPE = UA_TYPES_BYTESTRING;
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  static void UA_Write_Type_clear(UA_Write_Type* ptr) {
+    UA_ByteString_clear(ptr);
+  }
 
   static std::vector<uint8_t> value2IM(const Value_Type& s) {
     std::vector<uint8_t> ret;
@@ -197,12 +217,14 @@ struct ByteStringConversion {
     }
     return ret;
   }
+
   static UA_Write_Type value2Write(const Value_Type& s) {
     UA_ByteString ret;
     EXPECT_EQ(UA_STATUSCODE_GOOD, UA_ByteString_allocBuffer(&ret, s.length()));
     memcpy(ret.data, s.data(), s.length());
     return ret;
   }
+
   static bool equal(const std::vector<uint8_t>& v1, const UA_Read_Type& v2) {
     return (v1.size() == v2.length) &&
         (0 == memcmp(v1.data(), v2.data, v2.length));
@@ -249,8 +271,8 @@ struct NodeCallbackHandlerDataConversionTests
 
   UA_NodeId node1, node2;
 
-  Information_Model::DataVariant im_value;
   // the (single) resource that all callbacks use
+  Information_Model::DataVariant im_value;
 
   std::shared_ptr<CallbackWrapper> read_only_callbacks =
       std::make_shared<CallbackWrapper>(Type::IM_TYPE,
@@ -277,6 +299,7 @@ private:
         Type::value2IM(Type::value(value_index)));
   }
 
+  // The caller is responsible for calling `UA_DataValue_clear` on `dst`
   void initUaValue(UA_DataValue& dst, size_t value_index) {
     auto ua_val = Type::value2Write(Type::value(value_index));
     dst.hasValue = true;
@@ -288,8 +311,10 @@ private:
     EXPECT_EQ(UA_STATUSCODE_GOOD,
         UA_Variant_setScalarCopy(
             &dst.value, &ua_val, &UA_TYPES[Type::UA_WRITE_TYPE]));
+    Type::UA_Write_Type_clear(&ua_val);
   }
 
+  // The caller is responsible for calling `UA_DataValue_clear` on `ua_value`
   UA_StatusCode invokeRead(const UA_NodeId& node, UA_DataValue& ua_value) {
     return NodeCallbackHandler::readNodeValue(nullptr, nullptr, nullptr, &node,
         nullptr, UA_FALSE, nullptr, &ua_value);
@@ -310,6 +335,7 @@ private:
     UA_DataValue ua_value;
     initUaValue(ua_value, 0);
     EXPECT_NE(UA_STATUSCODE_GOOD, invokeWrite(node, ua_value));
+    UA_DataValue_clear(&ua_value);
   }
 
   void checkRead(const UA_NodeId& node, size_t nominal_value) {
@@ -324,6 +350,7 @@ private:
               *((typename Type::UA_Read_Type*)ua_value.value.data)))
           << i << "," << nominal_value;
     }
+    UA_DataValue_clear(&ua_value);
   }
 
 public:
@@ -349,6 +376,7 @@ public:
 
       EXPECT_EQ(im_value, initImValue(value));
       checkRead(node, value);
+      UA_DataValue_clear(&ua_v);
     }
   }
 };

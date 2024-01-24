@@ -290,7 +290,7 @@ UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
   return status;
 }
 
-Threadsafe::UnorderedMap<UA_NodeId, CallbackWrapperPtr>
+Threadsafe::UnorderedMap<NodeId, CallbackWrapperPtr>
     NodeCallbackHandler::node_calbacks_map_; // NOLINT(cert-err58-cpp)
 const UA_Logger* NodeCallbackHandler::logger_; // NOLINT
 } // namespace open62541

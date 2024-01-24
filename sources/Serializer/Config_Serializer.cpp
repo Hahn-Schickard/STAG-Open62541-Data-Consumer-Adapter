@@ -163,6 +163,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(UA_RuleHandling,
 
 namespace nlohmann {
 // ======================== UA_String ============================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, UA_String& p) {
   string text = j.get<string>();
@@ -182,6 +183,7 @@ static void to_json(json& j, const UA_String& p) {
 }
 
 // ======================== UA_LocalizedText ============================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, UA_LocalizedText& p) {
   p.locale = j.at("locale").get<UA_String>();
@@ -227,6 +229,7 @@ static void to_json(json& j, const UA_UInt32Range& p) {
 }
 
 // ======================== SecureChannelsLimts ============================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, UserCredentials& p) {
   p.username = j.at("username").get<UA_String>();
@@ -381,6 +384,7 @@ static void to_json(json& j, const UA_ConnectionConfig& p) {
 }
 
 // ======================== UA_BuildInfo ===========================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, UA_BuildInfo& p) {
   p.productUri = j.at("productUri").get<UA_String>();
@@ -404,6 +408,7 @@ static void to_json(json& j, const UA_BuildInfo& p) {
 }
 
 // ====================== UA_ApplicationDescription =======================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, UA_ApplicationDescription& p) {
   p.applicationUri = j.at("applicationUri").get<UA_String>();
@@ -429,6 +434,7 @@ static void to_json(json& j, const UA_ApplicationDescription& p) {
 }
 
 // ==================== UA_MdnsDiscoveryConfiguration =====================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, UA_MdnsDiscoveryConfiguration& p) {
   p.mdnsServerName = j.at("mdnsServerName").get<UA_String>();
@@ -484,6 +490,7 @@ static void to_json(json& j, const optional<Historization>& p) {
 }
 
 // ======================== Config ===========================
+// The caller is responsible for deallocation of `p`
 // NOLINTNEXTLINE
 static void from_json(const json& j, Config& p) {
   p.allow_anonymous_access = j.at("allow_anonymous_access").get<UA_Boolean>();

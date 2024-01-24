@@ -61,6 +61,10 @@ pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
   auto status = UA_Server_addObjectNode(server_->getServer(), node_id,
       parent_node_id.value(), reference_type_id, browse_name, type_definition,
       node_attr, nullptr, nullptr);
+
+  UA_QualifiedName_clear(&browse_name);
+  UA_ObjectAttributes_clear(&node_attr);
+
   return make_pair(status, node_id);
 }
 
@@ -85,6 +89,7 @@ UA_StatusCode NodeBuilder::addDeviceNode(const NonemptyDevicePtr& device) {
     logger_->error("Failed to create a Node for Device: {}. Status: {}",
         device->getElementName(), ex.what());
   }
+  UA_NodeId_clear(&result.second);
   return status;
 }
 
@@ -113,6 +118,8 @@ UA_StatusCode NodeBuilder::removeDataSources(const UA_NodeId* node_id) {
       result = removeDataSources(&node_reference.nodeId.nodeId);
     }
   }
+
+  UA_BrowseResult_clear(&browse_result);
   return result;
 }
 
@@ -123,7 +130,10 @@ UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
 
   removeDataSources(&device_node_id);
 
-  return UA_Server_deleteNode(server_->getServer(), device_node_id, true);
+  auto ret = UA_Server_deleteNode(server_->getServer(), device_node_id, true);
+
+  UA_NodeId_clear(&device_node_id);
+  return ret;
 }
 
 UA_StatusCode NodeBuilder::addDeviceNodeElement(
@@ -181,6 +191,7 @@ UA_StatusCode NodeBuilder::addGroupNode(
           "Failed to create a Node for Device Element Group: {}. Status: {}",
           meta_info->getElementName(), ex.what());
     }
+    UA_NodeId_clear(&result.second);
   }
   return status;
 }
@@ -262,6 +273,9 @@ UA_StatusCode NodeBuilder::addReadableNode(
         "Failed to create a Node for Readable Metric: {}. Status: {}",
         meta_info->getElementName(), ex.what());
   }
+  UA_NodeId_clear(&metrid_node_id);
+  UA_QualifiedName_clear(&metric_browse_name);
+  UA_VariableAttributes_clear(&node_attr);
   return status;
 }
 
@@ -326,6 +340,9 @@ UA_StatusCode NodeBuilder::addWritableNode(
         "Failed to create a Node for Writable Metric: {}. Status: {}",
         meta_info->getElementName(), ex.what());
   }
+  UA_NodeId_clear(&metrid_node_id);
+  UA_QualifiedName_clear(&metric_browse_name);
+  UA_VariableAttributes_clear(&node_attr);
   return status;
 }
 

@@ -50,7 +50,9 @@ string toString(const UA_NodeId* node_id) {
   if (UA_NodeId_print(node_id, &ua_string) != UA_STATUSCODE_GOOD) {
     throw runtime_error("Failed to conver UA_NodeId to a string!");
   }
-  return toString(&ua_string);
+  auto ret = toString(&ua_string);
+  UA_String_clear(&ua_string);
+  return ret;
 }
 
 string toString(const UA_QualifiedName* name) {
