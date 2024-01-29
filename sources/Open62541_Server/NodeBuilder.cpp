@@ -128,12 +128,25 @@ UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
       UA_NODEID_STRING_ALLOC(server_->getServerNamespace(), device_id.c_str());
   logger_->trace("Removing Node {}", toString(&device_node_id));
 
-  removeDataSources(&device_node_id);
+  auto result = removeDataSources(&device_node_id);
 
-  auto ret = UA_Server_deleteNode(server_->getServer(), device_node_id, true);
+  if (UA_StatusCode_isBad(result)) {
+    logger_->error(
+        "Could not remove data sources for {} device node", device_id);
+  } else {
+    logger_->trace("Removed linked data sources for device node {}", device_id);
+  }
+
+  result = UA_Server_deleteNode(server_->getServer(), device_node_id, true);
+  if (UA_StatusCode_isBad(result)) {
+    logger_->error("Could not delete {} device node: {}", device_id,
+        string(UA_StatusCode_name(result)));
+  } else {
+    logger_->trace("Device node {} deleted", device_id);
+  }
 
   UA_NodeId_clear(&device_node_id);
-  return ret;
+  return result;
 }
 
 UA_StatusCode NodeBuilder::addDeviceNodeElement(
