@@ -453,14 +453,21 @@ static void to_json(json& j, const UA_MdnsDiscoveryConfiguration& p) {
 static void from_json(const json& j, UA_ServerConfig_Discovery& p) {
   p.discoveryCleanupTimeout = j.at("cleanupTimeout").get<UA_UInt32>();
   p.mdnsEnabled = j.at("mdnsEnable").get<bool>();
+  if (p.mdnsEnabled) {
+    auto mdsnc_config = j.at("mdnsConfig").get<UA_MdnsDiscoveryConfiguration>();
+    p.mdnsConfig = mdsnc_config;
+  }
 }
 
 // NOLINTNEXTLINE
 static void to_json(json& j, const UA_ServerConfig_Discovery& p) {
   j = json{// clang-format off
       {"cleanupTimeout", p.discoveryCleanupTimeout},
-      {"mdnsEnable", p.mdnsEnabled}
-  }; // clang-format on
+      {"mdnsEnable", p.mdnsEnabled} 
+  }; // clang-format on}
+  if (p.mdnsEnabled) {
+    j += json::object_t::value_type("mdnsConfig", p.mdnsConfig);
+  }; 
 }
 
 // ====================== Historization =======================
