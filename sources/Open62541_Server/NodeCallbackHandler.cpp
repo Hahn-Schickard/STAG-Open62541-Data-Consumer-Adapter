@@ -79,7 +79,13 @@ UA_StatusCode NodeCallbackHandler::removeNodeCallbacks(
   if (it != node_calbacks_map_.end()) {
     string trace_msg = "Removing callbacks for Node " + toString(node_id);
     UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
-    node_calbacks_map_.erase(it);
+    try {
+      node_calbacks_map_.erase(it);
+    } catch (const NodeCalbackMap::AlreadyErased& ex) {
+      string msg = "Node " + toString(node_id) + " already erased";
+      UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, msg.c_str());
+      // set status to UA_STATUSCODE_BADOBJECTDELETED
+    }
     status = UA_STATUSCODE_GOOD;
   } else {
     string error_msg =
