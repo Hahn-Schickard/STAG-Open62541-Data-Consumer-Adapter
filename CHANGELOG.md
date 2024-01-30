@@ -1,19 +1,29 @@
 # Changelog
-## [0.3.5] - xxxx.xx.xx
+## [0.3.5] - 2024.1.30
 ### Added
- - `NodeId`
- - `~Config`
+ - `NodeId` class to control `UA_NodeId` lifetime in `NodeCallbackHandler`
+ - `~Config` to clear `access_credentials` fields
+ - `std::string toString(const UA_ExpandedNodeId& id)` function to utilities
+ - logging for each deletion stage in `NodeBuilder::deleteDeviceNode()`
+ - **try-catch** block for `NodeCalbackMap::AlreadyErased` exception in 
+   `NodeCallbackHandler::removeNodeCallbacks()` method
+ - `UA_MdnsDiscoveryConfiguration` serialization in `UA_ServerConfig_Discovery`
 
 ### Fixed
- - memory leak in `NodeCallbackHandler::node_calbacks_map_` where the (non-
-   existing) destructor of the open62541 data type `UA_NodeId` did not clear
-   the data allocated for the `UA_NodeId`
+ - memory leak in `NodeCallbackHandler::node_calbacks_map_` where the destructor 
+   of the open62541 data type `UA_NodeId` did not clear the data allocated for 
+   the `UA_NodeId`
  - memory leaks in `Configuration::Configuration(const string& filepath)` where
-   the fields already initialized by `Configuration::Configuration(bool)` and
-   then overwritten were not cleared.
+   the fields initialized by `Configuration::Configuration(bool)` ctor were not 
+   cleared.
  - memory leaks where temporary objects of type `UA_BrowseResult`,
    `UA_DataValue`, `UA_LocalizedText`, `UA_NodeId`, `UA_QualifiedName`,
    `UA_String`, `UA_VariableAttributes`, and `UA_Variant` were not cleared
+
+### Changed 
+  - `Open62541Server::runnable()` to continually retry restarting the server
+    while the adapter is running
+  - `NodeCallbackHandler::node_calbacks_map_` to use `NodeId` instead of `UA_NodeId`
 
 ## [0.3.4] - 2023.12.06
 ### Changed
