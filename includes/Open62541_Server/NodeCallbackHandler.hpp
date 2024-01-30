@@ -17,7 +17,7 @@
 
 template <> class std::hash<open62541::NodeId> {
 public:
-  size_t operator()(open62541::NodeId const& node_id) const {
+  size_t operator()(const open62541::NodeId& node_id) const {
     return UA_NodeId_hash(&node_id.base());
   }
 };
