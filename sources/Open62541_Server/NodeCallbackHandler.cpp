@@ -84,7 +84,6 @@ UA_StatusCode NodeCallbackHandler::removeNodeCallbacks(
     } catch (const NodeCalbackMap::AlreadyErased& ex) {
       string msg = "Node " + toString(node_id) + " already erased";
       UA_LOG_INFO(logger_, UA_LOGCATEGORY_SERVER, msg.c_str());
-      // set status to UA_STATUSCODE_BADOBJECTDELETED
     }
     status = UA_STATUSCODE_GOOD;
   } else {
