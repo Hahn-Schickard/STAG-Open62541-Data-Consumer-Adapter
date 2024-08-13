@@ -1,5 +1,10 @@
 # Changelog
-## [0.3.5] - 2024.1.30
+## [0.3.6] - 2024.08.13
+### Changed
+ - Cmake Historization option to default to OFF
+ - Conan to default to historization:False
+
+## [0.3.5] - 2024.01.30
 ### Added
  - `NodeId` class to control `UA_NodeId` lifetime in `NodeCallbackHandler`
  - `~Config` to clear `access_credentials` fields
