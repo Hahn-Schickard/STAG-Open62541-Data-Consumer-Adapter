@@ -9,9 +9,11 @@
 #include <chrono>
 #include <csignal>
 #include <exception>
+#include <functional>
 #include <gmock/gmock.h>
 #include <iostream>
 #include <thread>
+#include <unordered_map>
 
 using namespace std;
 using namespace HaSLL;
@@ -58,6 +60,68 @@ public:
   void sendEvent(const ModelRepositoryEventPtr& event) { notify(event); }
 };
 
+struct Executor {
+  using Callback = function<void(void)>;
+  Executor(Callback&& callback) : callback_(move(callback)) {}
+
+  pair<uintmax_t, future<DataVariant>> execute(const Function::Parameters&) {
+    auto execute_lock = lock_guard(execute_mx_);
+    auto id = calls_.size();
+    auto promise = std::promise<DataVariant>();
+    auto future = make_pair(id, promise.get_future());
+    calls_.emplace(id, move(promise));
+    auto responder = bind(&Executor::respond, this, id);
+    thread(
+        [](function<void(void)>&& responder) {
+          this_thread::sleep_for(1s);
+          if (responder) {
+            responder();
+          }
+        },
+        move(responder))
+        .detach();
+
+    return future;
+  }
+
+  void cancel(uintmax_t id) {
+    auto iter = calls_.find(id);
+    if (iter != calls_.end()) {
+      iter->second.set_exception(
+          make_exception_ptr(CallCanceled(id, "ExternalExecutor")));
+      auto clear_lock = lock_guard(erase_mx_);
+      iter = calls_.erase(iter);
+    } else {
+      throw CallerNotFound(id, "ExternalExecutor");
+    }
+  }
+
+private:
+  void respond(uintmax_t id) {
+    auto erase_lock = lock_guard(erase_mx_);
+    auto it = calls_.find(id);
+    if (it != calls_.end()) {
+      if (callback_) {
+        callback_();
+        it->second.set_value(DataVariant());
+      } else {
+        it->second.set_exception(
+            make_exception_ptr(runtime_error("Callback dos not exist")));
+      }
+      it = calls_.erase(it);
+    }
+  }
+
+  Callback callback_;
+  mutex execute_mx_;
+  mutex erase_mx_;
+  unordered_map<uintmax_t, promise<DataVariant>> calls_;
+};
+
+using ExecutorPtr = shared_ptr<Executor>;
+
+ExecutorPtr executor = nullptr;
+
 void print(const NonemptyDevicePtr& device);
 void print(const NonemptyDeviceElementPtr& element, size_t offset);
 void print(const NonemptyWritableMetricPtr& element, size_t offset);
@@ -91,13 +155,16 @@ int main(int argc, char* argv[]) {
         make_unique<OpcuaAdapter>(event_source, "config/defaultConfig.json");
     logger->trace("OPC UA Adapter initialized!");
 
+    executor =
+        make_shared<Executor>([]() { cout << "Callback called" << endl; });
+
     adapter->start();
     registerDevices(event_source);
-    this_thread::sleep_for(10s);
-    logger->trace("Sending device deregistered event");
-    deregisterDevices(event_source);
-    this_thread::sleep_for(5s);
-    registerDevices(event_source);
+    // this_thread::sleep_for(10s);
+    // logger->trace("Sending device deregistered event");
+    // deregisterDevices(event_source);
+    // this_thread::sleep_for(5s);
+    // registerDevices(event_source);
 
     if (argc > 1) {
       auto server_lifetime = stoi(argv[1]);
@@ -270,6 +337,15 @@ Information_Model::NonemptyDevicePtr buildDevice2() {
           // NOLINTNEXTLINE(readability-magic-numbers)
           return (double)8.8;
         });
+  }
+  mock_builder->addFunction("Recalculate", "Recalculates measured values",
+      Information_Model::DataType::BOOLEAN);
+
+  if (executor) {
+    mock_builder->addFunction("Reset", "Resets the device",
+        Information_Model::DataType::NONE,
+        bind(&Executor::execute, executor, placeholders::_1),
+        bind(&Executor::cancel, executor, placeholders::_1));
   }
   return Information_Model::NonemptyDevicePtr(mock_builder->getResult());
 }
