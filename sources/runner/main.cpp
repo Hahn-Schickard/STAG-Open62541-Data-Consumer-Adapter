@@ -160,11 +160,11 @@ int main(int argc, char* argv[]) {
 
     adapter->start();
     registerDevices(event_source);
-    // this_thread::sleep_for(10s);
-    // logger->trace("Sending device deregistered event");
-    // deregisterDevices(event_source);
-    // this_thread::sleep_for(5s);
-    // registerDevices(event_source);
+    this_thread::sleep_for(10s);
+    logger->trace("Sending device deregistered event");
+    deregisterDevices(event_source);
+    this_thread::sleep_for(5s);
+    registerDevices(event_source);
 
     if (argc > 1) {
       auto server_lifetime = stoi(argv[1]);
