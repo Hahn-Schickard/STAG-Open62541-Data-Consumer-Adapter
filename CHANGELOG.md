@@ -1,4 +1,16 @@
 # Changelog
+## [0.3.7] - 2025.01.15
+### Added 
+ - Method mocks to example runner 
+
+### Fixed 
+ - `NodeBuilder::addFunctionNode()` not calling `UA_Server_addMethodNode` due to a missing {
+ - Incorrect function result condition check in `NodeBuilder::addFunctionNode()` 
+ - `NodeCallbackHandler::callNodeMethod()` not setting result status to `UA_STATUSCODE_GOOD` upon successful callback call
+
+### Changed
+ - `NodeBuilder::addFunctionNode()` to use lambdas, instead of `std::bind()` when creating `CallbackWrapperPtr` instances
+
 ## [0.3.6] - 2024.08.13
 ### Changed
  - Cmake Historization option to default to OFF
