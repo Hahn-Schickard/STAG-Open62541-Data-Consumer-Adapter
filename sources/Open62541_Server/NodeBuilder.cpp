@@ -365,7 +365,7 @@ UA_StatusCode NodeBuilder::addFunctionNode(
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   auto method_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), meta_info->getElementId().c_str());
-  if (function->result_type != DataType::NONE ||
+  if (function->result_type != DataType::NONE &&
       function->result_type != DataType::UNKNOWN) {
     CallbackWrapper::CallCallback call_cb =
         bind(static_cast<DataVariant (Function::*)(
