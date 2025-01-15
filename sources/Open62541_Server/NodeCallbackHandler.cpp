@@ -244,6 +244,7 @@ UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
             auto ua_variant = toUAVariant(result_variant);
             UA_Variant_copy(&ua_variant, output);
             UA_Variant_clear(&ua_variant);
+            status = UA_STATUSCODE_GOOD;
           } else {
             string error_msg = "Method " + toString(method_id) +
                 " does not have any registered call callback!";
@@ -255,6 +256,7 @@ UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
                 "Calling execute callback for Method " + toString(method_id);
             UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER, trace_msg.c_str());
             execute(args);
+            status = UA_STATUSCODE_GOOD;
           } else {
             string error_msg = "Method " + toString(method_id) +
                 " does not have any registered execute callback!";
