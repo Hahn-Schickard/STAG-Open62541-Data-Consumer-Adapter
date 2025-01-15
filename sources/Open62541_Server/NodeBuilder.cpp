@@ -368,16 +368,35 @@ UA_StatusCode NodeBuilder::addFunctionNode(
   if (function->result_type != DataType::NONE &&
       function->result_type != DataType::UNKNOWN) {
     CallbackWrapper::CallCallback call_cb =
-        bind(static_cast<DataVariant (Function::*)(
-                 const Function::Parameters&, uintmax_t)>(&Function::call),
-            function.base(), placeholders::_1,
-            (uintmax_t)1000); // NOLINT(readability-magic-numbers) call-timeout
+        [function, id = meta_info->getElementId(),
+            logger = server_->getServerLogger()](
+            const Information_Model::Function::Parameters& params) {
+          try {
+            return function->call(
+                params, (uintmax_t)1000); // NOLINT(readability-magic-numbers)
+          } catch (const exception& ex) {
+            string msg = "An exception occurred while calling " + id +
+                " function: " + ex.what();
+            UA_LOG_ERROR(logger, UA_LOGCATEGORY_SERVER, msg.c_str());
+            return Information_Model::DataVariant();
+          }
+        };
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
         make_shared<CallbackWrapper>(
             function->result_type, function->parameters, move(call_cb)));
   } else {
     CallbackWrapper::ExecuteCallback execute_cb =
-        bind(&Function::execute, function.base(), placeholders::_1);
+        [function, id = meta_info->getElementId(),
+            logger = server_->getServerLogger()](
+            const Information_Model::Function::Parameters& params) {
+          try {
+            function->execute(params);
+          } catch (const exception& ex) {
+            string msg = "An exception occurred while executing " + id +
+                " function: " + ex.what();
+            UA_LOG_ERROR(logger, UA_LOGCATEGORY_SERVER, msg.c_str());
+          }
+        };
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
         make_shared<CallbackWrapper>(
             function->result_type, function->parameters, move(execute_cb)));
