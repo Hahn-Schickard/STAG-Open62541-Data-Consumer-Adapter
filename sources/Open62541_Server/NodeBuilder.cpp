@@ -401,35 +401,34 @@ UA_StatusCode NodeBuilder::addFunctionNode(
         input_args[i].description =
             UA_LOCALIZEDTEXT_ALLOC("EN_US", arg_desc.c_str());
       }
-      uint8_t output_count = 0;
-      if (function->result_type != DataType::NONE) {
-        output_count = 1;
-        output = UA_Argument_new();
-        output->name = makeUAString(toString(function->result_type));
-        output->dataType = toNodeId(function->result_type);
-        output->valueRank = UA_VALUERANK_SCALAR; // all returns are scalar
-        auto ouput_desc = toString(function->result_type);
-        output->description =
-            UA_LOCALIZEDTEXT_ALLOC("EN_US", ouput_desc.c_str());
-      }
-      auto reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
-      auto method_browse_name = UA_QUALIFIEDNAME_ALLOC(
-          server_->getServerNamespace(), meta_info->getElementName().c_str());
-
-      UA_MethodAttributes node_attr = UA_MethodAttributes_default;
-      node_attr.description = UA_LOCALIZEDTEXT_ALLOC(
-          "en-US", meta_info->getElementDescription().c_str());
-      node_attr.displayName =
-          UA_LOCALIZEDTEXT_ALLOC("en-US", meta_info->getElementName().c_str());
-      node_attr.executable = true;
-      node_attr.userExecutable = true;
-
-      status = UA_Server_addMethodNode(server_->getServer(), method_node_id,
-          parent_id, reference_type_id, method_browse_name, node_attr,
-          &NodeCallbackHandler::callNodeMethod, arg_count, input_args,
-          output_count, output, nullptr, nullptr);
-      checkStatusCode("While adding method node to server", status);
     }
+    uint8_t output_count = 0;
+    if (function->result_type != DataType::NONE) {
+      output_count = 1;
+      output = UA_Argument_new();
+      output->name = makeUAString(toString(function->result_type));
+      output->dataType = toNodeId(function->result_type);
+      output->valueRank = UA_VALUERANK_SCALAR; // all returns are scalar
+      auto ouput_desc = toString(function->result_type);
+      output->description = UA_LOCALIZEDTEXT_ALLOC("EN_US", ouput_desc.c_str());
+    }
+    auto reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
+    auto method_browse_name = UA_QUALIFIEDNAME_ALLOC(
+        server_->getServerNamespace(), meta_info->getElementName().c_str());
+
+    UA_MethodAttributes node_attr = UA_MethodAttributes_default;
+    node_attr.description = UA_LOCALIZEDTEXT_ALLOC(
+        "en-US", meta_info->getElementDescription().c_str());
+    node_attr.displayName =
+        UA_LOCALIZEDTEXT_ALLOC("en-US", meta_info->getElementName().c_str());
+    node_attr.executable = true;
+    node_attr.userExecutable = true;
+
+    status = UA_Server_addMethodNode(server_->getServer(), method_node_id,
+        parent_id, reference_type_id, method_browse_name, node_attr,
+        &NodeCallbackHandler::callNodeMethod, arg_count, input_args,
+        output_count, output, nullptr, nullptr);
+    checkStatusCode("While adding method node to server", status);
   } catch (const StatusCodeNotGood& ex) {
     logger_->error("Failed to create a MethodNode for Function: {}. Status: {}",
         meta_info->getElementName(), ex.what());
