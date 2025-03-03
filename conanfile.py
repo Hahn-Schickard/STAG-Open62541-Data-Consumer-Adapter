@@ -56,7 +56,7 @@ class PackageConan(ConanFile):
         self.requires("nlohmann_json/3.11.1")
         self.requires("open62541/1.3.6",
                       headers=True, transitive_headers=True)
-        self.requires("data_consumer_adapter_interface/[~0.2]@hahn-schickard/stable",
+        self.requires("data_consumer_adapter_interface/[~0.3]@hahn-schickard/stable",
                       headers=True, libs=True, transitive_headers=True, transitive_libs=True)
         if self.options.historization:
             self.requires("date/3.0.1")
