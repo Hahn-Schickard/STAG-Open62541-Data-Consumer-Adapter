@@ -11,7 +11,7 @@
 #include <string>
 
 using namespace std;
-using namespace HaSLI;
+using namespace HaSLL;
 using namespace OODD;
 
 namespace open62541 {

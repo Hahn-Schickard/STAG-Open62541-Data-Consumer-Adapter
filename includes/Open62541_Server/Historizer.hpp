@@ -158,9 +158,9 @@ private:
 
   template <typename... Types>
   static void log(
-      HaSLI::SeverityLevel level, std::string message, Types... args);
+      HaSLL::SeverityLevel level, std::string message, Types... args);
 
-  static HaSLI::LoggerPtr logger_;
+  static HaSLL::LoggerPtr logger_;
   static OODD::DatabaseDriverPtr db_;
 };
 } // namespace open62541
