@@ -21,7 +21,7 @@ class Open62541Server {
   UA_Server* open62541_server_;
   UA_UInt16 server_namespace_index_;
   std::thread server_thread_;
-  HaSLI::LoggerPtr logger_;
+  HaSLL::LoggerPtr logger_;
   std::mutex status_mutex_;
 #ifdef UA_ENABLE_HISTORIZING
   std::unique_ptr<Historizer> historizer_;

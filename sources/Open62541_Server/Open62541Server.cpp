@@ -4,7 +4,7 @@
 #include "HaSLL/LoggerManager.hpp"
 
 using namespace std;
-using namespace HaSLI;
+using namespace HaSLL;
 using namespace Information_Model;
 using namespace open62541;
 

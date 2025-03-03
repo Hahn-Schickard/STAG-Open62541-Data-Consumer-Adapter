@@ -1,6 +1,5 @@
 #include "Event_Model/EventSource.hpp"
 #include "HaSLL/LoggerManager.hpp"
-#include "HaSLL/SPD_LoggerRepository.hpp"
 #include "Information_Model/mocks/DeviceMockBuilder.hpp"
 #include "Information_Model/mocks/Metric_MOCK.hpp"
 
@@ -35,12 +34,13 @@ static void stopHandler(int /*sig*/) {
   exit(EXIT_SUCCESS);
 }
 
-void printException(const exception& e, int level = 0) {
-  cerr << string(level, ' ') << "Exception: " << e.what() << endl;
+void printException(
+    const LoggerPtr& logger, const exception& e, int level = 0) {
+  logger->error("{:level&} Exception: {}", " ", e.what());
   try {
     rethrow_if_nested(e);
   } catch (const exception& nested_exception) {
-    printException(nested_exception, level + 1);
+    printException(logger, nested_exception, level + 1);
   } catch (...) {
   }
 }
@@ -132,58 +132,68 @@ void registerDevices(const shared_ptr<EventSourceFake>& event_source);
 void deregisterDevices(const shared_ptr<EventSourceFake>& event_source);
 
 int main(int argc, char* argv[]) {
+  auto status = EXIT_SUCCESS;
   try {
-    auto repo = make_shared<SPD_LoggerRepository>("config/loggerConfig.json");
-    LoggerManager::initialise(repo);
-    auto logger = HaSLL::LoggerManager::registerLogger("Main");
-    logger->trace("Logging completed initialization!");
-    logger->info(
-        "Current Sever time, in number of 100 nanosecond intervals since "
-        "January 1, 1601 (UTC): {}",
-        UA_DateTime_now());
+    LoggerManager::initialise(
+        makeDefaultRepository("config/loggerConfig.json"));
+    auto logger = LoggerManager::registerLogger("Main");
+    try {
+      logger->trace("Logging completed initialization!");
+      logger->info(
+          "Current Sever time, in number of 100 nanosecond intervals since "
+          "January 1, 1601 (UTC): {}",
+          UA_DateTime_now());
 
-    signal(SIGINT, stopHandler); // NOLINT(cert-err33-c)
-    signal(SIGTERM, stopHandler); // NOLINT(cert-err33-c)
+      signal(SIGINT, stopHandler); // NOLINT(cert-err33-c)
+      signal(SIGTERM, stopHandler); // NOLINT(cert-err33-c)
 
-    logger->trace(
-        "Termination and Interruption signals assigned to stop handler!");
+      logger->trace(
+          "Termination and Interruption signals assigned to stop handler!");
 
-    auto event_source = make_shared<EventSourceFake>();
-    logger->trace("Fake event source initialized!");
+      auto event_source = make_shared<EventSourceFake>();
+      logger->trace("Fake event source initialized!");
 
-    adapter =
-        make_unique<OpcuaAdapter>(event_source, "config/defaultConfig.json");
-    logger->trace("OPC UA Adapter initialized!");
+      adapter =
+          make_unique<OpcuaAdapter>(event_source, "config/defaultConfig.json");
+      logger->trace("OPC UA Adapter initialized!");
 
-    executor =
-        make_shared<Executor>([]() { cout << "Callback called" << endl; });
+      executor =
+          make_shared<Executor>([]() { cout << "Callback called" << endl; });
 
-    adapter->start();
-    registerDevices(event_source);
-    this_thread::sleep_for(10s);
-    logger->trace("Sending device deregistered event");
-    deregisterDevices(event_source);
-    this_thread::sleep_for(5s);
-    registerDevices(event_source);
+      adapter->start();
+      registerDevices(event_source);
+      this_thread::sleep_for(10s);
+      logger->trace("Sending device deregistered event");
+      deregisterDevices(event_source);
+      this_thread::sleep_for(5s);
+      registerDevices(event_source);
 
-    if (argc > 1) {
-      auto server_lifetime = stoi(argv[1]);
-      cout << "Open62541 server will automatically shut down in "
-           << server_lifetime << " seconds." << endl;
-      this_thread::sleep_for(chrono::seconds(server_lifetime));
-      stopServer();
-    } else {
-      while (true) {
-        this_thread::sleep_for(1s);
+      if (argc > 1) {
+        auto server_lifetime = stoi(argv[1]);
+        cout << "Open62541 server will automatically shut down in "
+             << server_lifetime << " seconds." << endl;
+        this_thread::sleep_for(chrono::seconds(server_lifetime));
+        stopServer();
+      } else {
+        while (true) {
+          this_thread::sleep_for(1s);
+        }
       }
+    } catch (const exception& ex) {
+      printException(logger, ex);
+      status = EXIT_FAILURE;
+    } catch (...) {
+      logger->error("Unknown error occurred during program execution");
+      status = EXIT_FAILURE;
     }
-  } catch (const exception& ex) {
-    printException(ex);
-    exit(EXIT_FAILURE);
+    LoggerManager::terminate();
   } catch (...) {
-    cerr << "Unknown error occurred during program execution" << endl;
-    exit(EXIT_FAILURE);
+    cerr << "Unknown error occurred during program execution or logger "
+            "acquisition"
+         << endl;
+    status = EXIT_FAILURE;
   }
+  exit(status);
 }
 
 static constexpr size_t BASE_OFFSET = 160;

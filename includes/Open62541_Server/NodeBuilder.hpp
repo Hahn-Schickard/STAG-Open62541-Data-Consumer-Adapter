@@ -12,7 +12,7 @@
 
 namespace open62541 {
 class NodeBuilder {
-  HaSLI::LoggerPtr logger_;
+  HaSLL::LoggerPtr logger_;
   std::shared_ptr<Open62541Server> server_;
 
   /// The caller is responsible for calling `UA_NodeId_clear` on the `UA_NodeId`

@@ -10,7 +10,7 @@
 #include <open62541/server_config_default.h>
 
 using namespace std;
-using namespace HaSLI;
+using namespace HaSLL;
 
 namespace open62541 {
 Configuration::Configuration() : Configuration(false) {}

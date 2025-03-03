@@ -6,7 +6,7 @@
 #include <mutex>
 
 using namespace std;
-using namespace HaSLI;
+using namespace HaSLL;
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 enum class Open62541_Logger {
@@ -44,25 +44,25 @@ void registerLoggers() {
 SeverityLevel getLoggingLevel(UA_LogLevel level) {
   switch (level) {
   case UA_LogLevel::UA_LOGLEVEL_DEBUG: {
-    return SeverityLevel::DEBUG;
+    return SeverityLevel::Debug;
   }
   case UA_LogLevel::UA_LOGLEVEL_ERROR: {
-    return SeverityLevel::ERROR;
+    return SeverityLevel::Error;
   }
   case UA_LogLevel::UA_LOGLEVEL_FATAL: {
-    return SeverityLevel::CRITICAL;
+    return SeverityLevel::Critical;
   }
   case UA_LogLevel::UA_LOGLEVEL_INFO: {
-    return SeverityLevel::INFO;
+    return SeverityLevel::Info;
   }
   case UA_LogLevel::UA_LOGLEVEL_TRACE: {
-    return SeverityLevel::TRACE;
+    return SeverityLevel::Trace;
   }
   case UA_LogLevel::UA_LOGLEVEL_WARNING: {
-    return SeverityLevel::WARNING;
+    return SeverityLevel::Warning;
   }
   default: {
-    return SeverityLevel::ERROR;
+    return SeverityLevel::Error;
   }
   }
 }
