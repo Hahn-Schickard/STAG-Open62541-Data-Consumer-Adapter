@@ -165,7 +165,9 @@ struct TimeConversion {
     UA_DateTime_clear(ptr);
   }
 
-  static Information_Model::DateTime value2IM(Value_Type t) { return t; }
+  static Information_Model::DateTime value2IM(Value_Type t) {
+    return Information_Model::DateTime(t);
+  }
   static UA_Write_Type value2Write(Value_Type t) {
     return UA_DateTime_fromUnixTime(t);
   }

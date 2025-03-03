@@ -337,6 +337,22 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
 
           checkDeviceElementGroup(ref_desc, children, group);
         },
+        [&](const Information_Model::NonemptyObservableMetricPtr&) {
+          // @TODO: fix this variant so it does not reuse the code
+          // ObservableMetrics are treated as Metric instances in OPC UA
+          EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
+          checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
+          children.ignore([](const UA_ReferenceDescription& child) -> bool {
+            return (child.nodeClass == UA_NODECLASS_VARIABLETYPE);
+          });
+
+          UA_Variant value;
+          auto status =
+              UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
+          EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
+          EXPECT_EQ(value.type, Types::UA_TYPE);
+          UA_Variant_clear(&value);
+        },
         [&](const Information_Model::NonemptyMetricPtr&) {
           EXPECT_EQ(ref_desc.nodeClass, UA_NODECLASS_VARIABLE);
           checkType(ref_desc.typeDefinition.nodeId, UA_NODECLASS_VARIABLETYPE);
@@ -475,7 +491,7 @@ TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {}
 
 // NOLINTNEXTLINE
 TEST_F(BooleanNodeBuilderTests, addMockDeviceNode) {
-  auto device = NonemptyPointer::make_shared<
+  auto device = Nonempty::make_shared<
       ::testing::NiceMock<Information_Model::testing::MockDevice>>(
       "the_ref_id", "the name", "the description");
   testAddDeviceNode(device);

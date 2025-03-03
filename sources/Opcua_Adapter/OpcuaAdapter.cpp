@@ -10,7 +10,7 @@ using namespace std;
 using namespace open62541;
 
 namespace Data_Consumer_Adapter {
-OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source)
+OpcuaAdapter::OpcuaAdapter(const ModelEventSourcePtr& event_source)
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     : DCAI(event_source, "Open62541_Adapter") {
   registerLoggers();
@@ -19,7 +19,7 @@ OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr event_source)
 }
 
 OpcuaAdapter::OpcuaAdapter(
-    ModelEventSourcePtr event_source, const string& config_filepath)
+    const ModelEventSourcePtr& event_source, const string& config_filepath)
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     : DCAI(event_source, "Open62541_Adapter") {
   registerLoggers();
@@ -30,7 +30,7 @@ OpcuaAdapter::OpcuaAdapter(
 
 OpcuaAdapter::~OpcuaAdapter() { removeLoggers(); }
 
-void OpcuaAdapter::start(vector<DevicePtr> devices) {
+void OpcuaAdapter::start(const Devices& devices) {
   if (server_->start()) {
     DataConsumerAdapterInterface::start(devices);
   } else {
@@ -48,7 +48,7 @@ void OpcuaAdapter::stop() {
   DataConsumerAdapterInterface::stop();
 }
 
-void OpcuaAdapter::registrate(NonemptyDevicePtr device) {
+void OpcuaAdapter::registrate(const NonemptyDevicePtr& device) {
   logger->trace(
       "OPC UA Adapter received NEW_DEVICE_REGISTERED event for device "
       "with id",

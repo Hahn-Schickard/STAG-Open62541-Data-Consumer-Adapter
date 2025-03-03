@@ -8,21 +8,23 @@
 #include <memory>
 
 namespace Data_Consumer_Adapter {
-class OpcuaAdapter : public DCAI {
-  std::shared_ptr<open62541::Open62541Server> server_;
-  std::unique_ptr<open62541::NodeBuilder> node_builder_;
+struct OpcuaAdapter : public DCAI {
+  using DCAI::Devices;
 
-  void registrate(Information_Model::NonemptyDevicePtr device) override;
-  void deregistrate(const std::string& device_id) override;
-
-public:
-  OpcuaAdapter(ModelEventSourcePtr event_source);
-  OpcuaAdapter(
-      ModelEventSourcePtr event_source, const std::string& config_filepath);
+  OpcuaAdapter(const ModelEventSourcePtr& event_source);
+  OpcuaAdapter(const ModelEventSourcePtr& event_source,
+      const std::string& config_filepath);
   ~OpcuaAdapter();
 
-  void start(std::vector<Information_Model::DevicePtr> devices = {}) override;
+  void start(const Devices& devices = {}) override;
   void stop() override;
+
+private:
+  void registrate(const Information_Model::NonemptyDevicePtr& device) override;
+  void deregistrate(const std::string& device_id) override;
+
+  std::shared_ptr<open62541::Open62541Server> server_;
+  std::unique_ptr<open62541::NodeBuilder> node_builder_;
 };
 } // namespace Data_Consumer_Adapter
 #endif //__OPCUA_ADAPTER_HPP

@@ -212,6 +212,13 @@ void print(const NonemptyMetricPtr& element, size_t offset) {
   cout << endl;
 }
 
+void print(const NonemptyObservableMetricPtr& element, size_t offset) {
+  cout << string(offset, ' ') << "Observably Reads "
+       << toString(element->getDataType())
+       << " value: " << toString(element->getMetricValue()) << endl;
+  cout << endl;
+}
+
 void print(const NonemptyWritableMetricPtr& element, size_t offset) {
   cout << string(offset, ' ') << "Reads " << toString(element->getDataType())
        << " value: " << toString(element->getMetricValue()) << endl;
@@ -221,8 +228,8 @@ void print(const NonemptyWritableMetricPtr& element, size_t offset) {
 }
 
 void print(const NonemptyFunctionPtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Executes " << toString(element->result_type)
-       << " (" << toString(element->parameters) << ")" << endl;
+  cout << string(offset, ' ') << "Executes " << toString(element->resultType())
+       << " (" << toString(element->parameterTypes()) << ")" << endl;
 }
 
 void print(const NonemptyDeviceElementPtr& element, size_t offset) {
@@ -240,6 +247,9 @@ void print(const NonemptyDeviceElementPtr& element, size_t offset) {
       },
       [offset](
           const NonemptyMetricPtr& interface) { print(interface, offset); },
+      [offset](const NonemptyObservableMetricPtr& interface) {
+        print(interface, offset);
+      },
       [offset](const NonemptyWritableMetricPtr& interface) {
         print(interface, offset);
       },

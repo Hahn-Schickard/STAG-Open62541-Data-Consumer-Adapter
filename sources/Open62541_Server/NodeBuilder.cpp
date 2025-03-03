@@ -160,6 +160,10 @@ UA_StatusCode NodeBuilder::addDeviceNodeElement(
       [&](const NonemptyDeviceElementGroupPtr& group) {
         status = addGroupNode(element, group, parent_id);
       },
+      [&](const NonemptyObservableMetricPtr& metric) {
+        // handle observables as readables
+        status = addReadableNode(element, metric, parent_id);
+      },
       [&](const NonemptyMetricPtr& metric) {
         status = addReadableNode(element, metric, parent_id);
       },
@@ -365,8 +369,8 @@ UA_StatusCode NodeBuilder::addFunctionNode(
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   auto method_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), meta_info->getElementId().c_str());
-  if (function->result_type != DataType::NONE &&
-      function->result_type != DataType::UNKNOWN) {
+  if (function->resultType() != DataType::NONE &&
+      function->resultType() != DataType::UNKNOWN) {
     CallbackWrapper::CallCallback call_cb =
         [function, id = meta_info->getElementId(),
             logger = server_->getServerLogger()](
@@ -383,7 +387,7 @@ UA_StatusCode NodeBuilder::addFunctionNode(
         };
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
         make_shared<CallbackWrapper>(
-            function->result_type, function->parameters, move(call_cb)));
+            function->resultType(), function->parameterTypes(), move(call_cb)));
   } else {
     CallbackWrapper::ExecuteCallback execute_cb =
         [function, id = meta_info->getElementId(),
@@ -398,19 +402,19 @@ UA_StatusCode NodeBuilder::addFunctionNode(
           }
         };
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
-        make_shared<CallbackWrapper>(
-            function->result_type, function->parameters, move(execute_cb)));
+        make_shared<CallbackWrapper>(function->resultType(),
+            function->parameterTypes(), move(execute_cb)));
   }
   UA_Argument* input_args = nullptr;
   UA_Argument* output = nullptr;
   try {
     checkStatusCode("While setting function callbacks", status);
-    auto arg_count = function->parameters.size();
+    auto arg_count = function->parameterTypes().size();
     if (arg_count > 0) {
       input_args = (UA_Argument*)malloc(arg_count * sizeof(UA_Argument));
-      for (size_t i = 0; i < function->parameters.size(); ++i) {
+      for (size_t i = 0; i < function->parameterTypes().size(); ++i) {
         UA_Argument_init(&input_args[i]);
-        auto parameter = function->parameters.at(i);
+        auto parameter = function->parameterTypes().at(i);
         input_args[i].name = makeUAString(toString(parameter.first));
         input_args[i].dataType = toNodeId(parameter.first);
         input_args[i].valueRank =
@@ -422,13 +426,13 @@ UA_StatusCode NodeBuilder::addFunctionNode(
       }
     }
     uint8_t output_count = 0;
-    if (function->result_type != DataType::NONE) {
+    if (function->resultType() != DataType::NONE) {
       output_count = 1;
       output = UA_Argument_new();
-      output->name = makeUAString(toString(function->result_type));
-      output->dataType = toNodeId(function->result_type);
+      output->name = makeUAString(toString(function->resultType()));
+      output->dataType = toNodeId(function->resultType());
       output->valueRank = UA_VALUERANK_SCALAR; // all returns are scalar
-      auto ouput_desc = toString(function->result_type);
+      auto ouput_desc = toString(function->resultType());
       output->description = UA_LOCALIZEDTEXT_ALLOC("EN_US", ouput_desc.c_str());
     }
     auto reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
