@@ -50,7 +50,7 @@ class NodeBuilder {
   template <class MetricType> // either Metric or WritableMetric
   UA_StatusCode setValue(UA_VariableAttributes& value_attribute,
       const Information_Model::NonemptyNamedElementPtr& meta_info,
-      const NonemptyPointer::NonemptyPtr<std::shared_ptr<MetricType>>& metric,
+      const Nonempty::Pointer<std::shared_ptr<MetricType>>& metric,
       const std::string& metric_type_description);
 
   UA_StatusCode removeDataSources(const UA_NodeId* node_id);

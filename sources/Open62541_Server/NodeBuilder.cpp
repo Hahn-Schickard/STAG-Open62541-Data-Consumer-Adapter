@@ -212,7 +212,7 @@ UA_StatusCode NodeBuilder::addGroupNode(
 template <class MetricType>
 UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
     const Information_Model::NonemptyNamedElementPtr& meta_info,
-    const NonemptyPointer::NonemptyPtr<shared_ptr<MetricType>>& metric,
+    const Nonempty::Pointer<shared_ptr<MetricType>>& metric,
     const string& metric_type_description) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
