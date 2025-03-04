@@ -7,6 +7,11 @@ stages:
   - package
   - deploy
 
+default:
+  hooks:
+    pre_get_sources_script:
+      - git config --global core.longpaths true # ensure windows longpaths is true
+
 variables:
   CONAN_HOME: "${CI_PROJECT_DIR}/.conan2"
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
