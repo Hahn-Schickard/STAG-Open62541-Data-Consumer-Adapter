@@ -5,6 +5,10 @@ include:
 variables:
   IMAGE_VER: "6.5.0"
 
+.windows-path:
+  variables:
+    GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_CONCURRENT_PROJECT_ID
+
 build:debian-bullseye:
   extends: .build
   image: ${DOCKER_REGISTRY}/hs-conan-debian-bullseye-slim:${IMAGE_VER}
@@ -24,7 +28,9 @@ build:fedora-latest:
     entrypoint: ["/bin/sh", "-c"]
 
 build:windows-ltsc2019:
-  extends: .build
+  extends: 
+    - .build
+    - .windows-path
   tags:
     - windows-docker
   image:
@@ -173,7 +179,9 @@ package:fedora-latest:
     entrypoint: ["/bin/sh", "-c"]
 
 package:windows-ltsc2019:
-  extends: .package
+  extends: 
+    - .package
+    - .windows-path
   tags:
     - windows-docker
   image:
