@@ -242,19 +242,18 @@ void print(const NonemptyDeviceElementPtr& element, size_t offset) {
 
   match(
       element->functionality,
-      [offset](const NonemptyDeviceElementGroupPtr& interface) {
-        print(interface, offset);
-      },
       [offset](
-          const NonemptyMetricPtr& interface) { print(interface, offset); },
-      [offset](const NonemptyObservableMetricPtr& interface) {
-        print(interface, offset);
+          const NonemptyDeviceElementGroupPtr& group) { print(group, offset); },
+      [offset](const NonemptyMetricPtr& readable) { print(readable, offset); },
+      [offset](const NonemptyObservableMetricPtr& observable) {
+        print(observable, offset);
       },
-      [offset](const NonemptyWritableMetricPtr& interface) {
-        print(interface, offset);
+      [offset](const NonemptyWritableMetricPtr& writable) {
+        print(writable, offset);
       },
-      [offset](
-          const NonemptyFunctionPtr& interface) { print(interface, offset); });
+      [offset](const NonemptyFunctionPtr& executable) {
+        print(executable, offset);
+      });
 }
 
 void print(const NonemptyDevicePtr& device) {
