@@ -484,7 +484,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
 };
 
 using BooleanNodeBuilderTests = NodeBuilderTests<
-    DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>>;
+    DataTypes<Information_Model::DataType::Boolean, UA_TYPES_BOOLEAN>>;
 
 // NOLINTNEXTLINE
 TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {}
@@ -520,13 +520,13 @@ INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeParameterizedTestSuite,
  * @brief Test addDeviceNode with differently typed variables
  */
 using AllTypes = ::testing::Types<
-    DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>,
-    DataTypes<Information_Model::DataType::INTEGER, UA_TYPES_INT64>,
-    DataTypes<Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_UINT64>,
-    DataTypes<Information_Model::DataType::DOUBLE, UA_TYPES_DOUBLE>,
-    DataTypes<Information_Model::DataType::TIME, UA_TYPES_DATETIME>,
-    DataTypes<Information_Model::DataType::OPAQUE, UA_TYPES_BYTESTRING>,
-    DataTypes<Information_Model::DataType::STRING, UA_TYPES_STRING>>;
+    DataTypes<Information_Model::DataType::Boolean, UA_TYPES_BOOLEAN>,
+    DataTypes<Information_Model::DataType::Integer, UA_TYPES_INT64>,
+    DataTypes<Information_Model::DataType::Unsigned_Integer, UA_TYPES_UINT64>,
+    DataTypes<Information_Model::DataType::Double, UA_TYPES_DOUBLE>,
+    DataTypes<Information_Model::DataType::Time, UA_TYPES_DATETIME>,
+    DataTypes<Information_Model::DataType::Opaque, UA_TYPES_BYTESTRING>,
+    DataTypes<Information_Model::DataType::String, UA_TYPES_STRING>>;
 
 // NOLINTNEXTLINE
 TYPED_TEST_SUITE(NodeBuilderTests, AllTypes);

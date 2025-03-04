@@ -71,7 +71,7 @@ void Historizer::log(SeverityLevel level, string message, Types... args) {
 OODD::DataType getColumnDataType(const UA_DataType* variant) {
   switch (variant->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-    return OODD::DataType::BOOLEAN;
+    return OODD::DataType::Boolean;
   }
   // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
