@@ -32,7 +32,7 @@ UA_NodeId toNodeId(DataType type) {
   case DataType::TIME: {
     return UA_TYPES[UA_TYPES_DATETIME].typeId;
   }
-  case DataType::UNKNOWN:
+  case DataType::Unknown:
   default: {
     throw runtime_error("Could not convert STAG Information Model Data Type to "
                         "OPC UA data type!");

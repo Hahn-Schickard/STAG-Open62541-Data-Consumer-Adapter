@@ -363,7 +363,7 @@ Information_Model::NonemptyDevicePtr buildDevice2() {
 
   if (executor) {
     mock_builder->addFunction("Reset", "Resets the device",
-        Information_Model::DataType::NONE,
+        Information_Model::DataType::None,
         bind(&Executor::execute, executor, placeholders::_1),
         bind(&Executor::cancel, executor, placeholders::_1));
   }
