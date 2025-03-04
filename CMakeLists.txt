@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.24.0)
 option(CMAKE_CONAN "Enables integeated conan package manager module. (Requires conan and python3 to be installed)" ON)
 
 if(CMAKE_CONAN)
-        set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan.cmake)
+    set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan.cmake)
 endif()
 
 #@+ ======================== User PROJECT_NAME configuration ============================
@@ -21,9 +21,12 @@ set(DOCS_DIR "${PROJECT_SOURCE_DIR}/docs/code_documentation")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(VERBOSE_FILE_INCLUSION "Prints all included header files" ON)
-option(STATIC_CODE_ANALYSIS "Enable Code Linter" ON)
 option(RUN_TESTS "Enables Unit tests runner (Requires GTest framework)" ON)
 option(COVERAGE_TRACKING "Enable code test coverage tracking with gcov" ON)
+
+if(NOT WIN32)
+    option(STATIC_CODE_ANALYSIS "Enable Code Linter" ON)
+endif()
 
 include(GNUInstallDirs)
 include(macros)
@@ -39,12 +42,19 @@ option(HISTORIZATION "Enable historization service, required open62541 with defi
 # User defined cmake module includes go here
 #@- ======================== END OF USER CONFIGURATION ============================
 
+find_package(GTest REQUIRED)
+
 #@+ ======================== User PACKAGES configuration ===========================
 find_package(Data_Consumer_Adapter_Interface REQUIRED)
 find_package(HaSLL REQUIRED)
 find_package(open62541 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(Threads REQUIRED)
+#@- ========================= END OF USER CONFIGURATION ============================
+
+if(CMAKE_CONAN)
+    include(${CMAKE_BINARY_DIR}/conan/build/${CMAKE_BUILD_TYPE}/generators/conan_toolchain.cmake)
+endif()
 
 if(HISTORIZATION)
         find_package(OODD REQUIRED)
@@ -54,6 +64,6 @@ endif()
 
 add_subdirectory(sources)
 if(RUN_TESTS)
-        enable_testing()
-        add_subdirectory(unit_tests)
+    enable_testing()
+    add_subdirectory(unit_tests)
 endif()
