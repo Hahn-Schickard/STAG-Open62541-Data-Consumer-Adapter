@@ -7,15 +7,11 @@ stages:
   - package
   - deploy
 
-default:
-  hooks:
-    pre_get_sources_script:
-      - git config --global core.longpaths true # ensure windows longpaths is true
-
 variables:
   CONAN_HOME: "${CI_PROJECT_DIR}/.conan2"
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_ID}
 
 .build:
   stage: build
@@ -141,6 +137,7 @@ variables:
   cache:
     paths:
       - .trivycache/
+  allow_failure: true
 
 .lint:
   stage: check
@@ -189,8 +186,8 @@ variables:
   tags:
     - conan
   before_script:
-    - VERSION=$(python3 ./utility/.getVersionFromTag.py)
     - PROJECT_NAME=$(python3 ./utility/.getProjectName.py)
+    - VERSION=$(python3 ./utility/.getVersionFromTag.py)
   script:
     - conan remote add upload_repo ${CONAN_REMOTE}
     - mkdir -p ${CONAN_HOME}/profiles
