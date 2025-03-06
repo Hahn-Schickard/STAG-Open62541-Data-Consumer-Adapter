@@ -928,10 +928,10 @@ vector<ColumnValue> interpolateValues(
  */
 namespace HistorianBits {
 enum class DataLocation {
-  RAW = 0x00,
-  CALCULATED = 0x01,
-  INTERPOLATED = 0x02,
-  RESERVED = 0x03
+  Raw = 0x00,
+  Calculated = 0x01,
+  Interpolated = 0x02,
+  Reserved = 0x03
 };
 
 void setHistorianBits(UA_StatusCode* status, DataLocation data_loc,
@@ -942,7 +942,7 @@ void setHistorianBits(UA_StatusCode* status, DataLocation data_loc,
         "Can not set historian bits for " + string(UA_StatusCode_name(*status));
     throw invalid_argument(error_msg);
   }
-  if (data_loc == DataLocation::RESERVED) {
+  if (data_loc == DataLocation::Reserved) {
     throw invalid_argument(
         "Data location type can not be set to reserved type.");
   }
@@ -973,13 +973,13 @@ DataLocation getDataLocation(const UA_StatusCode status) {
 
 string toString(DataLocation location) {
   switch (location) {
-  case DataLocation::RAW: {
+  case DataLocation::Raw: {
     return "Raw";
   }
-  case DataLocation::CALCULATED: {
+  case DataLocation::Calculated: {
     return "Calculated";
   }
-  case DataLocation::INTERPOLATED: {
+  case DataLocation::Interpolated: {
     return "Interpolated";
   }
   default: {
@@ -1079,10 +1079,10 @@ UA_StatusCode Historizer::readAndAppendHistory(
             // useSimpleBounds=False would not change the calculation
             interpolateValues(history_read_details->reqTimes[i],
                 nearest_before_result, nearest_after_result));
-        setHistorianBits(&status, DataLocation::INTERPOLATED);
+        setHistorianBits(&status, DataLocation::Interpolated);
       } else {
         results.merge(timestamp_results);
-        setHistorianBits(&status, DataLocation::RAW);
+        setHistorianBits(&status, DataLocation::Raw);
       }
     }
     expandHistoryResult(history_data, results);
