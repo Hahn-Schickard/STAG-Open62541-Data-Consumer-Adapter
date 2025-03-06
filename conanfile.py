@@ -22,7 +22,7 @@ class PackageConan(ConanFile):
                "historization": [True, False]}
     default_options = {"shared": True,
                        "fPIC": True,
-                       "historization": False}
+                       "historization": True}
     default_user = "Hahn-Schickard"
     # @- END USER META CONFIG
     exports_sources = [
@@ -60,7 +60,7 @@ class PackageConan(ConanFile):
                       headers=True, libs=True, transitive_headers=True, transitive_libs=True)
         if self.options.historization:
             self.requires("date/3.0.1")
-            self.requires("oodd/[~0.2]@hahn-schickard/stable",
+            self.requires("oodd/[~0.3]@hahn-schickard/stable",
                           headers=True, transitive_headers=True)
         # @- END USER REQUIREMENTS
 
