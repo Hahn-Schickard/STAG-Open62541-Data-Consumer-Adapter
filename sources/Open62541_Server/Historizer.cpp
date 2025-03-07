@@ -45,8 +45,8 @@ Historizer::Historizer(OODD::DatabaseDriverPtr db) {
   db_ = move(db);
   db_->create("Historized_Nodes",
       vector<Column>{// clang-format off
-            Column("Node_Id", OODD::DataType::TEXT, ColumnConstraint::PRIMARY_KEY),
-            Column("Last_Updated", OODD::DataType::TIMESTAMP)
+            Column("Node_Id", OODD::DataType::Text, ColumnConstraint::Primary_Key),
+            Column("Last_Updated", OODD::DataType::Timestamp)
       }); // clang-format on
 }
 
@@ -71,7 +71,7 @@ void Historizer::log(SeverityLevel level, string message, Types... args) {
 OODD::DataType getColumnDataType(const UA_DataType* variant) {
   switch (variant->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-    return OODD::DataType::BOOLEAN;
+    return OODD::DataType::Boolean;
   }
   // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
@@ -81,14 +81,14 @@ OODD::DataType getColumnDataType(const UA_DataType* variant) {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    return OODD::DataType::SMALLINT;
+    return OODD::DataType::SmallInt;
   }
   // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    return OODD::DataType::INT;
+    return OODD::DataType::Int;
   }
   // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
@@ -100,17 +100,17 @@ OODD::DataType getColumnDataType(const UA_DataType* variant) {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    return OODD::DataType::BIGINT;
+    return OODD::DataType::BigInt;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    return OODD::DataType::TIMESTAMP;
+    return OODD::DataType::Timestamp;
   }
   // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    return OODD::DataType::FLOAT;
+    return OODD::DataType::Float;
   }
   // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
@@ -120,7 +120,7 @@ OODD::DataType getColumnDataType(const UA_DataType* variant) {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-    return OODD::DataType::TEXT;
+    return OODD::DataType::Text;
   }
   // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
@@ -146,7 +146,7 @@ string toSanitizedString(const UA_NodeId* node_id) {
 bool Historizer::isHistorized(const UA_NodeId* node_id) {
   auto node_id_string = toString(node_id);
   auto result = db_->select("Historized_Nodes",
-      ColumnFilter(FilterType::EQUAL, "Node_Id", node_id_string));
+      ColumnFilter(FilterType::Equal, "Node_Id", node_id_string));
   return !result.empty();
 }
 
@@ -156,7 +156,7 @@ UA_StatusCode Historizer::registerNodeId(
     if (db_) {
       if (isHistorized(&node_id)) {
         db_->update("Historized_Nodes",
-            ColumnFilter(FilterType::EQUAL, "Node_Id", toString(&node_id)),
+            ColumnFilter(FilterType::Equal, "Node_Id", toString(&node_id)),
             ColumnValue("Last_Updated", getCurrentTimestamp()));
       } else {
         db_->insert("Historized_Nodes",
@@ -168,9 +168,9 @@ UA_StatusCode Historizer::registerNodeId(
       auto node_id_string = toSanitizedString(&node_id);
       db_->create(node_id_string,
           vector<Column>{// clang-format off
-            Column("Index", OODD::DataType::INT, ColumnConstraint::GENERATED_PRIMARY_KEY),
-            Column("Server_Timestamp", OODD::DataType::TIMESTAMP),
-            Column("Source_Timestamp", OODD::DataType::TIMESTAMP),
+            Column("Index", OODD::DataType::Int, ColumnConstraint::Generated_Primary_Key),
+            Column("Server_Timestamp", OODD::DataType::Timestamp),
+            Column("Source_Timestamp", OODD::DataType::Timestamp),
             Column("Value", getColumnDataType(type))
           }); // clang-format on
 
@@ -183,11 +183,11 @@ UA_StatusCode Historizer::registerNodeId(
           &Historizer::dataChanged);
       return result.statusCode;
     } else {
-      log(SeverityLevel::CRITICAL, "Database Driver is not initialized");
+      log(SeverityLevel::Critical, "Database Driver is not initialized");
       return UA_STATUSCODE_BADDATAUNAVAILABLE;
     }
   } catch (exception& ex) {
-    log(SeverityLevel::CRITICAL,
+    log(SeverityLevel::Critical,
         "An unhandled exception occurred while trying to register {} node. "
         "Exception: {}",
         toString(&node_id), ex.what());
@@ -341,25 +341,25 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdb_context*/,
               ColumnValue("Value", data)
             }); // clang-format on
           db_->update("Historized_Nodes",
-              ColumnFilter(FilterType::EQUAL, "Node_Id", toString(node_id)),
+              ColumnFilter(FilterType::Equal, "Node_Id", toString(node_id)),
               ColumnValue("Last_Updated", getCurrentTimestamp()));
         } catch (exception& ex) {
-          log(SeverityLevel::ERROR,
+          log(SeverityLevel::Error,
               "Failed to historize Node {} value due to an exception. "
               "Exception: {}",
               toString(node_id), ex.what());
         }
       } else {
-        log(SeverityLevel::ERROR,
+        log(SeverityLevel::Error,
             "Failed to historize Node {} value. No data provided.",
             toString(node_id));
       }
     } else {
-      log(SeverityLevel::INFO, "Node {} is not configured for historization",
+      log(SeverityLevel::Info, "Node {} is not configured for historization",
           toString(node_id));
     }
   } else {
-    log(SeverityLevel::CRITICAL,
+    log(SeverityLevel::Critical,
         "Tried to historize Node {}, but internal database is unavailable",
         toString(node_id));
   }
@@ -379,7 +379,7 @@ void Historizer::dataChanged(UA_Server* server, UA_UInt32 /*monitored_item_id*/,
 
     setValue(server, nullptr, session_id, nullptr, node_id, historize, value);
   } else {
-    log(SeverityLevel::CRITICAL,
+    log(SeverityLevel::Critical,
         "Tried to historize Node {}, but internal database is unavailable",
         toString(node_id));
   }
@@ -418,11 +418,11 @@ vector<ColumnFilter> setColumnFilters(
 
   FilterType start_filter, end_filter;
   if (include_bounds) {
-    start_filter = FilterType::GREATER_OR_EQUAL;
-    end_filter = FilterType::LESS_OR_EQUAL;
+    start_filter = FilterType::Greater_Or_Equal;
+    end_filter = FilterType::Less_Or_Equal;
   } else {
-    start_filter = FilterType::GREATER;
-    end_filter = FilterType::LESS;
+    start_filter = FilterType::Greater;
+    end_filter = FilterType::Less;
   }
 
   UA_DateTime start, end;
@@ -456,7 +456,7 @@ vector<ColumnFilter> setColumnFilters(UA_Boolean include_bounds,
     auto continuation_index =
         string((char*)continuation_point->data, continuation_point->length);
     if (!continuation_index.empty()) {
-      result.emplace_back(FilterType::GREATER, "Index", continuation_index);
+      result.emplace_back(FilterType::Greater, "Index", continuation_index);
     }
   }
 
@@ -928,10 +928,10 @@ vector<ColumnValue> interpolateValues(
  */
 namespace HistorianBits {
 enum class DataLocation {
-  RAW = 0x00,
-  CALCULATED = 0x01,
-  INTERPOLATED = 0x02,
-  RESERVED = 0x03
+  Raw = 0x00,
+  Calculated = 0x01,
+  Interpolated = 0x02,
+  Reserved = 0x03
 };
 
 void setHistorianBits(UA_StatusCode* status, DataLocation data_loc,
@@ -942,7 +942,7 @@ void setHistorianBits(UA_StatusCode* status, DataLocation data_loc,
         "Can not set historian bits for " + string(UA_StatusCode_name(*status));
     throw invalid_argument(error_msg);
   }
-  if (data_loc == DataLocation::RESERVED) {
+  if (data_loc == DataLocation::Reserved) {
     throw invalid_argument(
         "Data location type can not be set to reserved type.");
   }
@@ -973,13 +973,13 @@ DataLocation getDataLocation(const UA_StatusCode status) {
 
 string toString(DataLocation location) {
   switch (location) {
-  case DataLocation::RAW: {
+  case DataLocation::Raw: {
     return "Raw";
   }
-  case DataLocation::CALCULATED: {
+  case DataLocation::Calculated: {
     return "Calculated";
   }
-  case DataLocation::INTERPOLATED: {
+  case DataLocation::Interpolated: {
     return "Interpolated";
   }
   default: {
@@ -1048,7 +1048,7 @@ UA_StatusCode Historizer::readAndAppendHistory(
        *
        */
       auto timestamp_results = db_->select(toSanitizedString(&node_id), columns,
-          ColumnFilter(FilterType::EQUAL, "Source_Timestamp", timestamp),
+          ColumnFilter(FilterType::Equal, "Source_Timestamp", timestamp),
           nullopt, "Source_Timestamp");
 
       if (timestamp_results.empty()) {
@@ -1061,11 +1061,11 @@ UA_StatusCode Historizer::readAndAppendHistory(
          */
         auto nearest_before_result =
             db_->select(toSanitizedString(&node_id), columns,
-                ColumnFilter(FilterType::LESS, "Source_Timestamp", timestamp),
+                ColumnFilter(FilterType::Less, "Source_Timestamp", timestamp),
                 1, "Source_Timestamp", true);
         auto nearest_after_result = db_->select(toSanitizedString(&node_id),
             columns,
-            ColumnFilter(FilterType::GREATER, "Source_Timestamp", timestamp), 1,
+            ColumnFilter(FilterType::Greater, "Source_Timestamp", timestamp), 1,
             "Source_Timestamp", false);
         // the following is safe because, indexes are only used to iterate over
         // the results map, so we only need to make sure that they are all
@@ -1079,10 +1079,10 @@ UA_StatusCode Historizer::readAndAppendHistory(
             // useSimpleBounds=False would not change the calculation
             interpolateValues(history_read_details->reqTimes[i],
                 nearest_before_result, nearest_after_result));
-        setHistorianBits(&status, DataLocation::INTERPOLATED);
+        setHistorianBits(&status, DataLocation::Interpolated);
       } else {
         results.merge(timestamp_results);
-        setHistorianBits(&status, DataLocation::RAW);
+        setHistorianBits(&status, DataLocation::Raw);
       }
     }
     expandHistoryResult(history_data, results);

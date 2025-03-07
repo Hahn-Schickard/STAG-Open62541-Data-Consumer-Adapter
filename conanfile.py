@@ -22,7 +22,7 @@ class PackageConan(ConanFile):
                "historization": [True, False]}
     default_options = {"shared": True,
                        "fPIC": True,
-                       "historization": False}
+                       "historization": True}
     default_user = "Hahn-Schickard"
     # @- END USER META CONFIG
     exports_sources = [
@@ -54,21 +54,23 @@ class PackageConan(ConanFile):
     def requirements(self):
         # @+ START USER REQUIREMENTS
         self.requires("nlohmann_json/3.11.1")
-        self.requires("open62541/1.3.6",
+        self.requires("open62541/1.3.15@hahn-schickard/stable",
                       headers=True, transitive_headers=True)
         self.requires("data_consumer_adapter_interface/[~0.3]@hahn-schickard/stable",
                       headers=True, libs=True, transitive_headers=True, transitive_libs=True)
         if self.options.historization:
             self.requires("date/3.0.1")
-            self.requires("oodd/[~0.2]@hahn-schickard/stable",
+            self.requires("oodd/[~0.3]@hahn-schickard/stable",
                           headers=True, transitive_headers=True)
         # @- END USER REQUIREMENTS
 
     def build_requirements(self):
-        self.test_requires("gtest/[~1.11]")
+        self.test_requires("gtest/[~1.16]")
 
     def configure(self):
         # @+ START USER REQUIREMENTS OPTION CONFIGURATION
+        self.options["gtest"].shared = True
+        self.options["open62541"].shared = True
         self.options["open62541"].cpp_compatible = True
         self.options["open62541"].multithreading = "Threadsafe"
         if self.options.historization:

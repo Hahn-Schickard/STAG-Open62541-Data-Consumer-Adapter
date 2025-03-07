@@ -10,13 +10,13 @@ using namespace HaSLL;
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 enum class Open62541_Logger {
-  NETWORK,
-  CHANNEL,
-  SESSION,
-  SERVER,
-  CLIENT,
-  USER,
-  SECURITY
+  Network,
+  Channel,
+  Session,
+  Server,
+  Client,
+  User,
+  Security
 };
 
 map<Open62541_Logger, LoggerPtr> loggers;
@@ -24,19 +24,19 @@ std::mutex logger_mutex;
 
 void registerLoggers() {
   if (loggers.empty()) {
-    loggers.emplace(Open62541_Logger::NETWORK,
+    loggers.emplace(Open62541_Logger::Network,
         LoggerManager::registerLogger("Open62541::Network"));
-    loggers.emplace(Open62541_Logger::CHANNEL,
+    loggers.emplace(Open62541_Logger::Channel,
         LoggerManager::registerLogger("Open62541::Channel"));
-    loggers.emplace(Open62541_Logger::SESSION,
+    loggers.emplace(Open62541_Logger::Session,
         LoggerManager::registerLogger("Open62541::Session"));
-    loggers.emplace(Open62541_Logger::SERVER,
+    loggers.emplace(Open62541_Logger::Server,
         LoggerManager::registerLogger("Open62541::Server"));
-    loggers.emplace(Open62541_Logger::CLIENT,
+    loggers.emplace(Open62541_Logger::Client,
         LoggerManager::registerLogger("Open62541::Client"));
-    loggers.emplace(Open62541_Logger::USER,
+    loggers.emplace(Open62541_Logger::User,
         LoggerManager::registerLogger("Open62541::User"));
-    loggers.emplace(Open62541_Logger::SECURITY,
+    loggers.emplace(Open62541_Logger::Security,
         LoggerManager::registerLogger("Open62541::Security"));
   }
 }
@@ -103,49 +103,49 @@ void HaSLL_Logger_log([[maybe_unused]] void* _logContext, UA_LogLevel level,
 
   switch (category) {
   case UA_LogCategory::UA_LOGCATEGORY_NETWORK: {
-    auto network_logger = loggers.find(Open62541_Logger::NETWORK);
+    auto network_logger = loggers.find(Open62541_Logger::Network);
     if (network_logger != loggers.end()) {
       network_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SECURECHANNEL: {
-    auto channel_logger = loggers.find(Open62541_Logger::CHANNEL);
+    auto channel_logger = loggers.find(Open62541_Logger::Channel);
     if (channel_logger != loggers.end()) {
       channel_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SESSION: {
-    auto session_logger = loggers.find(Open62541_Logger::SESSION);
+    auto session_logger = loggers.find(Open62541_Logger::Session);
     if (session_logger != loggers.end()) {
       session_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SERVER: {
-    auto server_logger = loggers.find(Open62541_Logger::SERVER);
+    auto server_logger = loggers.find(Open62541_Logger::Server);
     if (server_logger != loggers.end()) {
       server_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_CLIENT: {
-    auto client_logger = loggers.find(Open62541_Logger::CLIENT);
+    auto client_logger = loggers.find(Open62541_Logger::Client);
     if (client_logger != loggers.end()) {
       client_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_USERLAND: {
-    auto userland_logger = loggers.find(Open62541_Logger::USER);
+    auto userland_logger = loggers.find(Open62541_Logger::User);
     if (userland_logger != loggers.end()) {
       userland_logger->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SECURITYPOLICY: {
-    auto security_policy_logger = loggers.find(Open62541_Logger::SECURITY);
+    auto security_policy_logger = loggers.find(Open62541_Logger::Security);
     if (security_policy_logger != loggers.end()) {
       security_policy_logger->second->log(getLoggingLevel(level), message);
     }

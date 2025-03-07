@@ -11,28 +11,28 @@ namespace open62541 {
 
 UA_NodeId toNodeId(DataType type) {
   switch (type) {
-  case DataType::BOOLEAN: {
+  case DataType::Boolean: {
     return UA_TYPES[UA_TYPES_BOOLEAN].typeId;
   }
-  case DataType::UNSIGNED_INTEGER: {
+  case DataType::Unsigned_Integer: {
     return UA_TYPES[UA_TYPES_UINT64].typeId;
   }
-  case DataType::INTEGER: {
+  case DataType::Integer: {
     return UA_TYPES[UA_TYPES_INT64].typeId;
   }
-  case DataType::DOUBLE: {
+  case DataType::Double: {
     return UA_TYPES[UA_TYPES_DOUBLE].typeId;
   }
-  case DataType::OPAQUE: {
+  case DataType::Opaque: {
     return UA_TYPES[UA_TYPES_BYTESTRING].typeId;
   }
-  case DataType::STRING: {
+  case DataType::String: {
     return UA_TYPES[UA_TYPES_STRING].typeId;
   }
-  case DataType::TIME: {
+  case DataType::Time: {
     return UA_TYPES[UA_TYPES_DATETIME].typeId;
   }
-  case DataType::UNKNOWN:
+  case DataType::Unknown:
   default: {
     throw runtime_error("Could not convert STAG Information Model Data Type to "
                         "OPC UA data type!");

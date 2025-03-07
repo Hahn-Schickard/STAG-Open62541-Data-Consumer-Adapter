@@ -1,6 +1,5 @@
 #include "Event_Model/EventSource.hpp"
 #include "HaSLL/LoggerManager.hpp"
-#include "HaSLL/SPD_LoggerRepository.hpp"
 #include "Open62541_Data_Consumer_Adapter/OpcuaAdapter.hpp"
 
 #include <exception>
@@ -38,28 +37,30 @@ public:
 };
 
 int main() {
+  auto status = EXIT_SUCCESS;
   try {
-    auto repo = make_shared<SPD_LoggerRepository>();
-    LoggerManager::initialise(repo);
-    auto logger = LoggerManager::registerLogger("main");
+    LoggerManager::initialise(makeDefaultRepository());
+    try {
+      auto logger = LoggerManager::registerLogger("main");
 
-    auto adapter = make_unique<OpcuaAdapter>(
-        make_shared<EventSourceFake>(), "config/defaultConfig.json");
+      auto adapter = make_unique<OpcuaAdapter>(
+          make_shared<EventSourceFake>(), "config/defaultConfig.json");
 
-    adapter->start();
-    this_thread::sleep_for(chrono::seconds(2));
+      adapter->start();
+      this_thread::sleep_for(chrono::seconds(2));
 
-    adapter->stop();
-    logger->info("Integration test succeeded");
-
-    exit(EXIT_SUCCESS);
-  } catch (const exception& ex) {
-    printException(ex);
-    cerr << "Integration test failed" << endl;
-    exit(EXIT_FAILURE);
+      adapter->stop();
+      logger->info("Integration test succeeded");
+    } catch (const exception& ex) {
+      printException(ex);
+      cerr << "Integration test failed" << endl;
+      status = EXIT_FAILURE;
+    }
+    LoggerManager::terminate();
   } catch (...) {
     cerr << "Unknown error occurred during program execution" << endl;
     cerr << "Integration test failed" << endl;
-    exit(EXIT_FAILURE);
+    status = EXIT_FAILURE;
   }
+  exit(status);
 }

@@ -52,12 +52,14 @@ std::string toString(UA_Server* server, const UA_ReferenceDescription& ref) {
 template <Information_Model::DataType im, size_t ua> struct DataTypes {
   static constexpr Information_Model::DataType IM_INDEX = im;
   static constexpr size_t UA_INDEX = ua;
-  static constexpr const UA_DataType* UA_TYPE = &UA_TYPES[UA_INDEX];
+  // static constexpr const UA_DataType* UA_TYPE = &UA_TYPES[UA_INDEX];
   static Information_Model::DataVariant read() {
     return Information_Model::DataVariant(
         std::in_place_index<(size_t)IM_INDEX>);
   }
   static void write(const Information_Model::DataVariant&) {}
+
+  static const UA_DataType* UA_TYPE() { return &UA_TYPES[UA_INDEX]; }
 };
 
 /**
@@ -350,7 +352,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
           auto status =
               UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
-          EXPECT_EQ(value.type, Types::UA_TYPE);
+          EXPECT_EQ(value.type, Types::UA_TYPE());
           UA_Variant_clear(&value);
         },
         [&](const Information_Model::NonemptyMetricPtr&) {
@@ -364,7 +366,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
           auto status =
               UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
-          EXPECT_EQ(value.type, Types::UA_TYPE);
+          EXPECT_EQ(value.type, Types::UA_TYPE());
           UA_Variant_clear(&value);
         },
         [&](const Information_Model::NonemptyWritableMetricPtr&) {
@@ -378,7 +380,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
           auto status =
               UA_Server_readValue(ua_server, ref_desc.nodeId.nodeId, &value);
           EXPECT_EQ(status, UA_STATUSCODE_GOOD) << UA_StatusCode_name(status);
-          EXPECT_EQ(value.type, Types::UA_TYPE);
+          EXPECT_EQ(value.type, Types::UA_TYPE());
 
           status =
               UA_Server_writeValue(ua_server, ref_desc.nodeId.nodeId, value);
@@ -484,7 +486,7 @@ template <class Types> struct NodeBuilderTests : public ::testing::Test {
 };
 
 using BooleanNodeBuilderTests = NodeBuilderTests<
-    DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>>;
+    DataTypes<Information_Model::DataType::Boolean, UA_TYPES_BOOLEAN>>;
 
 // NOLINTNEXTLINE
 TEST_F(BooleanNodeBuilderTests, fixtureWorksByItself) {}
@@ -520,13 +522,13 @@ INSTANTIATE_TEST_SUITE_P(NodeBuilderAddDeviceNodeParameterizedTestSuite,
  * @brief Test addDeviceNode with differently typed variables
  */
 using AllTypes = ::testing::Types<
-    DataTypes<Information_Model::DataType::BOOLEAN, UA_TYPES_BOOLEAN>,
-    DataTypes<Information_Model::DataType::INTEGER, UA_TYPES_INT64>,
-    DataTypes<Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_UINT64>,
-    DataTypes<Information_Model::DataType::DOUBLE, UA_TYPES_DOUBLE>,
-    DataTypes<Information_Model::DataType::TIME, UA_TYPES_DATETIME>,
-    DataTypes<Information_Model::DataType::OPAQUE, UA_TYPES_BYTESTRING>,
-    DataTypes<Information_Model::DataType::STRING, UA_TYPES_STRING>>;
+    DataTypes<Information_Model::DataType::Boolean, UA_TYPES_BOOLEAN>,
+    DataTypes<Information_Model::DataType::Integer, UA_TYPES_INT64>,
+    DataTypes<Information_Model::DataType::Unsigned_Integer, UA_TYPES_UINT64>,
+    DataTypes<Information_Model::DataType::Double, UA_TYPES_DOUBLE>,
+    DataTypes<Information_Model::DataType::Time, UA_TYPES_DATETIME>,
+    DataTypes<Information_Model::DataType::Opaque, UA_TYPES_BYTESTRING>,
+    DataTypes<Information_Model::DataType::String, UA_TYPES_STRING>>;
 
 // NOLINTNEXTLINE
 TYPED_TEST_SUITE(NodeBuilderTests, AllTypes);

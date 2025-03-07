@@ -369,8 +369,8 @@ UA_StatusCode NodeBuilder::addFunctionNode(
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   auto method_node_id = UA_NODEID_STRING_ALLOC(
       server_->getServerNamespace(), meta_info->getElementId().c_str());
-  if (function->resultType() != DataType::NONE &&
-      function->resultType() != DataType::UNKNOWN) {
+  if (function->resultType() != DataType::None &&
+      function->resultType() != DataType::Unknown) {
     CallbackWrapper::CallCallback call_cb =
         [function, id = meta_info->getElementId(),
             logger = server_->getServerLogger()](
@@ -426,7 +426,7 @@ UA_StatusCode NodeBuilder::addFunctionNode(
       }
     }
     uint8_t output_count = 0;
-    if (function->resultType() != DataType::NONE) {
+    if (function->resultType() != DataType::None) {
       output_count = 1;
       output = UA_Argument_new();
       output->name = makeUAString(toString(function->resultType()));

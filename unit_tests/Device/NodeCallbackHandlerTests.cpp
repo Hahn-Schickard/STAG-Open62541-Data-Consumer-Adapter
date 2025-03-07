@@ -97,7 +97,7 @@ struct IntegralConversion : public SubtypeConversion<Super, Sub, im_type_,
 
 template <class Sub, size_t ua_sub_type>
 struct FloatConversion
-    : public SubtypeConversion<double, Sub, Information_Model::DataType::DOUBLE,
+    : public SubtypeConversion<double, Sub, Information_Model::DataType::Double,
           UA_TYPES_DOUBLE, ua_sub_type> {
   using Value_Type = Sub;
   static Value_Type value(size_t i) {
@@ -125,7 +125,7 @@ struct StringConversion {
   }
 
   static constexpr Information_Model::DataType IM_TYPE =
-      Information_Model::DataType::STRING;
+      Information_Model::DataType::String;
 
   using UA_Read_Type = UA_String;
   using UA_Write_Type = UA_String;
@@ -154,7 +154,7 @@ struct TimeConversion {
   }
 
   static constexpr Information_Model::DataType IM_TYPE =
-      Information_Model::DataType::TIME;
+      Information_Model::DataType::Time;
 
   using UA_Read_Type = UA_DateTime;
   using UA_Write_Type = UA_DateTime;
@@ -201,7 +201,7 @@ struct ByteStringConversion {
   }
 
   static constexpr Information_Model::DataType IM_TYPE =
-      Information_Model::DataType::OPAQUE;
+      Information_Model::DataType::Opaque;
 
   using UA_Read_Type = UA_ByteString;
   using UA_Write_Type = UA_ByteString;
@@ -234,31 +234,31 @@ struct ByteStringConversion {
 };
 
 using AllConversions = ::testing::Types<
-    IntegralConversion<bool, bool, Information_Model::DataType::BOOLEAN,
+    IntegralConversion<bool, bool, Information_Model::DataType::Boolean,
         UA_TYPES_BOOLEAN, UA_TYPES_BOOLEAN, true, false>,
-    IntegralConversion<intmax_t, int8_t, Information_Model::DataType::INTEGER,
+    IntegralConversion<intmax_t, int8_t, Information_Model::DataType::Integer,
         // NOLINTNEXTLINE(readability-magic-numbers)
         UA_TYPES_intmax, UA_TYPES_SBYTE, 42, -1>,
     IntegralConversion<uintmax_t, uint8_t,
-        Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
+        Information_Model::DataType::Unsigned_Integer, UA_TYPES_uintmax,
         UA_TYPES_BYTE, 13, 91>, // NOLINT(readability-magic-numbers)
-    IntegralConversion<intmax_t, int16_t, Information_Model::DataType::INTEGER,
+    IntegralConversion<intmax_t, int16_t, Information_Model::DataType::Integer,
         // NOLINTNEXTLINE(readability-magic-numbers)
         UA_TYPES_intmax, UA_TYPES_INT16, 42, -1>,
     IntegralConversion<uintmax_t, uint16_t,
-        Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
+        Information_Model::DataType::Unsigned_Integer, UA_TYPES_uintmax,
         UA_TYPES_UINT16, 13, 91>, // NOLINT(readability-magic-numbers)
-    IntegralConversion<intmax_t, int32_t, Information_Model::DataType::INTEGER,
+    IntegralConversion<intmax_t, int32_t, Information_Model::DataType::Integer,
         // NOLINTNEXTLINE(readability-magic-numbers)
         UA_TYPES_intmax, UA_TYPES_INT32, 42, -1>,
     IntegralConversion<uintmax_t, uint32_t,
-        Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
+        Information_Model::DataType::Unsigned_Integer, UA_TYPES_uintmax,
         UA_TYPES_UINT32, 13, 91>, // NOLINT(readability-magic-numbers)
-    IntegralConversion<intmax_t, int64_t, Information_Model::DataType::INTEGER,
+    IntegralConversion<intmax_t, int64_t, Information_Model::DataType::Integer,
         // NOLINTNEXTLINE(readability-magic-numbers)
         UA_TYPES_intmax, UA_TYPES_INT64, 42, -1>,
     IntegralConversion<uintmax_t, uint64_t,
-        Information_Model::DataType::UNSIGNED_INTEGER, UA_TYPES_uintmax,
+        Information_Model::DataType::Unsigned_Integer, UA_TYPES_uintmax,
         UA_TYPES_UINT64, 13, 91>, // NOLINT(readability-magic-numbers)
     FloatConversion<double, UA_TYPES_DOUBLE>, StringConversion, TimeConversion,
     ByteStringConversion>;

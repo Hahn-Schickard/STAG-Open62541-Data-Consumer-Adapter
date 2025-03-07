@@ -3,11 +3,7 @@ include:
  - local: ".gitlab-ci-templates.yml"
 
 variables:
-  IMAGE_VER: "6.5.0"
-
-.windows-path:
-  variables:
-    GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_CONCURRENT_PROJECT_ID
+  IMAGE_VER: "6.5.1"
 
 build:debian-bullseye:
   extends: .build
@@ -23,14 +19,10 @@ build:ubuntu-20.04:
 
 build:fedora-latest:
   extends: .build
-  image:
-    name: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
-    entrypoint: ["/bin/sh", "-c"]
+  image: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
 
 build:windows-ltsc2019:
-  extends: 
-    - .build
-    - .windows-path
+  extends: .build
   tags:
     - windows-docker
   image:
@@ -56,9 +48,7 @@ test:ubuntu-20.04:
 
 test:fedora-latest:
   extends: .test
-  image:
-    name: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
-    entrypoint: ["/bin/sh", "-c"]
+  image: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
   needs:
     - build:fedora-latest
 
@@ -66,8 +56,7 @@ test:windows-ltsc2019:
   extends: .test
   tags:
     - windows-docker
-  image:
-    name: ${DOCKER_REGISTRY}/hs-conan-windows-ltsc2019:${IMAGE_VER}
+  image: ${DOCKER_REGISTRY}/hs-conan-windows-ltsc2019:${IMAGE_VER}
   needs:
     - build:windows-ltsc2019
 
@@ -91,9 +80,7 @@ analyze_exe_memory:ubuntu-20.04:
 
 analyze_exe_memory:fedora-latest:
   extends: .analyze_exe_memory
-  image:
-    name: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
-    entrypoint: ["/bin/sh", "-c"]
+  image: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
   needs:
     - build:fedora-latest
 
@@ -117,9 +104,7 @@ analyze_test_runner_memory:ubuntu-20.04:
 
 analyze_test_runner_memory:fedora-latest:
   extends: .analyze_test_runner_memory
-  image:
-    name: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
-    entrypoint: ["/bin/sh", "-c"]
+  image: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
   needs:
     - build:fedora-latest
 
@@ -174,18 +159,13 @@ package:ubuntu-20.04:
 
 package:fedora-latest:
   extends: .package
-  image:
-    name: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
-    entrypoint: ["/bin/sh", "-c"]
+  image: ${DOCKER_REGISTRY}/hs-conan-fedora-latest:${IMAGE_VER}
 
 package:windows-ltsc2019:
-  extends: 
-    - .package
-    - .windows-path
+  extends: .package
   tags:
     - windows-docker
-  image:
-    name: ${DOCKER_REGISTRY}/hs-conan-windows-ltsc2019:${IMAGE_VER}
+  image: ${DOCKER_REGISTRY}/hs-conan-windows-ltsc2019:${IMAGE_VER}
   before_script:
     - $PROJECT_NAME=python3 ./utility/.getProjectName.py
     - $VERSION=python3 ./utility/.getVersionFromTag.py
