@@ -52,7 +52,7 @@ std::string toString(UA_Server* server, const UA_ReferenceDescription& ref) {
 template <Information_Model::DataType im, size_t ua> struct DataTypes {
   static constexpr Information_Model::DataType IM_INDEX = im;
   static constexpr size_t UA_INDEX = ua;
-  static constexpr const UA_DataType* UA_TYPE = &UA_TYPES[UA_INDEX];
+  static const UA_DataType* UA_TYPE = &UA_TYPES[UA_INDEX];
   static Information_Model::DataVariant read() {
     return Information_Model::DataVariant(
         std::in_place_index<(size_t)IM_INDEX>);
