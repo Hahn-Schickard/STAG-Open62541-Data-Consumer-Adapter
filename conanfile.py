@@ -54,7 +54,7 @@ class PackageConan(ConanFile):
     def requirements(self):
         # @+ START USER REQUIREMENTS
         self.requires("nlohmann_json/3.11.1")
-        self.requires("open62541/1.3.6",
+        self.requires("open62541/1.3.15@hahn-schickard/stable",
                       headers=True, transitive_headers=True)
         self.requires("data_consumer_adapter_interface/[~0.3]@hahn-schickard/stable",
                       headers=True, libs=True, transitive_headers=True, transitive_libs=True)
