@@ -70,6 +70,7 @@ class PackageConan(ConanFile):
     def configure(self):
         # @+ START USER REQUIREMENTS OPTION CONFIGURATION
         self.options["gtest"].shared = True
+        self.options["open62541"].shared = True
         self.options["open62541"].cpp_compatible = True
         self.options["open62541"].multithreading = "Threadsafe"
         if self.options.historization:
