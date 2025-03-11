@@ -39,7 +39,7 @@ struct CallbackWrapper {
   const ExecuteCallback executable_ = nullptr;
   const CallCallback callable_ = nullptr;
 
-  CallbackWrapper(){};
+  CallbackWrapper();
   CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback);
   CallbackWrapper(
       Information_Model::DataType type, WriteCallback write_callback);

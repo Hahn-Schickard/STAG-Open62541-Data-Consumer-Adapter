@@ -10,6 +10,9 @@ bool operator==(const UA_NodeId& lhs, const UA_NodeId& rhs) {
 }
 
 namespace open62541 {
+// NOLINTNEXTLINE(modernize-use-equals-default)
+CallbackWrapper::CallbackWrapper() { /* non trivial ctor due to const fields*/ }
+
 CallbackWrapper::CallbackWrapper(DataType type, ReadCallback read_callback)
     : data_type_(type), readable_(move(read_callback)) {}
 
