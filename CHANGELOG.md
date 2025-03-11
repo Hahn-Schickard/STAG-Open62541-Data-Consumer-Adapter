@@ -1,4 +1,27 @@
 # Changelog
+## [0.4.0] - 2025.03.11
+### Added
+ - Windows support
+
+### Changed
+ - `Open62541` to v1.3.15
+ - `Open62541` to be linked as a shared library
+ - `Data_Consumer_Adapter_Interface` to v0.3
+ - `OODD` to v0.3
+ - `GTest` to v1.16
+ - `GTest` to be linked as a shared library
+ - `Historization` service to default on 
+ - `OpcuaAdapter::start()` method to use `const Devices&` argument
+ - `OpcuaAdapter::OpcuaAdapter(ModelEventSourcePtr)` to `OpcuaAdapter::OpcuaAdapter(const ModelEventSourcePtr&)`
+ - `NonemptyPointer` to `Nonempty`
+ - `Information_Model::DataType` enum values to Camel_Case
+ - `Information_Model::ElementType` enum values to Camel_Case
+ - `OODD::DataType` enum values to Camel_Case
+ - `OODD::ColumnConstraint` enum values to Camel_Case
+ - `OODD::FilterType` enum values to Camel_Case
+ - `DataLocation`enum values to CamelCase
+ - `Open62541_Logger` enum values to CamelCase
+ 
 ## [0.3.7] - 2025.01.15
 ### Added 
  - Method mocks to example runner 
