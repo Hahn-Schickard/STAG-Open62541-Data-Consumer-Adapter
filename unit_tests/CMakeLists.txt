@@ -7,8 +7,8 @@ file(GLOB Shared_Resources "${CMAKE_CURRENT_LIST_DIR}/*.?pp")
 
 #@+ ====================== User TEST_SUITES configuration ==========================
 list(APPEND TEST_SUITES
-                       ${Device_Test_Suite}
-                       ${Shared_Resources}
+            ${Device_Test_Suite}
+            ${Shared_Resources}
 )
 #@- ========================= END OF USER CONFIGURATION ============================
 
@@ -20,7 +20,7 @@ target_sources(${THIS} PRIVATE
 
 #@+ ==================== User TEST_DEPENDCIES configuration =======================
 list(APPEND TEST_DEPENDCIES
-                              OPCUA_Adapter
+            ${PROJECT_NAME}
 )
 #@- ========================= END OF USER CONFIGURATION ===========================
 
