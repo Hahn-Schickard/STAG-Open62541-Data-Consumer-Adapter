@@ -1,6 +1,0 @@
-/usr/*
-*.conan/*
-*.conan2/*
-*/Example/*
-*/unit_tests/*
-*/test_package/*

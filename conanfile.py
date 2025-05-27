@@ -55,13 +55,21 @@ class PackageConan(ConanFile):
         # @+ START USER REQUIREMENTS
         self.requires("nlohmann_json/3.11.1")
         self.requires("open62541/1.3.15@hahn-schickard/stable",
-                      headers=True, transitive_headers=True)
+                      headers=True,
+                      transitive_headers=True
+        )
         self.requires("data_consumer_adapter_interface/[~0.3]@hahn-schickard/stable",
-                      headers=True, libs=True, transitive_headers=True, transitive_libs=True)
+                      headers=True,
+                      libs=True,
+                      transitive_headers=True,
+                      transitive_libs=True
+        )
         if self.options.historization:
             self.requires("date/3.0.1")
             self.requires("oodd/[~0.3]@hahn-schickard/stable",
-                          headers=True, transitive_headers=True)
+                          headers=True,
+                          transitive_headers=True
+            )
         # @- END USER REQUIREMENTS
 
     def build_requirements(self):
