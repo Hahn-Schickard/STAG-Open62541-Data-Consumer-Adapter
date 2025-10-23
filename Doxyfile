@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Data Consumer Adapter Open62541"
+PROJECT_NAME           = "Open62541 Data Consumer Adapter"
 PROJECT_NUMBER         =
 PROJECT_BRIEF          = ""
 PROJECT_LOGO           =
@@ -164,12 +164,11 @@ FILE_PATTERNS          = *.c \
                          *.ice
 RECURSIVE              = YES
 EXCLUDE                = libs/
-EXCLUDE               += sources/
+EXCLUDE               += sources/Example/
 EXCLUDE               += docs/style/doxygen-awesome-css
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = */unit_tests/*
 EXCLUDE_PATTERNS      += */test_package/*
-EXCLUDE_PATTERNS      += */utility/*
 EXCLUDE_PATTERNS      += */README.md
 EXCLUDE_PATTERNS      += */CONTRIBUTING.md
 EXCLUDE_PATTERNS      += */conanfile.py
@@ -216,6 +215,7 @@ HTML_EXTRA_STYLESHEET += docs/style/doxygen-awesome-css/doxygen-awesome-sidebar-
 HTML_EXTRA_STYLESHEET += docs/style/custom.css
 HTML_EXTRA_FILES       = docs/style/doxygen-awesome-css/doxygen-awesome-paragraph-link.js
 HTML_EXTRA_FILES      += docs/style/doxygen-awesome-css/doxygen-awesome-darkmode-toggle.js
+HTML_EXTRA_FILES      += docs/style/doxygen-awesome-css/doxygen-awesome-tabs.js
 HTML_COLORSTYLE_HUE    = 209
 HTML_COLORSTYLE_SAT    = 255
 HTML_COLORSTYLE_GAMMA  = 113
@@ -249,6 +249,7 @@ ECLIPSE_DOC_ID         = org.doxygen.Project
 DISABLE_INDEX          = NO
 FULL_SIDEBAR           = NO
 GENERATE_TREEVIEW      = YES
+PAGE_OUTLINE_PANEL     = NO
 ENUM_VALUES_PER_LINE   = 4
 TREEVIEW_WIDTH         = 250
 EXT_LINKS_IN_WINDOW    = NO

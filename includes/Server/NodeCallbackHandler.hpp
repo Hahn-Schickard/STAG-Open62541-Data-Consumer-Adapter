@@ -1,17 +1,17 @@
 #ifndef __DCAI_OPEN62541_NODE_MANAGER_HPP_
 #define __DCAI_OPEN62541_NODE_MANAGER_HPP_
 
-#include "Information_Model/Metric.hpp"
-#include "Information_Model/WritableMetric.hpp"
-#include "Threadsafe_Containers/UnorderedMap.hpp"
-
 #include "NodeId.hpp"
 #include "Open62541Server.hpp"
 
-#include "open62541/plugin/log.h"
+#include <Information_Model/Readable.hpp>
+#include <Information_Model/Writable.hpp>
+#include <open62541/plugin/log.h>
+#include <open62541/server.h>
+#include <unordered_map> // replace with threadsafe version
+
 #include <functional>
 #include <memory>
-#include <open62541/server.h>
 #include <optional>
 #include <string>
 
@@ -25,15 +25,16 @@ public:
 namespace open62541 {
 struct CallbackWrapper {
   using ReadCallback = std::function<Information_Model::DataVariant()>;
-  using WriteCallback = std::function<void(Information_Model::DataVariant)>;
+  using WriteCallback =
+      std::function<void(const Information_Model::DataVariant&)>;
   using ExecuteCallback =
-      std::function<void(Information_Model::Function::Parameters)>;
+      std::function<void(const Information_Model::Parameters&)>;
   using CallCallback = std::function<Information_Model::DataVariant(
-      Information_Model::Function::Parameters)>;
+      const Information_Model::Parameters&)>;
 
   const Information_Model::DataType data_type_ =
       Information_Model::DataType::Unknown;
-  const Information_Model::Function::ParameterTypes parameters_;
+  const Information_Model::ParameterTypes parameters_;
   const ReadCallback readable_ = nullptr;
   const WriteCallback writable_ = nullptr;
   const ExecuteCallback executable_ = nullptr;
@@ -46,17 +47,18 @@ struct CallbackWrapper {
   CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback,
       WriteCallback write_callback);
   CallbackWrapper(Information_Model::DataType type,
-      const Information_Model::Function::ParameterTypes& parameters,
+      const Information_Model::ParameterTypes& parameters,
       ExecuteCallback execute_callback);
   CallbackWrapper(Information_Model::DataType type,
-      const Information_Model::Function::ParameterTypes& parameters,
+      const Information_Model::ParameterTypes& parameters,
       CallCallback call_callback);
 };
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 
 class NodeCallbackHandler {
-  using NodeCalbackMap = Threadsafe::UnorderedMap<NodeId, CallbackWrapperPtr>;
-  static NodeCalbackMap node_calbacks_map_;
+  using CallbackMap = std::unordered_map<NodeId,
+      CallbackWrapperPtr>; // use threadsafe alternative
+  static CallbackMap callbacks_;
   // Invariant: No CallbackWrapperPtr is empty
   static const UA_Logger* logger_;
 

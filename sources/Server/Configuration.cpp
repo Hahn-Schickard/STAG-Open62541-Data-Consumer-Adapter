@@ -1,18 +1,19 @@
 #include "Configuration.hpp"
-#include "Config_Serializer.hpp"
-#include "HaSLL/LoggerManager.hpp"
 #include "HaSLL_Logger.hpp"
 #include "Historizer.hpp"
 
-#include <open62541/network_tcp.h>
-#include <open62541/plugin/accesscontrol_default.h>
-#include <open62541/plugin/securitypolicy_default.h>
+#include <HaSLL/LoggerManager.hpp>
 #include <open62541/server_config_default.h>
+#include <open62541/server_config_file_based.h>
 
+#include <filesystem>
+#include <fstream>
+#include <stdexcept>
+
+namespace open62541 {
 using namespace std;
 using namespace HaSLL;
 
-namespace open62541 {
 Configuration::Configuration() : Configuration(false) {}
 
 Configuration::Configuration(bool basic)
@@ -20,7 +21,7 @@ Configuration::Configuration(bool basic)
       configuration_(make_unique<UA_ServerConfig>()) {
   try {
     memset(configuration_.get(), 0, sizeof(UA_ServerConfig));
-    configuration_->logger = HaSLL_Logger_;
+    configuration_->logging = createHaSLL();
     if (basic) {
       UA_ServerConfig_setBasics(configuration_.get());
     } else {
@@ -34,231 +35,51 @@ Configuration::Configuration(bool basic)
   }
 }
 
-void addSecurityPolicy(UA_ServerConfig* config, SecurityPolicy policy) {
-  auto local_certificate = UA_BYTESTRING_NULL;
-#ifdef UA_ENABLE_ENCRYPTION
-  auto local_private_key = UA_BYTESTRING_NULL;
-#endif // UA_ENABLE_ENCRYPTION
+UA_ByteString readFile(const filesystem::path& filepath) {
+  if (!filesystem::exists(filepath)) {
+    throw runtime_error("File " + filepath.string() + " does not exist");
+  }
 
-  switch (policy) {
-  case NONE: {
-    auto status =
-        UA_ServerConfig_addSecurityPolicyNone(config, &local_certificate);
-    if (status != UA_STATUSCODE_GOOD) {
-      string error_msg = "Failed to set SecurityPolicy#None due to error " +
-          string(UA_StatusCode_name(status));
-      throw Open62541_Config_Exception(error_msg);
-    }
-    break;
+  auto filesize = filesystem::file_size(filepath);
+  if (filesize == 0) {
+    throw runtime_error("File " + filepath.string() + " is empty");
   }
-#ifdef UA_ENABLE_ENCRYPTION
-  case BASIC128_RSA15: {
-    UA_ServerConfig_addSecurityPolicyBasic128Rsa15(
-        config, &local_certificate, &local_private_key);
-    if (status != UA_STATUSCODE_GOOD) {
-      string error_msg =
-          "Failed to set SecurityPolicy#Basic128Rsa15 due to error " +
-          string(UA_StatusCode_name(status));
-      throw Open62541_Config_Exception(error_msg);
-    }
-    break;
-  }
-  case BASIC256: {
-    UA_ServerConfig_addSecurityPolicyBasic256(
-        config, &local_certificate, &local_private_key);
-    if (status != UA_STATUSCODE_GOOD) {
-      string error_msg = "Failed to set SecurityPolicy#Basic256 due to error " +
-          string(UA_StatusCode_name(status));
-      throw Open62541_Config_Exception(error_msg);
-    }
-    break;
-  }
-  case BASIC256_SHA256: {
-    UA_ServerConfig_addSecurityPolicyBasic256Sha256(
-        config, &local_certificate, &local_private_key);
-    if (status != UA_STATUSCODE_GOOD) {
-      string error_msg =
-          "Failed to set SecurityPolicy#Aes128Sha256RsaOaep due to error " +
-          string(UA_StatusCode_name(status));
-      throw Open62541_Config_Exception(error_msg);
-    }
-    break;
-  }
-  case AES128_SHA256_RSAO_AEP: {
-    UA_ServerConfig_addSecurityPolicyAes128Sha256RsaOaep(
-        config, &local_certificate, &local_private_key);
-    if (status != UA_STATUSCODE_GOOD) {
-      string error_msg =
-          "Failed to set SecurityPolicy#Aes128Sha256RsaOaep due to error " +
-          string(UA_StatusCode_name(status));
-      throw Open62541_Config_Exception(error_msg);
-    }
-    break;
-  }
-#endif
-  case ALL: {
-    UA_StatusCode status;
-#ifdef UA_ENABLE_ENCRYPTION
-    status = UA_ServerConfig_addAllSecurityPolicies(
-        config, &local_certificate, &local_private_key);
-#else
-    status = UA_ServerConfig_addSecurityPolicyNone(config, &local_certificate);
-#endif
-    if (status != UA_STATUSCODE_GOOD) {
-      string error_msg = "Failed to set SecurityPolicy#All due to error " +
-          string(UA_StatusCode_name(status));
-      throw Open62541_Config_Exception(error_msg);
-    }
-    break;
-  }
-  default: {
-    throw Open62541_Config_Exception("Unsupported security policy");
-  }
-  }
+
+  UA_ByteString result = UA_BYTESTRING_NULL;
+  UA_ByteString_allocBuffer(&result, filesize);
+
+  ifstream file_descriptor(filepath, ios::binary);
+  file_descriptor.read(reinterpret_cast<char*>(result.data), filesize);
+
+  return result;
 }
 
 Configuration::Configuration(const string& filepath) : Configuration(true) {
-  auto config = deserializeConfig(filepath);
+  UA_ByteString json_config = readFile(filepath);
 
-  UA_BuildInfo_clear(&configuration_->buildInfo);
-  configuration_->buildInfo = config.build_info;
-
-  UA_ApplicationDescription_clear(&configuration_->applicationDescription);
-  configuration_->applicationDescription = config.app_info;
-
-  UA_String_clear(&configuration_->serverCertificate);
-  configuration_->serverCertificate = config.server_certificate;
-
-  configuration_->shutdownDelay = config.shutdown_delay_ms;
-  configuration_->verifyRequestTimestamp = config.rules_handling;
-
-  configuration_->maxSecureChannels =
-      config.secure_channels_limits.max_secure_channels;
-  configuration_->maxSecurityTokenLifetime =
-      config.secure_channels_limits.max_security_token_lifetime_ms;
-
-  configuration_->maxSessions = config.session_limits.max_sessions;
-  configuration_->maxSessionTimeout =
-      config.session_limits.max_session_timeout_ms;
-
-  configuration_->maxNodesPerRead = config.operation_limits.max_nodes_per_read;
-  configuration_->maxNodesPerWrite =
-      config.operation_limits.max_nodes_per_write;
-  configuration_->maxNodesPerMethodCall =
-      config.operation_limits.max_nodes_per_method_call;
-  configuration_->maxNodesPerBrowse =
-      config.operation_limits.max_nodes_per_browse;
-  configuration_->maxNodesPerRegisterNodes =
-      config.operation_limits.max_nodes_per_register_nodes;
-  configuration_->maxNodesPerTranslateBrowsePathsToNodeIds =
-      config.operation_limits.max_nodes_per_translate_browse_paths_to_nodeids;
-  configuration_->maxNodesPerNodeManagement =
-      config.operation_limits.max_nodes_per_node_management;
-  configuration_->maxMonitoredItemsPerCall =
-      config.operation_limits.max_monitored_items_per_call;
-
-  configuration_->maxReferencesPerNode = config.max_references_per_node;
-
-  configuration_->maxSubscriptions =
-      config.subscription_limits.max_subscriptions;
-  configuration_->maxSubscriptionsPerSession =
-      config.subscription_limits.max_subscriptions_per_session;
-  configuration_->publishingIntervalLimits =
-      config.subscription_limits.publishing_interval_limits_ms;
-  configuration_->lifeTimeCountLimits =
-      config.subscription_limits.life_time_count_limits;
-  configuration_->keepAliveCountLimits =
-      config.subscription_limits.keep_alive_count_limits;
-  configuration_->maxNotificationsPerPublish =
-      config.subscription_limits.max_notifications_per_publish;
-  configuration_->enableRetransmissionQueue =
-      config.subscription_limits.enable_retransmission_queue;
-  configuration_->maxRetransmissionQueueSize =
-      config.subscription_limits.max_retransmission_queue_size;
-#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
-  configuration_->maxEventsPerNode =
-      config.subscription_limits.max_events_per_node;
-#endif
+  auto status =
+      UA_ServerConfig_updateFromFile(configuration_.get(), json_config);
 
 #ifdef UA_ENABLE_HISTORIZING
   try {
-    if (config.historization.has_value()) {
-      auto db_config = config.historization.value();
-      historizer_ = make_unique<Historizer>(db_config.dsn, db_config.user,
-          db_config.auth, db_config.request_timeout, db_config.request_logging);
+    // if () { // check if database config exists
+    //   throw runtime_error(
+    //       "Historization enabled, but no database configuration was
+    //       provided");
+    // }
+    // auto db_config = config.historization.value();
+    // historizer_ = make_unique<Historizer>(db_config.dsn, db_config.user,
+    //     db_config.auth, db_config.request_timeout,
+    //     db_config.request_logging);
 
-      configuration_->historyDatabase.clear(&configuration_->historyDatabase);
-      configuration_->historyDatabase = historizer_->createDatabase();
-
-      configuration_->accessHistoryDataCapability = true;
-      configuration_->accessHistoryEventsCapability = false;
-      configuration_->maxReturnDataValues = 0; // unlimited
-      configuration_->insertDataCapability = false;
-      configuration_->insertEventCapability = false;
-      configuration_->insertAnnotationsCapability = false;
-      configuration_->replaceDataCapability = false;
-      configuration_->replaceEventCapability = false;
-      configuration_->updateDataCapability = false;
-      configuration_->updateEventCapability = false;
-      configuration_->deleteRawCapability = false;
-      configuration_->deleteEventCapability = false;
-      configuration_->deleteAtTimeDataCapability = false;
-    }
+    // configuration_->historyDatabase.clear(&configuration_->historyDatabase);
+    // configuration_->historyDatabase = historizer_->createDatabase();
   } catch (exception& ex) {
     logger_->error("Data Historization Service will not be available, due to "
                    "an exception: {}",
         ex.what());
   }
 #endif // UA_ENABLE_HISTORIZING
-
-  configuration_->maxMonitoredItems =
-      config.monitored_items_limits.max_monitored_items;
-  configuration_->maxMonitoredItemsPerSubscription =
-      config.monitored_items_limits.max_monitored_items_per_subscription;
-  configuration_->samplingIntervalLimits =
-      config.monitored_items_limits.sampling_interval_limits_ms;
-  configuration_->queueSizeLimits =
-      config.monitored_items_limits.queue_size_limits;
-
-  configuration_->maxPublishReqPerSession = config.max_publish_req_per_session;
-#ifdef UA_ENABLE_DISCOVERY
-  configuration_->discoveryCleanupTimeout =
-      config.discovery.discoveryCleanupTimeout;
-#ifdef UA_ENABLE_DISCOVERY_MULTICAST
-  configuration_->mdnsEnabled = config.discovery.mdnsEnabled;
-
-  UA_MdnsDiscoveryConfiguration_clear(&configuration_->mdnsConfig);
-  configuration_->mdnsConfig = config.discovery.mdnsConfig;
-
-  UA_String_clear(&configuration_->mdnsInterfaceIP);
-  configuration_->mdnsInterfaceIP = config.discovery.mdnsInterfaceIP;
-#if !defined(UA_HAS_GETIFADDR)
-  configuration_->mdnsIpAddressListSize =
-      config.discovery.mdnsIpAddressListSize;
-
-  UA_free(configuration_->mdnsIpAddressList);
-  configuration_->mdnsIpAddressList = config.discovery.mdnsIpAddressList;
-#endif //! UA_HAS_GETIFADDR
-#endif // UA_ENABLE_DISCOVERY_MULTICAST
-#endif // UA_ENABLE_DISCOVERY
-
-  try {
-    UA_ServerConfig_addNetworkLayerTCP(configuration_.get(), config.port_number,
-        config.networking.sendBufferSize, config.networking.recvBufferSize);
-    addSecurityPolicy(configuration_.get(), config.security_policy);
-    auto policy_uri =
-        configuration_->securityPolicies[0].policyUri; // none policy
-    UA_AccessControl_default(configuration_.get(), true, nullptr, &policy_uri,
-        0,
-        nullptr); // allow_anonymous_access
-    UA_ServerConfig_addEndpoint(configuration_.get(),
-        UA_SECURITY_POLICY_NONE_URI, UA_MESSAGESECURITYMODE_NONE);
-  } catch (exception& ex) {
-    UA_ServerConfig_clean(configuration_.get());
-    string error_msg = "Caught exception while creating Open62541 Config: " +
-        string(ex.what());
-    throw Open62541_Config_Exception(error_msg);
-  }
 } // namespace open62541
 
 unique_ptr<UA_ServerConfig> Configuration::getConfig() {

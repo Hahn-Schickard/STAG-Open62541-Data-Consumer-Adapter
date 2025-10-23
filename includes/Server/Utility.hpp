@@ -1,11 +1,12 @@
 #ifndef __OPEN62541_UTILITY_FUNCTIONS_HPP
 #define __OPEN62541_UTILITY_FUNCTIONS_HPP
 
-#include "Information_Model/DataVariant.hpp"
-
+#include <Information_Model/DataVariant.hpp>
 #include <open62541/nodeids.h>
 #include <open62541/server.h>
 #include <open62541/types.h>
+
+#include <stdexcept>
 #include <string>
 
 namespace open62541 {

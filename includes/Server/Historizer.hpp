@@ -1,9 +1,9 @@
 #ifndef __OPCUA_HISTORIZER_HPP
 #define __OPCUA_HISTORIZER_HPP
 #ifdef UA_ENABLE_HISTORIZING
-#include "HaSLL/Logger.hpp"
-#include "OODD/DatabaseDriver.hpp"
-#include "open62541/plugin/historydatabase.h"
+#include <HaSLL/Logger.hpp>
+#include <open62541/plugin/historydatabase.h>
+#include <soci/soci.h>
 
 namespace open62541 {
 struct Historizer {
@@ -48,8 +48,6 @@ struct Historizer {
   static UA_HistoryDatabase createDatabase();
 
 private:
-  Historizer(OODD::DatabaseDriverPtr db);
-
   /**
    * @brief Used as destructor for the UA_HistoryDatabase struct by UA_Server
    * instance
@@ -92,7 +90,7 @@ private:
       void* monitored_item_context, const UA_NodeId* node_id,
       void* node_context, UA_UInt32 attribute_id, const UA_DataValue* value);
 
-  static OODD::Rows readHistory(
+  static std::vector<std::string> readHistory(
       const UA_ReadRawModifiedDetails* history_read_details,
       UA_UInt32 timeout_hint, UA_TimestampsToReturn timestamps_to_return,
       UA_NodeId node_id, const UA_ByteString* continuation_point_in,
@@ -161,7 +159,7 @@ private:
       HaSLL::SeverityLevel level, std::string message, Types... args);
 
   static HaSLL::LoggerPtr logger_;
-  static OODD::DatabaseDriverPtr db_;
+  static soci::session db_;
 };
 } // namespace open62541
 #endif // UA_ENABLE_HISTORIZING

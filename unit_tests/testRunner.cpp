@@ -1,5 +1,5 @@
-#include "HaSLL/LoggerManager.hpp"
-#include "gtest/gtest.h"
+#include <HaSLL/LoggerManager.hpp>
+#include <gtest/gtest.h>
 
 using namespace std;
 using namespace HaSLL;

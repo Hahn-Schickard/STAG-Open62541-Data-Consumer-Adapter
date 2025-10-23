@@ -93,7 +93,7 @@ UA_UInt16 Open62541Server::getServerNamespace() const {
 
 const UA_Logger* Open62541Server::getServerLogger() const {
   auto* config = UA_Server_getConfig(open62541_server_);
-  return &config->logger;
+  return config->logging;
 }
 
 UA_Server* Open62541Server::getServer() { return open62541_server_; }

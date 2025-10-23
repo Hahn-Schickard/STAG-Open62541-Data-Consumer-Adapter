@@ -1,95 +1,117 @@
 {
-    "access_credentials": {
-        "password": "user1",
-        "username": "password"
+  "buildInfo": {
+    "productUri": "urn:hahn_schickard:stag_dca.open62541",
+    "manufacturerName": "Hahn-Schickard",
+    "productName": "STAG Open62541 Data Consumer Adapter",
+    "softwareVersion": "0.0.0",
+    "buildNumber": "0.0.0",
+    "buildDate": "2025-10-23T15:38:03Z"
+  },
+  "applicationDescription": {
+    "applicationUri": "urn:user:user_machine:stag_dca.server",
+    "productUri": "urn:hahn_schickard:stag_dca.open62541",
+    "applicationName": {
+      "locale": "en-EN",
+      "text": "STAG Open62541 OPC UA Server Data Consumer Adapter"
     },
-    "allow_anonymous_access": true,
-    "app_info": {
-        "applicationName": {
-            "locale": "en",
-            "text": "STAG OPC UA Server"
-        },
-        "applicationType": "Server",
-        "applicationUri": "urn:stag.opcua_dca.server",
-        "discoveryProfileUri": "",
-        "gatewayServerUri": "",
-        "productUri": "http://stag.hahn-schickard.de/"
+    "applicationType": 0,
+    "discoveryUrls": [
+      "opc.tcp://10.0.20.240:2017",
+      "opc.tcp://10.0.20.240:2018",
+      "opc.tcp://10.0.20.241:2020"
+    ]
+  },
+  "shutdownDelay": 5000.00,
+  "verifyRequestTimestamp": 0,
+  "allowEmptyVariables": 0,
+  "serverUrls": [
+    "opc.tcp://localhost:4840"
+  ],
+  "tcpEnabled": true,
+  "tcp": {
+    "tcpBufSize": 64000,
+    "tcpMaxMsgSize": 0,
+    "tcpMaxChunks": 0
+  },
+  "maxSecureChannels": 10,
+  "maxSecurityTokenLifetime": 300000,
+  "maxSessions": 50,
+  "maxSessionTimeout": 3600000,
+  "maxNodesPerRead": 10000,
+  "maxNodesPerWrite": 10000,
+  "maxNodesPerMethodCall": 10000,
+  "maxNodesPerBrowse": 10000,
+  "maxNodesPerRegisterNodes": 10000,
+  "maxNodesPerTranslateBrowsePathsToNodeIds": 10000,
+  "maxNodesPerNodeManagement": 10000,
+  "maxMonitoredItemsPerCall": 10000,
+  "maxReferencesPerNode": 0,
+  "asyncOperationTimeout": 120000,
+  "maxAsyncOperationQueueSize": 1000000,
+  "mdnsEnabled": false,
+  "mdns": {
+    "mdnsServerName": "mdnsServerName",
+    "serverCapabilities": [
+      "LDS",
+      "NA",
+      "GDS"
+    ],
+    "mdnsInterfaceIP": "127.0.0.1",
+    "mdnsIpAddressList": [
+      1,
+      2,
+      3
+    ]
+  },
+  "subscriptionsEnabled": true,
+  "subscriptions": {
+    "maxSubscriptions": 100,
+    "maxSubscriptionsPerSession": 50,
+    "publishingIntervalLimits": {
+      "min": 100.0,
+      "max": 3600000.0
     },
-    "build_info": {
-        "buildDate": 133275739310888920,
-        "buildNumber": "May  3 2023 09:52",
-        "manufacturerName": "Hahn-Schickard",
-        "productName": "STAG open62541 Data Consumer Adapter",
-        "productUri": "http://stag.hahn-schickard.de/",
-        "softwareVersion": "0.2.0-rc"
+    "lifeTimeCountLimits": {
+      "min": 3,
+      "max": 15000
     },
-    "discovery": {
-        "cleanupTimeout": 0,
-        "mdnsEnable": false
+    "keepAliveCountLimits": {
+      "min": 1,
+      "max": 100
     },
-    "max_publish_req_per_session": 0,
-    "max_references_per_node": 0,
-    "monitored_items_limits": {
-        "max_monitored_items": 0,
-        "max_monitored_items_per_subscription": 0,
-        "queue_size_limits": {
-            "max": 100,
-            "min": 1
-        },
-        "sampling_interval_limits_ms": {
-            "max": 86400000.0,
-            "min": 50.0
-        }
+    "maxNotificationsPerPublish": 1000,
+    "enableRetransmissionQueue": true,
+    "maxRetransmissionQueueSize": 0,
+    "maxEventsPerNode": 0,
+    "maxMonitoredItems": 0,
+    "maxMonitoredItemsPerSubscription": 0,
+    "samplingIntervalLimits": {
+      "min": 50.0,
+      "max": 86400000.0
     },
-    "networking": {
-        "maxChunkCount": 0,
-        "maxMessageSize": 0,
-        "protocolVersion": 0,
-        "recvBufferSize": 65535,
-        "sendBufferSize": 65535
+    "queueSizeLimits": {
+      "min": 1,
+      "max": 100
     },
-    "operation_limits": {
-        "max_monitored_items_per_call": 0,
-        "max_nodes_per_browse": 0,
-        "max_nodes_per_method_call": 0,
-        "max_nodes_per_node_management": 0,
-        "max_nodes_per_read": 0,
-        "max_nodes_per_register_nodes": 0,
-        "max_nodes_per_translate_browse_paths_to_nodeids": 0,
-        "max_nodes_per_write": 0
-    },
-    "port_number": 4840,
-    "rules_handling": "default",
-    "secure_channels_limits": {
-        "max_secure_channels": 40,
-        "max_security_token_lifetime_ms": 600000
-    },
-    "security_policy": 0,
-    "server_certificate": "",
-    "session_limits": {
-        "max_session_timeout_ms": 3600000.0,
-        "max_sessions": 100
-    },
-    "shutdown_delay_ms": 0.0,
-    "subscription_limits": {
-        "enable_retransmission_queue": true,
-        "keep_alive_count_limits": {
-            "max": 100,
-            "min": 1
-        },
-        "life_time_count_limits": {
-            "max": 15000,
-            "min": 3
-        },
-        "max_events_per_node": 0,
-        "max_notifications_per_publish": 1000,
-        "max_retransmission_queue_size": 0,
-        "max_subscriptions": 0,
-        "max_subscriptions_per_session": 0,
-        "publishing_interval_limits_ms": {
-            "max": 3600000.0,
-            "min": 100.0
-        }
-    },
-    "thread_count": 1
+    "maxPublishReqPerSession": 5
+  },
+  "pubsubEnabled": false,
+  "historizingEnabled": true,
+  "historizing": {
+    "accessHistoryDataCapability": false,
+    "maxReturnDataValues": 0,
+    "accessHistoryEventsCapability": false,
+    "maxReturnEventValues": 0,
+    "insertDataCapability": false,
+    "insertEventCapability": false,
+    "insertAnnotationsCapability": false,
+    "replaceDataCapability": false,
+    "replaceEventCapability": false,
+    "updateDataCapability": false,
+    "updateEventCapability": false,
+    "deleteRawCapability": false,
+    "deleteEventCapability": false,
+    "deleteAtTimeDataCapability": false
+  },
+  "reverseReconnectInterval": 20000
 }

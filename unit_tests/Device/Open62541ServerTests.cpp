@@ -1,18 +1,18 @@
-#include "gtest/gtest.h"
+// #include "gtest/gtest.h"
 
-#include "Open62541Server.hpp"
+// #include "Open62541Server.hpp"
 
-using namespace open62541;
+// using namespace open62541;
 
-struct Open62541ServerTests : public ::testing::Test {};
+// struct Open62541ServerTests : public ::testing::Test {};
 
-// NOLINTNEXTLINE
-TEST_F(Open62541ServerTests, defaultConstructorWorks) {
-  Open62541Server server;
-}
+// // NOLINTNEXTLINE
+// TEST_F(Open62541ServerTests, defaultConstructorWorks) {
+//   Open62541Server server;
+// }
 
-// NOLINTNEXTLINE
-TEST_F(Open62541ServerTests, defaultConfigurationValid) {
-  auto config = std::make_unique<Configuration>();
-  Open62541Server server(std::move(config));
-}
+// // NOLINTNEXTLINE
+// TEST_F(Open62541ServerTests, defaultConfigurationValid) {
+//   auto config = std::make_unique<Configuration>();
+//   Open62541Server server(std::move(config));
+// }

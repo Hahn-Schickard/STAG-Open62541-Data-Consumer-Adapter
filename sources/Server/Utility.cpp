@@ -1,7 +1,10 @@
 #include "Utility.hpp"
 
+#include <Variant_Visitor/Visitor.hpp>
 #include <open62541/types.h>
 #include <open62541/types_generated.h>
+
+#include <cmath>
 #include <stdexcept>
 
 using namespace std;
@@ -29,7 +32,7 @@ UA_NodeId toNodeId(DataType type) {
   case DataType::String: {
     return UA_TYPES[UA_TYPES_STRING].typeId;
   }
-  case DataType::Time: {
+  case DataType::Timestamp: {
     return UA_TYPES[UA_TYPES_DATETIME].typeId;
   }
   case DataType::Unknown:
@@ -101,7 +104,7 @@ void checkStatusCode(const UA_StatusCode& status, bool uncertain_is_bad) {
 
 UA_Variant toUAVariant(const DataVariant& variant) {
   UA_Variant result;
-  match(
+  Variant_Visitor::match(
       variant,
       [&result](bool value) {
         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
@@ -115,8 +118,18 @@ UA_Variant toUAVariant(const DataVariant& variant) {
       [&result](double value) {
         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
       },
-      [&result](const DateTime& value) {
-        UA_DateTime date_time = UA_DateTime_fromUnixTime(value.getValue());
+      [&result](const Timestamp& value) {
+        UA_DateTimeStruct date_time_struct;
+        date_time_struct.year = (UA_UInt16)value.year,
+        date_time_struct.month = (UA_UInt16)value.month,
+        date_time_struct.day = (UA_UInt16)value.day,
+        date_time_struct.hour = (UA_UInt16)value.hours,
+        date_time_struct.min = (UA_UInt16)value.minutes,
+        date_time_struct.sec = (UA_UInt16)value.seconds,
+        date_time_struct.milliSec =
+            (UA_UInt16)(floor(value.microseconds / 1000)),
+        date_time_struct.microSec = (UA_UInt16)(value.microseconds % 1000);
+        auto date_time = UA_DateTime_fromStruct(date_time_struct);
         UA_Variant_setScalarCopy(
             &result, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
       },
@@ -159,8 +172,16 @@ DataVariant toDataVariant(const UA_Variant& variant) {
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    UA_DateTime time_value = *((UA_DateTime*)(variant.data));
-    DateTime value(UA_DateTime_toUnixTime(time_value));
+    UA_DateTimeStruct time_value =
+        UA_DateTime_toStruct(*(UA_DateTime*)(variant.data));
+    Timestamp value{.year = static_cast<uint16_t>(time_value.year),
+        .month = static_cast<uint8_t>(time_value.month),
+        .day = static_cast<uint8_t>(time_value.day),
+        .hours = static_cast<uint8_t>(time_value.hour),
+        .minutes = static_cast<uint8_t>(time_value.min),
+        .seconds = static_cast<uint8_t>(time_value.sec),
+        .microseconds = static_cast<uint32_t>(
+            (time_value.milliSec * 1000) + time_value.microSec)};
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {

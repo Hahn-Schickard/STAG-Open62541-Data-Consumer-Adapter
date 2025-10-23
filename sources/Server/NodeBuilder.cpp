@@ -1,10 +1,11 @@
 #include "NodeBuilder.hpp"
-#include "HaSLL/LoggerManager.hpp"
 #include "Utility.hpp"
-#include "Variant_Visitor.hpp"
 
+#include <HaSLL/LoggerManager.hpp>
+#include <Variant_Visitor/Visitor.hpp>
 #include <open62541/nodeids.h>
 #include <open62541/statuscodes.h>
+
 #include <string>
 #include <vector>
 
@@ -24,17 +25,16 @@ NodeBuilder::~NodeBuilder() { cleanup(); }
 void NodeBuilder::cleanup() { NodeCallbackHandler::destroy(); }
 
 pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
-    const NonemptyNamedElementPtr& element,
-    optional<UA_NodeId> parent_node_id) {
+    const MetaInfoPtr& element, optional<UA_NodeId> parent_node_id) {
   bool is_root = !parent_node_id.has_value();
 
-  logger_->info("Adding a new node: {}, with id: {}", element->getElementName(),
-      element->getElementId());
+  logger_->info(
+      "Adding a new node: {}, with id: {}", element->name(), element->id());
 
   auto node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), element->getElementId().c_str());
+      server_->getServerNamespace(), element->id().c_str());
   logger_->trace("Assigning {} NodeId to element: {}, with id: {}",
-      toString(&node_id), element->getElementName(), element->getElementId());
+      toString(&node_id), element->name(), element->id());
 
   auto reference_type_id = UA_NODEID_NUMERIC(
       0, (is_root ? UA_NS0ID_ORGANIZES : UA_NS0ID_HASCOMPONENT));
@@ -45,18 +45,17 @@ pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
   }
 
   auto browse_name = UA_QUALIFIEDNAME_ALLOC(
-      server_->getServerNamespace(), element->getElementName().c_str());
+      server_->getServerNamespace(), element->name().c_str());
   logger_->trace("Assigning browse name: {} to element: {}, with id: {}",
-      toString(&browse_name), element->getElementName(),
-      element->getElementId());
+      toString(&browse_name), element->name(), element->id());
 
   auto type_definition = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE);
 
   UA_ObjectAttributes node_attr = UA_ObjectAttributes_default;
   node_attr.description =
-      UA_LOCALIZEDTEXT_ALLOC("EN_US", element->getElementDescription().c_str());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", element->description().c_str());
   node_attr.displayName =
-      UA_LOCALIZEDTEXT_ALLOC("EN_US", element->getElementName().c_str());
+      UA_LOCALIZEDTEXT_ALLOC("EN_US", element->name().c_str());
 
   auto status = UA_Server_addObjectNode(server_->getServer(), node_id,
       parent_node_id.value(), reference_type_id, browse_name, type_definition,
@@ -68,26 +67,25 @@ pair<UA_StatusCode, UA_NodeId> NodeBuilder::addObjectNode(
   return make_pair(status, node_id);
 }
 
-UA_StatusCode NodeBuilder::addDeviceNode(const NonemptyDevicePtr& device) {
+UA_StatusCode NodeBuilder::addDeviceNode(const DevicePtr& device) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   auto result = addObjectNode(device);
   status = result.first;
 
   try {
-    checkStatusCode("While creating Object Node for " + device->getElementId() +
-            " " + device->getElementName() + " device",
+    checkStatusCode("While creating Object Node for " + device->id() + " " +
+            device->name() + " device",
         status);
-    auto device_element_group = device->getDeviceElementGroup();
-    for (const auto& device_element : device_element_group->getSubelements()) {
-      status = addDeviceNodeElement(device_element, result.second);
-      checkStatusCode("While adding DeviceElement " +
-              device_element->getElementId() + " " +
-              device_element->getElementName() + " node",
+    auto elements = device->group(); // @todo refactor to visitor
+    for (const auto& element : elements->asVector()) {
+      status = addElementNode(element, result.second);
+      checkStatusCode("While adding DeviceElement " + element->id() + " " +
+              element->name() + " node",
           status);
     }
   } catch (const StatusCodeNotGood& ex) {
     logger_->error("Failed to create a Node for Device: {}. Status: {}",
-        device->getElementName(), ex.what());
+        device->name(), ex.what());
   }
   UA_NodeId_clear(&result.second);
   return status;
@@ -149,85 +147,78 @@ UA_StatusCode NodeBuilder::deleteDeviceNode(const string& device_id) {
   return result;
 }
 
-UA_StatusCode NodeBuilder::addDeviceNodeElement(
-    const NonemptyDeviceElementPtr& element, const UA_NodeId& parent_id) {
+UA_StatusCode NodeBuilder::addElementNode(
+    const ElementPtr& element, const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-  logger_->info("Adding element {} to node {}", element->getElementName(),
-      toString(&parent_id));
+  logger_->info(
+      "Adding element {} to node {}", element->name(), toString(&parent_id));
 
-  match(
-      element->functionality,
-      [&](const NonemptyDeviceElementGroupPtr& group) {
+  Variant_Visitor::match(
+      element->function(),
+      [&](const GroupPtr& group) {
         status = addGroupNode(element, group, parent_id);
       },
-      [&](const NonemptyObservableMetricPtr& metric) {
-        // handle observables as readables
+      [&](const ObservablePtr& metric) {
+        status = addObservableNode(element, metric, parent_id);
+      },
+      [&](const ReadablePtr& metric) {
         status = addReadableNode(element, metric, parent_id);
       },
-      [&](const NonemptyMetricPtr& metric) {
-        status = addReadableNode(element, metric, parent_id);
-      },
-      [&](const NonemptyWritableMetricPtr& metric) {
+      [&](const WritablePtr& metric) {
         status = addWritableNode(element, metric, parent_id);
       },
-      [&](const NonemptyFunctionPtr& function) {
-        status = addFunctionNode(element, function, parent_id);
+      [&](const CallablePtr& callable) {
+        status = addCallableNode(element, callable, parent_id);
       });
 
   if (status != UA_STATUSCODE_GOOD) {
     logger_->error("Failed to create a Node for Device Element: {}. Status: {}",
-        element->getElementName(), UA_StatusCode_name(status));
+        element->name(), UA_StatusCode_name(status));
   }
 
   return status;
 }
 
-UA_StatusCode NodeBuilder::addGroupNode(
-    const NonemptyNamedElementPtr& meta_info,
-    const NonemptyDeviceElementGroupPtr& device_element_group,
-    const UA_NodeId& parent_id) {
+UA_StatusCode NodeBuilder::addGroupNode(const MetaInfoPtr& meta_info,
+    const GroupPtr& group, const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
-  if (!device_element_group->getSubelements().empty()) {
-    auto result = addObjectNode(meta_info, parent_id);
-    status = result.first;
-    try {
-      checkStatusCode("Parent's " + toString(&parent_id) + " group element " +
-              meta_info->getElementName() + " with id " +
-              meta_info->getElementId() + " is empty.",
-          status);
-      auto elements = device_element_group->getSubelements();
+  auto result = addObjectNode(meta_info, parent_id);
+  status = result.first;
+  try {
+    checkStatusCode("Parent's " + toString(&parent_id) + " group element " +
+            meta_info->name() + " with id " + meta_info->id() + " is empty.",
+        status);
+    auto elements = group->asVector();
 
-      logger_->info("Group element {}:{} contains {} subelements.",
-          meta_info->getElementName(), toString(&result.second),
-          elements.size());
-      for (const auto& element : elements) {
-        status = addDeviceNodeElement(element, result.second);
-      }
-    } catch (const StatusCodeNotGood& ex) {
-      logger_->error(
-          "Failed to create a Node for Device Element Group: {}. Status: {}",
-          meta_info->getElementName(), ex.what());
+    logger_->info("Group element {}:{} contains {} subelements.",
+        meta_info->name(), toString(&result.second), elements.size());
+    for (const auto& element : elements) {
+      status = addElementNode(element, result.second);
     }
-    UA_NodeId_clear(&result.second);
+  } catch (const StatusCodeNotGood& ex) {
+    logger_->error(
+        "Failed to create a Node for Device Element Group: {}. Status: {}",
+        meta_info->name(), ex.what());
   }
+  UA_NodeId_clear(&result.second);
+
   return status;
 }
 
 template <class MetricType>
 UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
-    const Information_Model::NonemptyNamedElementPtr& meta_info,
-    const Nonempty::Pointer<shared_ptr<MetricType>>& metric,
+    const MetaInfoPtr& meta_info, const shared_ptr<MetricType>& metric,
     const string& metric_type_description) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
 
   try {
-    auto variant = metric->getMetricValue();
+    auto variant = metric->read();
     value_attribute.value = toUAVariant(variant);
-    value_attribute.description = UA_LOCALIZEDTEXT_ALLOC(
-        "EN_US", meta_info->getElementDescription().c_str());
+    value_attribute.description =
+        UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->description().c_str());
     value_attribute.displayName =
-        UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->getElementName().c_str());
-    value_attribute.dataType = toNodeId(metric->getDataType());
+        UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->name().c_str());
+    value_attribute.dataType = toNodeId(metric->dataType());
     status = UA_STATUSCODE_GOOD;
   } catch (const exception& ex) {
     logger_->error("An exception occurred while trying to set " +
@@ -238,20 +229,17 @@ UA_StatusCode NodeBuilder::setValue(UA_VariableAttributes& value_attribute,
   return status;
 }
 
-UA_StatusCode NodeBuilder::addReadableNode(
-    const NonemptyNamedElementPtr& meta_info, const NonemptyMetricPtr& metric,
-    const UA_NodeId& parent_id) {
+UA_StatusCode NodeBuilder::addReadableNode(const MetaInfoPtr& meta_info,
+    const ReadablePtr& metric, const UA_NodeId& parent_id) {
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), meta_info->getElementId().c_str());
+      server_->getServerNamespace(), meta_info->id().c_str());
   logger_->trace("Assigning {} NodeId to metric: {}, with id: {}",
-      toString(&metrid_node_id), meta_info->getElementName(),
-      meta_info->getElementId());
+      toString(&metrid_node_id), meta_info->name(), meta_info->id());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
-      server_->getServerNamespace(), meta_info->getElementName().c_str());
+      server_->getServerNamespace(), meta_info->name().c_str());
   logger_->trace("Assigning browse name: {} to metric: {}, with id: {}",
-      toString(&metric_browse_name), meta_info->getElementName(),
-      meta_info->getElementId());
+      toString(&metric_browse_name), meta_info->name(), meta_info->id());
   UA_NodeId type_definition =
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
 
@@ -261,16 +249,15 @@ UA_StatusCode NodeBuilder::addReadableNode(
   try {
     checkStatusCode("While setting default readable metric value", status);
     logger_->trace("Assigning {} read callback for {} node",
-        toString(metric->getDataType()), toString(&metrid_node_id));
+        toString(metric->dataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
 #ifdef UA_ENABLE_HISTORIZING
     node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     node_attr.historizing = true;
 #endif // UA_ENABLE_HISTORIZING
     status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
-        make_shared<CallbackWrapper>(metric->getDataType(),
-            (CallbackWrapper::ReadCallback)bind(
-                &Metric::getMetricValue, metric.base())));
+        make_shared<CallbackWrapper>(metric->dataType(),
+            (CallbackWrapper::ReadCallback)bind(&Readable::read, metric)));
     checkStatusCode("While setting readable metric callbacks", status);
 
     UA_DataSource data_source;
@@ -288,7 +275,7 @@ UA_StatusCode NodeBuilder::addReadableNode(
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
         "Failed to create a Node for Readable Metric: {}. Status: {}",
-        meta_info->getElementName(), ex.what());
+        meta_info->name(), ex.what());
   }
   UA_NodeId_clear(&metrid_node_id);
   UA_QualifiedName_clear(&metric_browse_name);
@@ -296,20 +283,24 @@ UA_StatusCode NodeBuilder::addReadableNode(
   return status;
 }
 
-UA_StatusCode NodeBuilder::addWritableNode(
-    const NonemptyNamedElementPtr& meta_info,
-    const NonemptyWritableMetricPtr& metric, const UA_NodeId& parent_id) {
+UA_StatusCode addObservableNode(const Information_Model::ElementPtr& meta_info,
+    const Information_Model::ObservablePtr& metric,
+    const UA_NodeId& parent_id) {
+
+  // convert to readable
+}
+
+UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
+    const WritablePtr& metric, const UA_NodeId& parent_id) {
   UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), meta_info->getElementId().c_str());
+      server_->getServerNamespace(), meta_info->id().c_str());
   logger_->trace("Assigning {} NodeId to metric: {}, with id: {}",
-      toString(&metrid_node_id), meta_info->getElementName(),
-      meta_info->getElementId());
+      toString(&metrid_node_id), meta_info->name(), meta_info->id());
   UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
   UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
-      server_->getServerNamespace(), meta_info->getElementName().c_str());
+      server_->getServerNamespace(), meta_info->name().c_str());
   logger_->trace("Assigning browse name: {} to metric: {}, with id: {}",
-      toString(&metric_browse_name), meta_info->getElementName(),
-      meta_info->getElementId());
+      toString(&metric_browse_name), meta_info->name(), meta_info->id());
   UA_NodeId type_definition =
       UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
   UA_VariableAttributes node_attr = UA_VariableAttributes_default;
@@ -318,7 +309,7 @@ UA_StatusCode NodeBuilder::addWritableNode(
   try {
     checkStatusCode("While setting default writable metric value", status);
     logger_->trace("Assigning {} read and write callbacks for {} node",
-        toString(metric->getDataType()), toString(&metrid_node_id));
+        toString(metric->dataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
 #ifdef UA_ENABLE_HISTORIZING
     node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
@@ -327,19 +318,16 @@ UA_StatusCode NodeBuilder::addWritableNode(
     UA_DataSource data_source;
     if (!metric->isWriteOnly()) {
       status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
-          make_shared<CallbackWrapper>(metric->getDataType(),
-              (CallbackWrapper::ReadCallback)bind(
-                  &WritableMetric::getMetricValue, metric.base()),
+          make_shared<CallbackWrapper>(metric->dataType(),
+              (CallbackWrapper::ReadCallback)bind(&Writable::read, metric),
               (CallbackWrapper::WriteCallback)bind(
-                  &WritableMetric::setMetricValue, metric.base(),
-                  placeholders::_1)));
+                  &Writable::write, metric, placeholders::_1)));
       data_source.read = &NodeCallbackHandler::readNodeValue;
     } else {
       status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
-          make_shared<CallbackWrapper>(metric->getDataType(),
+          make_shared<CallbackWrapper>(metric->dataType(),
               (CallbackWrapper::WriteCallback)bind(
-                  &WritableMetric::setMetricValue, metric.base(),
-                  placeholders::_1)));
+                  &Writable::write, metric, placeholders::_1)));
       data_source.read = nullptr;
     }
     checkStatusCode("While setting writable metric callbacks", status);
@@ -355,7 +343,7 @@ UA_StatusCode NodeBuilder::addWritableNode(
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
         "Failed to create a Node for Writable Metric: {}. Status: {}",
-        meta_info->getElementName(), ex.what());
+        meta_info->name(), ex.what());
   }
   UA_NodeId_clear(&metrid_node_id);
   UA_QualifiedName_clear(&metric_browse_name);
@@ -363,87 +351,83 @@ UA_StatusCode NodeBuilder::addWritableNode(
   return status;
 }
 
-UA_StatusCode NodeBuilder::addFunctionNode(
-    const NonemptyNamedElementPtr& meta_info,
-    const NonemptyFunctionPtr& function, const UA_NodeId& parent_id) {
+UA_StatusCode NodeBuilder::addCallableNode(const MetaInfoPtr& meta_info,
+    const CallablePtr& callable, const UA_NodeId& parent_id) {
   UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
   auto method_node_id = UA_NODEID_STRING_ALLOC(
-      server_->getServerNamespace(), meta_info->getElementId().c_str());
-  if (function->resultType() != DataType::None &&
-      function->resultType() != DataType::Unknown) {
+      server_->getServerNamespace(), meta_info->id().c_str());
+  if (callable->resultType() != DataType::None &&
+      callable->resultType() != DataType::Unknown) {
     CallbackWrapper::CallCallback call_cb =
-        [function, id = meta_info->getElementId(),
-            logger = server_->getServerLogger()](
-            const Information_Model::Function::Parameters& params) {
+        [callable, id = meta_info->id(), logger = server_->getServerLogger()](
+            const Information_Model::Parameters& params) {
           try {
-            return function->call(
-                params, (uintmax_t)1000); // NOLINT(readability-magic-numbers)
+            return callable->call(params);
           } catch (const exception& ex) {
-            string msg = "An exception occurred while calling " + id +
-                " function: " + ex.what();
-            UA_LOG_ERROR(logger, UA_LOGCATEGORY_SERVER, msg.c_str());
+            UA_LOG_ERROR(logger, UA_LOGCATEGORY_SERVER,
+                "An exception occurred while calling %s callable: %s",
+                id.c_str(), ex.what());
             return Information_Model::DataVariant();
           }
         };
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
         make_shared<CallbackWrapper>(
-            function->resultType(), function->parameterTypes(), move(call_cb)));
+            callable->resultType(), callable->parameterTypes(), move(call_cb)));
   } else {
     CallbackWrapper::ExecuteCallback execute_cb =
-        [function, id = meta_info->getElementId(),
-            logger = server_->getServerLogger()](
-            const Information_Model::Function::Parameters& params) {
+        [callable, id = meta_info->id(), logger = server_->getServerLogger()](
+            const Information_Model::Parameters& params) {
           try {
-            function->execute(params);
+            callable->execute(params);
           } catch (const exception& ex) {
-            string msg = "An exception occurred while executing " + id +
-                " function: " + ex.what();
-            UA_LOG_ERROR(logger, UA_LOGCATEGORY_SERVER, msg.c_str());
+            UA_LOG_ERROR(logger, UA_LOGCATEGORY_SERVER,
+                "An exception occurred while executing %s callable: %s",
+                id.c_str(), ex.what());
           }
         };
     status = NodeCallbackHandler::addNodeCallbacks(method_node_id,
-        make_shared<CallbackWrapper>(function->resultType(),
-            function->parameterTypes(), move(execute_cb)));
+        make_shared<CallbackWrapper>(callable->resultType(),
+            callable->parameterTypes(), move(execute_cb)));
   }
   UA_Argument* input_args = nullptr;
   UA_Argument* output = nullptr;
   try {
-    checkStatusCode("While setting function callbacks", status);
-    auto arg_count = function->parameterTypes().size();
+    checkStatusCode("While setting callable callbacks", status);
+    auto arg_count = callable->parameterTypes().size();
     if (arg_count > 0) {
       input_args = (UA_Argument*)malloc(arg_count * sizeof(UA_Argument));
-      for (size_t i = 0; i < function->parameterTypes().size(); ++i) {
+      for (size_t i = 0; i < callable->parameterTypes().size(); ++i) {
         UA_Argument_init(&input_args[i]);
-        auto parameter = function->parameterTypes().at(i);
-        input_args[i].name = makeUAString(toString(parameter.first));
-        input_args[i].dataType = toNodeId(parameter.first);
+        auto parameter = callable->parameterTypes().at(i);
+        input_args[i].name = makeUAString(toString(parameter.type));
+        input_args[i].dataType = toNodeId(parameter.type);
         input_args[i].valueRank =
             UA_VALUERANK_SCALAR; // each input type is scalar
-        auto arg_desc =
-            (parameter.second ? "Optional " : "") + toString(parameter.first);
+        auto arg_desc = (parameter.mandatory ? "Mandatory " : "") +
+            toString(parameter.type);
         input_args[i].description =
             UA_LOCALIZEDTEXT_ALLOC("EN_US", arg_desc.c_str());
       }
     }
     uint8_t output_count = 0;
-    if (function->resultType() != DataType::None) {
+    if (callable->resultType() != DataType::None) {
       output_count = 1;
       output = UA_Argument_new();
-      output->name = makeUAString(toString(function->resultType()));
-      output->dataType = toNodeId(function->resultType());
+      output->name = makeUAString(toString(callable->resultType()));
+      output->dataType = toNodeId(callable->resultType());
       output->valueRank = UA_VALUERANK_SCALAR; // all returns are scalar
-      auto ouput_desc = toString(function->resultType());
+      auto ouput_desc = toString(callable->resultType());
       output->description = UA_LOCALIZEDTEXT_ALLOC("EN_US", ouput_desc.c_str());
     }
     auto reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
     auto method_browse_name = UA_QUALIFIEDNAME_ALLOC(
-        server_->getServerNamespace(), meta_info->getElementName().c_str());
+        server_->getServerNamespace(), meta_info->name().c_str());
 
     UA_MethodAttributes node_attr = UA_MethodAttributes_default;
-    node_attr.description = UA_LOCALIZEDTEXT_ALLOC(
-        "en-US", meta_info->getElementDescription().c_str());
+    node_attr.description =
+        UA_LOCALIZEDTEXT_ALLOC("en-US", meta_info->description().c_str());
     node_attr.displayName =
-        UA_LOCALIZEDTEXT_ALLOC("en-US", meta_info->getElementName().c_str());
+        UA_LOCALIZEDTEXT_ALLOC("en-US", meta_info->name().c_str());
     node_attr.executable = true;
     node_attr.userExecutable = true;
 
@@ -453,8 +437,8 @@ UA_StatusCode NodeBuilder::addFunctionNode(
         output_count, output, nullptr, nullptr);
     checkStatusCode("While adding method node to server", status);
   } catch (const StatusCodeNotGood& ex) {
-    logger_->error("Failed to create a MethodNode for Function: {}. Status: {}",
-        meta_info->getElementName(), ex.what());
+    logger_->error("Failed to create a MethodNode for callable: {}. Status: {}",
+        meta_info->name(), ex.what());
   }
 
   // clean local pointer instances to avoid memory leaks

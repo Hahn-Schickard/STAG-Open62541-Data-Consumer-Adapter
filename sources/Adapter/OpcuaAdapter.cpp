@@ -1,38 +1,27 @@
 #include "OpcuaAdapter.hpp"
 
-#include "HaSLL_Logger.hpp"
-#include "Variant_Visitor.hpp"
-
+namespace Data_Consumer_Adapter {
 using namespace Information_Model;
-using namespace Event_Model;
-using namespace HaSLL;
 using namespace std;
 using namespace open62541;
 
-namespace Data_Consumer_Adapter {
-OpcuaAdapter::OpcuaAdapter(const ModelEventSourcePtr& event_source)
-    // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    : DCAI(event_source, "Open62541_Adapter") {
-  registerLoggers();
+OpcuaAdapter::OpcuaAdapter(const DataConnector& connector)
+    : DataConsumerAdapter("Open62541_Adapter", connector) {
   server_ = make_shared<Open62541Server>();
   node_builder_ = make_unique<NodeBuilder>(server_);
 }
 
 OpcuaAdapter::OpcuaAdapter(
-    const ModelEventSourcePtr& event_source, const string& config_filepath)
-    // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    : DCAI(event_source, "Open62541_Adapter") {
-  registerLoggers();
+    const DataConnector& connector, const string& config_filepath)
+    : DataConsumerAdapter("Open62541_Adapter", connector) {
   server_ = make_shared<Open62541Server>(
       make_unique<open62541::Configuration>(config_filepath));
   node_builder_ = make_unique<NodeBuilder>(server_);
 }
 
-OpcuaAdapter::~OpcuaAdapter() { removeLoggers(); }
-
-void OpcuaAdapter::start(const Devices& devices) {
+void OpcuaAdapter::start() {
   if (server_->start()) {
-    DataConsumerAdapterInterface::start(devices);
+    DataConsumerAdapter::start();
   } else {
     logger->error("Failed to start Open62541 server");
   }
@@ -45,14 +34,14 @@ void OpcuaAdapter::stop() {
   if (!server_->stop()) {
     logger->error("Failed to stop Open62541 server");
   }
-  DataConsumerAdapterInterface::stop();
+  DataConsumerAdapter::stop();
 }
 
-void OpcuaAdapter::registrate(const NonemptyDevicePtr& device) {
+void OpcuaAdapter::registrate(const DevicePtr& device) {
   logger->trace(
       "OPC UA Adapter received NEW_DEVICE_REGISTERED event for device "
       "with id",
-      device->getElementId());
+      device->id());
   node_builder_->addDeviceNode(device);
 }
 

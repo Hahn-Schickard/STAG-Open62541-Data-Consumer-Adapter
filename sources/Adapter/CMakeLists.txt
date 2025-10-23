@@ -1,45 +1,40 @@
-set(MODULE ${PROJECT_NAME})
+#@+ ======================== User TARGET NAME configuration =============================
+set(THIS Adapter)
+#@- =========================== END OF USER CONFIGURATION ===============================
 
-list(APPEND MODULE_INCLUDES_DIRS
-            ${INCLUDES_DIR}/Adapter
+set(TARGET ${PROJECT_NAME}_${THIS})
+
+#@+ =========================== User TARGET configuration ===============================
+set(THIS_INCLUDES_DIR ${INCLUDES_DIR}/Adapter)
+file(GLOB THIS_INCLUDES ${THIS_INCLUDES_DIR}/*.hpp)
+file(GLOB SOURCEFILES "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+
+add_library(${TARGET})
+target_sources(${TARGET}
+    PUBLIC
+        ${THIS_INCLUDES}
+    PRIVATE
+        ${SOURCEFILES}
 )
 
-file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+target_link_libraries(${TARGET} 
+    PUBLIC
+        Data_Consumer_Adapter_Interface::Data_Consumer_Adapter_Interface
+        HaSLL::HaSLL
+        ${PROJECT_NAME}_Server
+    PRIVATE
+        Variant_Visitor::Variant_Visitor
+)
+#@- =========================== END OF USER CONFIGURATION ===============================
 
-INCLUDE_DIRS_AND_FILES("${MODULE_INCLUDES_DIRS}" MODULE_INCLUDES)
-
-add_library(${MODULE})
-
-target_sources(${MODULE} PRIVATE
-                       ${MODULE_INCLUDES}
-                       ${sources_list}
+target_include_directories(${TARGET}
+    PUBLIC
+        $<BUILD_INTERFACE:${THIS_INCLUDES_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
 )
 
-target_link_libraries(${MODULE} PUBLIC
-                              Data_Consumer_Adapter_Interface::Data_Consumer_Adapter_Interface
-                              Variant_Visitor::Variant_Visitor
-                              HaSLL::HaSLL                           
-                              ${PROJECT_NAME}_Server
-)
+PRINT_TARGET_PROPERTIES(${TARGET})
 
-target_include_directories(${MODULE} PUBLIC
-                           $<BUILD_INTERFACE:${INCLUDES_DIR}/Adapter>
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
-)
-
-target_compile_features(${MODULE} PUBLIC cxx_std_17)
-
-PRINT_TARGET_PROPERTIES(${MODULE})
-
-install(
-    TARGETS ${MODULE}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-install(
-    FILES ${MODULE_INCLUDES}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-)
+INSTALL_TARGET(${TARGET})
+INSTALL_HEADERS(HEADERS "${THIS_INCLUDES}")

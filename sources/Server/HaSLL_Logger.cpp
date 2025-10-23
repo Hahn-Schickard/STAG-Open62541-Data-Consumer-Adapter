@@ -75,9 +75,8 @@ void removeLoggers() {
   }
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-void HaSLL_Logger_log([[maybe_unused]] void* _logContext, UA_LogLevel level,
-    UA_LogCategory category, const char* msg, va_list args) {
+void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
+    const char* msg, va_list args) {
   const std::lock_guard<std::mutex> lock(logger_mutex);
 
   /*
@@ -154,10 +153,16 @@ void HaSLL_Logger_log([[maybe_unused]] void* _logContext, UA_LogLevel level,
   }
 }
 
-void HaSLL_Logger_clear([[maybe_unused]] void* log_context) {
-  // Nothing to clear
+void destroyHaSLL(struct UA_Logger* logger) {
+  removeLoggers();
+  UA_free(logger);
 }
 
-// NOLINTNEXTLINE
-const UA_Logger HaSLL_Logger_ = {HaSLL_Logger_log, NULL, HaSLL_Logger_clear};
-const UA_Logger* HaSLL_Logger = &HaSLL_Logger_; // NOLINT
+UA_Logger* createHaSLL() {
+  UA_Logger* logger = (UA_Logger*)UA_malloc(sizeof(UA_Logger));
+  if (!logger) {
+    return NULL;
+  }
+  *logger = {logToHaSLL, NULL, destroyHaSLL};
+  return logger;
+}

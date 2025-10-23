@@ -1,64 +1,50 @@
-cmake_minimum_required(VERSION 3.6) 
-
-#@+ ======================== User MODULE NAME configuration ============================
+#@+ ======================== User TARGET NAME configuration =============================
 set(THIS Server)
 #@- =========================== END OF USER CONFIGURATION ===============================
 
-set(MODULE ${PROJECT_NAME}_${THIS})
+set(TARGET ${PROJECT_NAME}_${THIS})
 
-list(APPEND THIS_INCLUDES_DIRS
-            ${INCLUDES_DIR}/Server
+#@+ =========================== User TARGET configuration ===============================
+set(THIS_INCLUDES_DIR ${INCLUDES_DIR}/Server)
+file(GLOB THIS_INCLUDES ${THIS_INCLUDES_DIR}/*.hpp)
+file(GLOB SOURCEFILES "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+
+add_library(${TARGET})
+target_sources(${TARGET}
+    PUBLIC
+        ${THIS_INCLUDES}
+    PRIVATE
+        ${SOURCEFILES}
 )
 
-file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
-
-INCLUDE_DIRS_AND_FILES("${THIS_INCLUDES_DIRS}" THIS_INCLUDES)
-
-add_library(${MODULE})
-
-target_sources(${MODULE} PRIVATE 
-                       ${THIS_INCLUDES}
-                       ${sources_list}
+target_link_libraries(${TARGET} 
+    PUBLIC #@todo change to private
+        Information_Model::Information_Model
+        open62541::open62541
+        Variant_Visitor::Variant_Visitor
+        HaSLL::HaSLL
+        ${PROJECT_NAME}_Serializer                                
 )
-
-target_link_libraries(${MODULE} PUBLIC
-                              Information_Model::Information_Model
-                              open62541::open62541
-                              Variant_Visitor::Variant_Visitor
-                              Threadsafe_Containers::Threadsafe_Containers
-                              HaSLL::HaSLL
-                              ${PROJECT_NAME}_Serializer
-)
-
 
 if(HISTORIZATION)
-    target_link_libraries(${MODULE} PUBLIC
-                                  date::date
-                                  OODD::OODD
+    target_link_libraries(${TARGET} 
+        PUBLIC #@todo change to private
+            date::date
+            soci::soci
     )
-    target_compile_definitions(${MODULE} PUBLIC UA_ENABLE_HISTORIZING)
+    target_compile_definitions(${TARGET} PUBLIC UA_ENABLE_HISTORIZING)
 endif()
 
-target_include_directories(${MODULE} PUBLIC
-                           $<BUILD_INTERFACE:${INCLUDES_DIR}/Server>
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
+#@- =========================== END OF USER CONFIGURATION ===============================
+
+target_include_directories(${TARGET}
+    PUBLIC
+        $<BUILD_INTERFACE:${THIS_INCLUDES_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
 )
 
-set_property(TARGET ${MODULE} PROPERTY POSITION_INDEPENDENT_CODE ON)
+PRINT_TARGET_PROPERTIES(${TARGET})
 
-target_compile_features(${MODULE} PUBLIC cxx_std_17)
-
-PRINT_TARGET_PROPERTIES(${MODULE})
-
-install(
-    TARGETS ${MODULE}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-install(
-    FILES ${THIS_INCLUDES}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-)
+INSTALL_TARGET(${TARGET})
+INSTALL_HEADERS(HEADERS "${THIS_INCLUDES}")

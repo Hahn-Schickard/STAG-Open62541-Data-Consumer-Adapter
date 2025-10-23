@@ -1,26 +1,27 @@
 #ifndef __OPCUA_ADAPTER_HPP
 #define __OPCUA_ADAPTER_HPP
 
-#include "Data_Consumer_Adapter_Interface/DataConsumerAdapterInterface.hpp"
 #include "NodeBuilder.hpp"
 #include "Open62541Server.hpp"
+
+#include <Data_Consumer_Adapter_Interface/DataConsumerAdapter.hpp>
 
 #include <memory>
 
 namespace Data_Consumer_Adapter {
-struct OpcuaAdapter : public DCAI {
-  using DCAI::Devices;
+struct OpcuaAdapter : public DataConsumerAdapter {
+  using DataConsumerAdapter::Devices;
 
-  OpcuaAdapter(const ModelEventSourcePtr& event_source);
-  OpcuaAdapter(const ModelEventSourcePtr& event_source,
-      const std::string& config_filepath);
-  ~OpcuaAdapter();
+  OpcuaAdapter(const DataConnector& connector);
+  OpcuaAdapter(
+      const DataConnector& connector, const std::string& config_filepath);
+  ~OpcuaAdapter() override = default;
 
-  void start(const Devices& devices = {}) override;
+  void start() override;
   void stop() override;
 
 private:
-  void registrate(const Information_Model::NonemptyDevicePtr& device) override;
+  void registrate(const Information_Model::DevicePtr& device) override;
   void deregistrate(const std::string& device_id) override;
 
   std::shared_ptr<open62541::Open62541Server> server_;
