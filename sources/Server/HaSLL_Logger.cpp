@@ -9,7 +9,7 @@ using namespace std;
 using namespace HaSLL;
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-enum class Open62541_Logger {
+enum class Open62541_Logger : uint8_t {
   Network,
   Channel,
   Session,
