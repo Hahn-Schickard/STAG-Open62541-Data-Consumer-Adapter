@@ -18,10 +18,10 @@ using namespace HaSLL;
 Configuration::Configuration()
     : logger_(LoggerManager::registerLogger("Open62541 Configuration")),
       configuration_(make_unique<UA_ServerConfig>()) {
-    memset(configuration_.get(), 0, sizeof(UA_ServerConfig));
-    configuration_->logging = createHaSLL();
-    auto status = UA_ServerConfig_setDefault(configuration_.get());
-    checkStatusCode("While setting configuration defaults", status, true);
+  memset(configuration_.get(), 0, sizeof(UA_ServerConfig));
+  configuration_->logging = createHaSLL();
+  auto status = UA_ServerConfig_setDefault(configuration_.get());
+  checkStatusCode("While setting configuration defaults", status, true);
 }
 
 UA_ByteString readFile(const filesystem::path& filepath) {
@@ -51,23 +51,25 @@ Configuration::Configuration(const string& filepath) : Configuration() {
   checkStatusCode("While reading configuration file " + filepath, status, true);
 
 #ifdef UA_ENABLE_HISTORIZING
-  try {
-    // if () { // check if database config exists
-    //   throw runtime_error(
-    //       "Historization enabled, but no database configuration was
-    //       provided");
-    // }
-    // auto db_config = config.historization.value();
-    // historizer_ = make_unique<Historizer>(db_config.dsn, db_config.user,
-    //     db_config.auth, db_config.request_timeout,
-    //     db_config.request_logging);
+  if (configuration_->historizingEnabled) {
+    try {
+      // if () { // check if database config exists
+      //   throw runtime_error(
+      //       "Historization enabled, but no database configuration was
+      //       provided");
+      // }
+      // auto db_config = config.historization.value();
+      // historizer_ = make_unique<Historizer>(db_config.dsn, db_config.user,
+      //     db_config.auth, db_config.request_timeout,
+      //     db_config.request_logging);
 
-    // configuration_->historyDatabase.clear(&configuration_->historyDatabase);
-    // configuration_->historyDatabase = historizer_->createDatabase();
-  } catch (exception& ex) {
-    logger_->error("Data Historization Service will not be available, due to "
-                   "an exception: {}",
-        ex.what());
+      // configuration_->historyDatabase.clear(&configuration_->historyDatabase);
+      // configuration_->historyDatabase = historizer_->createDatabase();
+    } catch (exception& ex) {
+      logger_->error("Data Historization Service will not be available, due to "
+                     "an exception: {}",
+          ex.what());
+    }
   }
 #endif // UA_ENABLE_HISTORIZING
 } // namespace open62541
