@@ -129,6 +129,7 @@ UA_Variant toUAVariant(const DataVariant& variant) {
         date_time_struct.milliSec =
             (UA_UInt16)(floor(value.microseconds / 1000)),
         date_time_struct.microSec = (UA_UInt16)(value.microseconds % 1000);
+        date_time_struct.nanoSec = 0;
         auto date_time = UA_DateTime_fromStruct(date_time_struct);
         UA_Variant_setScalarCopy(
             &result, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
