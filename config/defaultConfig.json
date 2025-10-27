@@ -15,11 +15,7 @@
       "text": "STAG Open62541 OPC UA Server Data Consumer Adapter"
     },
     "applicationType": 0,
-    "discoveryUrls": [
-      "opc.tcp://10.0.20.240:2017",
-      "opc.tcp://10.0.20.240:2018",
-      "opc.tcp://10.0.20.241:2020"
-    ]
+    "discoveryUrls": []
   },
   "shutdownDelay": 5000.00,
   "verifyRequestTimestamp": 0,
@@ -48,21 +44,6 @@
   "maxReferencesPerNode": 0,
   "asyncOperationTimeout": 120000,
   "maxAsyncOperationQueueSize": 1000000,
-  "mdnsEnabled": false,
-  "mdns": {
-    "mdnsServerName": "mdnsServerName",
-    "serverCapabilities": [
-      "LDS",
-      "NA",
-      "GDS"
-    ],
-    "mdnsInterfaceIP": "127.0.0.1",
-    "mdnsIpAddressList": [
-      1,
-      2,
-      3
-    ]
-  },
   "subscriptionsEnabled": true,
   "subscriptions": {
     "maxSubscriptions": 100,
@@ -95,7 +76,6 @@
     },
     "maxPublishReqPerSession": 5
   },
-  "pubsubEnabled": false,
   "historizingEnabled": true,
   "historizing": {
     "accessHistoryDataCapability": false,
