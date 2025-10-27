@@ -59,14 +59,6 @@ bool Open62541Server::stop() {
     is_running_ = false;
     server_thread_.join();
     logger_->trace("Joined open62541 server thread!");
-    UA_StatusCode status = UA_Server_run_shutdown(open62541_server_);
-    if (status == UA_STATUSCODE_GOOD) {
-      logger_->info("Stopped open62541 server!");
-      return true;
-    } else {
-      logger_->error("Could not shutdown open62541 server!");
-      return false;
-    }
   }
   return true;
 }
