@@ -14,19 +14,14 @@ namespace open62541 {
 using namespace std;
 using namespace HaSLL;
 
-Configuration::Configuration() : Configuration(false) {}
-
-Configuration::Configuration(bool basic)
+Configuration::Configuration()
     : logger_(LoggerManager::registerLogger("Open62541 Configuration")),
       configuration_(make_unique<UA_ServerConfig>()) {
   try {
     memset(configuration_.get(), 0, sizeof(UA_ServerConfig));
     configuration_->logging = createHaSLL();
-    if (basic) {
-      UA_ServerConfig_setBasics(configuration_.get());
-    } else {
-      UA_ServerConfig_setDefault(configuration_.get());
-    }
+    auto status = UA_ServerConfig_setDefault(configuration_.get());
+    checkStatusCode("While setting configuration defaults", status, true);
   } catch (exception& ex) {
     string error_msg =
         "Caught exception when deserializing Configuration file: " +
@@ -54,7 +49,7 @@ UA_ByteString readFile(const filesystem::path& filepath) {
   return result;
 }
 
-Configuration::Configuration(const string& filepath) : Configuration(true) {
+Configuration::Configuration(const string& filepath) : Configuration() {
   UA_ByteString json_config = readFile(filepath);
 
   auto status =

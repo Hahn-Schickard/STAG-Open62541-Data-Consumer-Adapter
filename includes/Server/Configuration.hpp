@@ -27,8 +27,6 @@ struct Configuration {
 #endif // UA_ENABLE_HISTORIZING
 
 private:
-  Configuration(bool basic);
-
   HaSLL::LoggerPtr logger_;
 #ifdef UA_ENABLE_HISTORIZING
   std::unique_ptr<Historizer> historizer_;
