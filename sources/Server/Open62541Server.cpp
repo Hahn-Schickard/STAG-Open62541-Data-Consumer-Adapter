@@ -77,8 +77,8 @@ void Open62541Server::runnable() {
       logger_->info("Starting open62541 server thread");
       UA_StatusCode status = UA_Server_run(open62541_server_, &is_running_);
       if (status != UA_STATUSCODE_GOOD) {
-        logger_->error(
-            "ERROR:{} Failed to start open62541 server thread!", status);
+        logger_->error("ERROR:{} Failed to start open62541 server thread!",
+            UA_StatusCode_name(status));
       }
     } catch (const exception& ex) {
       logger_->critical(
