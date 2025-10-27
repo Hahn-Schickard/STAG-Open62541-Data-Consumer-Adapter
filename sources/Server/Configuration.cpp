@@ -1,6 +1,7 @@
 #include "Configuration.hpp"
 #include "HaSLL_Logger.hpp"
 #include "Historizer.hpp"
+#include "Utility.hpp"
 
 #include <HaSLL/LoggerManager.hpp>
 #include <open62541/server_config_default.h>
@@ -17,17 +18,10 @@ using namespace HaSLL;
 Configuration::Configuration()
     : logger_(LoggerManager::registerLogger("Open62541 Configuration")),
       configuration_(make_unique<UA_ServerConfig>()) {
-  try {
     memset(configuration_.get(), 0, sizeof(UA_ServerConfig));
     configuration_->logging = createHaSLL();
     auto status = UA_ServerConfig_setDefault(configuration_.get());
     checkStatusCode("While setting configuration defaults", status, true);
-  } catch (exception& ex) {
-    string error_msg =
-        "Caught exception when deserializing Configuration file: " +
-        string(ex.what());
-    throw Open62541_Config_Exception(error_msg);
-  }
 }
 
 UA_ByteString readFile(const filesystem::path& filepath) {
@@ -54,6 +48,7 @@ Configuration::Configuration(const string& filepath) : Configuration() {
 
   auto status =
       UA_ServerConfig_updateFromFile(configuration_.get(), json_config);
+  checkStatusCode("While reading configuration file " + filepath, status, true);
 
 #ifdef UA_ENABLE_HISTORIZING
   try {
