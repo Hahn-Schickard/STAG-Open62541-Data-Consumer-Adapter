@@ -109,7 +109,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
     try {
       if (auto read = callback_wrapper->readable_) {
         UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER,
-            "Calling read callback for Node &s", toString(node_id).c_str());
+            "Calling read callback for Node %s", toString(node_id).c_str());
         auto data_variant = read();
         if (toDataType(data_variant) == callback_wrapper->data_type_) {
           value->value = toUAVariant(data_variant);
@@ -135,7 +135,7 @@ UA_StatusCode NodeCallbackHandler::readNodeValue( // clang-format off
           toString(node_id).c_str(), ex.what());
       removeNodeCallbacks(node_id);
       UA_LOG_WARNING(logger_, UA_LOGCATEGORY_SERVER,
-          "Removing Node &s due to an unhandled exception",
+          "Removing Node %s due to an unhandled exception",
           toString(node_id).c_str());
       UA_Server_deleteNode(server, *node_id, true);
       status = UA_STATUSCODE_BADINTERNALERROR;
@@ -233,7 +233,7 @@ UA_StatusCode NodeCallbackHandler::callNodeMethod( // clang-format off
         if (output_size > 0) {
           if (auto call = callback_wrapper->callable_) {
             UA_LOG_TRACE(logger_, UA_LOGCATEGORY_SERVER,
-                "Calling CALL callback for Method &s",
+                "Calling CALL callback for Method %s",
                 toString(method_id).c_str());
             auto result_variant = call(args);
             auto ua_variant = toUAVariant(result_variant);
