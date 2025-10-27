@@ -5,6 +5,8 @@
 #include <open62541/plugin/historydatabase.h>
 #include <soci/soci.h>
 
+#include <filesystem>
+
 namespace open62541 {
 struct Historizer {
 
@@ -13,20 +15,7 @@ struct Historizer {
    * values
    *
    */
-  Historizer();
-
-  /**
-   * @brief Create a historizer object with custom OODD::DatabaseDriver
-   * values
-   *
-   * @param dsn - data source name
-   * @param user - username for the target database
-   * @param auth - authentication key for the target database
-   * @param request_timeout - SQL request timeout value in seconds
-   * @param log - log SQL requests
-   */
-  Historizer(const std::string& dsn, const std::string& user,
-      const std::string& auth, size_t request_timeout, bool log);
+  Historizer(const filesystem::path& config);
 
   ~Historizer();
   /**
@@ -55,6 +44,10 @@ private:
    * @param database
    */
   static void clear(UA_HistoryDatabase* database);
+
+  static bool checkTable(const std::string& name);
+
+  static std::string getIncrementedPrimaryKey();
 
   static bool isHistorized(const UA_NodeId* node_id);
 

@@ -1,19 +1,22 @@
 #ifdef UA_ENABLE_HISTORIZING
 #include "Historizer.hpp"
-#include "HaSLL/LoggerManager.hpp"
 #include "Utility.hpp"
 
-#include <chrono>
-#include <cmath>
+#include <HaSLL/LoggerManager.hpp>
 #include <date/date.h>
 #include <open62541/client_subscriptions.h>
 #include <open62541/server.h>
+
+#include <chrono>
+#include <cmath>
+
 #include <string>
 
+namespace open62541 {
 using namespace std;
 using namespace HaSLL;
+using namespace soci;
 
-namespace open62541 {
 struct DatabaseNotAvailable : runtime_error {
   DatabaseNotAvailable()
       : runtime_error("Database driver is not initialized") {}
@@ -38,25 +41,32 @@ struct NoBoundData : runtime_error {
 
 LoggerPtr Historizer::logger_ = LoggerPtr(); // NOLINT
 
-// Historizer::Historizer(OODD::DatabaseDriverPtr db) {
-//   logger_ = LoggerManager::registerTypedLogger(this);
-//   db_ = move(db);
-//   db_->create("Historized_Nodes",
-//       vector<Column>{// clang-format off
-//             Column("Node_Id", OODD::DataType::Text,
-//             ColumnConstraint::Primary_Key), Column("Last_Updated",
-//             OODD::DataType::Timestamp)
-//       }); // clang-format on
-// }
+string readConfig(const filesystem::path& config) {
+  // @todo: read configuration file to get database backend, authentication and
+  // table info
+  return "";
+}
 
-Historizer::Historizer() {}
+Historizer::Historizer(const filesystem::path& config) {
+  if (!logger_) {
+    logger_ = LoggerManager::registerTypedLogger(this);
+  }
 
-Historizer::Historizer(const string& dsn, const string& user,
-    const string& auth, size_t request_timeout, bool log) {}
+  if (!db_.is_connected()) {
+    db_ = session(readConfig(config));
+  }
+
+  if (!checkTable("Historized_Nodes")) {
+    auto table = db_.create_table("Historized_Nodes");
+    table.column("Node_ID", db_string);
+    table.column("Last_Updated", db_date)("not null");
+    table.primary_key("Historized_Nodes_pk", "Node_ID");
+  }
+}
 
 Historizer::~Historizer() {
   logger_.reset();
-  //   db_.reset();
+  db_.close();
 }
 
 template <typename... Types>
@@ -66,134 +76,156 @@ void Historizer::log(SeverityLevel level, string message, Types... args) {
   }
 }
 
-// OODD::DataType getColumnDataType(const UA_DataType* variant) {
-//   switch (variant->typeKind) {
-//   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-//     return OODD::DataType::Boolean;
-//   }
-//   // NOLINTNEXTLINE(bugprone-branch-clone)
-//   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-//     [[fallthrough]];
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-//     [[fallthrough]];
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-//     return OODD::DataType::SmallInt;
-//   }
-//   // NOLINTNEXTLINE(bugprone-branch-clone)
-//   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-//     [[fallthrough]];
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-//     return OODD::DataType::Int;
-//   }
-//   // NOLINTNEXTLINE(bugprone-branch-clone)
-//   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-//     [[fallthrough]];
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-//     // SQL does not have larger integer type than 64 bits
-//     // We will have to loose the upper most value bound
-//     [[fallthrough]];
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-//     return OODD::DataType::BigInt;
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-//     return OODD::DataType::Timestamp;
-//   }
-//   // NOLINTNEXTLINE(bugprone-branch-clone)
-//   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-//     [[fallthrough]];
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-//     return OODD::DataType::Float;
-//   }
-//   // NOLINTNEXTLINE(bugprone-branch-clone)
-//   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-//     [[fallthrough]];
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-//     [[fallthrough]];
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-//     return OODD::DataType::Text;
-//   }
-//   // NOLINTNEXTLINE(bugprone-branch-clone)
-//   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
-//     [[fallthrough]];
-//   }
-//   default: {
-//     string error_msg =
-//         "Unhandeled UA_DataType detected: " + string(variant->typeName);
-//     throw logic_error(error_msg);
-//   }
-//   }
-// }
+bool Historizer::checkTable(const string& name) {
+  indicator result;
+  auto query =
+      "SELECT 1 FROM information_schema.tables WHERE table_name = :name";
+  db_ << query, use(name), into(result);
+  if (db_.got_data()) {
+    return result != indicator::i_null;
+  } else {
+    return false;
+  }
+}
 
-// string getCurrentTimestamp() {
-//   auto timestamp = chrono::system_clock::now();
-//   return date::format("%F %T", timestamp);
-// }
+db_type toSociDataType(const UA_DataType* variant) {
+  switch (variant->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    [[fallthrough]];
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
+    return db_uint8;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    return db_int8;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    return db_int16;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    return db_uint16;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    return db_int32;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    return db_uint32;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    return db_uint64;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    return db_int64;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
+    return db_date;
+  }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    [[fallthrough]];
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    return db_double;
+  }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
+    [[fallthrough]];
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
+    [[fallthrough]];
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
+    return db_string;
+  }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
+  case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
+    [[fallthrough]];
+  }
+  default: {
+    string error_msg =
+        "Unhandeled UA_DataType detected: " + string(variant->typeName);
+    throw logic_error(error_msg);
+  }
+  }
+}
 
-// string toSanitizedString(const UA_NodeId* node_id) {
-//   return "\"" + toString(node_id) + "\"";
-// }
+// @TODO: refactor into timestamp?
+string getCurrentTimestamp() {
+  auto timestamp = chrono::system_clock::now();
+  return date::format("%F %T", timestamp);
+}
+
+string toSanitizedString(const UA_NodeId* node_id) {
+  return "\"" + toString(node_id) + "\"";
+}
 
 bool Historizer::isHistorized(const UA_NodeId* node_id) {
-  //   auto node_id_string = toString(node_id);
-  //   auto result = db_->select("Historized_Nodes",
-  //       ColumnFilter(FilterType::Equal, "Node_Id", node_id_string));
-  //   return !result.empty();
+  auto target = toString(node_id);
+  indicator result;
+  auto query = "SELECT * FROM Historized_Nodes WHERE Node_Id = :target";
+  db_ << query, into(result), use(target);
+  if (db_.got_data()) {
+    return result != indicator::i_null;
+  } else {
+    return false;
+  }
+}
+
+string Historizer::getIncrementedPrimaryKey() {
+  auto backend = db_.get_backend_name();
+
+  if (backend == "mysql") {
+    return "BIGINT AUTO_INCREMENT";
+  } else if (backend == "postgresql") {
+    return "BIGSERIAL";
+  } else {
+    throw runtime_error("Unsupported database backend: " + backend);
+  }
 }
 
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId node_id, const UA_DataType* type) {
-  //   try {
-  //     if (db_) {
-  //       if (isHistorized(&node_id)) {
-  //         db_->update("Historized_Nodes",
-  //             ColumnFilter(FilterType::Equal, "Node_Id", toString(&node_id)),
-  //             ColumnValue("Last_Updated", getCurrentTimestamp()));
-  //       } else {
-  //         db_->insert("Historized_Nodes",
-  //             vector<ColumnValue>{// clang-format off
-  //               ColumnValue("Node_Id", toString(&node_id)), // column value
-  //               is automatically sanitized ColumnValue("Last_Updated",
-  //               getCurrentTimestamp())
-  //           }); // clang-format on
-  //       }
-  //       auto node_id_string = toSanitizedString(&node_id);
-  //       db_->create(node_id_string,
-  //           vector<Column>{// clang-format off
-  //             Column("Index", OODD::DataType::Int,
-  //             ColumnConstraint::Generated_Primary_Key),
-  //             Column("Server_Timestamp", OODD::DataType::Timestamp),
-  //             Column("Source_Timestamp", OODD::DataType::Timestamp),
-  //             Column("Value", getColumnDataType(type))
-  //           }); // clang-format on
+  auto target = toString(&node_id);
+  try {
+    if (db_.is_connected()) {
+      auto timestamp = getCurrentTimestamp();
+      if (isHistorized(&node_id)) {
+        auto update = "UPDATE Historized_Nodes Last_Updated = :timestamp WHERE "
+                      "Node_ID = :target";
+        db_ << update, use(target), use(timestamp);
+      } else {
+        auto insert = "INSERT INTO Historized_Nodes(Node_Id, Last_Updated) "
+                      "VALUES(:target, :timestamp)";
+      }
+      auto create = "CREATE TABLE " + toSanitizedString(&node_id) + " (Index " +
+          getIncrementedPrimaryKey() +
+          " PRIMARY KEY, "
+          "Server_Timestamp TIMESTAMP NOT NULL, "
+          "Source_Timestamp TIMESTAMP NOT NULL, "
+          "Value :value_type NOT NULL)";
+      auto value_type = toSociDataType(
+          type); // @TODO: check if this binds to correct data type
+      db_ << create, use(value_type);
 
-  //       auto monitor_request =
-  //       UA_MonitoredItemCreateRequest_default(node_id);
-  //       // NOLINTNEXTLINE(readability-magic-numbers)
-  //       monitor_request.requestedParameters.samplingInterval = 1000000.0;
-  //       monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
-  //       auto result = UA_Server_createDataChangeMonitoredItem(server,
-  //           UA_TIMESTAMPSTORETURN_BOTH, monitor_request, nullptr,
-  //           &Historizer::dataChanged);
-  //       return result.statusCode;
-  //     } else {
-  //       log(SeverityLevel::Critical, "Database Driver is not initialized");
-  //       return UA_STATUSCODE_BADDATAUNAVAILABLE;
-  //     }
-  //   } catch (exception& ex) {
-  //     log(SeverityLevel::Critical,
-  //         "An unhandled exception occurred while trying to register {} node.
-  //         " "Exception: {}", toString(&node_id), ex.what());
-  //     return UA_STATUSCODE_BADUNEXPECTEDERROR;
-  //   }
-  return UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
+      auto monitor_request = UA_MonitoredItemCreateRequest_default(node_id);
+      // NOLINTNEXTLINE(readability-magic-numbers)
+      monitor_request.requestedParameters.samplingInterval = 1000000.0;
+      monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
+      auto result = UA_Server_createDataChangeMonitoredItem(server,
+          UA_TIMESTAMPSTORETURN_BOTH, monitor_request, nullptr,
+          &Historizer::dataChanged);
+      return result.statusCode;
+    } else {
+      log(SeverityLevel::Critical, "Database Driver is not initialized");
+      return UA_STATUSCODE_BADDATAUNAVAILABLE;
+    }
+  } catch (const exception& ex) {
+    log(SeverityLevel::Critical,
+        "An unhandled exception occurred while trying to register {} node. "
+        "Exception: {}",
+        target, ex.what());
+    return UA_STATUSCODE_BADUNEXPECTEDERROR;
+  }
 }
 
 UA_HistoryDatabase Historizer::createDatabase() {
