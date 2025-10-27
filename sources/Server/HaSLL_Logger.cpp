@@ -159,10 +159,10 @@ void destroyHaSLL(struct UA_Logger* logger) {
 }
 
 UA_Logger* createHaSLL() {
-  UA_Logger* logger = (UA_Logger*)UA_malloc(sizeof(UA_Logger));
-  if (!logger) {
-    return NULL;
+  auto* logger = (UA_Logger*)UA_malloc(sizeof(UA_Logger));
+  if (logger == nullptr) {
+    return nullptr;
   }
-  *logger = {logToHaSLL, NULL, destroyHaSLL};
+  *logger = {logToHaSLL, nullptr, destroyHaSLL};
   return logger;
 }
