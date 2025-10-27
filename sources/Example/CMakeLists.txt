@@ -18,6 +18,7 @@ target_link_libraries(${TARGET}
     PRIVATE 
         ${PROJECT_NAME}_Adapter
         Information_Model_Mocks::Information_Model_Mocks
+        Variant_Visitor::Variant_Visitor
 )
 
 add_custom_command(TARGET ${TARGET} POST_BUILD 
