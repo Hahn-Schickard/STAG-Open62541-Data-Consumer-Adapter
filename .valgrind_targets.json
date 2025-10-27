@@ -1,4 +1,6 @@
 {
-    "build/sources/Example/Open62541_Data_Consumer_Adapter_Example": [],
+    "build/sources/Example/Open62541_Data_Consumer_Adapter_Example": [
+        "2"
+    ],
     "build/unit_tests/Unit_Tests_Runner": []
 }
