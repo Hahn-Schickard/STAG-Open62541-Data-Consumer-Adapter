@@ -283,11 +283,12 @@ UA_StatusCode NodeBuilder::addReadableNode(const MetaInfoPtr& meta_info,
   return status;
 }
 
-UA_StatusCode addObservableNode(const Information_Model::ElementPtr& meta_info,
+UA_StatusCode NodeBuilder::addObservableNode(
+    const Information_Model::MetaInfoPtr& meta_info,
     const Information_Model::ObservablePtr& metric,
     const UA_NodeId& parent_id) {
-
   // convert to readable
+  return UA_STATUSCODE_BAD;
 }
 
 UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
