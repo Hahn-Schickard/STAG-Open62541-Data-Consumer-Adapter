@@ -15,7 +15,12 @@
 namespace open62541 {
 using namespace std;
 using namespace HaSLL;
-using namespace soci;
+using namespace pqxx;
+
+struct ConnectionUnavailable : runtime_error {
+  ConnectionUnavailable()
+      : runtime_error("Connection information does not exist") {}
+};
 
 struct DatabaseNotAvailable : runtime_error {
   DatabaseNotAvailable()
@@ -52,22 +57,22 @@ Historizer::Historizer(const filesystem::path& config) {
     logger_ = LoggerManager::registerTypedLogger(this);
   }
 
-  if (!db_.is_connected()) {
-    db_ = session(readConfig(config));
+  if (!connection_info_.empty()) {
+    connection_info_ = readConfig(config);
   }
 
   if (!checkTable("Historized_Nodes")) {
-    auto table = db_.create_table("Historized_Nodes");
-    table.column("Node_ID", db_string);
-    table.column("Last_Updated", db_date)("not null");
-    table.primary_key("Historized_Nodes_pk", "Node_ID");
+    auto session = connect();
+    work transaction(session);
+    transaction.exec("CREATE TABLE Historized_Nodes("
+                     "Node_ID TEXT PRIMARY KEY NOT NULL, "
+                     "Last_Updated TIMESTAMP(6) NOT NULL"
+                     ");");
+    transaction.commit();
   }
 }
 
-Historizer::~Historizer() {
-  logger_.reset();
-  db_.close();
-}
+Historizer::~Historizer() { logger_.reset(); }
 
 template <typename... Types>
 void Historizer::log(SeverityLevel level, string message, Types... args) {
@@ -76,66 +81,68 @@ void Historizer::log(SeverityLevel level, string message, Types... args) {
   }
 }
 
-bool Historizer::checkTable(const string& name) {
-  indicator result;
-  auto query =
-      "SELECT 1 FROM information_schema.tables WHERE table_name = :name";
-  db_ << query, use(name), into(result);
-  if (db_.got_data()) {
-    return result != indicator::i_null;
+pqxx::connection Historizer::connect() {
+  if (!connection_info_.empty()) {
+    return connection(connection_info_);
   } else {
-    return false;
+    throw ConnectionUnavailable();
   }
 }
 
-db_type toSociDataType(const UA_DataType* variant) {
+bool Historizer::checkTable(const string& name) {
+  auto session = connect();
+  work transaction(session);
+  auto result = transaction.exec(
+      "SELECT 1 FROM information_schema.tables WHERE table_name = " + name);
+  return !result.empty();
+}
+
+string toPostgreDataType(const UA_DataType* variant) {
   switch (variant->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
+    return "BOOLEAN";
+  }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
     [[fallthrough]];
   }
-  case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-    return db_uint8;
-  }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    return db_int8;
+    [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    return db_int16;
+    return "SMALLINT";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    return db_uint16;
+    [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    return db_int32;
+    return "INTEGER";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    return db_uint32;
+    [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    return db_uint64;
+    [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    return db_int64;
+    return "BIGINT";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    return db_date;
+    return "TIMESTAMP(6)";
   }
-  // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-    [[fallthrough]];
+    return "REAL";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    return db_double;
+    return "DOUBLE PRECISION";
   }
-  // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-    [[fallthrough]];
+    return "BYTEA";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
     [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-    return db_string;
+    return "TEXT";
   }
   // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
@@ -149,7 +156,6 @@ db_type toSociDataType(const UA_DataType* variant) {
   }
 }
 
-// @TODO: refactor into timestamp?
 string getCurrentTimestamp() {
   auto timestamp = chrono::system_clock::now();
   return date::format("%F %T", timestamp);
@@ -160,65 +166,60 @@ string toSanitizedString(const UA_NodeId* node_id) {
 }
 
 bool Historizer::isHistorized(const UA_NodeId* node_id) {
-  auto target = toString(node_id);
-  indicator result;
-  auto query = "SELECT * FROM Historized_Nodes WHERE Node_Id = :target";
-  db_ << query, into(result), use(target);
-  if (db_.got_data()) {
-    return result != indicator::i_null;
-  } else {
-    return false;
-  }
+  auto session = connect();
+  work transaction(session);
+  auto result = transaction.exec(
+      "SELECT 1 FROM Historized_Nodes WHERE Node_Id = " + toString(node_id));
+  return !result.empty();
 }
 
-string Historizer::getIncrementedPrimaryKey() {
-  auto backend = db_.get_backend_name();
-
-  if (backend == "mysql") {
-    return "BIGINT AUTO_INCREMENT";
-  } else if (backend == "postgresql") {
-    return "BIGSERIAL";
-  } else {
-    throw runtime_error("Unsupported database backend: " + backend);
-  }
+void updateHistorized(work* transaction, const string& target_node_id) {
+  auto timestamp = getCurrentTimestamp();
+  transaction->exec("UPDATE Historized_Nodes Last_Updated = $2 WHERE "
+                    "Node_ID = $1",
+      {target_node_id, timestamp});
+  transaction->commit();
 }
 
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId node_id, const UA_DataType* type) {
   auto target = toString(&node_id);
   try {
-    if (db_.is_connected()) {
-      auto timestamp = getCurrentTimestamp();
-      if (isHistorized(&node_id)) {
-        auto update = "UPDATE Historized_Nodes Last_Updated = :timestamp WHERE "
-                      "Node_ID = :target";
-        db_ << update, use(target), use(timestamp);
-      } else {
-        auto insert = "INSERT INTO Historized_Nodes(Node_Id, Last_Updated) "
-                      "VALUES(:target, :timestamp)";
-      }
-      auto create = "CREATE TABLE " + toSanitizedString(&node_id) + " (Index " +
-          getIncrementedPrimaryKey() +
-          " PRIMARY KEY, "
-          "Server_Timestamp TIMESTAMP NOT NULL, "
-          "Source_Timestamp TIMESTAMP NOT NULL, "
-          "Value :value_type NOT NULL)";
-      auto value_type = toSociDataType(
-          type); // @TODO: check if this binds to correct data type
-      db_ << create, use(value_type);
-
-      auto monitor_request = UA_MonitoredItemCreateRequest_default(node_id);
-      // NOLINTNEXTLINE(readability-magic-numbers)
-      monitor_request.requestedParameters.samplingInterval = 1000000.0;
-      monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
-      auto result = UA_Server_createDataChangeMonitoredItem(server,
-          UA_TIMESTAMPSTORETURN_BOTH, monitor_request, nullptr,
-          &Historizer::dataChanged);
-      return result.statusCode;
+    auto session = connect();
+    work transaction(session);
+    if (isHistorized(&node_id)) {
+      updateHistorized(&transaction, target);
     } else {
-      log(SeverityLevel::Critical, "Database Driver is not initialized");
-      return UA_STATUSCODE_BADDATAUNAVAILABLE;
+      auto timestamp = getCurrentTimestamp();
+      transaction.exec("INSERT INTO Historized_Nodes(Node_Id, Last_Updated)  "
+                       "VALUES($1, $2)",
+          {target, timestamp});
     }
+    transaction.commit();
+
+    auto table_name = toSanitizedString(&node_id);
+    auto value_type = toPostgreDataType(type);
+    transaction.exec("CREATE TABLE IF NOT EXISTS $1("
+                     "Index BIGSERIAL PRIMARY KEY, "
+                     "Server_Timestamp TIMESTAMP NOT NULL, "
+                     "Source_Timestamp TIMESTAMP NOT NULL, "
+                     "Value $2 NOT NULL);",
+        {table_name, value_type}); // if table exists, check value data type
+    transaction.commit();
+
+    auto monitor_request = UA_MonitoredItemCreateRequest_default(node_id);
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    monitor_request.requestedParameters.samplingInterval = 1000000.0;
+    monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
+    auto result = UA_Server_createDataChangeMonitoredItem(server,
+        UA_TIMESTAMPSTORETURN_BOTH, monitor_request, nullptr,
+        &Historizer::dataChanged);
+    return result.statusCode;
+  } catch (const ConnectionUnavailable& ex) {
+    log(SeverityLevel::Critical,
+        "Could not read {} value. Database connection is not available",
+        target);
+    return UA_STATUSCODE_BADDATAUNAVAILABLE;
   } catch (const exception& ex) {
     log(SeverityLevel::Critical,
         "An unhandled exception occurred while trying to register {} node. "
@@ -270,174 +271,176 @@ string getTimestamp(UA_DateTime timestamp) {
   return result;
 }
 
-// OODD::DataValue getNodeValue(UA_Variant variant) {
-//   switch (variant.type->typeKind) {
-//   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-//     auto value = *((bool*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-//     // NOLINTNEXTLINE(bugprone-signed-char-misuse,cert-str34-c)
-//     auto value = (intmax_t) * ((UA_SByte*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-//     auto value = (intmax_t) * ((UA_Int16*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-//     auto value = (intmax_t) * ((UA_Int32*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-//     auto value = (intmax_t) * ((UA_Int64*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-//     auto value = (uintmax_t) * ((UA_Byte*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-//     auto value = (uintmax_t) * ((UA_UInt16*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-//     auto value = (uintmax_t) * ((UA_UInt32*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-//     auto value = (uintmax_t) * ((UA_UInt64*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-//     auto value = getTimestamp(*((UA_DateTime*)(variant.data)));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-//     const auto* status_code =
-//         UA_StatusCode_name(*((UA_StatusCode*)(variant.data)));
-//     auto value = string(status_code);
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-//     auto value = *((UA_Float*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-//     auto value = *((UA_Double*)(variant.data));
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-//     auto* byte_string = (UA_ByteString*)(variant.data);
-//     auto value = vector<uint8_t>(
-//         byte_string->data, byte_string->data + byte_string->length);
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-//     auto* ua_string = (UA_String*)(variant.data);
-//     auto value = string((char*)ua_string->data, ua_string->length);
-//     return OODD::DataValue(value);
-//   }
-//   case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
-//     [[fallthrough]];
-//   }
-//   default: {
-//     string error_msg =
-//         "Unhandled UA_Variant type detected: " +
-//         string(variant.type->typeName);
-//     throw logic_error(error_msg);
-//   }
-//   }
-// }
+void addNodeValue(params* values, UA_Variant variant) {
+  switch (variant.type->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
+    auto value = *((bool*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    auto value = *((UA_SByte*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    auto value = *((UA_Int16*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    auto value = *((UA_Int32*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    auto value = *((UA_Int64*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    auto value = *((UA_Byte*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    auto value = *((UA_UInt16*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    auto value = *((UA_UInt32*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    auto value = *((UA_UInt64*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
+    auto value = getTimestamp(*((UA_DateTime*)(variant.data)));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
+    const auto* status_code =
+        UA_StatusCode_name(*((UA_StatusCode*)(variant.data)));
+    auto value = string(status_code);
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    auto value = *((UA_Float*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    auto value = *((UA_Double*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
+    auto* byte_string = (UA_ByteString*)(variant.data);
+    values->append(binary_cast(byte_string->data, byte_string->length));
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
+    auto* ua_string = (UA_String*)(variant.data);
+    auto value = string((char*)ua_string->data, ua_string->length);
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
+    [[fallthrough]];
+  }
+  default: {
+    string error_msg =
+        "Unhandled UA_Variant type detected: " + string(variant.type->typeName);
+    throw logic_error(error_msg);
+  }
+  }
+}
 
 void Historizer::setValue(UA_Server* /*server*/, void* /*hdb_context*/,
     const UA_NodeId* /*session_id*/, void* /*session_context*/,
     const UA_NodeId* node_id, UA_Boolean historizing,
     const UA_DataValue* value) {
-  //   if (db_) {
-  //     if (historizing) {
-  //       if (value != nullptr) {
-  //         try {
-  //           string server_time;
-  //           if (value->hasServerTimestamp) {
-  //             server_time = getTimestamp(value->serverTimestamp);
-  //           }
-  //           string source_time;
-  //           if (value->hasSourceTimestamp) {
-  //             source_time = getTimestamp(value->sourceTimestamp);
-  //           }
-  //           auto data = getNodeValue(value->value); // get data
-  //           auto node_id_string = toSanitizedString(node_id);
-  //           db_->insert(node_id_string,
-  //               vector<ColumnValue>{// clang-format off
-  //               ColumnValue("Source_Timestamp", source_time),
-  //               ColumnValue("Server_Timestamp", server_time),
-  //               ColumnValue("Value", data)
-  //             }); // clang-format on
-  //           db_->update("Historized_Nodes",
-  //               ColumnFilter(FilterType::Equal, "Node_Id",
-  //               toString(node_id)), ColumnValue("Last_Updated",
-  //               getCurrentTimestamp()));
-  //         } catch (exception& ex) {
-  //           log(SeverityLevel::Error,
-  //               "Failed to historize Node {} value due to an exception. "
-  //               "Exception: {}",
-  //               toString(node_id), ex.what());
-  //         }
-  //       } else {
-  //         log(SeverityLevel::Error,
-  //             "Failed to historize Node {} value. No data provided.",
-  //             toString(node_id));
-  //       }
-  //     } else {
-  //       log(SeverityLevel::Info, "Node {} is not configured for
-  //       historization",
-  //           toString(node_id));
-  //     }
-  //   } else {
-  //     log(SeverityLevel::Critical,
-  //         "Tried to historize Node {}, but internal database is unavailable",
-  //         toString(node_id));
-  //   }
+  auto target = toString(node_id);
+  if (!historizing) {
+    log(SeverityLevel::Info, "Node {} is not configured for historization ",
+        target);
+    return;
+  }
+
+  if (value == nullptr) {
+    log(SeverityLevel::Error,
+        "Failed to historize Node {} value. No data provided.", target);
+    return;
+  }
+
+  try {
+    auto session = connect();
+    work transaction(session);
+
+    string source_time;
+    if (value->hasSourceTimestamp) {
+      source_time = getTimestamp(value->sourceTimestamp);
+    }
+    string server_time;
+    if (value->hasServerTimestamp) {
+      server_time = getTimestamp(value->serverTimestamp);
+    }
+    auto node_id_string = toSanitizedString(node_id);
+    params values{node_id_string, source_time, server_time};
+    addNodeValue(&values, value->value);
+
+    transaction.exec(
+        "INSERT INTO $1(Source_Timestamp, Server_Timestamp, Value) "
+        "VALUES($2, $3, 4)",
+        values);
+    transaction.commit();
+
+    updateHistorized(&transaction, target);
+  } catch (const ConnectionUnavailable& ex) {
+    log(SeverityLevel::Critical,
+        "Could not read {} value. Database connection is not available",
+        target);
+  } catch (exception& ex) {
+    log(SeverityLevel::Error,
+        "Failed to historize Node {} value due to an exception. "
+        "Exception: {}",
+        toString(node_id), ex.what());
+  }
 }
 
-void Historizer::dataChanged(UA_Server* server,
-    UA_UInt32
-    /*monitored_item_id*/,
+void Historizer::dataChanged(UA_Server* server, UA_UInt32 /*monitored_item_id*/,
     void* /*monitored_item_context*/, const UA_NodeId* node_id,
     void* /*node_context*/, UA_UInt32 attribute_id, const UA_DataValue* value) {
-  //   if (db_) {
-  //     UA_NodeId* session_id =
-  //         nullptr; // obtain session id, its set to nullptr in the
-  //                  // example code, so might be imposable to do so
-  //     UA_Boolean historize = false;
-  //     if ((attribute_id & UA_ATTRIBUTEID_HISTORIZING) != 0) {
-  //       historize = true;
-  //     }
+  // obtain session id, its set to nullptr in the
+  // example code, so might be imposable to do so
+  UA_NodeId* session_id = nullptr;
+  UA_Boolean historize = false;
+  if ((attribute_id & UA_ATTRIBUTEID_HISTORIZING) != 0) {
+    historize = true;
+  }
 
-  //     setValue(server, nullptr, session_id, nullptr, node_id, historize,
-  //     value);
-  //   } else {
-  //     log(SeverityLevel::Critical,
-  //         "Tried to historize Node {}, but internal database is unavailable",
-  //         toString(node_id));
-  //   }
+  setValue(server, nullptr, session_id, nullptr, node_id, historize, value);
 }
 
-vector<string> setColumnNames(UA_TimestampsToReturn timestamps_to_return) {
-  vector<string> result;
+string setColumnNames(UA_TimestampsToReturn timestamps_to_return) {
+  string result;
   switch (timestamps_to_return) {
   case UA_TIMESTAMPSTORETURN_SOURCE: {
-    result.emplace_back("Source_Timestamp");
+    result = "Source_Timestamp, ";
     break;
   }
   case UA_TIMESTAMPSTORETURN_SERVER: {
-    result.emplace_back("Server_Timestamp");
+    result = "Server_Timestamp, ";
     break;
   }
   case UA_TIMESTAMPSTORETURN_BOTH: {
-    result.emplace_back("Source_Timestamp");
-    result.emplace_back("Server_Timestamp");
+    result = "Source_Timestamp, Server_Timestamp, ";
     break;
   }
   case UA_TIMESTAMPSTORETURN_NEITHER:
@@ -446,63 +449,62 @@ vector<string> setColumnNames(UA_TimestampsToReturn timestamps_to_return) {
     break;
   }
   }
-  result.emplace_back("Value");
+  result += "Value";
 
   return result;
 }
 
-// vector<ColumnFilter> setColumnFilters(
-//     UA_Boolean include_bounds, UA_DateTime start_time, UA_DateTime end_time)
-//     {
-//   vector<ColumnFilter> result;
+string setColumnFilters(
+    UA_Boolean include_bounds, UA_DateTime start_time, UA_DateTime end_time) {
+  UA_DateTime start, end;
+  if (start_time < end_time) {
+    start = start_time;
+    end = end_time;
+  } else { // set reverse order filters
+    start = end_time;
+    end = start_time;
+  }
 
-//   FilterType start_filter, end_filter;
-//   if (include_bounds) {
-//     start_filter = FilterType::Greater_Or_Equal;
-//     end_filter = FilterType::Less_Or_Equal;
-//   } else {
-//     start_filter = FilterType::Greater;
-//     end_filter = FilterType::Less;
-//   }
+  string lower_filter = ">";
+  string upper_filter = "<";
+  if (include_bounds) {
+    lower_filter += "=";
+    upper_filter += "=";
+  }
 
-//   UA_DateTime start, end;
-//   if (start_time < end_time) {
-//     start = start_time;
-//     end = end_time;
-//   } else { // set reverse order filters
-//     start = end_time;
-//     end = start_time;
-//   }
+  string result = "WHERE";
+  if (start > 0) {
+    result += " Source_Timestamp " + lower_filter + getTimestamp(start);
+    if (end > 0) {
+      result += " AND ";
+    }
+  }
+  if (end > 0) {
+    result += " Source_Timestamp " + upper_filter + getTimestamp(end);
+  }
 
-//   if (start > 0) {
-//     // if start time is equal DateTime.MinValue, then there is no start
-//     filter result.emplace_back(
-//         start_filter, "Source_Timestamp", getTimestamp(start));
-//   }
-//   if (end > 0) {
-//     // if end time is equal DateTime.MinValue, then there is no end filter
-//     result.emplace_back(end_filter, "Source_Timestamp", getTimestamp(end));
-//   }
+  return result != "WHERE" ? result : "";
+}
 
-//   return result;
-// }
+string setColumnFilters(UA_Boolean include_bounds, UA_DateTime start_time,
+    UA_DateTime end_time, const UA_ByteString* continuation_point) {
+  auto result = setColumnFilters(include_bounds, start_time, end_time);
 
-// vector<ColumnFilter> setColumnFilters(UA_Boolean include_bounds,
-//     UA_DateTime start_time, UA_DateTime end_time,
-//     const UA_ByteString* continuation_point) {
-//   vector<ColumnFilter> result =
-//       setColumnFilters(include_bounds, start_time, end_time);
+  if (continuation_point != nullptr) {
+    auto continuation_index =
+        string((char*)continuation_point->data, continuation_point->length);
+    if (!continuation_index.empty()) {
+      if (!result.empty()) {
+        result += " AND";
+      } else {
+        result = "WHERE";
+      }
+      result += "Index > " + continuation_index;
+    }
+  }
 
-//   if (continuation_point != nullptr) {
-//     auto continuation_index =
-//         string((char*)continuation_point->data, continuation_point->length);
-//     if (!continuation_index.empty()) {
-//       result.emplace_back(FilterType::Greater, "Index", continuation_index);
-//     }
-//   }
-
-//   return result;
-// }
+  return result;
+}
 
 UA_StatusCode appendUADataValue(UA_HistoryData* result,
     UA_DataValue* data_points, size_t data_points_size) {
@@ -528,81 +530,128 @@ UA_StatusCode appendUADataValue(UA_HistoryData* result,
   }
 }
 
-// UA_Variant toUAVariant(const OODD::DataValue& data) {
-//   UA_Variant result;
-//   UA_Variant_init(&result);
-//   match(
-//       data, // clang-format off
-//       [&result](bool value) {
-//         UA_Variant_setScalarCopy(&result, &value,
-//         &UA_TYPES[UA_TYPES_BOOLEAN]);
-//       },
-//       [&result](uintmax_t value) {
-//         UA_Variant_setScalarCopy(&result, &value,
-//         &UA_TYPES[UA_TYPES_uintmax]);
-//       },
-//       [&result](intmax_t value) {
-//         UA_Variant_setScalarCopy(&result, &value,
-//         &UA_TYPES[UA_TYPES_intmax]);
-//       },
-//       [&result](float value) {
-//         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_FLOAT]);
-//       },
-//       [&result](double value) {
-//         UA_Variant_setScalarCopy(&result, &value,
-//         &UA_TYPES[UA_TYPES_DOUBLE]);
-//       },
-//       [&result](const string& cpp_string) {
-//         UA_String value = UA_String_fromChars(cpp_string.c_str());
-//         UA_Variant_setScalarCopy(&result, &value,
-//         &UA_TYPES[UA_TYPES_STRING]); UA_String_clear(&value); // clear
-//         original content, since a copy is already within the variant
-//       },
-//       [&result](const vector<uint8_t>& opaque) {
-//          UA_ByteString value;
-//          value.length = opaque.size();
-//          value.data = (UA_Byte*)malloc(value.length);
-//          memcpy(value.data, opaque.data(), value.length);
-//          UA_Variant_setScalarCopy(&result, &value,
-//          &UA_TYPES[UA_TYPES_BYTESTRING]); UA_String_clear(&value); //
-//          UA_ByteString is an alias for UA_String, so we clear it the same way
-//       }
-//       ); // clang-format on
-//   return result;
-// }
+UA_DateTime toUaDateTime(const string& data) {
+  using namespace date;
+  using namespace chrono;
 
-// UA_DateTime toUADateTime(OODD::DataValue data) {
-//   if (holds_alternative<string>(data)) {
-//     using namespace date;
-//     using namespace chrono;
+  istringstream string_stream{data};
+  system_clock::time_point time_point;
+  string_stream >> parse("%F %T", time_point);
 
-//     istringstream string_stream{get<string>(data)};
-//     system_clock::time_point time_point;
-//     string_stream >> parse("%F %T", time_point);
+  UA_DateTimeStruct calendar_time;
+  auto day_point = floor<days>(time_point);
+  auto calender_date = year_month_day{day_point};
+  // NOLINTNEXTLINE(bugprone-narrowing-conversions)
+  calendar_time.year = int{calender_date.year()};
+  calendar_time.month = unsigned{calender_date.month()};
+  calendar_time.day = unsigned{calender_date.day()};
 
-//     UA_DateTimeStruct calendar_time;
-//     auto day_point = floor<days>(time_point);
-//     auto calender_date = year_month_day{day_point};
-//     // NOLINTNEXTLINE(bugprone-narrowing-conversions)
-//     calendar_time.year = int{calender_date.year()};
-//     calendar_time.month = unsigned{calender_date.month()};
-//     calendar_time.day = unsigned{calender_date.day()};
+  auto day_time = hh_mm_ss{time_point - day_point};
+  calendar_time.hour = day_time.hours().count();
+  calendar_time.min = day_time.minutes().count();
+  calendar_time.sec = day_time.seconds().count();
+  calendar_time.milliSec = floor<milliseconds>(day_time.seconds()).count();
+  calendar_time.microSec = floor<microseconds>(day_time.seconds()).count();
+  calendar_time.nanoSec = floor<nanoseconds>(day_time.seconds()).count();
 
-//     auto day_time = hh_mm_ss{time_point - day_point};
-//     calendar_time.hour = day_time.hours().count();
-//     calendar_time.min = day_time.minutes().count();
-//     calendar_time.sec = day_time.seconds().count();
-//     calendar_time.milliSec = floor<milliseconds>(day_time.seconds()).count();
-//     calendar_time.microSec = floor<microseconds>(day_time.seconds()).count();
-//     calendar_time.nanoSec = floor<nanoseconds>(day_time.seconds()).count();
+  return UA_DateTime_fromStruct(calendar_time);
+}
 
-//     return UA_DateTime_fromStruct(calendar_time);
-//   } else {
-//     throw domain_error("OODD::DataValue can not be converted into
-//         UA_DateTime."
-//                     "It does not contain a DateTime string.");
-//   }
-// }
+// @TODO: switch to Postgre data type?
+UA_Variant toUaVariant(const field& data, UA_DataTypeKind type) {
+  UA_Variant result;
+  UA_Variant_init(&result);
+  switch (type) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
+    auto value = data.as<bool>();
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    auto value = data.as<uint8_t>();
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_BYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    auto value = data.as<int8_t>();
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_SBYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    auto value = data.as<uint16_t>();
+    UA_Variant_setScalarCopy(
+        &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    auto value = data.as<int16_t>();
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_INT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    auto value = data.as<uint32_t>();
+    UA_Variant_setScalarCopy(
+        &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    auto value = data.as<int32_t>();
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_INT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    auto value = data.as<uint64_t>();
+    UA_Variant_setScalarCopy(
+        &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    auto value = data.as<int64_t>();
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_INT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    auto value = data.as<float>();
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_FLOAT]);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    auto value = data.as<double>();
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
+    auto timestamp = data.as<string>();
+    auto value = toUaDateTime(timestamp);
+    UA_Variant_setScalarCopy(
+        &result, &value, &UA_TYPES[UA_DATATYPEKIND_DATETIME]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
+    auto opaque = binarystring(data);
+    UA_ByteString value;
+    value.length = opaque.size();
+    value.data = (UA_Byte*)malloc(value.length);
+    memcpy(value.data, opaque.bytes(), value.length);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BYTESTRING]);
+    UA_String_clear(&value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
+    [[fallthrough]];
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
+    auto cpp_string = data.as<string>();
+    UA_String value = UA_String_fromChars(cpp_string.c_str());
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_STRING]);
+    UA_String_clear(&value);
+    break;
+  }
+  default: {
+    throw logic_error("Unhandled UA Data Type " + to_string(type));
+  }
+  }
+
+  return result;
+}
 
 // UA_StatusCode expandHistoryResult(UA_HistoryData* result, Rows rows) {
 //   auto* data =
@@ -658,79 +707,79 @@ UA_StatusCode appendUADataValue(UA_HistoryData* result,
  or
  * a future result for async select statements
  */
-// UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
-//   if (holds_alternative<string>(last_row[0].value())) {
-//     auto source_timestamp =
-//         get<string>(last_row[0].value()); // this SHOULD be the index column
-//     UA_ByteString* result = UA_ByteString_new(); // should it be on heap?
-//     auto status = UA_ByteString_allocBuffer(result, source_timestamp.size());
-//     if (status == UA_STATUSCODE_GOOD) {
-//       memcpy(result->data, source_timestamp.c_str(),
-//       source_timestamp.size());
-//     } else {
-//       throw OutOfMemory();
-//     }
-//     return result;
-//   } else {
-//     throw BadContinuationPoint();
-//   }
-// }
+UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
+  if (holds_alternative<string>(last_row[0].value())) {
+    auto source_timestamp =
+        get<string>(last_row[0].value()); // this SHOULD be the index column
+    UA_ByteString* result = UA_ByteString_new(); // should it be on heap?
+    auto status = UA_ByteString_allocBuffer(result, source_timestamp.size());
+    if (status == UA_STATUSCODE_GOOD) {
+      memcpy(result->data, source_timestamp.c_str(), source_timestamp.size());
+    } else {
+      throw OutOfMemory();
+    }
+    return result;
+  } else {
+    throw BadContinuationPoint();
+  }
+}
 
-std::vector<std::string> Historizer::readHistory(
+struct ResultType {
+  string server_timestamp;
+  string source_timestamp;
+  UA_Variant value;
+};
+
+vector<ResultType> Historizer::readHistory(
     const UA_ReadRawModifiedDetails* history_read_details,
     UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestamps_to_return,
     UA_NodeId node_id, const UA_ByteString* continuation_point_in,
     [[maybe_unused]] UA_ByteString* continuation_point_out) { // NOLINT
-  //   if (db_) {
-  //     auto columns = setColumnNames(timestamps_to_return);
-  //     auto filters = setColumnFilters(history_read_details->returnBounds,
-  //         history_read_details->startTime, history_read_details->endTime,
-  //         continuation_point_in);
 
-  //     auto read_limit = history_read_details->numValuesPerNode;
-  //     bool reverse_order = false;
-  //     if (((history_read_details->startTime == 0) &&
-  //             ((read_limit != 0) && history_read_details->endTime != 0)) ||
-  //         (history_read_details->startTime > history_read_details->endTime))
-  //         {
-  //       // if start time was not specified (start time is equal to
-  //       // DateTime.MinValue), but end time AND read_limit is, OR end time is
-  //       // less than start time, than the historical values should be in
-  //       reverse
-  //           // order (freshest values first, oldest ones last)
-  //           reverse_order = true;
-  //     }
+  auto columns = setColumnNames(timestamps_to_return);
+  auto filters = setColumnFilters(history_read_details->returnBounds,
+      history_read_details->startTime, history_read_details->endTime,
+      continuation_point_in);
 
-  //     Rows results;
-  //     if (read_limit != 0) { // if numValuesPerNode is zero, there is no
-  //     limit
-  //       OverrunPoint overrun_point;
-  //       /**
-  //        * @todo: use an async select request or a batch read, and check if
-  //        * timeout_hint elapsed, if it did set a continuation point
-  //        *
-  //        */
-  //       results = db_->select(toSanitizedString(&node_id), columns, filters,
-  //           history_read_details->numValuesPerNode, "Source_Timestamp",
-  //           reverse_order, &overrun_point);
-  //       if (overrun_point.hasMoreValues()) {
-  //         // continuation_point_out is read by the Client, not the Server
-  //         continuation_point_out = // NOLINT
-  //             makeContinuationPoint(overrun_point.getOverrunRecord());
-  //       }
-  //     } else {
-  //       /**
-  //        * @todo: use an async select request or a batch read, and check if
-  //        * timeout_hint elapsed, if it did set a continuation point
-  //        *
-  //        */
-  //       results = db_->select(toSanitizedString(&node_id), columns, filters,
-  //           nullopt, "Source_Timestamp", reverse_order);
-  //     }
-  //     return results;
-  //   } else {
-  //     throw DatabaseNotAvailable();
-  //   }
+  auto read_limit = history_read_details->numValuesPerNode;
+  string result_order = "ORDER BY Source_Timestamp ";
+  if (((history_read_details->startTime == 0) &&
+          ((read_limit != 0) && history_read_details->endTime != 0)) ||
+      (history_read_details->startTime > history_read_details->endTime)) {
+    // if start time was not specified (start time is equal to
+    // DateTime.MinValue), but end time AND read_limit is, OR end time is
+    // less than start time, than the historical values should be in reverse
+    // order (freshest values first, oldest ones last)
+    result_order += "DESC";
+  } else {
+    result_order += "ASC";
+  }
+
+  auto session = connect();
+  work transaction(session);
+  auto table = toSanitizedString(&node_id);
+  string query =
+      "SELECT " + columns + " FROM " + table + filters + result_order;
+
+  if (read_limit != 0) { // if numValuesPerNode is zero, there is no limit
+    query += " FETCH FIRST " + to_string(read_limit) + " ROWS ONLY";
+    /**
+     * @todo: use an async select request or a batch read, and check if
+     * timeout_hint elapsed, if it did set a continuation point
+     *
+     */
+    if (overrun_point.hasMoreValues()) {
+      // continuation_point_out is read by the Client, not the Server
+      continuation_point_out = // NOLINT
+          makeContinuationPoint(overrun_point.getOverrunRecord());
+    }
+  }
+  auto rows = transaction.exec(query);
+  vector<ResultType> results;
+  for (const auto& row : rows) {
+    ResultType result{"", "", toUaVariant(row["Value"])};
+  }
+  return results;
 }
 
 void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,

@@ -3,7 +3,7 @@
 #ifdef UA_ENABLE_HISTORIZING
 #include <HaSLL/Logger.hpp>
 #include <open62541/plugin/historydatabase.h>
-#include <soci/soci.h>
+#include <pqxx/pqxx>
 
 #include <filesystem>
 
@@ -45,9 +45,9 @@ private:
    */
   static void clear(UA_HistoryDatabase* database);
 
-  static bool checkTable(const std::string& name);
+  static pqxx::connection connect();
 
-  static std::string getIncrementedPrimaryKey();
+  static bool checkTable(const std::string& name);
 
   static bool isHistorized(const UA_NodeId* node_id);
 
@@ -83,7 +83,7 @@ private:
       void* monitored_item_context, const UA_NodeId* node_id,
       void* node_context, UA_UInt32 attribute_id, const UA_DataValue* value);
 
-  static std::vector<std::string> readHistory(
+  static std::unordered_map<std::string, UA_Variant> readHistory(
       const UA_ReadRawModifiedDetails* history_read_details,
       UA_UInt32 timeout_hint, UA_TimestampsToReturn timestamps_to_return,
       UA_NodeId node_id, const UA_ByteString* continuation_point_in,
@@ -152,7 +152,7 @@ private:
       HaSLL::SeverityLevel level, std::string message, Types... args);
 
   static HaSLL::LoggerPtr logger_;
-  static soci::session db_;
+  static std::string connection_info_;
 };
 } // namespace open62541
 #endif // UA_ENABLE_HISTORIZING

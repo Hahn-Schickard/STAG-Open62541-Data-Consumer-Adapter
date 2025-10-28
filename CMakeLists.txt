@@ -65,7 +65,7 @@ find_package(nlohmann_json REQUIRED)
 find_package(Threads REQUIRED)
 
 if(HISTORIZATION)
-        find_package(SOCI REQUIRED)
+        find_package(libpqxx REQUIRED)
         find_package(date REQUIRED)
 endif()
 #@- =========================== END OF USER CONFIGURATION ===============================

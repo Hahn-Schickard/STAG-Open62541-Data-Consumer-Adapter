@@ -30,7 +30,7 @@ if(HISTORIZATION)
     target_link_libraries(${TARGET} 
         PUBLIC #@todo change to private
             date::date
-            soci::soci
+            libpqxx::pqxx
     )
     target_compile_definitions(${TARGET} PUBLIC UA_ENABLE_HISTORIZING)
 endif()

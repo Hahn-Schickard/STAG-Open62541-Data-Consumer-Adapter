@@ -72,7 +72,7 @@ class PackageConan(ConanFile):
             self.requires("date/[~3.0]",
                           visible=False
                           )
-            self.requires("soci/[~4.1]",
+            self.requires("libpqxx/[~7.10]",
                           visible=False
                           )
         # @- END USER REQUIREMENTS
