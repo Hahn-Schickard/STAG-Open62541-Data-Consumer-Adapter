@@ -36,7 +36,6 @@ struct Historizer {
    */
   static UA_HistoryDatabase createDatabase();
 
-private:
   struct ResultType {
     int64_t index; // pqxx does not return size_t from queries
     UA_Variant value;
@@ -44,6 +43,7 @@ private:
     std::string server_timestamp;
   };
 
+private:
   /**
    * @brief Used as destructor for the UA_HistoryDatabase struct by UA_Server
    * instance

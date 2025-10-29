@@ -697,58 +697,31 @@ UA_Variant toUaVariant(const field& data,
   return result;
 }
 
-// UA_StatusCode expandHistoryResult(UA_HistoryData* result, Rows rows) {
-//   auto* data =
-//       (UA_DataValue*)UA_Array_new(rows.size(),
-//       &UA_TYPES[UA_TYPES_DATAVALUE]);
-//   if (data == nullptr) {
-//     return UA_STATUSCODE_BADOUTOFMEMORY;
-//   }
+UA_StatusCode expandHistoryResult(
+    UA_HistoryData* result, vector<Historizer::ResultType> rows) {
+  auto* data =
+      (UA_DataValue*)UA_Array_new(rows.size(), &UA_TYPES[UA_TYPES_DATAVALUE]);
+  if (data == nullptr) {
+    return UA_STATUSCODE_BADOUTOFMEMORY;
+  }
 
-//   for (size_t index = 0; index < rows.size(); ++index) {
-//     try {
-//       if (rows[index].size() == 3) {
-//         // row has Source_Timestamp, Server_Timestamp and Value columns
-//         data[index].hasSourceTimestamp = true;
-//         data[index].hasServerTimestamp = true;
-//         data[index].sourceTimestamp = toUADateTime(rows[index][0].value());
-//         data[index].serverTimestamp = toUADateTime(rows[index][1].value());
-//         data[index].value = toUAVariant(rows[index][2].value());
-//       } else if (rows[index].size() == 2) {
-//         if (rows[index][0].name() == "Source_Timestamp") {
-//           // row has Source_Timestamp column
-//           data[index].hasSourceTimestamp = true;
-//           data[index].sourceTimestamp =
-//           toUADateTime(rows[index][0].value());
-//         } else {
-//           // row has Server_Timestamp column
-//           data[index].hasServerTimestamp = true;
-//           data[index].serverTimestamp =
-//           toUADateTime(rows[index][0].value());
-//         }
-//         // remaining row column MUST be Value
-//         data[index].value = toUAVariant(rows[index][1].value());
-//       } else {
-//         // row only has Value column
-//         data[index].hasSourceTimestamp = false;
-//         data[index].hasServerTimestamp = false;
-//         data[index].value = toUAVariant(rows[index][0].value());
-//       }
-//       data[index].hasValue = true;
-//     } catch (domain_error& ex) {
-//       // failed to decode timestamps or value for UA_DataValue, hasValue
-//       was
-//       // not set to true, so it MUST be false
-//       data[index].hasStatus = true;
-//       data[index].status =
-//           UA_STATUSCODE_BADDECODINGERROR; // mark the entire data set or
-//           just
-//                                           // the failed value?
-//     }
-//   }
+  for (size_t index = 0; index < rows.size(); ++index) {
+    data[index].hasValue = true;
+    data[index].hasSourceTimestamp = false;
+    data[index].hasServerTimestamp = false;
+    data[index].value = rows[index].value;
+    if (!rows[index].source_timestamp.empty()) {
+      data[index].hasSourceTimestamp = true;
+      data[index].sourceTimestamp = toUaDateTime(rows[index].source_timestamp);
+    }
+    if (!rows[index].server_timestamp.empty()) {
+      data[index].hasServerTimestamp = true;
+      data[index].sourceTimestamp = toUaDateTime(rows[index].server_timestamp);
+    }
+  }
 
-//   return appendUADataValue(result, data, rows.size());
-// }
+  return appendUADataValue(result, data, rows.size());
+}
 
 /**
  * @todo: expand continuation_point to store either the index of next value
@@ -836,7 +809,7 @@ vector<Historizer::ResultType> Historizer::readHistory(
   }
   return results;
 }
-
+// NOLINTNEXTLINE parameter names are set by open62541
 void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
     const UA_NodeId* /*session_id*/, void* /*session_context*/,
     const UA_RequestHeader* request_header,
@@ -845,38 +818,31 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
     UA_Boolean release_continuation_points, size_t nodes_to_read_size,
     const UA_HistoryReadValueId* nodes_to_read,
     UA_HistoryReadResponse* response,
-    UA_HistoryData* const* const
-        history_data) { // NOLINT parameter name set by open62541
-  // response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
-  // if (!release_continuation_points) {
-  //   for (size_t i = 0; i < nodes_to_read_size; ++i) {
-  //     try {
-  //       auto history_values = readHistory(history_read_details,
-  //           request_header->timeoutHint, timestamps_to_return,
-  //           nodes_to_read[i].nodeId, &nodes_to_read[i].continuationPoint,
-  //           &response->results[i].continuationPoint);
-  //       response->results[i].statusCode =
-  //           expandHistoryResult(history_data[i], history_values);
-  //     } catch (BadContinuationPoint& ex) {
-  //       response->results[i].statusCode =
-  //           UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-  //     } catch (DatabaseNotAvailable& ex) {
-  //       response->responseHeader.serviceResult =
-  //           UA_STATUSCODE_BADDATAUNAVAILABLE;
-  //     } catch (OutOfMemory& ex) {
-  //       response->responseHeader.serviceResult =
-  //       UA_STATUSCODE_BADOUTOFMEMORY;
-  //     } catch (runtime_error& ex) {
-  //       // handle unexpected read exceptions here
-  //       response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
-  //     }
-  //   }
-  // }
-  /** *@todo : release response->results[i]->history_data ? *as specified in
-                                                    : *https
-    : //
-    github.com/open62541/open62541/blob/master/include/open62541/plugin/historydatabase.h#L73
-      */
+    UA_HistoryData* const* const history_data) {
+  response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
+  if (!release_continuation_points) {
+    for (size_t i = 0; i < nodes_to_read_size; ++i) {
+      try {
+        auto history_values = readHistory(history_read_details,
+            request_header->timeoutHint, timestamps_to_return,
+            nodes_to_read[i].nodeId, &nodes_to_read[i].continuationPoint,
+            &response->results[i].continuationPoint);
+        response->results[i].statusCode =
+            expandHistoryResult(history_data[i], history_values);
+      } catch (BadContinuationPoint& ex) {
+        response->results[i].statusCode =
+            UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
+      } catch (DatabaseNotAvailable& ex) {
+        response->responseHeader.serviceResult =
+            UA_STATUSCODE_BADDATAUNAVAILABLE;
+      } catch (OutOfMemory& ex) {
+        response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
+      } catch (runtime_error& ex) {
+        // handle unexpected read exceptions here
+        response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
+      }
+    }
+  }
   /* Continuation points are not stored internally, so no need to release
    * them, simply return StatusCode::Good for the entire request without
    * setting any data*/
