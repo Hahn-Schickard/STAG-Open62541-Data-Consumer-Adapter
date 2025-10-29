@@ -740,6 +740,37 @@ UA_ByteString* makeContinuationPoint(size_t last_index) {
   return result;
 }
 
+Historizer::ResultType makeResultType(const pqxx::row& entry,
+    UA_TimestampsToReturn timestamps_to_return,
+    unordered_map<int64_t, UA_DataTypeKind> type_map) {
+  Historizer::ResultType result{// clang-format off
+      .index = entry["Index"].as<long>(),
+      .value = toUaVariant(entry["Value"], type_map),
+      .source_timestamp = "", 
+      .server_timestamp = ""
+    }; // clang-format on
+  if (timestamps_to_return != UA_TIMESTAMPSTORETURN_NEITHER) {
+    if (timestamps_to_return == UA_TIMESTAMPSTORETURN_SOURCE ||
+        timestamps_to_return == UA_TIMESTAMPSTORETURN_BOTH) {
+      result.source_timestamp = entry["Source_Timestamp"].as<string>();
+    }
+    if (timestamps_to_return == UA_TIMESTAMPSTORETURN_SERVER ||
+        timestamps_to_return == UA_TIMESTAMPSTORETURN_BOTH) {
+      result.server_timestamp = entry["Server_Timestamp"].as<string>();
+    }
+  }
+  return result;
+}
+
+vector<Historizer::ResultType> makeResultTypes(const pqxx::result& rows,
+    UA_TimestampsToReturn timestamps_to_return,
+    unordered_map<int64_t, UA_DataTypeKind> type_map) {
+  vector<Historizer::ResultType> results;
+  for (const auto& row : rows) {
+    results.push_back(makeResultType(row, timestamps_to_return, type_map));
+  }
+}
+
 vector<Historizer::ResultType> Historizer::readHistory(
     const UA_ReadRawModifiedDetails* history_read_details,
     UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestamps_to_return,
@@ -776,25 +807,8 @@ vector<Historizer::ResultType> Historizer::readHistory(
   }
 
   auto rows = transaction.exec(query);
-  vector<ResultType> results;
-  for (const auto& row : rows) {
-    ResultType result{// clang-format off
-      .index = row["Index"].as<long>(),
-      .value = toUaVariant(row["Value"], type_map_),
-      .source_timestamp = "", 
-      .server_timestamp = ""
-    }; // clang-format on
-    if (timestamps_to_return != UA_TIMESTAMPSTORETURN_NEITHER) {
-      if (timestamps_to_return == UA_TIMESTAMPSTORETURN_SOURCE ||
-          timestamps_to_return == UA_TIMESTAMPSTORETURN_BOTH) {
-        result.source_timestamp = row["Source_Timestamp"].as<string>();
-      }
-      if (timestamps_to_return == UA_TIMESTAMPSTORETURN_SERVER ||
-          timestamps_to_return == UA_TIMESTAMPSTORETURN_BOTH) {
-        result.server_timestamp = row["Server_Timestamp"].as<string>();
-      }
-    }
-  }
+  auto results = makeResultTypes(rows, timestamps_to_return, type_map_);
+
   if (read_limit != 0 && results.size() == read_limit) {
     // check if there overrun
     auto record_count =
