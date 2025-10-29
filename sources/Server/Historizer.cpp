@@ -843,15 +843,15 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
             &response->results[i].continuationPoint);
         response->results[i].statusCode =
             expandHistoryResult(history_data[i], history_values);
-      } catch (BadContinuationPoint& ex) {
+      } catch (const BadContinuationPoint& ex) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-      } catch (DatabaseNotAvailable& ex) {
+      } catch (const ConnectionUnavailable& ex) {
         response->responseHeader.serviceResult =
             UA_STATUSCODE_BADDATAUNAVAILABLE;
-      } catch (OutOfMemory& ex) {
+      } catch (const OutOfMemory& ex) {
         response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
-      } catch (runtime_error& ex) {
+      } catch (const runtime_error& ex) {
         // handle unexpected read exceptions here
         response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
       }
@@ -1273,19 +1273,19 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdb_context*/,
         // decoded as UA_DateTime
         response->results[i].statusCode =
             UA_STATUSCODE_BADAGGREGATEINVALIDINPUTS;
-      } catch (NoBoundData& ex) {
+      } catch (const NoBoundData& ex) {
         response->results[i].statusCode = UA_STATUSCODE_BADBOUNDNOTFOUND;
-      } catch (NoData& ex) {
+      } catch (const NoData& ex) {
         response->results[i].statusCode = UA_STATUSCODE_BADNODATA;
-      } catch (BadContinuationPoint& ex) {
+      } catch (const BadContinuationPoint& ex) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-      } catch (DatabaseNotAvailable& ex) {
+      } catch (const ConnectionUnavailable& ex) {
         response->responseHeader.serviceResult =
             UA_STATUSCODE_BADDATAUNAVAILABLE;
-      } catch (OutOfMemory& ex) {
+      } catch (const OutOfMemory& ex) {
         response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
-      } catch (runtime_error& ex) {
+      } catch (const runtime_error& ex) {
         // handle unexpected read exceptions here
         response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
       }
