@@ -1010,60 +1010,53 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
 //   return result;
 // }
 
-// vector<ColumnValue> interpolateValues(
-//     UA_DateTime target_timestamp, Rows first, Rows second) {
-//   vector<ColumnValue> result;
-//   // both maps MUST have 1 row each
-//   if (first.size() != 1 || second.size() != 1) {
-//     throw logic_error("Multiple nearest match values are not supported");
-//   }
+vector<Historizer::ResultType> interpolateValues(
+    UA_DateTime target_timestamp, pqxx::result before, pqxx::result after) {
+  vector<Historizer::ResultType> result;
 
-//   auto first_row = first.begin()->second;
-//   auto second_row = second.begin()->second;
-//   OODD::DataValue first_nearest_value, second_nearest_value;
-//   string data_point_name;
-//   // set result timestamp columns and nearest_value DataTypes
-//   switch (first_row.size()) { // MUST either be equal to 1,2 or 3
-//   case 1: {
-//     first_nearest_value = first_row[0].value();
-//     second_nearest_value = second_row[0].value();
-//     data_point_name = first_row[0].name();
-//     break;
-//   }
-//   case 2: {
-//     result.emplace_back(first_row[0].name(),
-//     getTimestamp(target_timestamp)); first_nearest_value =
-//     first_row[1].value(); second_nearest_value = second_row[1].value();
-//     data_point_name = first_row[1].name();
-//     break;
-//   }
-//   case 3: {
-//     result.emplace_back(first_row[0].name(),
-//     getTimestamp(target_timestamp));
-//     result.emplace_back(first_row[1].name(),
-//     getTimestamp(target_timestamp)); first_nearest_value =
-//     first_row[2].value(); second_nearest_value = second_row[2].value();
-//     data_point_name = first_row[2].name();
-//     break;
-//   }
-//   default: {
-//     throw NoBoundData();
-//     break;
-//   }
-//   }
+  // Historizer::ResultType first_nearest_value, second_nearest_value;
+  // string data_point_name;
+  // // set result timestamp columns and nearest_value DataTypes
+  // switch (first_row.size()) { // MUST either be equal to 1,2 or 3
+  // case 1: {
+  //   first_nearest_value = first_row[0].value();
+  //   second_nearest_value = second_row[0].value();
+  //   data_point_name = first_row[0].name();
+  //   break;
+  // }
+  // case 2: {
+  //   result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
+  //   first_nearest_value = first_row[1].value();
+  //   second_nearest_value = second_row[1].value();
+  //   data_point_name = first_row[1].name();
+  //   break;
+  // }
+  // case 3: {
+  //   result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
+  //   result.emplace_back(first_row[1].name(), getTimestamp(target_timestamp));
+  //   first_nearest_value = first_row[2].value();
+  //   second_nearest_value = second_row[2].value();
+  //   data_point_name = first_row[2].name();
+  //   break;
+  // }
+  // default: {
+  //   throw NoBoundData();
+  //   break;
+  // }
+  // }
 
-//   auto first_nearest_timestamp = toUADateTime(first_row[0].value());
-//   auto second_nearest_timestamp = toUADateTime(second_row[0].value());
-//   // use formula from OPC UA Part 13 Aggregates specification section 3.1.8
-//   intmax_t weight = target_timestamp - first_nearest_timestamp;
-//   auto value_diff = second_nearest_value - first_nearest_value;
-//   intmax_t denominator = second_nearest_timestamp -
-//   first_nearest_timestamp; auto interpolated_data =
-//       ((value_diff * weight) / denominator) + first_nearest_value;
+  // auto first_nearest_timestamp = toUaDateTime(first.server_timestamp);
+  // auto second_nearest_timestamp = toUaDateTime(second.server_timestamp);
+  // // use formula from OPC UA Part 13 Aggregates specification section 3.1.8
+  // intmax_t weight = target_timestamp - first_nearest_timestamp;
+  // auto value_diff = second_nearest_value - first_nearest_value;
+  // intmax_t denominator = second_nearest_timestamp - first_nearest_timestamp;
+  // auto interpolated_data =
+  //     ((value_diff * weight) / denominator) + first_nearest_value;
 
-//   result.emplace_back(data_point_name, interpolated_data);
-//   return result;
-// }
+  // result.emplace_back(data_point_name, interpolated_data);
+  return result;
+}
 
 /**
  * @brief Defines Aggregate Result Status Code expansion
@@ -1178,73 +1171,46 @@ UA_StatusCode Historizer::readAndAppendHistory(
     UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestamps_to_return,
     UA_NodeId node_id, const UA_ByteString* /*continuation_point_in*/,
     [[maybe_unused]] UA_ByteString* continuation_point_out,
-    UA_HistoryData* history_data) { // NOLINT
-  //   if (db_) {
-  //     auto columns = setColumnNames(timestamps_to_return);
+    UA_HistoryData* history_data) {
 
-  //     UA_StatusCode status = UA_STATUSCODE_GOOD;
-  //     using namespace HistorianBits;
-  //     Rows results;
-  //     for (size_t i = 0; i < history_read_details->reqTimesSize; ++i) {
-  //       auto timestamp = getTimestamp(history_read_details->reqTimes[i]);
-  //       /**
-  //        * @todo: use an async select request or a batch read, and check if
-  //        * timeout_hint elapsed, if it did set a continuation point
-  //        *
-  //        */
-  //       auto timestamp_results = db_->select(toSanitizedString(&node_id),
-  //       columns,
-  //           ColumnFilter(FilterType::Equal, "Source_Timestamp", timestamp),
-  //           nullopt, "Source_Timestamp");
-
-  //       if (timestamp_results.empty()) {
-  //         /**
-  //          * @todo: use an async select requests or a batch reads, and
-  //          check if
-  //          * timeout_hint elapsed for both nearest_before_result and
-  //          * nearest_after_result select requests, if it did set a
-  //          continuation
-  //          * point for next
-  //          *
-  //          */
-  //         auto nearest_before_result =
-  //             db_->select(toSanitizedString(&node_id), columns,
-  //                 ColumnFilter(FilterType::Less, "Source_Timestamp",
-  //                 timestamp), 1, "Source_Timestamp", true);
-  //         auto nearest_after_result =
-  //         db_->select(toSanitizedString(&node_id),
-  //             columns,
-  //             ColumnFilter(FilterType::Greater, "Source_Timestamp",
-  //             timestamp), 1, "Source_Timestamp", false);
-  //         // the following is safe because, indexes are only used to
-  //         iterate over
-  //             // the results map, so we only need to make sure that they
-  //             are all
-  //             // unique. Because bounding values by defintion do not meet
-  //             our
-  //             // aggregate criteria, their indexes will never be in the
-  //             results maps,
-  //             // thus they will always be unique
-  //             auto index = nearest_after_result.begin()->first;
-  //         results.emplace(index,
-  //             // we do not check history_read_details->useSimpleBounds
-  //             flag,
-  //             // because all values are Non-Bad for our case and thus
-  //             // useSimpleBounds=False would not change the calculation
-  //             interpolateValues(history_read_details->reqTimes[i],
-  //                 nearest_before_result, nearest_after_result));
-  //         setHistorianBits(&status, DataLocation::Interpolated);
-  //       } else {
-  //         results.merge(timestamp_results);
-  //         setHistorianBits(&status, DataLocation::Raw);
-  //       }
-  //     }
-  //     expandHistoryResult(history_data, results);
-  //     return status;
-  //   } else {
-  //     throw DatabaseNotAvailable();
-  //   }
-  return UA_STATUSCODE_BAD;
+  auto columns = setColumnNames(timestamps_to_return);
+  UA_StatusCode status = UA_STATUSCODE_GOOD;
+  using namespace HistorianBits;
+  vector<ResultType> results;
+  for (size_t i = 0; i < history_read_details->reqTimesSize; ++i) {
+    auto timestamp = getTimestamp(history_read_details->reqTimes[i]);
+    auto session = connect();
+    work transaction(session);
+    auto table = toSanitizedString(&node_id);
+    string query = "SELECT " + columns + " FROM " + table +
+        " WHERE Source_Timestamp =" + timestamp +
+        " ORDER BY Source_Timestamp ASC";
+    /**
+     * @todo: use an async select request or a batch read, and check if
+     * timeout_hint elapsed, if it did set a continuation point
+     */
+    auto rows = transaction.exec(query);
+    if (rows.empty()) {
+      string nearest_query = "SELECT " + columns + " FROM " + table +
+          " WHERE Source_Timestamp $1 " + timestamp +
+          " ORDER BY Source_Timestamp ASC";
+      auto nearest_before = transaction.exec(nearest_query, params{"<"});
+      auto nearest_after = transaction.exec(nearest_query, params{">"});
+      // we do not check history_read_details->useSimpleBoundsflag,
+      // because all values are Non-Bad for our case and thus
+      // useSimpleBounds=False would not change the calculation
+      auto interpolated = interpolateValues(
+          history_read_details->reqTimes[i], nearest_before, nearest_after);
+      results.insert(results.end(), interpolated.begin(), interpolated.end());
+      setHistorianBits(&status, DataLocation::Interpolated);
+    } else {
+      auto raw = makeResultTypes(rows, timestamps_to_return, type_map_);
+      results.insert(results.end(), raw.begin(), raw.end());
+      setHistorianBits(&status, DataLocation::Raw);
+    }
+  }
+  expandHistoryResult(history_data, results);
+  return status;
 }
 
 void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdb_context*/,
