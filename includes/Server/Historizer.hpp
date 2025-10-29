@@ -15,7 +15,7 @@ struct Historizer {
    * values
    *
    */
-  Historizer(const filesystem::path& config);
+  Historizer(const std::filesystem::path& config);
 
   ~Historizer();
   /**
@@ -37,6 +37,13 @@ struct Historizer {
   static UA_HistoryDatabase createDatabase();
 
 private:
+  struct ResultType {
+    int64_t index; // pqxx does not return size_t from queries
+    UA_Variant value;
+    std::string source_timestamp;
+    std::string server_timestamp;
+  };
+
   /**
    * @brief Used as destructor for the UA_HistoryDatabase struct by UA_Server
    * instance
@@ -83,7 +90,7 @@ private:
       void* monitored_item_context, const UA_NodeId* node_id,
       void* node_context, UA_UInt32 attribute_id, const UA_DataValue* value);
 
-  static std::unordered_map<std::string, UA_Variant> readHistory(
+  static std::vector<ResultType> readHistory(
       const UA_ReadRawModifiedDetails* history_read_details,
       UA_UInt32 timeout_hint, UA_TimestampsToReturn timestamps_to_return,
       UA_NodeId node_id, const UA_ByteString* continuation_point_in,
@@ -148,11 +155,12 @@ private:
       UA_HistoryData* const* const history_data);
 
   template <typename... Types>
-  static void log(
-      HaSLL::SeverityLevel level, std::string message, Types... args);
+  static void log(HaSLL::SeverityLevel level, const std::string& message,
+      const Types&... args);
 
-  static HaSLL::LoggerPtr logger_;
-  static std::string connection_info_;
+  static inline HaSLL::LoggerPtr logger_ = nullptr;
+  static inline std::string connection_info_ = {};
+  static inline std::unordered_map<int64_t, UA_DataTypeKind> type_map_ = {};
 };
 } // namespace open62541
 #endif // UA_ENABLE_HISTORIZING

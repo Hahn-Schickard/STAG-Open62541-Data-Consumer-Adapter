@@ -44,12 +44,69 @@ struct NoBoundData : runtime_error {
   NoBoundData() : runtime_error("No bound data") {}
 };
 
-LoggerPtr Historizer::logger_ = LoggerPtr(); // NOLINT
-
 string readConfig(const filesystem::path& config) {
   // @todo: read configuration file to get database backend, authentication and
   // table info
   return "";
+}
+
+void createDomainRestrictions(work* transaction) {
+  // NOLINTBEGIN(readability-magic-numbers)
+  unordered_map<string, size_t> domains{
+      // clang-format off
+      {"OPCUA_TINYUINT", 256},
+      {"OPCUA_SMALLUINT", 65536},
+      {"OPCUA_UINT", 4294967296},
+      {"OPCUA_STATUSCODE", 4294967296} // status code uses 32 bit uint
+  }; // clang-format on
+  // NOLINTEND(readability-magic-numbers)
+  string create = "CREATE DOMAIN IF NOT EXISTS ";
+  for (const auto& [domain, limit] : domains) {
+    transaction->exec(
+        create + "$1 AS INTEGER CHECK (VALUE >= 0 AND VALUE < $2)",
+        {domain, limit});
+    transaction->commit();
+  }
+  // int8 requires different limits, hence we create it separately
+  transaction->exec(create +
+      "OPCUA_TINYINT AS INTEGER CHECK (VALUE >= -128 AND VALUE < 128)");
+  transaction->commit();
+
+  // uint64 does not fit into integer, hence we use numeric
+  transaction->exec(create +
+      "OPCUA_BIGUINT AS NUMERIC CHECK (VALUE >= 0 AND VALUE "
+      "< 18446744073709551616)");
+  transaction->commit();
+}
+
+unordered_map<int64_t, UA_DataTypeKind> queryTypeOIDs(work* transaction) {
+  unordered_map<string, size_t> typenames{// clang-format off
+      {"BOOLEAN", UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN},
+      {"OPCUA_TINYUINT", UA_DataTypeKind::UA_DATATYPEKIND_BYTE},
+      {"OPCUA_TINYINT", UA_DataTypeKind::UA_DATATYPEKIND_SBYTE},
+      {"OPCUA_SMALLUINT", UA_DataTypeKind::UA_DATATYPEKIND_UINT16},
+      {"SMALLINT", UA_DataTypeKind::UA_DATATYPEKIND_INT16},
+      {"OPCUA_UINT", UA_DataTypeKind::UA_DATATYPEKIND_UINT32},
+      {"INT", UA_DataTypeKind::UA_DATATYPEKIND_INT32},
+      {"OPCUA_BIGUINT", UA_DataTypeKind::UA_DATATYPEKIND_UINT64},
+      {"BIGINT", UA_DataTypeKind::UA_DATATYPEKIND_INT64},
+      {"OPCUA_STATUSCODE", UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE},
+      {"REAL", UA_DataTypeKind::UA_DATATYPEKIND_FLOAT},
+      {"DOUBLE PRECISION", UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE},
+      {"TIMESTAMP", UA_DataTypeKind::UA_DATATYPEKIND_DATETIME},
+      {"BYTEA", UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING},
+      {"TEXT", UA_DataTypeKind::UA_DATATYPEKIND_STRING}
+  }; // clang-format on
+  unordered_map<int64_t, UA_DataTypeKind> result;
+  for (const auto& [type_name, type_code] : typenames) {
+    auto oid =
+        transaction
+            ->exec1("SELECT oid FROM pg_type WHERE typname = $1", {type_name})
+            .at(0)
+            .as<int64_t>();
+    result.emplace(oid, static_cast<UA_DataTypeKind>(type_code));
+  }
+  return result;
 }
 
 Historizer::Historizer(const filesystem::path& config) {
@@ -61,21 +118,22 @@ Historizer::Historizer(const filesystem::path& config) {
     connection_info_ = readConfig(config);
   }
 
-  if (!checkTable("Historized_Nodes")) {
-    auto session = connect();
-    work transaction(session);
-    transaction.exec("CREATE TABLE Historized_Nodes("
-                     "Node_ID TEXT PRIMARY KEY NOT NULL, "
-                     "Last_Updated TIMESTAMP(6) NOT NULL"
-                     ");");
-    transaction.commit();
-  }
+  auto session = connect();
+  work transaction(session);
+  transaction.exec("CREATE TABLE IF NOT EXISTS Historized_Nodes("
+                   "Node_ID TEXT PRIMARY KEY NOT NULL, "
+                   "Last_Updated TIMESTAMP(6) NOT NULL"
+                   ");");
+  transaction.commit();
+  createDomainRestrictions(&transaction);
+  type_map_ = queryTypeOIDs(&transaction);
 }
 
 Historizer::~Historizer() { logger_.reset(); }
 
 template <typename... Types>
-void Historizer::log(SeverityLevel level, string message, Types... args) {
+void Historizer::log(
+    SeverityLevel level, const string& message, const Types&... args) {
   if (logger_) {
     logger_->log(level, message, args...);
   }
@@ -103,31 +161,31 @@ string toPostgreDataType(const UA_DataType* variant) {
     return "BOOLEAN";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-    [[fallthrough]];
+    return "OPCUA_TINYUINT";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    [[fallthrough]];
+    return "OPCUA_TINYINT";
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    return "OPCUA_SMALLUINT";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
     return "SMALLINT";
   }
-  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    [[fallthrough]];
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    return "OPCUA_UINT";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    return "INTEGER";
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    [[fallthrough]];
+    return "INT";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    [[fallthrough]];
+    return "OPCUA_BIGUINT";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
     return "BIGINT";
   }
-  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    return "TIMESTAMP(6)";
+  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
+    return "OPCUA_STATUSCODE";
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
     return "REAL";
@@ -135,11 +193,11 @@ string toPostgreDataType(const UA_DataType* variant) {
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
     return "DOUBLE PRECISION";
   }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
+    return "TIMESTAMP(6)";
+  }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
     return "BYTEA";
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-    [[fallthrough]];
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
     return "TEXT";
@@ -324,9 +382,7 @@ void addNodeValue(params* values, UA_Variant variant) {
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-    const auto* status_code =
-        UA_StatusCode_name(*((UA_StatusCode*)(variant.data)));
-    auto value = string(status_code);
+    auto value = *((UA_StatusCode*)(variant.data));
     values->append(value);
     break;
   }
@@ -429,28 +485,17 @@ void Historizer::dataChanged(UA_Server* server, UA_UInt32 /*monitored_item_id*/,
 }
 
 string setColumnNames(UA_TimestampsToReturn timestamps_to_return) {
-  string result;
-  switch (timestamps_to_return) {
-  case UA_TIMESTAMPSTORETURN_SOURCE: {
-    result = "Source_Timestamp, ";
-    break;
+  string result = "Index, Value";
+  if (timestamps_to_return != UA_TIMESTAMPSTORETURN_NEITHER) {
+    if (timestamps_to_return == UA_TIMESTAMPSTORETURN_SOURCE ||
+        timestamps_to_return == UA_TIMESTAMPSTORETURN_BOTH) {
+      result += ", Source_Timestamp";
+    }
+    if (timestamps_to_return == UA_TIMESTAMPSTORETURN_SERVER ||
+        timestamps_to_return == UA_TIMESTAMPSTORETURN_BOTH) {
+      result += ", Server_Timestamp";
+    }
   }
-  case UA_TIMESTAMPSTORETURN_SERVER: {
-    result = "Server_Timestamp, ";
-    break;
-  }
-  case UA_TIMESTAMPSTORETURN_BOTH: {
-    result = "Source_Timestamp, Server_Timestamp, ";
-    break;
-  }
-  case UA_TIMESTAMPSTORETURN_NEITHER:
-    [[fallthrough]];
-  default: {
-    break;
-  }
-  }
-  result += "Value";
-
   return result;
 }
 
@@ -557,10 +602,12 @@ UA_DateTime toUaDateTime(const string& data) {
   return UA_DateTime_fromStruct(calendar_time);
 }
 
-// @TODO: switch to Postgre data type?
-UA_Variant toUaVariant(const field& data, UA_DataTypeKind type) {
+UA_Variant toUaVariant(const field& data,
+    const unordered_map<int64_t, UA_DataTypeKind>& type_map) {
   UA_Variant result;
   UA_Variant_init(&result);
+  auto type_oid = data.type();
+  auto type = type_map.at(type_oid);
   switch (type) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
     auto value = data.as<bool>();
@@ -568,28 +615,28 @@ UA_Variant toUaVariant(const field& data, UA_DataTypeKind type) {
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-    auto value = data.as<uint8_t>();
+    auto value = static_cast<uint8_t>(data.as<int>());
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_BYTE]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    auto value = data.as<int8_t>();
+    auto value = static_cast<uint8_t>(data.as<int>());
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_SBYTE]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    auto value = data.as<uint16_t>();
+    auto value = static_cast<uint16_t>(data.as<int>());
     UA_Variant_setScalarCopy(
         &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT16]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    auto value = data.as<int16_t>();
+    auto value = static_cast<int16_t>(data.as<int>());
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_INT16]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    auto value = data.as<uint32_t>();
+    auto value = static_cast<uint32_t>(data.as<int64_t>());
     UA_Variant_setScalarCopy(
         &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT32]);
     break;
@@ -600,7 +647,7 @@ UA_Variant toUaVariant(const field& data, UA_DataTypeKind type) {
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    auto value = data.as<uint64_t>();
+    auto value = static_cast<uint64_t>(data.as<int64_t>());
     UA_Variant_setScalarCopy(
         &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT64]);
     break;
@@ -674,11 +721,13 @@ UA_Variant toUaVariant(const field& data, UA_DataTypeKind type) {
 //         if (rows[index][0].name() == "Source_Timestamp") {
 //           // row has Source_Timestamp column
 //           data[index].hasSourceTimestamp = true;
-//           data[index].sourceTimestamp = toUADateTime(rows[index][0].value());
+//           data[index].sourceTimestamp =
+//           toUADateTime(rows[index][0].value());
 //         } else {
 //           // row has Server_Timestamp column
 //           data[index].hasServerTimestamp = true;
-//           data[index].serverTimestamp = toUADateTime(rows[index][0].value());
+//           data[index].serverTimestamp =
+//           toUADateTime(rows[index][0].value());
 //         }
 //         // remaining row column MUST be Value
 //         data[index].value = toUAVariant(rows[index][1].value());
@@ -690,11 +739,13 @@ UA_Variant toUaVariant(const field& data, UA_DataTypeKind type) {
 //       }
 //       data[index].hasValue = true;
 //     } catch (domain_error& ex) {
-//       // failed to decode timestamps or value for UA_DataValue, hasValue was
+//       // failed to decode timestamps or value for UA_DataValue, hasValue
+//       was
 //       // not set to true, so it MUST be false
 //       data[index].hasStatus = true;
 //       data[index].status =
-//           UA_STATUSCODE_BADDECODINGERROR; // mark the entire data set or just
+//           UA_STATUSCODE_BADDECODINGERROR; // mark the entire data set or
+//           just
 //                                           // the failed value?
 //     }
 //   }
@@ -707,30 +758,19 @@ UA_Variant toUaVariant(const field& data, UA_DataTypeKind type) {
  or
  * a future result for async select statements
  */
-UA_ByteString* makeContinuationPoint(vector<ColumnValue> last_row) {
-  if (holds_alternative<string>(last_row[0].value())) {
-    auto source_timestamp =
-        get<string>(last_row[0].value()); // this SHOULD be the index column
-    UA_ByteString* result = UA_ByteString_new(); // should it be on heap?
-    auto status = UA_ByteString_allocBuffer(result, source_timestamp.size());
-    if (status == UA_STATUSCODE_GOOD) {
-      memcpy(result->data, source_timestamp.c_str(), source_timestamp.size());
-    } else {
-      throw OutOfMemory();
-    }
-    return result;
+UA_ByteString* makeContinuationPoint(size_t last_index) {
+  string index = to_string(last_index);
+  UA_ByteString* result = UA_ByteString_new(); // should it be on heap?
+  auto status = UA_ByteString_allocBuffer(result, index.size());
+  if (status == UA_STATUSCODE_GOOD) {
+    memcpy(result->data, index.c_str(), index.size());
   } else {
-    throw BadContinuationPoint();
+    throw OutOfMemory();
   }
+  return result;
 }
 
-struct ResultType {
-  string server_timestamp;
-  string source_timestamp;
-  UA_Variant value;
-};
-
-vector<ResultType> Historizer::readHistory(
+vector<Historizer::ResultType> Historizer::readHistory(
     const UA_ReadRawModifiedDetails* history_read_details,
     UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestamps_to_return,
     UA_NodeId node_id, const UA_ByteString* continuation_point_in,
@@ -763,21 +803,39 @@ vector<ResultType> Historizer::readHistory(
 
   if (read_limit != 0) { // if numValuesPerNode is zero, there is no limit
     query += " FETCH FIRST " + to_string(read_limit) + " ROWS ONLY";
-    /**
-     * @todo: use an async select request or a batch read, and check if
-     * timeout_hint elapsed, if it did set a continuation point
-     *
-     */
-    if (overrun_point.hasMoreValues()) {
-      // continuation_point_out is read by the Client, not the Server
-      continuation_point_out = // NOLINT
-          makeContinuationPoint(overrun_point.getOverrunRecord());
-    }
   }
+
   auto rows = transaction.exec(query);
   vector<ResultType> results;
   for (const auto& row : rows) {
-    ResultType result{"", "", toUaVariant(row["Value"])};
+    ResultType result{// clang-format off
+      .index = row["Index"].as<int64_t>(),
+      .value = toUaVariant(row["Value"], type_map_),
+      .source_timestamp = "", 
+      .server_timestamp = ""
+    }; // clang-format on
+    if (timestamps_to_return != UA_TIMESTAMPSTORETURN_NEITHER) {
+      if (timestamps_to_return == UA_TIMESTAMPSTORETURN_SOURCE ||
+          timestamps_to_return == UA_TIMESTAMPSTORETURN_BOTH) {
+        result.source_timestamp = row["Source_Timestamp"].as<string>();
+      }
+      if (timestamps_to_return == UA_TIMESTAMPSTORETURN_SERVER ||
+          timestamps_to_return == UA_TIMESTAMPSTORETURN_BOTH) {
+        result.server_timestamp = row["Server_Timestamp"].as<string>();
+      }
+    }
+  }
+  if (read_limit != 0 && results.size() == read_limit) {
+    // check if there overrun
+    auto record_count =
+        transaction.exec1("SELECT COUNT(*) FROM " + table + filters)
+            .at(0)
+            .as<int64_t>();
+    if (record_count > read_limit) {
+      auto index = results.back().index;
+      // continuation_point_out is read by the Client, not the Server
+      continuation_point_out = makeContinuationPoint(index);
+    }
   }
   return results;
 }
@@ -827,7 +885,8 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
    * setting any data*/
 }
 
-// OODD::DataValue operator*(const OODD::DataValue& lhs, const intmax_t& rhs) {
+// OODD::DataValue operator*(const OODD::DataValue& lhs, const intmax_t& rhs)
+// {
 //   OODD::DataValue result;
 //   match(
 //       lhs,
@@ -886,7 +945,8 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
 //           auto addition = get<double>(rhs);
 //           result = value + addition;
 //         } else {
-//           throw invalid_argument("Can not add non double value to a double");
+//           throw invalid_argument("Can not add non double value to a
+//           double");
 //         }
 //       },
 //       [&](const string& /*value*/) {
@@ -912,7 +972,8 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
 //           result = value - addition;
 //         } else {
 //           throw invalid_argument(
-//               "Can not subtract non unsigned int value from a unsigned int");
+//               "Can not subtract non unsigned int value from a unsigned
+//               int");
 //         }
 //       },
 //       [&](intmax_t value) {
@@ -951,7 +1012,8 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
 //   return result;
 // }
 
-// OODD::DataValue operator/(const OODD::DataValue& lhs, const intmax_t& rhs) {
+// OODD::DataValue operator/(const OODD::DataValue& lhs, const intmax_t& rhs)
+// {
 //   OODD::DataValue result;
 //   match(
 //       lhs,
@@ -992,17 +1054,18 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
 //     break;
 //   }
 //   case 2: {
-//     result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
-//     first_nearest_value = first_row[1].value();
-//     second_nearest_value = second_row[1].value();
+//     result.emplace_back(first_row[0].name(),
+//     getTimestamp(target_timestamp)); first_nearest_value =
+//     first_row[1].value(); second_nearest_value = second_row[1].value();
 //     data_point_name = first_row[1].name();
 //     break;
 //   }
 //   case 3: {
-//     result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
-//     result.emplace_back(first_row[1].name(), getTimestamp(target_timestamp));
-//     first_nearest_value = first_row[2].value();
-//     second_nearest_value = second_row[2].value();
+//     result.emplace_back(first_row[0].name(),
+//     getTimestamp(target_timestamp));
+//     result.emplace_back(first_row[1].name(),
+//     getTimestamp(target_timestamp)); first_nearest_value =
+//     first_row[2].value(); second_nearest_value = second_row[2].value();
 //     data_point_name = first_row[2].name();
 //     break;
 //   }
@@ -1017,8 +1080,8 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
 //   // use formula from OPC UA Part 13 Aggregates specification section 3.1.8
 //   intmax_t weight = target_timestamp - first_nearest_timestamp;
 //   auto value_diff = second_nearest_value - first_nearest_value;
-//   intmax_t denominator = second_nearest_timestamp - first_nearest_timestamp;
-//   auto interpolated_data =
+//   intmax_t denominator = second_nearest_timestamp -
+//   first_nearest_timestamp; auto interpolated_data =
 //       ((value_diff * weight) / denominator) + first_nearest_value;
 
 //   result.emplace_back(data_point_name, interpolated_data);
@@ -1032,7 +1095,7 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
  *
  */
 namespace HistorianBits {
-enum class DataLocation {
+enum class DataLocation : uint8_t {
   Raw = 0x00,
   Calculated = 0x01,
   Interpolated = 0x02,
@@ -1159,8 +1222,8 @@ UA_StatusCode Historizer::readAndAppendHistory(
 
   //       if (timestamp_results.empty()) {
   //         /**
-  //          * @todo: use an async select requests or a batch reads, and check
-  //          if
+  //          * @todo: use an async select requests or a batch reads, and
+  //          check if
   //          * timeout_hint elapsed for both nearest_before_result and
   //          * nearest_after_result select requests, if it did set a
   //          continuation
@@ -1176,17 +1239,19 @@ UA_StatusCode Historizer::readAndAppendHistory(
   //             columns,
   //             ColumnFilter(FilterType::Greater, "Source_Timestamp",
   //             timestamp), 1, "Source_Timestamp", false);
-  //         // the following is safe because, indexes are only used to iterate
-  //         over
-  //             // the results map, so we only need to make sure that they are
-  //             all
-  //             // unique. Because bounding values by defintion do not meet our
+  //         // the following is safe because, indexes are only used to
+  //         iterate over
+  //             // the results map, so we only need to make sure that they
+  //             are all
+  //             // unique. Because bounding values by defintion do not meet
+  //             our
   //             // aggregate criteria, their indexes will never be in the
   //             results maps,
   //             // thus they will always be unique
   //             auto index = nearest_after_result.begin()->first;
   //         results.emplace(index,
-  //             // we do not check history_read_details->useSimpleBounds flag,
+  //             // we do not check history_read_details->useSimpleBounds
+  //             flag,
   //             // because all values are Non-Bad for our case and thus
   //             // useSimpleBounds=False would not change the calculation
   //             interpolateValues(history_read_details->reqTimes[i],
