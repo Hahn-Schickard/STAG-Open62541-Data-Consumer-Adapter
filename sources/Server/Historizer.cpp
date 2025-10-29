@@ -103,7 +103,7 @@ unordered_map<int64_t, UA_DataTypeKind> queryTypeOIDs(work* transaction) {
         transaction
             ->exec1("SELECT oid FROM pg_type WHERE typname = $1", {type_name})
             .at(0)
-            .as<int64_t>();
+            .as<long>();
     result.emplace(oid, static_cast<UA_DataTypeKind>(type_code));
   }
   return result;
@@ -337,7 +337,13 @@ void addNodeValue(params* values, UA_Variant variant) {
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    auto value = *((UA_SByte*)(variant.data));
+    [[fallthrough]]; // pqxx does not allow signed char as a parameter
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    [[fallthrough]]; // pqxx does not allow unsigned char as a parameter
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    auto value = *((UA_UInt16*)(variant.data));
     values->append(value);
     break;
   }
@@ -346,28 +352,13 @@ void addNodeValue(params* values, UA_Variant variant) {
     values->append(value);
     break;
   }
-  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    auto value = *((UA_Int32*)(variant.data));
-    values->append(value);
-    break;
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    auto value = *((UA_Int64*)(variant.data));
-    values->append(value);
-    break;
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-    auto value = *((UA_Byte*)(variant.data));
-    values->append(value);
-    break;
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    auto value = *((UA_UInt16*)(variant.data));
-    values->append(value);
-    break;
-  }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
     auto value = *((UA_UInt32*)(variant.data));
+    values->append(value);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    auto value = *((UA_Int32*)(variant.data));
     values->append(value);
     break;
   }
@@ -376,8 +367,8 @@ void addNodeValue(params* values, UA_Variant variant) {
     values->append(value);
     break;
   }
-  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    auto value = getTimestamp(*((UA_DateTime*)(variant.data)));
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    auto value = *((UA_Int64*)(variant.data));
     values->append(value);
     break;
   }
@@ -396,6 +387,11 @@ void addNodeValue(params* values, UA_Variant variant) {
     values->append(value);
     break;
   }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
+    auto value = getTimestamp(*((UA_DateTime*)(variant.data)));
+    values->append(value);
+    break;
+  }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
     auto* byte_string = (UA_ByteString*)(variant.data);
     values->append(binary_cast(byte_string->data, byte_string->length));
@@ -406,9 +402,6 @@ void addNodeValue(params* values, UA_Variant variant) {
     auto value = string((char*)ua_string->data, ua_string->length);
     values->append(value);
     break;
-  }
-  case UA_DataTypeKind::UA_DATATYPEKIND_GUID: {
-    [[fallthrough]];
   }
   default: {
     string error_msg =
@@ -606,8 +599,7 @@ UA_Variant toUaVariant(const field& data,
     const unordered_map<int64_t, UA_DataTypeKind>& type_map) {
   UA_Variant result;
   UA_Variant_init(&result);
-  auto type_oid = data.type();
-  auto type = type_map.at(type_oid);
+  auto type = type_map.at(data.type());
   switch (type) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
     auto value = data.as<bool>();
@@ -620,7 +612,7 @@ UA_Variant toUaVariant(const field& data,
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    auto value = static_cast<uint8_t>(data.as<int>());
+    auto value = static_cast<int8_t>(data.as<int>());
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_SBYTE]);
     break;
   }
@@ -636,7 +628,7 @@ UA_Variant toUaVariant(const field& data,
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    auto value = static_cast<uint32_t>(data.as<int64_t>());
+    auto value = static_cast<uint32_t>(data.as<long>());
     UA_Variant_setScalarCopy(
         &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT32]);
     break;
@@ -647,23 +639,31 @@ UA_Variant toUaVariant(const field& data,
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    auto value = static_cast<uint64_t>(data.as<int64_t>());
+    auto value = static_cast<uint64_t>(data.as<long>());
     UA_Variant_setScalarCopy(
         &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT64]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    auto value = data.as<int64_t>();
+    auto value = data.as<long>();
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_INT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
+    auto value = data.as<int>();
+    UA_Variant_setScalarCopy(
+        &result, &value, &UA_TYPES[UA_DATATYPEKIND_STATUSCODE]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
     auto value = data.as<float>();
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_FLOAT]);
+    break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
     auto value = data.as<double>();
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
+    break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
     auto timestamp = data.as<string>();
@@ -682,9 +682,6 @@ UA_Variant toUaVariant(const field& data,
     UA_String_clear(&value);
     break;
   }
-  case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-    [[fallthrough]];
-  }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
     auto cpp_string = data.as<string>();
     UA_String value = UA_String_fromChars(cpp_string.c_str());
@@ -693,7 +690,7 @@ UA_Variant toUaVariant(const field& data,
     break;
   }
   default: {
-    throw logic_error("Unhandled UA Data Type " + to_string(type));
+    throw logic_error("Unhandled UA Data Type " + std::to_string(type));
   }
   }
 
@@ -809,7 +806,7 @@ vector<Historizer::ResultType> Historizer::readHistory(
   vector<ResultType> results;
   for (const auto& row : rows) {
     ResultType result{// clang-format off
-      .index = row["Index"].as<int64_t>(),
+      .index = row["Index"].as<long>(),
       .value = toUaVariant(row["Value"], type_map_),
       .source_timestamp = "", 
       .server_timestamp = ""
@@ -830,7 +827,7 @@ vector<Historizer::ResultType> Historizer::readHistory(
     auto record_count =
         transaction.exec1("SELECT COUNT(*) FROM " + table + filters)
             .at(0)
-            .as<int64_t>();
+            .as<long>();
     if (record_count > read_limit) {
       auto index = results.back().index;
       // continuation_point_out is read by the Client, not the Server
