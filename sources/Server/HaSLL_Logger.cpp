@@ -17,7 +17,8 @@ enum class Open62541_Logger : uint8_t {
   Client,
   User,
   Security,
-  EventLoop
+  EventLoop,
+  Discovery
 };
 
 map<Open62541_Logger, LoggerPtr> loggers;
@@ -41,6 +42,8 @@ void registerLoggers() {
         LoggerManager::registerLogger("Open62541::Security"));
     loggers.emplace(Open62541_Logger::EventLoop,
         LoggerManager::registerLogger("Open62541::EventLoop"));
+    loggers.emplace(Open62541_Logger::Discovery,
+        LoggerManager::registerLogger("Open62541::Discovery"));
   }
 }
 
@@ -154,6 +157,13 @@ void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
   }
   case UA_LogCategory::UA_LOGCATEGORY_EVENTLOOP: {
     auto it = loggers.find(Open62541_Logger::EventLoop);
+    if (it != loggers.end()) {
+      it->second->log(getLoggingLevel(level), message);
+    }
+    break;
+  }
+  case UA_LogCategory::UA_LOGCATEGORY_DISCOVERY: {
+    auto it = loggers.find(Open62541_Logger::Discovery);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
