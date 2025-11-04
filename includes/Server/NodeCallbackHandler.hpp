@@ -31,16 +31,7 @@ struct CallbackWrapper {
       std::function<void(const Information_Model::Parameters&)>;
   using CallCallback = std::function<Information_Model::DataVariant(
       const Information_Model::Parameters&)>;
-
-  const Information_Model::DataType data_type_ =
-      Information_Model::DataType::Unknown;
-  const Information_Model::ParameterTypes parameters_;
-  const ReadCallback readable_ = nullptr;
-  const WriteCallback writable_ = nullptr;
-  const ExecuteCallback executable_ = nullptr;
-  const CallCallback callable_ = nullptr;
-
-  CallbackWrapper();
+  CallbackWrapper() = default;
   CallbackWrapper(Information_Model::DataType type, ReadCallback read_callback);
   CallbackWrapper(
       Information_Model::DataType type, WriteCallback write_callback);
@@ -52,6 +43,13 @@ struct CallbackWrapper {
   CallbackWrapper(Information_Model::DataType type,
       const Information_Model::ParameterTypes& parameters,
       CallCallback call_callback);
+
+  Information_Model::DataType data_type_ = Information_Model::DataType::Unknown;
+  Information_Model::ParameterTypes parameters_;
+  ReadCallback readable_ = nullptr;
+  WriteCallback writable_ = nullptr;
+  ExecuteCallback executable_ = nullptr;
+  CallCallback callable_ = nullptr;
 };
 using CallbackWrapperPtr = std::shared_ptr<CallbackWrapper>;
 
