@@ -159,6 +159,13 @@ void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
     }
     break;
   }
+  case UA_LogCategory::UA_LOGCATEGORY_PUBSUB: {
+    auto it = loggers.find(Open62541_Logger::Server);
+    if (it != loggers.end()) {
+      it->second->error("PubSub is not supported by the server");
+    }
+    break;
+  }
   }
 }
 
