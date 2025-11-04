@@ -202,40 +202,32 @@ void print(const DevicePtr& device) {
   print(device->group(), ELEMENT_OFFSET);
 }
 
-const static vector<string> device_ids{"base_id_1", "base_id_2"};
+const static vector<string_view> device_ids{"base_id_1", "base_id_2"};
 
+// NOLINTBEGIN(readability-magic-numbers)
 DevicePtr buildDevice1() {
   auto mock_builder = make_shared<Information_Model::testing::MockBuilder>();
 
-  mock_builder->setDeviceInfo(device_ids[0],
+  mock_builder->setDeviceInfo(string{device_ids[0]},
       {"Example 1", "This is an example temperature sensor system"});
   { // Power group
     auto subgroup_1_ref_id = mock_builder->addGroup(
         {"Power", "Groups information regarding the power supply"});
     mock_builder->addReadable(subgroup_1_ref_id,
-        {"Power", "Indicates if system is running on batter power"},
-        Information_Model::DataType::Boolean,
-        []() -> DataVariant { return true; });
+        {"Power", "Indicates if system is running on batter power"}, true);
     auto subgroup_2_ref_id = mock_builder->addGroup(subgroup_1_ref_id,
         {"State", "Groups information regarding the power supply"});
     mock_builder->addReadable(subgroup_2_ref_id,
         {"Error",
             "Indicates the current error message, regarding power supply"},
-        Information_Model::DataType::String, []() -> DataVariant {
-          return string("Main Power Supply Interrupted");
-        });
-    mock_builder->addWritable(
-        subgroup_2_ref_id,
+        "Main Power Supply Interrupted");
+    mock_builder->addWritable(subgroup_2_ref_id,
         {"Reset Power Supply",
             "Resets power supply and any related error messages"},
-        Information_Model::DataType::Boolean,
-        [](const DataVariant&) { /*There is nothing to do*/ },
-        []() -> DataVariant { return false; });
+        false);
   }
   mock_builder->addReadable(
-      {"Temperature", "Current measured temperature value in °C"},
-      Information_Model::DataType::Double,
-      []() -> DataVariant { return (double)20.1; }); // NOLINT
+      {"Temperature", "Current measured temperature value in °C"}, 20.1);
 
   return mock_builder->result();
 }
@@ -243,55 +235,31 @@ DevicePtr buildDevice1() {
 DevicePtr buildDevice2() {
   auto mock_builder = make_shared<Information_Model::testing::MockBuilder>();
 
-  mock_builder->setDeviceInfo(device_ids[1],
+  mock_builder->setDeviceInfo(string{device_ids[1]},
       {"Example 2", "This is an example power measurement sensor system"});
   { // Phase 1 group
     auto subgroup_1_ref_id = mock_builder->addGroup(
         {"Phase 1", "Groups first phase's power measurements"});
     mock_builder->addReadable(subgroup_1_ref_id,
-        {"Voltage", "Current measured phase voltage in V"},
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)239.1;
-        });
+        {"Voltage", "Current measured phase voltage in V"}, 241.1);
     mock_builder->addReadable(subgroup_1_ref_id,
-        {"Current", "Current measured phase current in A"},
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)8.8;
-        });
+        {"Current", "Current measured phase current in A"}, 3.4);
   }
   { // Phase 2 group
     auto subgroup_1_ref_id = mock_builder->addGroup(
         {"Phase 2", "Groups second phase's power measurements"});
     mock_builder->addReadable(subgroup_1_ref_id,
-        {"Voltage", "Current measured phase voltage in V"},
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)239.1;
-        });
+        {"Voltage", "Current measured phase voltage in V"}, 222.1);
     mock_builder->addReadable(subgroup_1_ref_id,
-        {"Current", "Current measured phase current in A"},
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)8.8;
-        });
+        {"Current", "Current measured phase current in A"}, 6.6);
   }
   { // Phase 3 group
     auto subgroup_1_ref_id = mock_builder->addGroup(
         {"Phase 3", "Groups third phase's power measurements"});
     mock_builder->addReadable(subgroup_1_ref_id,
-        {"Voltage", "Current measured phase voltage in V"},
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)239.1;
-        });
+        {"Voltage", "Current measured phase voltage in V"}, 239.1);
     mock_builder->addReadable(subgroup_1_ref_id,
-        {"Current", "Current measured phase current in A"},
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)8.8;
-        });
+        {"Current", "Current measured phase current in A"}, 8.8);
   }
   mock_builder->addCallable({"Recalculate", "Recalculates measured values"},
       Information_Model::DataType::Boolean);
@@ -300,6 +268,7 @@ DevicePtr buildDevice2() {
       [](const Parameters&) { cout << "Callback called" << endl; });
   return mock_builder->result();
 }
+// NOLINTEND(readability-magic-numbers)
 
 void registerDevice(
     const DevicePtr& device, const EventSourcePtr& event_source) {
@@ -316,7 +285,7 @@ void registerDevices(const EventSourcePtr& event_source) {
 void deregisterDevices(const EventSourcePtr& event_source) {
   for (const auto& device_id : device_ids) {
     cout << "Deregistrating device: " << device_id << endl;
-    event_source->deregisterDevice(device_id);
+    event_source->deregisterDevice(string{device_id});
     this_thread::sleep_for(5s);
   }
 }
