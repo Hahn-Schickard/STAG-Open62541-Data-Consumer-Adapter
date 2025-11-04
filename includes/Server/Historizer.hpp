@@ -37,7 +37,8 @@ struct Historizer {
   static UA_HistoryDatabase createDatabase();
 
   struct ResultType {
-    int64_t index; // pqxx does not return size_t from queries
+    int64_t index; // pqxx does not return size_t from queries, also we use -1
+                   // for interpolated values
     UA_Variant value;
     std::string source_timestamp;
     std::string server_timestamp;
