@@ -16,7 +16,8 @@ enum class Open62541_Logger : uint8_t {
   Server,
   Client,
   User,
-  Security
+  Security,
+  EventLoop
 };
 
 map<Open62541_Logger, LoggerPtr> loggers;
@@ -38,6 +39,8 @@ void registerLoggers() {
         LoggerManager::registerLogger("Open62541::User"));
     loggers.emplace(Open62541_Logger::Security,
         LoggerManager::registerLogger("Open62541::Security"));
+    loggers.emplace(Open62541_Logger::EventLoop,
+        LoggerManager::registerLogger("Open62541::EventLoop"));
   }
 }
 
@@ -102,51 +105,58 @@ void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
 
   switch (category) {
   case UA_LogCategory::UA_LOGCATEGORY_NETWORK: {
-    auto network_logger = loggers.find(Open62541_Logger::Network);
-    if (network_logger != loggers.end()) {
-      network_logger->second->log(getLoggingLevel(level), message);
+    auto it = loggers.find(Open62541_Logger::Network);
+    if (it != loggers.end()) {
+      it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SECURECHANNEL: {
-    auto channel_logger = loggers.find(Open62541_Logger::Channel);
-    if (channel_logger != loggers.end()) {
-      channel_logger->second->log(getLoggingLevel(level), message);
+    auto it = loggers.find(Open62541_Logger::Channel);
+    if (it != loggers.end()) {
+      it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SESSION: {
-    auto session_logger = loggers.find(Open62541_Logger::Session);
-    if (session_logger != loggers.end()) {
-      session_logger->second->log(getLoggingLevel(level), message);
+    auto it = loggers.find(Open62541_Logger::Session);
+    if (it != loggers.end()) {
+      it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SERVER: {
-    auto server_logger = loggers.find(Open62541_Logger::Server);
-    if (server_logger != loggers.end()) {
-      server_logger->second->log(getLoggingLevel(level), message);
+    auto it = loggers.find(Open62541_Logger::Server);
+    if (it != loggers.end()) {
+      it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_CLIENT: {
-    auto client_logger = loggers.find(Open62541_Logger::Client);
-    if (client_logger != loggers.end()) {
-      client_logger->second->log(getLoggingLevel(level), message);
+    auto it = loggers.find(Open62541_Logger::Client);
+    if (it != loggers.end()) {
+      it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_USERLAND: {
-    auto userland_logger = loggers.find(Open62541_Logger::User);
-    if (userland_logger != loggers.end()) {
-      userland_logger->second->log(getLoggingLevel(level), message);
+    auto it = loggers.find(Open62541_Logger::User);
+    if (it != loggers.end()) {
+      it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SECURITYPOLICY: {
-    auto security_policy_logger = loggers.find(Open62541_Logger::Security);
-    if (security_policy_logger != loggers.end()) {
-      security_policy_logger->second->log(getLoggingLevel(level), message);
+    auto it = loggers.find(Open62541_Logger::Security);
+    if (it != loggers.end()) {
+      it->second->log(getLoggingLevel(level), message);
+    }
+    break;
+  }
+  case UA_LogCategory::UA_LOGCATEGORY_EVENTLOOP: {
+    auto it = loggers.find(Open62541_Logger::EventLoop);
+    if (it != loggers.end()) {
+      it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
