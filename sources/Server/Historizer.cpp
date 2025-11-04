@@ -812,7 +812,9 @@ vector<Historizer::ResultType> Historizer::readHistory(
   if (read_limit != 0 && results.size() == read_limit) {
     // check if there overrun
     auto record_count =
-        transaction.exec1("SELECT COUNT(*) FROM " + table + filters)
+        transaction.exec("SELECT COUNT(*) FROM " + table + filters)
+            .expect_rows(1)
+            .at(0)
             .at(0)
             .as<long>();
     if (record_count > read_limit) {
