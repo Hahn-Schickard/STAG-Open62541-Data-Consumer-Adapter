@@ -6,6 +6,7 @@
 
 #include <Data_Consumer_Adapter_Interface/DataConsumerAdapter.hpp>
 
+#include <filesystem>
 #include <memory>
 
 namespace Data_Consumer_Adapter {
@@ -14,7 +15,7 @@ struct OpcuaAdapter : public DataConsumerAdapter {
 
   OpcuaAdapter(const DataConnector& connector);
   OpcuaAdapter(
-      const DataConnector& connector, const std::string& config_filepath);
+      const DataConnector& connector, const std::filesystem::path& config);
   ~OpcuaAdapter() override = default;
 
   void start() override;

@@ -12,10 +12,10 @@ OpcuaAdapter::OpcuaAdapter(const DataConnector& connector)
 }
 
 OpcuaAdapter::OpcuaAdapter(
-    const DataConnector& connector, const string& config_filepath)
+    const DataConnector& connector, const filesystem::path& config)
     : DataConsumerAdapter("Open62541_Adapter", connector) {
   server_ = make_shared<Open62541Server>(
-      make_unique<open62541::Configuration>(config_filepath));
+      make_unique<open62541::Configuration>(config));
   node_builder_ = make_unique<NodeBuilder>(server_);
 }
 
