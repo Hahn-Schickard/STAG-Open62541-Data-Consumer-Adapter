@@ -768,6 +768,7 @@ vector<Historizer::ResultType> makeResultTypes(const pqxx::result& rows,
   for (const auto& row : rows) {
     results.push_back(makeResultType(row, timestamps_to_return, type_map));
   }
+  return results;
 }
 
 vector<Historizer::ResultType> Historizer::readHistory(
