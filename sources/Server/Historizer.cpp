@@ -9,7 +9,6 @@
 
 #include <chrono>
 #include <cmath>
-
 #include <string>
 
 namespace open62541 {
@@ -20,11 +19,6 @@ using namespace pqxx;
 struct ConnectionUnavailable : runtime_error {
   ConnectionUnavailable()
       : runtime_error("Connection information does not exist") {}
-};
-
-struct DatabaseNotAvailable : runtime_error {
-  DatabaseNotAvailable()
-      : runtime_error("Database driver is not initialized") {}
 };
 
 struct BadContinuationPoint : runtime_error {
