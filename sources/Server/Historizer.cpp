@@ -1260,7 +1260,8 @@ Historizer::ResultType interpolateValues(UA_DateTime target_timestamp,
   intmax_t denominator = after_timestamp - before_timestamp;
   auto interpolated = ((value_diff * weight) / denominator) + before.value;
 
-  return Historizer::ResultType{.value = interpolated,
+  return Historizer::ResultType{.index = -1,
+      .value = interpolated,
       .source_timestamp = getTimestamp(target_timestamp),
       .server_timestamp = getTimestamp(target_timestamp)};
 }
