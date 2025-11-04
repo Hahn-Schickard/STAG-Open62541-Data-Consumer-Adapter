@@ -287,8 +287,56 @@ UA_StatusCode NodeBuilder::addObservableNode(
     const Information_Model::MetaInfoPtr& meta_info,
     const Information_Model::ObservablePtr& metric,
     const UA_NodeId& parent_id) {
-  // convert to readable
-  return UA_STATUSCODE_BAD;
+  UA_NodeId metrid_node_id = UA_NODEID_STRING_ALLOC(
+      server_->getServerNamespace(), meta_info->id().c_str());
+  logger_->trace("Assigning {} NodeId to metric: {}, with id: {}",
+      toString(&metrid_node_id), meta_info->name(), meta_info->id());
+  UA_NodeId reference_type_id = UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT);
+  UA_QualifiedName metric_browse_name = UA_QUALIFIEDNAME_ALLOC(
+      server_->getServerNamespace(), meta_info->name().c_str());
+  logger_->trace("Assigning browse name: {} to metric: {}, with id: {}",
+      toString(&metric_browse_name), meta_info->name(), meta_info->id());
+  UA_NodeId type_definition =
+      UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+
+  UA_VariableAttributes node_attr = UA_VariableAttributes_default;
+
+  auto status = setValue(node_attr, meta_info, metric, "readable metric");
+  try {
+    checkStatusCode("While setting default readable metric value", status);
+    logger_->trace("Assigning {} read callback for {} node",
+        toString(metric->dataType()), toString(&metrid_node_id));
+    node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
+#ifdef UA_ENABLE_HISTORIZING
+    node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
+    node_attr.historizing = true;
+#endif // UA_ENABLE_HISTORIZING
+    status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
+        make_shared<CallbackWrapper>(metric->dataType(),
+            (CallbackWrapper::ReadCallback)bind(&Observable::read, metric)));
+    checkStatusCode("While setting readable metric callbacks", status);
+
+    UA_DataSource data_source;
+    data_source.read = &NodeCallbackHandler::readNodeValue;
+    data_source.write = nullptr;
+
+    auto* server_ptr = server_->getServer();
+    status = UA_Server_addDataSourceVariableNode(server_ptr, metrid_node_id,
+        parent_id, reference_type_id, metric_browse_name, type_definition,
+        node_attr, data_source, nullptr, nullptr);
+    checkStatusCode("While adding readable variable node to server", status);
+#ifdef UA_ENABLE_HISTORIZING
+    server_->registerForHistorization(metrid_node_id, node_attr.value.type);
+#endif // UA_ENABLE_HISTORIZING
+  } catch (const StatusCodeNotGood& ex) {
+    logger_->error(
+        "Failed to create a Node for Readable Metric: {}. Status: {}",
+        meta_info->name(), ex.what());
+  }
+  UA_NodeId_clear(&metrid_node_id);
+  UA_QualifiedName_clear(&metric_browse_name);
+  UA_VariableAttributes_clear(&node_attr);
+  return status;
 }
 
 UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
