@@ -38,12 +38,6 @@ struct NoBoundData : runtime_error {
   NoBoundData() : runtime_error("No bound data") {}
 };
 
-string readConfig(const filesystem::path& config) {
-  // @todo: read configuration file to get database backend, authentication and
-  // table info
-  return "";
-}
-
 void createDomainRestrictions(work* transaction) {
   // NOLINTBEGIN(readability-magic-numbers)
   unordered_map<string, size_t> domains{
@@ -106,13 +100,14 @@ unordered_map<int64_t, UA_DataTypeKind> queryTypeOIDs(work* transaction) {
   return result;
 }
 
-Historizer::Historizer(const filesystem::path& config) {
+Historizer::Historizer(const string& config) {
   if (!logger_) {
     logger_ = LoggerManager::registerTypedLogger(this);
   }
 
-  if (!connection_info_.empty()) {
-    connection_info_ = readConfig(config);
+  if (!config_.empty()) {
+    // @todo probably a bad idea to store connection info in a field
+    config_ = config;
   }
 
   auto session = connect();
@@ -137,8 +132,8 @@ void Historizer::log(
 }
 
 pqxx::connection Historizer::connect() {
-  if (!connection_info_.empty()) {
-    return connection(connection_info_);
+  if (!config_.empty()) {
+    return connection(config_);
   } else {
     throw ConnectionUnavailable();
   }
