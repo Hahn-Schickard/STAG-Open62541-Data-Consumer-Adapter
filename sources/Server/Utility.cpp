@@ -120,7 +120,7 @@ UA_Variant toUAVariant(const DataVariant& variant) {
       },
       [&result](const Timestamp& value) {
         UA_DateTimeStruct date_time_struct;
-        date_time_struct.year = (UA_UInt16)value.year,
+        date_time_struct.year = static_cast<UA_UInt16>(value.year),
         date_time_struct.month = (UA_UInt16)value.month,
         date_time_struct.day = (UA_UInt16)value.day,
         date_time_struct.hour = (UA_UInt16)value.hours,
