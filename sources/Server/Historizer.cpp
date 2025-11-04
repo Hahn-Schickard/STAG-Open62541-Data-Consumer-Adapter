@@ -99,11 +99,14 @@ unordered_map<int64_t, UA_DataTypeKind> queryTypeOIDs(work* transaction) {
   }; // clang-format on
   unordered_map<int64_t, UA_DataTypeKind> result;
   for (const auto& [type_name, type_code] : typenames) {
-    auto oid =
-        transaction
-            ->exec1("SELECT oid FROM pg_type WHERE typname = $1", {type_name})
-            .at(0)
-            .as<long>();
+    auto oid = transaction
+                   ->exec("SELECT oid FROM pg_type WHERE typname = $1",
+                       params{type_name})
+                   .expect_rows(1)
+                   .expect_columns(1)
+                   .at(0)
+                   .at(0)
+                   .as<long>();
     result.emplace(oid, static_cast<UA_DataTypeKind>(type_code));
   }
   return result;
@@ -235,7 +238,7 @@ void updateHistorized(work* transaction, const string& target_node_id) {
   auto timestamp = getCurrentTimestamp();
   transaction->exec("UPDATE Historized_Nodes Last_Updated = $2 WHERE "
                     "Node_ID = $1",
-      {target_node_id, timestamp});
+      params{target_node_id, timestamp});
   transaction->commit();
 }
 
@@ -251,7 +254,7 @@ UA_StatusCode Historizer::registerNodeId(
       auto timestamp = getCurrentTimestamp();
       transaction.exec("INSERT INTO Historized_Nodes(Node_Id, Last_Updated)  "
                        "VALUES($1, $2)",
-          {target, timestamp});
+          params{target, timestamp});
     }
     transaction.commit();
 
@@ -262,7 +265,8 @@ UA_StatusCode Historizer::registerNodeId(
                      "Server_Timestamp TIMESTAMP NOT NULL, "
                      "Source_Timestamp TIMESTAMP NOT NULL, "
                      "Value $2 NOT NULL);",
-        {table_name, value_type}); // if table exists, check value data type
+        params{
+            table_name, value_type}); // if table exists, check value data type
     transaction.commit();
 
     auto monitor_request = UA_MonitoredItemCreateRequest_default(node_id);
@@ -608,51 +612,47 @@ UA_Variant toUaVariant(const field& data,
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
     auto value = static_cast<uint8_t>(data.as<int>());
-    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_BYTE]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BYTE]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
     auto value = static_cast<int8_t>(data.as<int>());
-    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_SBYTE]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_SBYTE]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
     auto value = static_cast<uint16_t>(data.as<int>());
-    UA_Variant_setScalarCopy(
-        &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT16]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT16]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
     auto value = static_cast<int16_t>(data.as<int>());
-    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_INT16]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT16]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
     auto value = static_cast<uint32_t>(data.as<long>());
-    UA_Variant_setScalarCopy(
-        &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT32]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT32]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
     auto value = data.as<int32_t>();
-    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_INT32]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT32]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
     auto value = static_cast<uint64_t>(data.as<long>());
-    UA_Variant_setScalarCopy(
-        &result, &value, &UA_TYPES[UA_DATATYPEKIND_UINT64]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
     auto value = data.as<long>();
-    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_DATATYPEKIND_INT64]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
     auto value = data.as<int>();
-    UA_Variant_setScalarCopy(
-        &result, &value, &UA_TYPES[UA_DATATYPEKIND_STATUSCODE]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_STATUSCODE]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
@@ -668,8 +668,7 @@ UA_Variant toUaVariant(const field& data,
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
     auto timestamp = data.as<string>();
     auto value = toUaDateTime(timestamp);
-    UA_Variant_setScalarCopy(
-        &result, &value, &UA_TYPES[UA_DATATYPEKIND_DATETIME]);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DATETIME]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
@@ -742,7 +741,7 @@ UA_ByteString* makeContinuationPoint(size_t last_index) {
 
 Historizer::ResultType makeResultType(const pqxx::row& entry,
     UA_TimestampsToReturn timestamps_to_return,
-    unordered_map<int64_t, UA_DataTypeKind> type_map) {
+    const unordered_map<int64_t, UA_DataTypeKind>& type_map) {
   Historizer::ResultType result{// clang-format off
       .index = entry["Index"].as<long>(),
       .value = toUaVariant(entry["Value"], type_map),
@@ -764,7 +763,7 @@ Historizer::ResultType makeResultType(const pqxx::row& entry,
 
 vector<Historizer::ResultType> makeResultTypes(const pqxx::result& rows,
     UA_TimestampsToReturn timestamps_to_return,
-    unordered_map<int64_t, UA_DataTypeKind> type_map) {
+    const unordered_map<int64_t, UA_DataTypeKind>& type_map) {
   vector<Historizer::ResultType> results;
   for (const auto& row : rows) {
     results.push_back(makeResultType(row, timestamps_to_return, type_map));
@@ -862,200 +861,394 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
    * setting any data*/
 }
 
-// OODD::DataValue operator*(const OODD::DataValue& lhs, const intmax_t& rhs)
-// {
-//   OODD::DataValue result;
-//   match(
-//       lhs,
-//       [&](bool /*value*/) {
-//         throw logic_error("Can not multiply Boolean value");
-//       },
-//       [&](uintmax_t value) { result = value * abs(rhs); },
-//       [&](intmax_t value) { result = value * rhs; },
-//       [&](float value) { result = value * (float)(rhs); },
-//       [&](double value) { result = value * (double)(rhs); },
-//       [&](const string& /*value*/) {
-//         throw logic_error("Can not multiply Text");
-//       },
-//       [&](const vector<uint8_t>& /*value*/) {
-//         throw logic_error("Can not multiply Opaque data");
-//       });
-//   return result;
-// }
+template <typename T> T multiply(const UA_Variant& lhs, const intmax_t& rhs) {
+  auto lhs_value = *((T*)(lhs.data));
+  if (lhs_value > 0 && rhs > 0) {
+    if (lhs_value > numeric_limits<T>::max() / rhs) {
+      // overflow
+      return numeric_limits<T>::max();
+    }
+  }
 
-// OODD::DataValue operator+(
-//     const OODD::DataValue& lhs, const OODD::DataValue& rhs) {
-//   OODD::DataValue result;
-//   match(
-//       lhs,
-//       [&](bool /*value*/) {
-//         throw invalid_argument("Can not add to a boolean");
-//       },
-//       [&](uintmax_t value) {
-//         if (holds_alternative<uintmax_t>(rhs)) {
-//           auto addition = get<uintmax_t>(rhs);
-//           result = value + addition;
-//         } else {
-//           throw invalid_argument(
-//               "Can not add non unsigned int value to a unsigned int");
-//         }
-//       },
-//       [&](intmax_t value) {
-//         if (holds_alternative<intmax_t>(rhs)) {
-//           auto addition = get<intmax_t>(rhs);
-//           result = value + addition;
-//         } else {
-//           throw invalid_argument(
-//               "Can not add non signed int value to a signed int");
-//         }
-//       },
-//       [&](float value) {
-//         if (holds_alternative<float>(rhs)) {
-//           auto addition = get<float>(rhs);
-//           result = value + addition;
-//         } else {
-//           throw invalid_argument("Can not add non float value to a float");
-//         }
-//       },
-//       [&](double value) {
-//         if (holds_alternative<double>(rhs)) {
-//           auto addition = get<double>(rhs);
-//           result = value + addition;
-//         } else {
-//           throw invalid_argument("Can not add non double value to a
-//           double");
-//         }
-//       },
-//       [&](const string& /*value*/) {
-//         throw logic_error("Can not add to Text");
-//       },
-//       [&](const vector<uint8_t>& /*value*/) {
-//         throw logic_error("Can not add to Opaque data");
-//       });
-//   return result;
-// }
+  if (lhs_value < 0 && rhs < 0) {
+    if (lhs_value < numeric_limits<T>::min() / rhs) {
+      // overflow
+      return numeric_limits<T>::max();
+    }
+  }
 
-// OODD::DataValue operator-(
-//     const OODD::DataValue& lhs, const OODD::DataValue& rhs) {
-//   OODD::DataValue result;
-//   match(
-//       lhs,
-//       [&](bool /*value*/) {
-//         throw invalid_argument("Can not subtract from a boolean");
-//       },
-//       [&](uintmax_t value) {
-//         if (holds_alternative<uintmax_t>(rhs)) {
-//           auto addition = get<uintmax_t>(rhs);
-//           result = value - addition;
-//         } else {
-//           throw invalid_argument(
-//               "Can not subtract non unsigned int value from a unsigned
-//               int");
-//         }
-//       },
-//       [&](intmax_t value) {
-//         if (holds_alternative<intmax_t>(rhs)) {
-//           auto addition = get<intmax_t>(rhs);
-//           result = value - addition;
-//         } else {
-//           throw invalid_argument(
-//               "Can not subtract non signed int value from a signed int");
-//         }
-//       },
-//       [&](float value) {
-//         if (holds_alternative<float>(rhs)) {
-//           auto addition = get<float>(rhs);
-//           result = value - addition;
-//         } else {
-//           throw invalid_argument(
-//               "Can not subtract non float value from a float");
-//         }
-//       },
-//       [&](double value) {
-//         if (holds_alternative<double>(rhs)) {
-//           auto addition = get<double>(rhs);
-//           result = value - addition;
-//         } else {
-//           throw invalid_argument(
-//               "Can not subtract non double value from a double");
-//         }
-//       },
-//       [&](const string& /*value*/) {
-//         throw logic_error("Can not subtract from Text");
-//       },
-//       [&](const vector<uint8_t>& /*value*/) {
-//         throw logic_error("Can not subtract from Opaque data");
-//       });
-//   return result;
-// }
+  if (lhs_value < 0 && rhs > 0) {
+    if (rhs < numeric_limits<T>::min() / lhs_value) {
+      // underflow
+      return numeric_limits<T>::min();
+    }
+  }
 
-// OODD::DataValue operator/(const OODD::DataValue& lhs, const intmax_t& rhs)
-// {
-//   OODD::DataValue result;
-//   match(
-//       lhs,
-//       [&](bool /*value*/) {
-//         throw logic_error("Can not divide Boolean value");
-//       },
-//       [&](uintmax_t value) { result = value / (uintmax_t)(rhs); },
-//       [&](intmax_t value) { result = value / rhs; },
-//       [&](float value) { result = value / (float)(rhs); },
-//       [&](double value) { result = value / (double)(rhs); },
-//       [&](const string& /*value*/) {
-//         throw logic_error("Can not divide Text");
-//       },
-//       [&](const vector<uint8_t>& /*value*/) {
-//         throw logic_error("Can not divide Opaque data");
-//       });
-//   return result;
-// }
+  if (lhs_value > 0 && rhs < 0) {
+    if (lhs_value < numeric_limits<T>::min() / rhs) {
+      // underflow
+      return numeric_limits<T>::min();
+    }
+  }
 
-vector<Historizer::ResultType> interpolateValues(
-    UA_DateTime target_timestamp, pqxx::result before, pqxx::result after) {
-  vector<Historizer::ResultType> result;
+  T value = round(lhs_value * rhs);
+  return value;
+}
 
-  // Historizer::ResultType first_nearest_value, second_nearest_value;
-  // string data_point_name;
-  // // set result timestamp columns and nearest_value DataTypes
-  // switch (first_row.size()) { // MUST either be equal to 1,2 or 3
-  // case 1: {
-  //   first_nearest_value = first_row[0].value();
-  //   second_nearest_value = second_row[0].value();
-  //   data_point_name = first_row[0].name();
-  //   break;
-  // }
-  // case 2: {
-  //   result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
-  //   first_nearest_value = first_row[1].value();
-  //   second_nearest_value = second_row[1].value();
-  //   data_point_name = first_row[1].name();
-  //   break;
-  // }
-  // case 3: {
-  //   result.emplace_back(first_row[0].name(), getTimestamp(target_timestamp));
-  //   result.emplace_back(first_row[1].name(), getTimestamp(target_timestamp));
-  //   first_nearest_value = first_row[2].value();
-  //   second_nearest_value = second_row[2].value();
-  //   data_point_name = first_row[2].name();
-  //   break;
-  // }
-  // default: {
-  //   throw NoBoundData();
-  //   break;
-  // }
-  // }
+UA_Variant operator*(const UA_Variant& lhs, const intmax_t& rhs) {
+  if (lhs.type->typeKind == UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN) {
+    throw logic_error("Can not multiply Boolean values");
+  }
 
-  // auto first_nearest_timestamp = toUaDateTime(first.server_timestamp);
-  // auto second_nearest_timestamp = toUaDateTime(second.server_timestamp);
-  // // use formula from OPC UA Part 13 Aggregates specification section 3.1.8
-  // intmax_t weight = target_timestamp - first_nearest_timestamp;
-  // auto value_diff = second_nearest_value - first_nearest_value;
-  // intmax_t denominator = second_nearest_timestamp - first_nearest_timestamp;
-  // auto interpolated_data =
-  //     ((value_diff * weight) / denominator) + first_nearest_value;
-
-  // result.emplace_back(data_point_name, interpolated_data);
+  UA_Variant result;
+  UA_Variant_init(&result);
+  switch (lhs.type->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    auto value = multiply<UA_SByte>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_SBYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    auto value = multiply<UA_Byte>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    auto value = multiply<UA_UInt16>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    auto value = multiply<UA_Int16>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    auto value = multiply<UA_UInt32>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    auto value = multiply<UA_Int32>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    auto value = multiply<UA_UInt64>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    auto value = multiply<UA_Int64>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    auto value = multiply<float>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_FLOAT]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    auto value = multiply<double>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
+    break;
+  }
+  default: {
+    throw logic_error("Can not multiply non numeric data");
+  }
+  }
   return result;
+}
+
+template <typename T> T divide(const UA_Variant& lhs, const intmax_t& rhs) {
+  auto lhs_value = *((T*)(lhs.data));
+  if (rhs == 0) {
+    throw logic_error("Division by 0 is not allowed");
+  }
+  if (lhs_value == -1 && rhs == numeric_limits<intmax_t>::min()) {
+    // overflow
+    return numeric_limits<T>::max();
+  }
+  T value = round(lhs_value / rhs);
+  return value;
+}
+
+UA_Variant operator/(const UA_Variant& lhs, const intmax_t& rhs) {
+  if (lhs.type->typeKind == UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN) {
+    throw logic_error("Can not divide Boolean values");
+  }
+
+  UA_Variant result;
+  UA_Variant_init(&result);
+  switch (lhs.type->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    auto value = divide<UA_SByte>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_SBYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    auto value = divide<UA_Byte>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    auto value = divide<UA_UInt16>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    auto value = divide<UA_Int16>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    auto value = divide<UA_UInt32>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    auto value = divide<UA_Int32>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    auto value = divide<UA_UInt64>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    auto value = divide<UA_Int64>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    auto value = divide<float>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_FLOAT]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    auto value = divide<double>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
+    break;
+  }
+  default: {
+    throw logic_error("Can not divide non numeric data");
+  }
+  }
+  return result;
+}
+
+template <typename T>
+T sumUnsigned(const UA_Variant& lhs, const UA_Variant& rhs) {
+  auto lhs_value = *((T*)(lhs.data));
+  auto rhs_value = *((T*)(rhs.data));
+  auto value = lhs_value + rhs_value;
+  if (value < lhs_value) {
+    // overflow
+    return numeric_limits<T>::max();
+  }
+  return value;
+}
+
+template <typename T>
+T sumSigned(const UA_Variant& lhs, const UA_Variant& rhs) {
+  auto lhs_value = *((T*)(lhs.data));
+  auto rhs_value = *((T*)(rhs.data));
+  if (lhs_value > numeric_limits<T>::max() - rhs_value) {
+    // overflow
+    return numeric_limits<T>::max();
+  }
+  if (lhs_value < numeric_limits<T>::min() + rhs_value) {
+    // underflow
+    return numeric_limits<T>::min();
+  }
+  T value = lhs_value + rhs_value;
+  return value;
+}
+
+UA_Variant operator+(const UA_Variant& lhs, const UA_Variant& rhs) {
+  if (lhs.type->typeKind != rhs.type->typeKind) {
+    throw logic_error("Can not not add non matching numeric types");
+  }
+
+  if (lhs.type->typeKind == UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN) {
+    throw logic_error("Can not add Boolean values");
+  }
+
+  UA_Variant result;
+  UA_Variant_init(&result);
+
+  switch (lhs.type->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    auto value = sumUnsigned<UA_SByte>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_SBYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    auto value = sumSigned<UA_Byte>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    auto value = sumSigned<UA_UInt16>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    auto value = sumUnsigned<UA_Int16>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    auto value = sumSigned<UA_UInt32>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    auto value = sumUnsigned<UA_Int32>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    auto value = sumSigned<UA_UInt64>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    auto value = sumUnsigned<UA_Int64>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    auto value = sumUnsigned<float>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_FLOAT]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    auto value = sumUnsigned<double>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
+    break;
+  }
+  default: {
+    throw logic_error("Can not add non numeric data");
+  }
+  }
+  return result;
+}
+
+template <typename T>
+T numericUnsignedDiff(const UA_Variant& lhs, const UA_Variant& rhs) {
+  auto lhs_value = *((T*)(lhs.data));
+  auto rhs_value = *((T*)(rhs.data));
+  // @todo: use modulo for diff instead?
+  auto value = lhs_value - rhs_value;
+  if (lhs_value < rhs_value) {
+    // underflow
+    return numeric_limits<T>::min();
+  }
+  return value;
+}
+
+template <typename T>
+T numericSignedDiff(const UA_Variant& lhs, const UA_Variant& rhs) {
+  auto lhs_value = *((T*)(lhs.data));
+  auto rhs_value = *((T*)(rhs.data));
+  if (lhs_value > numeric_limits<T>::max() - rhs_value) {
+    // overflow
+    return numeric_limits<T>::max();
+  }
+  if (lhs_value < numeric_limits<T>::min() + rhs_value) {
+    // underflow
+    return numeric_limits<T>::min();
+  }
+
+  T value = lhs_value - rhs_value;
+  return value;
+}
+
+UA_Variant operator-(const UA_Variant& lhs, const UA_Variant& rhs) {
+  if (lhs.type->typeKind != rhs.type->typeKind) {
+    throw logic_error("Can not not subtract non matching numeric types");
+  }
+
+  if (lhs.type->typeKind == UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN) {
+    throw logic_error("Can not subtract Boolean values");
+  }
+
+  UA_Variant result;
+  UA_Variant_init(&result);
+
+  switch (lhs.type->typeKind) {
+  case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    auto value = numericSignedDiff<UA_SByte>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_SBYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
+    auto value = numericUnsignedDiff<UA_Byte>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BYTE]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
+    auto value = numericUnsignedDiff<UA_UInt16>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
+    auto value = numericSignedDiff<UA_Int16>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT16]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
+    auto value = numericUnsignedDiff<UA_UInt32>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
+    auto value = numericSignedDiff<UA_Int32>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT32]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
+    auto value = numericUnsignedDiff<UA_UInt64>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
+    auto value = numericSignedDiff<UA_Int64>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
+    auto value = numericSignedDiff<float>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_FLOAT]);
+    break;
+  }
+  case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
+    auto value = numericSignedDiff<double>(lhs, rhs);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
+    break;
+  }
+  default: {
+    throw logic_error("Can not subtract non numeric data");
+  }
+  }
+  return result;
+}
+
+Historizer::ResultType interpolateValues(UA_DateTime target_timestamp,
+    const Historizer::ResultType& before, const Historizer::ResultType& after) {
+  auto before_timestamp = toUaDateTime(before.server_timestamp);
+  auto after_timestamp = toUaDateTime(after.server_timestamp);
+  // use formula from OPC UA Part 13 Aggregates specification section 3.1.8
+  intmax_t weight = target_timestamp - before_timestamp;
+  auto value_diff = after.value - before.value;
+  intmax_t denominator = after_timestamp - before_timestamp;
+  auto interpolated = ((value_diff * weight) / denominator) + before.value;
+
+  return Historizer::ResultType{.value = interpolated,
+      .source_timestamp = getTimestamp(target_timestamp),
+      .server_timestamp = getTimestamp(target_timestamp)};
 }
 
 /**
@@ -1193,15 +1386,19 @@ UA_StatusCode Historizer::readAndAppendHistory(
     if (rows.empty()) {
       string nearest_query = "SELECT " + columns + " FROM " + table +
           " WHERE Source_Timestamp $1 " + timestamp +
-          " ORDER BY Source_Timestamp ASC";
-      auto nearest_before = transaction.exec(nearest_query, params{"<"});
-      auto nearest_after = transaction.exec(nearest_query, params{">"});
+          " ORDER BY Source_Timestamp ASC LIMIT 1;";
+      auto nearest_before = makeResultType(
+          transaction.exec(nearest_query, params{"<"}).expect_rows(1).at(0),
+          timestamps_to_return, type_map_);
+      auto nearest_after = makeResultType(
+          transaction.exec(nearest_query, params{">"}).expect_rows(1).at(0),
+          timestamps_to_return, type_map_);
       // we do not check history_read_details->useSimpleBoundsflag,
       // because all values are Non-Bad for our case and thus
       // useSimpleBounds=False would not change the calculation
       auto interpolated = interpolateValues(
           history_read_details->reqTimes[i], nearest_before, nearest_after);
-      results.insert(results.end(), interpolated.begin(), interpolated.end());
+      results.push_back(interpolated);
       setHistorianBits(&status, DataLocation::Interpolated);
     } else {
       auto raw = makeResultTypes(rows, timestamps_to_return, type_map_);
