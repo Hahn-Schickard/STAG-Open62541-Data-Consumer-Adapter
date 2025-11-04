@@ -963,7 +963,18 @@ UA_Variant operator*(const UA_Variant& lhs, const intmax_t& rhs) {
   return result;
 }
 
-template <typename T> T divide(const UA_Variant& lhs, const intmax_t& rhs) {
+template <typename T>
+T divideUnsigned(const UA_Variant& lhs, const intmax_t& rhs) {
+  auto lhs_value = *((T*)(lhs.data));
+  if (rhs == 0) {
+    throw logic_error("Division by 0 is not allowed");
+  }
+  T value = round(lhs_value / rhs);
+  return value;
+}
+
+template <typename T>
+T divideSigned(const UA_Variant& lhs, const intmax_t& rhs) {
   auto lhs_value = *((T*)(lhs.data));
   if (rhs == 0) {
     throw logic_error("Division by 0 is not allowed");
@@ -985,52 +996,52 @@ UA_Variant operator/(const UA_Variant& lhs, const intmax_t& rhs) {
   UA_Variant_init(&result);
   switch (lhs.type->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    auto value = divide<UA_SByte>(lhs, rhs);
+    auto value = divideSigned<UA_SByte>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_SBYTE]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
-    auto value = divide<UA_Byte>(lhs, rhs);
+    auto value = divideUnsigned<UA_Byte>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BYTE]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    auto value = divide<UA_UInt16>(lhs, rhs);
+    auto value = divideUnsigned<UA_UInt16>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT16]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    auto value = divide<UA_Int16>(lhs, rhs);
+    auto value = divideSigned<UA_Int16>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT16]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    auto value = divide<UA_UInt32>(lhs, rhs);
+    auto value = divideUnsigned<UA_UInt32>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT32]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    auto value = divide<UA_Int32>(lhs, rhs);
+    auto value = divideSigned<UA_Int32>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT32]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    auto value = divide<UA_UInt64>(lhs, rhs);
+    auto value = divideUnsigned<UA_UInt64>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    auto value = divide<UA_Int64>(lhs, rhs);
+    auto value = divideSigned<UA_Int64>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-    auto value = divide<float>(lhs, rhs);
+    auto value = divideSigned<float>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_FLOAT]);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    auto value = divide<double>(lhs, rhs);
+    auto value = divideSigned<double>(lhs, rhs);
     UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
     break;
   }
