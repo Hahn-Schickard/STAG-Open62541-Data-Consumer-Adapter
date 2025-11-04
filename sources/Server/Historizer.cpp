@@ -16,11 +16,6 @@ using namespace std;
 using namespace HaSLL;
 using namespace pqxx;
 
-struct ConnectionUnavailable : runtime_error {
-  ConnectionUnavailable()
-      : runtime_error("Connection information does not exist") {}
-};
-
 struct BadContinuationPoint : runtime_error {
   BadContinuationPoint() : runtime_error("Corrupted Continuation Point") {}
 };
@@ -100,14 +95,9 @@ unordered_map<int64_t, UA_DataTypeKind> queryTypeOIDs(work* transaction) {
   return result;
 }
 
-Historizer::Historizer(const string& config) {
+Historizer::Historizer() {
   if (!logger_) {
     logger_ = LoggerManager::registerTypedLogger(this);
-  }
-
-  if (!config_.empty()) {
-    // @todo probably a bad idea to store connection info in a field
-    config_ = config;
   }
 
   auto session = connect();
@@ -132,11 +122,7 @@ void Historizer::log(
 }
 
 pqxx::connection Historizer::connect() {
-  if (!config_.empty()) {
-    return connection(config_);
-  } else {
-    throw ConnectionUnavailable();
-  }
+  return connection("service=stag_open62541_historizer");
 }
 
 bool Historizer::checkTable(const string& name) {
@@ -266,11 +252,6 @@ UA_StatusCode Historizer::registerNodeId(
         UA_TIMESTAMPSTORETURN_BOTH, monitor_request, nullptr,
         &Historizer::dataChanged);
     return result.statusCode;
-  } catch (const ConnectionUnavailable& ex) {
-    log(SeverityLevel::Critical,
-        "Could not read {} value. Database connection is not available",
-        target);
-    return UA_STATUSCODE_BADDATAUNAVAILABLE;
   } catch (const exception& ex) {
     log(SeverityLevel::Critical,
         "An unhandled exception occurred while trying to register {} node. "
@@ -444,10 +425,6 @@ void Historizer::setValue(UA_Server* /*server*/, void* /*hdb_context*/,
     transaction.commit();
 
     updateHistorized(&transaction, target);
-  } catch (const ConnectionUnavailable& ex) {
-    log(SeverityLevel::Critical,
-        "Could not read {} value. Database connection is not available",
-        target);
   } catch (exception& ex) {
     log(SeverityLevel::Error,
         "Failed to historize Node {} value due to an exception. "
@@ -837,9 +814,6 @@ void Historizer::readRaw(UA_Server* /*server*/, void* /*hdb_context*/,
       } catch (const BadContinuationPoint& ex) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-      } catch (const ConnectionUnavailable& ex) {
-        response->responseHeader.serviceResult =
-            UA_STATUSCODE_BADDATAUNAVAILABLE;
       } catch (const OutOfMemory& ex) {
         response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
       } catch (const runtime_error& ex) {
@@ -1447,9 +1421,6 @@ void Historizer::readAtTime(UA_Server* /*server*/, void* /*hdb_context*/,
       } catch (const BadContinuationPoint& ex) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-      } catch (const ConnectionUnavailable& ex) {
-        response->responseHeader.serviceResult =
-            UA_STATUSCODE_BADDATAUNAVAILABLE;
       } catch (const OutOfMemory& ex) {
         response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
       } catch (const runtime_error& ex) {

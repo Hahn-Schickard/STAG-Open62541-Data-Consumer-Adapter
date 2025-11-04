@@ -9,13 +9,7 @@
 
 namespace open62541 {
 struct Historizer {
-
-  /**
-   * @brief Create default historizer object with default OODD::DatabaseDriver
-   * values
-   *
-   */
-  Historizer(const std::string& config);
+  Historizer();
 
   ~Historizer();
   /**
@@ -160,7 +154,6 @@ private:
       const Types&... args);
 
   static inline HaSLL::LoggerPtr logger_ = nullptr;
-  static inline std::string config_ = {};
   static inline std::unordered_map<int64_t, UA_DataTypeKind> type_map_ = {};
 };
 } // namespace open62541
