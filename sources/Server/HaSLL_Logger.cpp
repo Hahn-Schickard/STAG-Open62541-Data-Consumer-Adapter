@@ -73,7 +73,7 @@ SeverityLevel getLoggingLevel(UA_LogLevel level) {
 void removeLoggers() {
   try {
     loggers.clear();
-  } catch (...) {
+  } catch (...) { // NOLINT(bugprone-empty-catch)
     // surpress any exceptions thrown from logger dtors
   }
 }
@@ -91,7 +91,6 @@ void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
   va_copy(args_copy, args); // make a copy for the buffer size calculation
   // NOLINTNEXTLINE(clang-analyzer-valist.*)
   auto len = vsnprintf(
-      // NOLINTNEXTLINE(modernize-use-nullptr)
       0, 0, msg, args_copy); // get the amount of bytes needed to write
   // vsnprintf returns a negative value if an error occurred
   if (len > 0) {
