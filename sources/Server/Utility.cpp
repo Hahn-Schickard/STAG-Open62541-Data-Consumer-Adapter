@@ -110,10 +110,10 @@ UA_Variant toUAVariant(const DataVariant& variant) {
         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
       },
       [&result](uintmax_t value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_uintmax]);
+        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
       },
       [&result](intmax_t value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_intmax]);
+        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
       },
       [&result](double value) {
         UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
