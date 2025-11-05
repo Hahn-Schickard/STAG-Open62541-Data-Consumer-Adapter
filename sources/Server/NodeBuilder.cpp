@@ -1,5 +1,7 @@
 #include "NodeBuilder.hpp"
-#include "Utility.hpp"
+#include "CheckStatus.hpp"
+#include "StringConverter.hpp"
+#include "VariantConverter.hpp"
 
 #include <HaSLL/LoggerManager.hpp>
 #include <Variant_Visitor/Visitor.hpp>
@@ -251,10 +253,10 @@ UA_StatusCode NodeBuilder::addReadableNode(const MetaInfoPtr& meta_info,
     logger_->trace("Assigning {} read callback for {} node",
         toString(metric->dataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
     node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     node_attr.historizing = true;
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
     status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
         make_shared<CallbackWrapper>(metric->dataType(),
             (CallbackWrapper::ReadCallback)bind(&Readable::read, metric)));
@@ -269,9 +271,9 @@ UA_StatusCode NodeBuilder::addReadableNode(const MetaInfoPtr& meta_info,
         parent_id, reference_type_id, metric_browse_name, type_definition,
         node_attr, data_source, nullptr, nullptr);
     checkStatusCode("While adding readable variable node to server", status);
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
     server_->registerForHistorization(metrid_node_id, node_attr.value.type);
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
         "Failed to create a Node for Readable Metric: {}. Status: {}",
@@ -307,10 +309,10 @@ UA_StatusCode NodeBuilder::addObservableNode(
     logger_->trace("Assigning {} read callback for {} node",
         toString(metric->dataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ;
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
     node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     node_attr.historizing = true;
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
     status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
         make_shared<CallbackWrapper>(metric->dataType(),
             (CallbackWrapper::ReadCallback)bind(&Observable::read, metric)));
@@ -325,9 +327,9 @@ UA_StatusCode NodeBuilder::addObservableNode(
         parent_id, reference_type_id, metric_browse_name, type_definition,
         node_attr, data_source, nullptr, nullptr);
     checkStatusCode("While adding readable variable node to server", status);
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
     server_->registerForHistorization(metrid_node_id, node_attr.value.type);
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
         "Failed to create a Node for Readable Metric: {}. Status: {}",
@@ -360,10 +362,10 @@ UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
     logger_->trace("Assigning {} read and write callbacks for {} node",
         toString(metric->dataType()), toString(&metrid_node_id));
     node_attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
     node_attr.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     node_attr.historizing = true;
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
     UA_DataSource data_source;
     if (!metric->isWriteOnly()) {
       status = NodeCallbackHandler::addNodeCallbacks(metrid_node_id,
@@ -386,9 +388,9 @@ UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
         metrid_node_id, parent_id, reference_type_id, metric_browse_name,
         type_definition, node_attr, data_source, nullptr, nullptr);
     checkStatusCode("While adding writable variable node to server", status);
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
     server_->registerForHistorization(metrid_node_id, node_attr.value.type);
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
         "Failed to create a Node for Writable Metric: {}. Status: {}",

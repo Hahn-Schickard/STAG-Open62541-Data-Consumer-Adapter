@@ -1,6 +1,5 @@
 #include "HaSLL_Logger.hpp"
 #include "HaSLL/LoggerManager.hpp"
-#include "Utility.hpp"
 
 #include <map>
 #include <mutex>

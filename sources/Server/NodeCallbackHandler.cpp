@@ -1,16 +1,15 @@
 #include "NodeCallbackHandler.hpp"
-#include "Utility.hpp"
-
-#include <Variant_Visitor/Visitor.hpp>
-
-using namespace std;
-using namespace Information_Model;
+#include "StringConverter.hpp"
+#include "VariantConverter.hpp"
 
 bool operator==(const UA_NodeId& lhs, const UA_NodeId& rhs) {
   return UA_NodeId_equal(&lhs, &rhs);
 }
 
 namespace open62541 {
+using namespace std;
+using namespace Information_Model;
+
 CallbackWrapper::CallbackWrapper(DataType type, ReadCallback read_callback)
     : data_type_(type), readable_(move(read_callback)) {}
 

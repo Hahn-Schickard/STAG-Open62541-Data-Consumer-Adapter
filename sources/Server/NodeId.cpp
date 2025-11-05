@@ -1,10 +1,9 @@
 #include "NodeId.hpp"
-
-#include <stdexcept>
+#include "StringConverter.hpp"
 
 #include <open62541/server.h>
 
-#include "Utility.hpp"
+#include <stdexcept>
 
 namespace open62541 {
 

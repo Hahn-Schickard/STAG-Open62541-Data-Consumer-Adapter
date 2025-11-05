@@ -1,16 +1,14 @@
-#include "Utility.hpp"
+#include "VariantConverter.hpp"
+#include "StringConverter.hpp"
 
 #include <Variant_Visitor/Visitor.hpp>
-#include <open62541/types.h>
-#include <open62541/types_generated.h>
 
 #include <cmath>
 #include <stdexcept>
 
+namespace open62541 {
 using namespace std;
 using namespace Information_Model;
-
-namespace open62541 {
 
 UA_NodeId toNodeId(DataType type) {
   switch (type) {
@@ -41,65 +39,6 @@ UA_NodeId toNodeId(DataType type) {
                         "OPC UA data type!");
   }
   }
-}
-
-string toString(const UA_String* input) {
-  string result = string((char*)(input->data), input->length);
-  return result;
-}
-
-string toString(const UA_NodeId* node_id) {
-  UA_String ua_string = UA_STRING_NULL;
-  if (UA_NodeId_print(node_id, &ua_string) != UA_STATUSCODE_GOOD) {
-    throw runtime_error("Failed to conver UA_NodeId to a string!");
-  }
-  auto ret = toString(&ua_string);
-  UA_String_clear(&ua_string);
-  return ret;
-}
-
-string toString(const UA_QualifiedName* name) {
-  string result = to_string(name->namespaceIndex) + ":" + toString(&name->name);
-  return result;
-}
-
-string toString(const UA_ExpandedNodeId& id) {
-  return to_string(id.serverIndex) + ":" + toString(&id.namespaceUri) + ":" +
-      toString(&id.nodeId);
-}
-
-UA_String makeUAString(const string& input) {
-  UA_String result;
-  result.length = strlen(input.c_str());
-  result.data = (UA_Byte*)malloc(result.length);
-  memcpy(result.data, input.c_str(), result.length);
-  return result;
-}
-
-UA_ByteString makeUAByteString(const vector<uint8_t>& input) {
-  UA_ByteString result;
-  result.length = input.size();
-  result.data = (UA_Byte*)malloc(result.length);
-  memcpy(result.data, input.data(), result.length);
-  return result;
-}
-
-StatusCodeNotGood::StatusCodeNotGood(
-    const string& msg, const UA_StatusCode& code)
-    : runtime_error("Received status code: " +
-          string(UA_StatusCode_name(code)) + (msg.empty() ? "" : " " + msg)),
-      status(code) {}
-
-void checkStatusCode(
-    const string& msg, const UA_StatusCode& status, bool uncertain_is_bad) {
-  if (UA_StatusCode_isBad(status) ||
-      (UA_StatusCode_isUncertain(status) && uncertain_is_bad)) {
-    throw StatusCodeNotGood(msg, status);
-  }
-}
-
-void checkStatusCode(const UA_StatusCode& status, bool uncertain_is_bad) {
-  checkStatusCode(string(), status, uncertain_is_bad);
 }
 
 UA_Variant toUAVariant(const DataVariant& variant) {
@@ -156,7 +95,6 @@ DataVariant toDataVariant(const UA_Variant& variant) {
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
-    // NOLINTNEXTLINE(bugprone-signed-char-misuse,cert-str34-c)
     intmax_t value = *((UA_SByte*)(variant.data)); // this is not a char
     return DataVariant(value);
   }

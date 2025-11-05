@@ -1,13 +1,13 @@
 #ifndef __OPEN62541_NODE_BUILDER_HPP
 #define __OPEN62541_NODE_BUILDER_HPP
 
+#include "NodeCallbackHandler.hpp"
+#include "Open62541Server.hpp"
+
 #include <HaSLL/Logger.hpp>
 #include <Information_Model/Device.hpp>
 #include <Information_Model/Readable.hpp>
 #include <Information_Model/Writable.hpp>
-
-#include "NodeCallbackHandler.hpp"
-#include "Open62541Server.hpp"
 
 #include <memory>
 

@@ -12,9 +12,9 @@ Open62541Server::Open62541Server()
 
 Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
     : logger_(LoggerManager::registerTypedLogger(this)) {
-#ifdef UA_ENABLE_HISTORIZING
-  historizer_ = configuration->obtainHistorizer();
-#endif // UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
+  historizer_ = configuration->getHistorizer();
+#endif // ENABLE_UA_HISTORIZING
   auto config = configuration->getConfig();
   /* Config is consumed, so no need to save it
    * Inside UA_Server_newWithConfig assigns the config as follows
@@ -94,7 +94,7 @@ bool Open62541Server::isRunning() {
   return is_running_;
 }
 
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
 UA_StatusCode Open62541Server::registerForHistorization(
     UA_NodeId node_id, const UA_DataType* type) {
   if (historizer_) {
@@ -103,4 +103,4 @@ UA_StatusCode Open62541Server::registerForHistorization(
     return UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
   }
 }
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING

@@ -1,7 +1,10 @@
 #include "Configuration.hpp"
+#include "CheckStatus.hpp"
 #include "HaSLL_Logger.hpp"
+
+#ifdef ENABLE_UA_HISTORIZING
 #include "Historizer.hpp"
-#include "Utility.hpp"
+#endif // ENABLE_UA_HISTORIZING
 
 #include <HaSLL/LoggerManager.hpp>
 #include <open62541/server_config_default.h>
@@ -61,30 +64,28 @@ Configuration::Configuration(const filesystem::path& filepath)
   checkStatusCode(
       "While reading configuration file " + filepath.string(), status, true);
 
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
   if (configuration_->historizingEnabled) {
     try {
       historizer_ = make_unique<Historizer>();
-
-      configuration_->historyDatabase.clear(&configuration_->historyDatabase);
-      configuration_->historyDatabase = historizer_->createDatabase();
+      configuration_->historyDatabase = createDatabase(historizer_.get());
     } catch (exception& ex) {
       logger_->error("Data Historization Service will not be available, due to "
                      "an exception: {}",
           ex.what());
     }
   }
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
 } // namespace open62541
 
 unique_ptr<UA_ServerConfig> Configuration::getConfig() {
   return move(configuration_);
 }
 
-#ifdef UA_ENABLE_HISTORIZING
-unique_ptr<Historizer> Configuration::obtainHistorizer() {
+#ifdef ENABLE_UA_HISTORIZING
+unique_ptr<Historizer> Configuration::getHistorizer() {
   return move(historizer_);
 }
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
 
 } // namespace open62541

@@ -2,11 +2,11 @@
 #define _OPEN62541_SERVER_H_
 
 #include "Configuration.hpp"
-#include "HaSLL/Logger.hpp"
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
 #include "Historizer.hpp"
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
 
+#include <HaSLL/Logger.hpp>
 #include <Information_Model/Device.hpp>
 #include <open62541/server.h>
 
@@ -35,10 +35,10 @@ struct Open62541Server {
 
   UA_Server* getServer();
 
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
   UA_StatusCode registerForHistorization(
       UA_NodeId node_id, const UA_DataType* type);
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
 
 private:
   void runnable();
@@ -49,9 +49,9 @@ private:
   std::thread server_thread_;
   HaSLL::LoggerPtr logger_;
   std::mutex status_mutex_;
-#ifdef UA_ENABLE_HISTORIZING
+#ifdef ENABLE_UA_HISTORIZING
   std::unique_ptr<Historizer> historizer_;
-#endif // UA_ENABLE_HISTORIZING
+#endif // ENABLE_UA_HISTORIZING
 };
 } // namespace open62541
 #endif //_OPEN62541_SERVER_H_
