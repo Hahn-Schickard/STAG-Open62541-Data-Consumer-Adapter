@@ -68,7 +68,7 @@ Configuration::Configuration(const filesystem::path& filepath)
   if (configuration_->historizingEnabled) {
     try {
       historizer_ = make_unique<Historizer>();
-      configuration_->historyDatabase = createDatabase(historizer_.get());
+      configuration_->historyDatabase = createDatabaseStruct(historizer_.get());
     } catch (exception& ex) {
       logger_->error("Data Historization Service will not be available, due to "
                      "an exception: {}",

@@ -70,6 +70,6 @@ private:
  *
  * @return UA_HistoryDatabase
  */
-UA_HistoryDatabase createDatabase(Historizer* historizer);
+UA_HistoryDatabase createDatabaseStruct(Historizer* historizer);
 } // namespace open62541
 #endif // __OPEN62541_HISTORIZER_HPP
