@@ -92,11 +92,9 @@ class PackageConan(ConanFile):
         self.options["open62541"].json_support = True
         self.options["open62541"].multithreading = "Threadsafe"
         if self.options.historization:
-            self.options["soci"].shared = False
-            self.options["soci"].with_postgresql = True
+            self.options["libpqxx"].shared = False
             self.options["date"].header_only = True
             self.options["open62541"].historize = True
-
         # @- END USER REQUIREMENTS OPTION CONFIGURATION
 
     def layout(self):
@@ -113,8 +111,8 @@ class PackageConan(ConanFile):
         tc.variables['RUN_TESTS'] = False
         tc.variables['COVERAGE_TRACKING'] = False
         tc.variables['CMAKE_CONAN'] = False
-        tc.variables['HISTORIZATION'] = self.options.historization
         # @+ START USER CMAKE OPTIONS
+        tc.variables['HISTORIZATION'] = self.options.historization
         # @- END USER CMAKE OPTIONS
         tc.generate()
 
