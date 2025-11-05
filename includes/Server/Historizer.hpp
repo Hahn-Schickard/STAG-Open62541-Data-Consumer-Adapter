@@ -13,8 +13,8 @@ struct Historizer {
 
   ~Historizer();
   /**
-   * @brief Create UA_MonitoredItem for a given node ide and use the data change
-   * callback to as a historization call for the database
+   * @brief Create UA_MonitoredItem for a given node id and use the data change
+   * callback to trigger historization call for the database
    *
    * @see
    * https://github.com/open62541/open62541/blob/master/plugins/historydata/ua_history_data_gathering_default.c#L59

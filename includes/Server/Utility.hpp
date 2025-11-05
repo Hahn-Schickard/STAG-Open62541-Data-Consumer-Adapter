@@ -34,7 +34,7 @@ void checkStatusCode(
 UA_Variant toUAVariant(const Information_Model::DataVariant& variant);
 Information_Model::DataVariant toDataVariant(const UA_Variant& variant);
 
-/** The UA_TYPES constant that corresponds to intmax_t */
+/* @todo: remove this shit once tests are fixed
 constexpr const size_t UA_TYPES_intmax =
     std::numeric_limits<intmax_t>::digits == 63   ? UA_TYPES_INT64
     : std::numeric_limits<intmax_t>::digits == 31 ? UA_TYPES_INT32
@@ -43,7 +43,6 @@ static_assert((std::numeric_limits<intmax_t>::digits == 15) ||
         (UA_TYPES_intmax != UA_TYPES_INT16),
     "intmax_t has unsupported size");
 
-/** The UA_TYPES constant that corresponds to uintmax_t */
 constexpr const size_t UA_TYPES_uintmax =
     std::numeric_limits<uintmax_t>::digits == 64   ? UA_TYPES_UINT64
     : std::numeric_limits<uintmax_t>::digits == 32 ? UA_TYPES_UINT32
@@ -51,7 +50,7 @@ constexpr const size_t UA_TYPES_uintmax =
 static_assert((std::numeric_limits<uintmax_t>::digits == 16) ||
         (UA_TYPES_uintmax != UA_TYPES_UINT16),
     "uintmax_t has unsupported size");
-
+*/
 } // namespace open62541
 
 #endif //__OPEN62541_UTILITY_FUNCTIONS_HPP

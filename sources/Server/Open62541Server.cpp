@@ -1,7 +1,6 @@
 #include "Open62541Server.hpp"
 
-#include "Config_Serializer.hpp"
-#include "HaSLL/LoggerManager.hpp"
+#include <HaSLL/LoggerManager.hpp>
 
 using namespace std;
 using namespace HaSLL;

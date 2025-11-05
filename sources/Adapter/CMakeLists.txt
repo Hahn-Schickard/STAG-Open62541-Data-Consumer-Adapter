@@ -20,9 +20,9 @@ target_sources(${TARGET}
 target_link_libraries(${TARGET} 
     PUBLIC
         Data_Consumer_Adapter_Interface::Data_Consumer_Adapter_Interface
+    PRIVATE
         HaSLL::HaSLL
         ${PROJECT_NAME}_Server
-    PRIVATE
         Variant_Visitor::Variant_Visitor
 )
 #@- =========================== END OF USER CONFIGURATION ===============================

@@ -22,8 +22,7 @@ target_link_libraries(${TARGET}
         Information_Model::Information_Model
         open62541::open62541
         Variant_Visitor::Variant_Visitor
-        HaSLL::HaSLL
-        ${PROJECT_NAME}_Serializer                                
+        HaSLL::HaSLL                             
 )
 
 if(HISTORIZATION)

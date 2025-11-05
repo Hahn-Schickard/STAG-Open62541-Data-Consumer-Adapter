@@ -12,11 +12,6 @@
 #include <stdexcept>
 
 namespace open62541 {
-struct Open62541_Config_Exception : public std::runtime_error {
-  Open62541_Config_Exception(const std::string& message)
-      : std::runtime_error(message) {}
-};
-
 struct Configuration {
   Configuration();
   Configuration(const std::filesystem::path& filepath);

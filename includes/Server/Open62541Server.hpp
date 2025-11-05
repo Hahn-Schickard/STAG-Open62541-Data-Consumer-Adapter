@@ -1,17 +1,17 @@
 #ifndef _OPEN62541_SERVER_H_
 #define _OPEN62541_SERVER_H_
 
-#include "Config.hpp"
 #include "Configuration.hpp"
 #include "HaSLL/Logger.hpp"
-#include "Information_Model/Device.hpp"
 #ifdef UA_ENABLE_HISTORIZING
 #include "Historizer.hpp"
 #endif // UA_ENABLE_HISTORIZING
 
+#include <Information_Model/Device.hpp>
+#include <open62541/server.h>
+
 #include <memory>
 #include <mutex>
-#include <open62541/server.h>
 #include <thread>
 
 namespace open62541 {

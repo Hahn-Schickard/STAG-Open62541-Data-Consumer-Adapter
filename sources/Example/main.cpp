@@ -1,4 +1,4 @@
-#include "OpcuaAdapter.hpp"
+#include "Open62541Adapter.hpp"
 
 #include <HaSLL/LoggerManager.hpp>
 #include <Information_Model_Mocks/MockBuilder.hpp>
@@ -80,20 +80,13 @@ int main(int argc, char* argv[]) {
     auto logger = LoggerManager::registerLogger("Main");
     try {
       logger->trace("Logging completed initialization!");
-      logger->info(
-          "Current Sever time, in number of 100 nanosecond intervals since "
-          "January 1, 1601 (UTC): {}",
-          UA_DateTime_now());
-
-      logger->trace(
-          "Termination and Interruption signals assigned to stop handler!");
 
       auto event_source = make_shared<EventSource>();
       logger->trace("Fake event source initialized!");
       auto connector =
           bind(&EventSource::connect, event_source, placeholders::_1);
       auto adapter =
-          make_unique<OpcuaAdapter>(connector, "config/defaultConfig.json");
+          makeOpen62541Adapter(connector, "config/defaultConfig.json");
       logger->trace("OPC UA Adapter initialized!");
 
       adapter->start();
