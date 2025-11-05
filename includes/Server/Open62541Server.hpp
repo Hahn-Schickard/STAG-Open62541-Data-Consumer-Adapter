@@ -16,7 +16,33 @@
 
 namespace open62541 {
 
-class Open62541Server {
+struct Open62541Server {
+  Open62541Server();
+
+  Open62541Server(std::unique_ptr<Configuration>);
+
+  ~Open62541Server();
+
+  bool start();
+
+  bool stop();
+
+  bool isRunning();
+
+  UA_UInt16 getServerNamespace() const;
+
+  const UA_Logger* getServerLogger() const;
+
+  UA_Server* getServer();
+
+#ifdef UA_ENABLE_HISTORIZING
+  UA_StatusCode registerForHistorization(
+      UA_NodeId node_id, const UA_DataType* type);
+#endif // UA_ENABLE_HISTORIZING
+
+private:
+  void runnable();
+
   volatile bool is_running_ = false;
   UA_Server* open62541_server_;
   UA_UInt16 server_namespace_index_;
@@ -25,34 +51,7 @@ class Open62541Server {
   std::mutex status_mutex_;
 #ifdef UA_ENABLE_HISTORIZING
   std::unique_ptr<Historizer> historizer_;
-
-  UA_StatusCode registerForHistorization(
-      UA_NodeId node_id, const UA_DataType* type);
 #endif // UA_ENABLE_HISTORIZING
-
-  void runnable();
-
-  friend class NodeBuilder;
-
-public:
-  /**
-   * @pre HaSLL::LoggerRepository has been initialized
-   */
-  Open62541Server();
-
-  /**
-   * @pre HaSLL::LoggerRepository has been initialized
-   */
-  Open62541Server(std::unique_ptr<Configuration>);
-
-  ~Open62541Server();
-
-  bool start();
-  bool stop();
-  bool isRunning();
-  UA_UInt16 getServerNamespace() const;
-  const UA_Logger* getServerLogger() const;
-  UA_Server* getServer();
 };
 } // namespace open62541
 #endif //_OPEN62541_SERVER_H_
