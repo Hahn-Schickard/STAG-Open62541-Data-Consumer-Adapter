@@ -431,7 +431,7 @@ void Historizer::readAtTime(const UA_RequestHeader* request_header,
   }
 }
 
-UA_HistoryDatabase createDatabase(Historizer* historizer) {
+UA_HistoryDatabase createDatabaseStruct(Historizer* historizer) {
   UA_HistoryDatabase database;
   memset(&database, 0, sizeof(UA_HistoryDatabase));
 
