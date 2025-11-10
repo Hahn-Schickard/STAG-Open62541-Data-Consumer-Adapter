@@ -17,7 +17,7 @@ class PackageConan(ConanFile):
                "historization": [True, False]}
     default_options = {"shared": True,
                        "fPIC": True,
-                       "historization": True}
+                       "historization": False}
     default_user = "Hahn-Schickard"
     # @- END USER META CONFIG
     exports = [

@@ -50,7 +50,7 @@ include(GNUInstallDirs)
 
 #@+ ======================== User CMAKE_OPTIONS configuration ===========================
 # User defined options and cmake variables are set here
-option(HISTORIZATION "Enable historization service, required open62541 with defined UA_ENABLE_HISTORIZING macro value" On)
+option(HISTORIZATION "Enable historization service, required open62541 with defined UA_ENABLE_HISTORIZING macro value" OFF)
 #@- ===================== END OF USER CONFIGURATION ================================
 
 find_package(GTest REQUIRED)

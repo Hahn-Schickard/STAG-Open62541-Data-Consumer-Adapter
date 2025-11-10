@@ -7,24 +7,9 @@ using namespace HaSLL;
 using namespace Information_Model;
 using namespace open62541;
 
-Open62541Server::Open62541Server()
-    : Open62541Server(make_unique<Configuration>()) {}
-
-Open62541Server::Open62541Server(std::unique_ptr<Configuration> configuration)
+Open62541Server::Open62541Server(UA_ServerConfig* config)
     : logger_(LoggerManager::registerTypedLogger(this)) {
-#ifdef ENABLE_UA_HISTORIZING
-  historizer_ = configuration->getHistorizer();
-#endif // ENABLE_UA_HISTORIZING
-  auto config = configuration->getConfig();
-  /* Config is consumed, so no need to save it
-   * Inside UA_Server_newWithConfig assigns the config as follows
-   *      server->config = *config;
-   * and afterwards sets it to 0 with:
-   *      memset(config, 0, sizeof(UA_ServerConfig));
-   * this mimics cpp std::move()
-   */
-  open62541_server_ = UA_Server_newWithConfig(config.get());
-  server_namespace_index_ = 1;
+  open62541_server_ = UA_Server_newWithConfig(config);
 }
 
 Open62541Server::~Open62541Server() { UA_Server_delete(open62541_server_); }
@@ -78,29 +63,9 @@ void Open62541Server::runnable() {
   } while (isRunning());
 }
 
-UA_UInt16 Open62541Server::getServerNamespace() const {
-  return server_namespace_index_;
-}
-
-const UA_Logger* Open62541Server::getServerLogger() const {
-  auto* config = UA_Server_getConfig(open62541_server_);
-  return config->logging;
-}
-
 UA_Server* Open62541Server::getServer() { return open62541_server_; }
 
 bool Open62541Server::isRunning() {
   lock_guard<mutex> lock(status_mutex_);
   return is_running_;
 }
-
-#ifdef ENABLE_UA_HISTORIZING
-UA_StatusCode Open62541Server::registerForHistorization(
-    UA_NodeId node_id, const UA_DataType* type) {
-  if (historizer_) {
-    return historizer_->registerNodeId(open62541_server_, node_id, type);
-  } else {
-    return UA_STATUSCODE_BADRESOURCEUNAVAILABLE;
-  }
-}
-#endif // ENABLE_UA_HISTORIZING

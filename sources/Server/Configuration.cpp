@@ -67,8 +67,8 @@ Configuration::Configuration(const filesystem::path& filepath)
 #ifdef ENABLE_UA_HISTORIZING
   if (configuration_->historizingEnabled) {
     try {
-      historizer_ = make_unique<Historizer>();
-      configuration_->historyDatabase = createDatabaseStruct(historizer_.get());
+      historizer_ = make_shared<Historizer>();
+      configuration_->historyDatabase = createDatabaseStruct(historizer_);
     } catch (exception& ex) {
       logger_->error("Data Historization Service will not be available, due to "
                      "an exception: {}",
@@ -83,9 +83,7 @@ unique_ptr<UA_ServerConfig> Configuration::getConfig() {
 }
 
 #ifdef ENABLE_UA_HISTORIZING
-unique_ptr<Historizer> Configuration::getHistorizer() {
-  return move(historizer_);
-}
+HistorizerPtr Configuration::getHistorizer() { return historizer_; }
 #endif // ENABLE_UA_HISTORIZING
 
 } // namespace open62541

@@ -77,9 +77,8 @@ void dataChangedCallback(UA_Server*, UA_UInt32, void* monitored_item_context,
   try {
     auto* historizer = getHistorizer(monitored_item_context);
     historizer->dataChanged(node_id, attribute_id, value);
-  } catch (const NoHistorizerInContext& ex) {
-
   } catch (...) {
+    // suppress any exceptions
   }
 }
 
@@ -98,9 +97,8 @@ void setValueCallback(UA_Server*, void* hdb_context, const UA_NodeId*, void*,
   try {
     auto* historizer = getHistorizer(hdb_context);
     historizer->write(node_id, historizing, value);
-  } catch (const NoHistorizerInContext& ex) {
-
   } catch (...) {
+    // suppress any exceptions
   }
 }
 
@@ -117,8 +115,9 @@ void readRawCallback(UA_Server*, void* hdb_context, const UA_NodeId*, void*,
     historizer->readRaw(request_header, history_read_details,
         timestamps_to_return, release_continuation_points, nodes_to_read_size,
         nodes_to_read, response, history_data);
-  } catch (const NoHistorizerInContext& ex) {
   } catch (...) {
+    response->resultsSize = 1;
+    response->results[0].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
   }
 }
 
@@ -135,8 +134,9 @@ void readAtTimeCallback(UA_Server*, void* hdb_context, const UA_NodeId*, void*,
     historizer->readAtTime(request_header, history_read_details,
         timestamps_to_return, release_continuation_points, nodes_to_read_size,
         nodes_to_read, response, history_data);
-  } catch (const NoHistorizerInContext& ex) {
   } catch (...) {
+    response->resultsSize = 1;
+    response->results[0].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
   }
 }
 
@@ -431,11 +431,11 @@ void Historizer::readAtTime(const UA_RequestHeader* request_header,
   }
 }
 
-UA_HistoryDatabase createDatabaseStruct(Historizer* historizer) {
+UA_HistoryDatabase createDatabaseStruct(const HistorizerPtr& historizer) {
   UA_HistoryDatabase database;
   memset(&database, 0, sizeof(UA_HistoryDatabase));
 
-  database.context = historizer;
+  database.context = historizer.get();
   database.clear = &clearCallback;
   database.setValue = &setValueCallback;
   database.setEvent = nullptr;

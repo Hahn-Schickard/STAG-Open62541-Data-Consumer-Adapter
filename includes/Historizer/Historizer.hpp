@@ -65,11 +65,13 @@ private:
   std::unordered_map<int64_t, UA_DataTypeKind> type_map_;
 };
 
+using HistorizerPtr = std::shared_ptr<Historizer>;
+
 /**
  * @brief UA_HistoryDatabase constructor
  *
  * @return UA_HistoryDatabase
  */
-UA_HistoryDatabase createDatabaseStruct(Historizer* historizer);
+UA_HistoryDatabase createDatabaseStruct(const HistorizerPtr& historizer);
 } // namespace open62541
 #endif // __OPEN62541_HISTORIZER_HPP

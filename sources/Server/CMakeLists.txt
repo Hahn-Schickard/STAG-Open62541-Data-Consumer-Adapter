@@ -33,8 +33,6 @@ if(HISTORIZATION)
             ${PROJECT_NAME}_Historizer
     )
     target_compile_definitions(${TARGET} PUBLIC ENABLE_UA_HISTORIZING)
-else()
-    add_compile_definitions(-UENABLE_UA_HISTORIZING)
 endif(HISTORIZATION)
 
 #@- =========================== END OF USER CONFIGURATION ===============================

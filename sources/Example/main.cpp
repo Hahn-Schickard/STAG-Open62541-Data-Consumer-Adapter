@@ -217,7 +217,9 @@ DevicePtr buildDevice1() {
     mock_builder->addWritable(subgroup_2_ref_id,
         {"Reset Power Supply",
             "Resets power supply and any related error messages"},
-        false);
+        DataType::Boolean, [](const DataVariant&) {
+          cout << "Reseting power supply for " << string{device_ids[0]} << endl;
+        });
   }
   mock_builder->addReadable(
       {"Temperature", "Current measured temperature value in °C"}, 20.1);

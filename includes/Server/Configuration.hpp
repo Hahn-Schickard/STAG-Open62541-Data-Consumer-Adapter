@@ -20,13 +20,13 @@ struct Configuration {
 
   std::unique_ptr<UA_ServerConfig> getConfig();
 #ifdef ENABLE_UA_HISTORIZING
-  std::unique_ptr<Historizer> getHistorizer();
+  HistorizerPtr getHistorizer();
 #endif // ENABLE_UA_HISTORIZING
 
 private:
   HaSLL::LoggerPtr logger_;
 #ifdef ENABLE_UA_HISTORIZING
-  std::unique_ptr<Historizer> historizer_;
+  HistorizerPtr historizer_;
 #endif // ENABLE_UA_HISTORIZING
   std::unique_ptr<UA_ServerConfig> configuration_;
 };
