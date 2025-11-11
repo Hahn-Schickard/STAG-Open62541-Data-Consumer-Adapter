@@ -61,6 +61,21 @@ NodeBuilder::NodeBuilder(const CallbackRepoPtr& repo,
       server_(server) {
 }
 
+#ifdef ENABLE_UA_HISTORIZING
+void NodeBuilder::historize(UA_NodeId node_id, const UA_DataType* type) {
+  if (!historizer_) {
+    logger_->info("Historizer is not set");
+  }
+  try {
+    auto status = historizer_->registerNodeId(server_, node_id, type);
+    checkStatusCode(
+        "While registering writable node historization callback", status);
+  } catch (const StatusCodeNotGood& ex) {
+    logger_->error("Failed to historize node {} due to exception {}",
+        toString(&node_id), ex.what());
+  }
+#endif // ENABLE_UA_HISTORIZING
+
 UA_NodeId NodeBuilder::addObjectNode(
     const MetaInfoPtr& element, optional<UA_NodeId> parent_node_id) {
   logger_->info(

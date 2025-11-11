@@ -57,6 +57,8 @@ private:
 
   UA_StatusCode removeDataSources(const UA_NodeId* node_id);
 
+  void historize(UA_NodeId node_id, const UA_DataType* type);
+
   HaSLL::LoggerPtr logger_;
   CallbackRepoPtr repo_;
 #ifdef ENABLE_UA_HISTORIZING
