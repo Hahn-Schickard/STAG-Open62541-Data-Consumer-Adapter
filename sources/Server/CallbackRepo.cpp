@@ -200,6 +200,14 @@ UA_StatusCode CallbackRepo::read(
       logger_->trace("Calling read from Observable Node {}", toString(node_id));
       target_type = observable->dataType();
       result = observable->read();
+    } else if (std::holds_alternative<WritablePtr>(it->second)) {
+      auto writable = std::get<WritablePtr>(it->second);
+      logger_->trace("Calling read from Writable Node {}", toString(node_id));
+      target_type = writable->dataType();
+      if (writable->isWriteOnly()) {
+        throw NotReadable();
+      }
+      result = writable->read();
     } else {
       auto readable = std::get<ReadablePtr>(it->second);
       logger_->trace("Calling read from Readable Node {}", toString(node_id));
