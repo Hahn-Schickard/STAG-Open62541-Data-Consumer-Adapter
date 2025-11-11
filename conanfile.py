@@ -58,7 +58,12 @@ class PackageConan(ConanFile):
     def requirements(self):
         # @+ START USER REQUIREMENTS
         self.requires(
-            "data_consumer_adapter_interface/[~0.4]@hahn-schickard/stable")
+            "data_consumer_adapter_interface/[~0.4]@hahn-schickard/stable",
+            headers=True,
+            libs=True,
+            transitive_headers=True,
+            transitive_libs=True
+        )
         self.requires("variant_visitor/[~0.2]@hahn-schickard/stable",
                       visible=False
                       )
@@ -129,9 +134,11 @@ class PackageConan(ConanFile):
         copy(self, pattern='AUTHORS', dst='licenses', src=self.cwd)
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["Open62541_Data_Consumer_Adapter"]
         self.cpp_info.set_property("cmake_find_mode", "both")
-        # @+ START USER DEFINES
+        self.cpp_info.requires = [
+            "data_consumer_adapter_interface::data_consumer_adapter_interface"
+        ]
         # @- END USER DEFINES
         self.cpp_info.set_property("cmake_file_name", self.full_name)
         cmake_target_name = self.full_name + "::" + self.full_name
