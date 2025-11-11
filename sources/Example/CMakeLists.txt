@@ -16,7 +16,7 @@ target_sources(${TARGET}
 
 target_link_libraries(${TARGET}
     PUBLIC 
-        ${PROJECT_NAME}_Adapter
+        ${PROJECT_NAME}
         Information_Model_Mocks::Information_Model_Mocks
         Variant_Visitor::Variant_Visitor
 )

@@ -19,7 +19,7 @@ target_sources(${THIS}
 )
 #@+ ======================= User TEST_DECENCIES configuration ===========================
 list(APPEND TEST_DECENCIES
-    ${PROJECT_NAME}_Adapter
+    ${PROJECT_NAME}
     Information_Model_Mocks::Information_Model_Mocks
 )
 #@- =========================== END OF USER CONFIGURATION ===============================

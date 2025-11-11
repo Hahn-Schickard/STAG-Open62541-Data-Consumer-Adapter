@@ -1,8 +1,4 @@
-#@+ ======================== User TARGET NAME configuration =============================
-set(THIS Adapter)
-#@- =========================== END OF USER CONFIGURATION ===============================
-
-set(TARGET ${PROJECT_NAME}_${THIS})
+set(TARGET ${PROJECT_NAME})
 
 #@+ =========================== User TARGET configuration ===============================
 set(THIS_INCLUDES_DIR ${INCLUDES_DIR}/Adapter)
