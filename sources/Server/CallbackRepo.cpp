@@ -100,25 +100,6 @@ UA_StatusCode handleExceptions(
   }
 }
 
-UA_StatusCode dummyRead(UA_Server* server, const UA_NodeId*, void*,
-    const UA_NodeId* node_id, void*, UA_Boolean, const UA_NumericRange*,
-    UA_DataValue* value) {
-  try {
-    UA_LOG_INFO(getLogger(server), UA_LOGCATEGORY_SERVER,
-        "Node %s does not support read capabilities, calling dummy read "
-        "callback",
-        toString(node_id).c_str());
-    auto ua_string = makeUAString("Read operation not supported");
-    UA_Variant_setScalarCopy(
-        &(value->value), &ua_string, &UA_TYPES[UA_TYPES_STRING]);
-    value->hasValue = true;
-    UA_String_clear(&ua_string);
-    return UA_STATUSCODE_GOOD;
-  } catch (...) {
-    return handleExceptions(server, node_id);
-  }
-}
-
 UA_StatusCode readNodeValue(UA_Server* server, const UA_NodeId*, void*,
     const UA_NodeId* node_id, void* node_context, UA_Boolean,
     const UA_NumericRange*, UA_DataValue* value) {
@@ -224,9 +205,16 @@ UA_StatusCode CallbackRepo::read(
       logger_->trace("Calling read from Writable Node {}", toString(node_id));
       target_type = writable->dataType();
       if (writable->isWriteOnly()) {
-        throw NotReadable();
+        // set default data as dummy to avoid bad internat error
+        // writable can not have None or Unknown data type
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+        result = setVariant(target_type).value();
+        logger_->warning(
+            "Node {} does not support read operation", toString(node_id));
+      } else {
+        result = writable->read();
       }
-      result = writable->read();
+
     } else {
       auto readable = std::get<ReadablePtr>(it->second);
       logger_->trace("Calling read from Readable Node {}", toString(node_id));

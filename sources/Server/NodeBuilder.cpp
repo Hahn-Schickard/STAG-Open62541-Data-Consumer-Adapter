@@ -251,7 +251,6 @@ UA_VariableAttributes setValueAttributes(
   // supported
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   value_attributes.value = toUAVariant(default_value.value());
-  // UA_Variant_init(&value_attributes.value);
 
   return value_attributes;
 }
@@ -365,13 +364,10 @@ UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
       value_attributes.historizing = true;
       historize(node.id, value_attributes.value.type);
 #endif // ENABLE_UA_HISTORIZING
-      data_source.read = &readNodeValue;
-    } else {
-      // read callback can not be null, so we set a dummy callback
-      data_source.read = &dummyRead;
     }
-
+    data_source.read = &readNodeValue;
     data_source.write = &writeNodeValue;
+
     UA_NodeId type_definition =
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
     status = UA_Server_addDataSourceVariableNode(server_, node.id, node.parent,

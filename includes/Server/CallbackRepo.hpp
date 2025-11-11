@@ -30,10 +30,6 @@ inline bool operator==(const UA_NodeId& lhs, const UA_NodeId& rhs) {
 }
 
 namespace open62541 {
-UA_StatusCode dummyRead(UA_Server* server, const UA_NodeId*, void*,
-    const UA_NodeId* node_id, void*, UA_Boolean, const UA_NumericRange*,
-    UA_DataValue* value);
-
 UA_StatusCode readNodeValue(UA_Server* server, const UA_NodeId*, void*,
     const UA_NodeId* node_id, void* node_context, UA_Boolean,
     const UA_NumericRange*, UA_DataValue* value);
