@@ -9,7 +9,7 @@ set(THIS_INCLUDES_DIR ${INCLUDES_DIR}/Server)
 file(GLOB THIS_INCLUDES ${THIS_INCLUDES_DIR}/*.hpp)
 file(GLOB SOURCEFILES "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 
-add_library(${TARGET})
+add_library(${TARGET} STATIC)
 target_sources(${TARGET}
     PUBLIC
         ${THIS_INCLUDES}
