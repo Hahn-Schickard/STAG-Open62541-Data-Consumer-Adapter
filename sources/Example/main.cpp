@@ -223,6 +223,12 @@ DevicePtr buildDevice1() {
   }
   mock_builder->addReadable(
       {"Temperature", "Current measured temperature value in °C"}, 20.1);
+  mock_builder->addWritable(
+      {"Label", "Device label"}, DataType::String,
+      [](const DataVariant&) {
+        cout << "Changed device label " << string{device_ids[0]} << endl;
+      },
+      []() { return "Dummy label"; });
 
   return mock_builder->result();
 }
