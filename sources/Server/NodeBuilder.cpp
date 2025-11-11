@@ -65,6 +65,7 @@ NodeBuilder::NodeBuilder(const CallbackRepoPtr& repo,
 void NodeBuilder::historize(UA_NodeId node_id, const UA_DataType* type) {
   if (!historizer_) {
     logger_->info("Historizer is not set");
+    return;
   }
   try {
     auto status = historizer_->registerNodeId(server_, node_id, type);
