@@ -149,7 +149,8 @@ UA_StatusCode NodeBuilder::removeDataSources(const UA_NodeId* node_id) {
   for (size_t i = 0; i < browse_result.referencesSize; ++i) {
     auto node_reference = browse_result.references[i];
     if (node_reference.nodeClass != UA_NODECLASS_OBJECT) {
-      result = repo_->remove(&node_reference.nodeId.nodeId);
+      repo_->remove(&node_reference.nodeId.nodeId);
+      result = UA_STATUSCODE_GOOD;
     } else {
       result = removeDataSources(&node_reference.nodeId.nodeId);
     }

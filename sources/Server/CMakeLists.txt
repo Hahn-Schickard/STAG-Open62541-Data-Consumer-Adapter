@@ -21,6 +21,7 @@ target_link_libraries(${TARGET}
     PUBLIC
         Information_Model::Information_Model
         open62541::open62541
+        boost::boost
         HaSLL::HaSLL
     PRIVATE
         Variant_Visitor::Variant_Visitor

@@ -151,40 +151,25 @@ UA_StatusCode callNodeMethod(UA_Server* server, const UA_NodeId*, void*,
 CallbackRepo::CallbackRepo()
     : logger_(LoggerManager::registerLogger("OPC-UA_CallbackRepo")) {}
 
-CallbackWrapper CallbackRepo::find(const UA_NodeId* node_id) {
-  auto it = callbacks_.find(*node_id);
-  if (it != callbacks_.end()) {
-    return it->second;
-  } else {
-    throw CallbackNotFound();
-  }
-}
-
 UA_StatusCode CallbackRepo::add(
     UA_NodeId node_id, const CallbackWrapper& wrapper) {
-  try {
-    find(&node_id);
+  UA_StatusCode status = UA_STATUSCODE_GOOD;
+  callbacks_.visit(node_id,
+      [&status](const auto&) { status = UA_STATUSCODE_BADNODEIDEXISTS; });
+  if (status != UA_STATUSCODE_GOOD) {
     logger_->error(
         "Node {} was already registered earlier", toString(&node_id));
-    return UA_STATUSCODE_BADNODEIDEXISTS;
-  } catch (const CallbackNotFound&) {
+  } else {
     logger_->trace("Adding wrapper for Node {}", toString(&node_id));
     callbacks_.emplace(node_id, wrapper);
-    return UA_STATUSCODE_GOOD;
   }
+  return status;
 }
 
-UA_StatusCode CallbackRepo::remove(const UA_NodeId* node_id) {
-  try {
-    auto callback = callbacks_.find(*node_id);
-    logger_->trace("Removing callbacks for Node {}", toString(node_id));
-    callbacks_.erase(callback);
-    return UA_STATUSCODE_GOOD;
-  } catch (const CallbackNotFound&) {
-    logger_->error(
-        "Node {} does not have any registered callbacks", toString(node_id));
-    return UA_STATUSCODE_BADNOTFOUND;
-  }
+void CallbackRepo::remove(const UA_NodeId* node_id) {
+  logger_->trace("Removing callbacks for Node {}", toString(node_id));
+  callbacks_.erase_if(
+      [node_id](const auto& pair) { return pair.first == *node_id; });
 }
 
 UA_StatusCode CallbackRepo::read(
@@ -194,33 +179,34 @@ UA_StatusCode CallbackRepo::read(
   try {
     DataType target_type = DataType::Unknown;
     DataVariant result;
-    auto it = callbacks_.find(*node_id);
-    if (std::holds_alternative<ObservablePtr>(it->second)) {
-      auto observable = std::get<ObservablePtr>(it->second);
-      logger_->trace("Calling read from Observable Node {}", toString(node_id));
-      target_type = observable->dataType();
-      result = observable->read();
-    } else if (std::holds_alternative<WritablePtr>(it->second)) {
-      auto writable = std::get<WritablePtr>(it->second);
-      logger_->trace("Calling read from Writable Node {}", toString(node_id));
-      target_type = writable->dataType();
-      if (writable->isWriteOnly()) {
-        // set default data as dummy to avoid bad internat error
-        // writable can not have None or Unknown data type
-        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-        result = setVariant(target_type).value();
-        logger_->warning(
-            "Node {} does not support read operation", toString(node_id));
+    callbacks_.visit(*node_id, [&](const auto& pair) {
+      if (std::holds_alternative<ObservablePtr>(pair.second)) {
+        auto observable = std::get<ObservablePtr>(pair.second);
+        logger_->trace(
+            "Calling read from Observable Node {}", toString(node_id));
+        target_type = observable->dataType();
+        result = observable->read();
+      } else if (std::holds_alternative<WritablePtr>(pair.second)) {
+        auto writable = std::get<WritablePtr>(pair.second);
+        logger_->trace("Calling read from Writable Node {}", toString(node_id));
+        target_type = writable->dataType();
+        if (writable->isWriteOnly()) {
+          // set default data as dummy to avoid bad internal error
+          // writable can not have None or Unknown data type
+          // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+          result = setVariant(target_type).value();
+          logger_->warning(
+              "Node {} does not support read operation", toString(node_id));
+        } else {
+          result = writable->read();
+        }
       } else {
-        result = writable->read();
+        auto readable = std::get<ReadablePtr>(pair.second);
+        logger_->trace("Calling read from Readable Node {}", toString(node_id));
+        target_type = readable->dataType();
+        result = readable->read();
       }
-
-    } else {
-      auto readable = std::get<ReadablePtr>(it->second);
-      logger_->trace("Calling read from Readable Node {}", toString(node_id));
-      target_type = readable->dataType();
-      result = readable->read();
-    }
+    });
 
     if (toDataType(result) == target_type) {
       value->value = toUAVariant(result);
@@ -247,19 +233,22 @@ UA_StatusCode CallbackRepo::write(
     const UA_NodeId* node_id, const UA_DataValue* value) {
   logger_->trace("Calling write callback for Node %s", toString(node_id));
   try {
-    auto it = callbacks_.find(*node_id);
-    auto writable = std::get<WritablePtr>(it->second);
-    auto data_variant = toDataVariant(value->value);
-    if (toDataType(data_variant) == writable->dataType()) {
-      writable->write(data_variant);
-      return UA_STATUSCODE_GOOD;
-    } else {
-      logger_->error(
-          "Expected to write {} data type, but writing {} instead for Node {}",
-          toString(writable->dataType()), toString(toDataType(data_variant)),
-          toString(node_id));
-      return UA_STATUSCODE_BADTYPEMISMATCH;
-    }
+    UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+    callbacks_.visit(*node_id, [&](const auto& pair) {
+      auto writable = std::get<WritablePtr>(pair.second);
+      auto data_variant = toDataVariant(value->value);
+      if (toDataType(data_variant) == writable->dataType()) {
+        writable->write(data_variant);
+        status = UA_STATUSCODE_GOOD;
+      } else {
+        logger_->error("Expected to write {} data type, but writing {} instead "
+                       "for Node {}",
+            toString(writable->dataType()), toString(toDataType(data_variant)),
+            toString(node_id));
+        status = UA_STATUSCODE_BADTYPEMISMATCH;
+      }
+    });
+    return status;
   } catch (const bad_variant_access&) {
     throw NotWritable();
   } catch (const CallbackNotFound&) {
@@ -275,42 +264,46 @@ UA_StatusCode CallbackRepo::execute(const UA_NodeId* method_id,
     UA_Variant* output) {
   logger_->trace("Calling Method callback for Node {}", toString(method_id));
   try {
-    auto it = callbacks_.find(*method_id);
-    auto callable = std::get<CallablePtr>(it->second);
-    auto supported_params = callable->parameterTypes();
-    if (supported_params.size() < input_size) {
-      logger_->error(
-          "Too many arguments provided for Method {}", toString(method_id));
-      return UA_STATUSCODE_BADTOOMANYARGUMENTS;
-    }
-
-    Parameters params;
-    for (size_t i = 0; i < input_size; ++i) {
-      auto parameter = toDataVariant(input[i]);
-      addSupportedParameter(params, supported_params, i, parameter);
-    }
-    if (output_size > 0) {
-      logger_->trace("Calling Method callback with results for Node {}",
-          toString(method_id));
-      auto result_variant = callable->call(params);
-      if (toDataType(result_variant) == callable->resultType()) {
-        auto ua_variant = toUAVariant(result_variant);
-        UA_Variant_copy(&ua_variant, output);
-        UA_Variant_clear(&ua_variant);
-        return UA_STATUSCODE_GOOD;
-      } else {
-        logger_->error("Expected to receive {} data type, but received {} "
-                       "instead from Method {}",
-            toString(callable->resultType()),
-            toString(toDataType(result_variant)), toString(method_id));
-        return UA_STATUSCODE_BADTYPEMISMATCH;
+    UA_StatusCode status = UA_STATUSCODE_BADINTERNALERROR;
+    callbacks_.visit(*method_id, [&](const auto& pair) {
+      auto callable = std::get<CallablePtr>(pair.second);
+      auto supported_params = callable->parameterTypes();
+      if (supported_params.size() < input_size) {
+        logger_->error(
+            "Too many arguments provided for Method {}", toString(method_id));
+        status = UA_STATUSCODE_BADTOOMANYARGUMENTS;
+        return;
       }
-    } else {
-      logger_->trace(
-          "Calling Method callback for Node {}", toString(method_id));
-      callable->execute(params);
-      return UA_STATUSCODE_GOOD;
-    }
+
+      Parameters params;
+      for (size_t i = 0; i < input_size; ++i) {
+        auto parameter = toDataVariant(input[i]);
+        addSupportedParameter(params, supported_params, i, parameter);
+      }
+      if (output_size > 0) {
+        logger_->trace("Calling Method callback with results for Node {}",
+            toString(method_id));
+        auto result_variant = callable->call(params);
+        if (toDataType(result_variant) == callable->resultType()) {
+          auto ua_variant = toUAVariant(result_variant);
+          UA_Variant_copy(&ua_variant, output);
+          UA_Variant_clear(&ua_variant);
+          status = UA_STATUSCODE_GOOD;
+        } else {
+          logger_->error("Expected to receive {} data type, but received {} "
+                         "instead from Method {}",
+              toString(callable->resultType()),
+              toString(toDataType(result_variant)), toString(method_id));
+          status = UA_STATUSCODE_BADTYPEMISMATCH;
+        }
+      } else {
+        logger_->trace(
+            "Calling Method callback for Node {}", toString(method_id));
+        callable->execute(params);
+        status = UA_STATUSCODE_GOOD;
+      }
+    });
+    return status;
   } catch (const ParameterDoesNotExist& ex) {
     logger_->error("Method {} {}", toString(method_id), ex.what());
     return UA_STATUSCODE_BADINVALIDARGUMENT;

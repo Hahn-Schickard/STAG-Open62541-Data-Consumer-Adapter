@@ -9,8 +9,8 @@
 #include <Information_Model/Observable.hpp>
 #include <Information_Model/Readable.hpp>
 #include <Information_Model/Writable.hpp>
+#include <boost/unordered/concurrent_node_map.hpp>
 #include <open62541/server.h>
-#include <unordered_map> // replace with threadsafe version
 
 #include <functional>
 #include <memory>
@@ -18,7 +18,7 @@
 #include <string>
 #include <variant>
 
-template <> class std::hash<open62541::NodeId> {
+template <> class boost::hash<open62541::NodeId> {
 public:
   size_t operator()(const open62541::NodeId& node_id) const {
     return UA_NodeId_hash(&node_id.base());
@@ -51,15 +51,14 @@ using CallbackWrapper = std::variant< // clang-format off
     >; // clang-format on
 
 struct CallbackRepo {
-  // use threadsafe alternative
-  using CallbackMap = std::unordered_map<NodeId, CallbackWrapper>;
+  using CallbackMap = boost::concurrent_node_map<NodeId, CallbackWrapper>;
 
   CallbackRepo();
   ~CallbackRepo() = default;
 
   UA_StatusCode add(UA_NodeId node_id, const CallbackWrapper& wrapper);
 
-  UA_StatusCode remove(const UA_NodeId* node_id);
+  void remove(const UA_NodeId* node_id);
 
   UA_StatusCode read(const UA_NodeId* node_id, UA_DataValue* value);
 
@@ -69,8 +68,6 @@ struct CallbackRepo {
       const UA_Variant* input, size_t output_size, UA_Variant* output);
 
 private:
-  CallbackWrapper find(const UA_NodeId* node_id);
-
   CallbackMap callbacks_;
   HaSLL::LoggerPtr logger_;
 };

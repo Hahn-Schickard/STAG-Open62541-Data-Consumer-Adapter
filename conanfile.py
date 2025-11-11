@@ -67,10 +67,10 @@ class PackageConan(ConanFile):
         self.requires("variant_visitor/[~0.2]@hahn-schickard/stable",
                       visible=False
                       )
-        self.requires("nlohmann_json/[~3.12]",
+        self.requires("open62541/[~1.4]",
                       visible=False
                       )
-        self.requires("open62541/[~1.4]",
+        self.requires("boost/[~1.89]",
                       visible=False
                       )
         if self.options.historization:
@@ -96,6 +96,7 @@ class PackageConan(ConanFile):
         self.options["open62541"].parsing = True
         self.options["open62541"].json_support = True
         self.options["open62541"].multithreading = "Threadsafe"
+        self.options["boost"].header_only = True
         if self.options.historization:
             self.options["libpqxx"].shared = False
             self.options["date"].header_only = True

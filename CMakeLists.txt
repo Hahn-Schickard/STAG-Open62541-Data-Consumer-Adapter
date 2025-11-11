@@ -65,7 +65,7 @@ find_package(Variant_Visitor REQUIRED)
 find_package(HaSLL REQUIRED)
 find_package(Information_Model_Mocks REQUIRED)
 find_package(open62541 REQUIRED)
-find_package(nlohmann_json REQUIRED)
+find_package(Boost REQUIRED)
 find_package(Threads REQUIRED)
 
 if(HISTORIZATION)
