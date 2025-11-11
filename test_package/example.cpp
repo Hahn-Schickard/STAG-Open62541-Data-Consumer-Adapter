@@ -11,7 +11,7 @@ using namespace std;
 using namespace Data_Consumer_Adapter;
 using namespace HaSLL;
 
-int main() {
+int main(int, char* argv[]) {
   auto status = EXIT_SUCCESS;
   try {
     LoggerManager::initialise(makeDefaultRepository());
