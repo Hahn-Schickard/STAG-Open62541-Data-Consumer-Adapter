@@ -44,6 +44,7 @@ UA_StatusCode callNodeMethod(UA_Server* server, const UA_NodeId*, void*,
     UA_Variant* output);
 
 using CallbackWrapper = std::variant< // clang-format off
+        std::monostate,
         Information_Model::ReadablePtr, 
         Information_Model::WritablePtr,
         Information_Model::ObservablePtr, 
@@ -68,6 +69,8 @@ struct CallbackRepo {
       const UA_Variant* input, size_t output_size, UA_Variant* output);
 
 private:
+  CallbackWrapper find(const UA_NodeId* node_id);
+
   CallbackMap callbacks_;
   HaSLL::LoggerPtr logger_;
 };
