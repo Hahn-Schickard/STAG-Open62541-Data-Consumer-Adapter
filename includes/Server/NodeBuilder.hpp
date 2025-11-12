@@ -28,7 +28,7 @@ struct NodeBuilder {
 
 private:
   UA_NodeId addObjectNode(const Information_Model::MetaInfoPtr& element,
-      std::optional<UA_NodeId> parent_node_id = std::nullopt);
+      const std::optional<UA_NodeId>& parent_node_id = std::nullopt);
 
   UA_StatusCode addElementNode(
       const Information_Model::ElementPtr& device_element,

@@ -124,7 +124,7 @@ void NodeBuilder::historize(UA_NodeId node_id, const UA_DataType* type) {
 #endif // ENABLE_UA_HISTORIZING
 
 UA_NodeId NodeBuilder::addObjectNode(
-    const MetaInfoPtr& element, optional<UA_NodeId> parent_node_id) {
+    const MetaInfoPtr& element, const optional<UA_NodeId>& parent_node_id) {
   logger_->info(
       "Adding a new node: {}, with id: {}", element->name(), element->id());
 
