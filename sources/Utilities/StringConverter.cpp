@@ -43,7 +43,7 @@ string toString(UA_DateTime timestamp) {
 
 UA_String makeUAString(const string& input) {
   UA_String result;
-  result.length = strlen(input.c_str());
+  result.length = input.size();
   result.data = (UA_Byte*)malloc(result.length);
   memcpy(result.data, input.c_str(), result.length);
   return result;
