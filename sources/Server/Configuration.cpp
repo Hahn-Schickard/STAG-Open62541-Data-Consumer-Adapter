@@ -1,6 +1,6 @@
 #include "Configuration.hpp"
 #include "CheckStatus.hpp"
-#include "HaSLL_Logger.hpp"
+#include "Logger.hpp"
 
 #ifdef ENABLE_UA_HISTORIZING
 #include "Historizer.hpp"

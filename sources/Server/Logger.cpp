@@ -1,14 +1,14 @@
-#include "HaSLL_Logger.hpp"
+#include "Logger.hpp"
 #include "HaSLL/LoggerManager.hpp"
 
 #include <map>
 #include <mutex>
 
+namespace open62541 {
 using namespace std;
 using namespace HaSLL;
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-enum class Open62541_Logger : uint8_t {
+enum class LoggerType : uint8_t {
   Network,
   Channel,
   Session,
@@ -20,28 +20,28 @@ enum class Open62541_Logger : uint8_t {
   Discovery
 };
 
-map<Open62541_Logger, LoggerPtr> loggers;
+map<LoggerType, LoggerPtr> loggers;
 std::mutex logger_mutex;
 
 void registerLoggers() {
   if (loggers.empty()) {
-    loggers.emplace(Open62541_Logger::Network,
+    loggers.emplace(LoggerType::Network,
         LoggerManager::registerLogger("Open62541::Network"));
-    loggers.emplace(Open62541_Logger::Channel,
+    loggers.emplace(LoggerType::Channel,
         LoggerManager::registerLogger("Open62541::Channel"));
-    loggers.emplace(Open62541_Logger::Session,
+    loggers.emplace(LoggerType::Session,
         LoggerManager::registerLogger("Open62541::Session"));
-    loggers.emplace(Open62541_Logger::Server,
-        LoggerManager::registerLogger("Open62541::Server"));
-    loggers.emplace(Open62541_Logger::Client,
-        LoggerManager::registerLogger("Open62541::Client"));
-    loggers.emplace(Open62541_Logger::User,
-        LoggerManager::registerLogger("Open62541::User"));
-    loggers.emplace(Open62541_Logger::Security,
+    loggers.emplace(
+        LoggerType::Server, LoggerManager::registerLogger("Open62541::Server"));
+    loggers.emplace(
+        LoggerType::Client, LoggerManager::registerLogger("Open62541::Client"));
+    loggers.emplace(
+        LoggerType::User, LoggerManager::registerLogger("Open62541::User"));
+    loggers.emplace(LoggerType::Security,
         LoggerManager::registerLogger("Open62541::Security"));
-    loggers.emplace(Open62541_Logger::EventLoop,
+    loggers.emplace(LoggerType::EventLoop,
         LoggerManager::registerLogger("Open62541::EventLoop"));
-    loggers.emplace(Open62541_Logger::Discovery,
+    loggers.emplace(LoggerType::Discovery,
         LoggerManager::registerLogger("Open62541::Discovery"));
   }
 }
@@ -106,70 +106,70 @@ void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
 
   switch (category) {
   case UA_LogCategory::UA_LOGCATEGORY_NETWORK: {
-    auto it = loggers.find(Open62541_Logger::Network);
+    auto it = loggers.find(LoggerType::Network);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SECURECHANNEL: {
-    auto it = loggers.find(Open62541_Logger::Channel);
+    auto it = loggers.find(LoggerType::Channel);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SESSION: {
-    auto it = loggers.find(Open62541_Logger::Session);
+    auto it = loggers.find(LoggerType::Session);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SERVER: {
-    auto it = loggers.find(Open62541_Logger::Server);
+    auto it = loggers.find(LoggerType::Server);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_CLIENT: {
-    auto it = loggers.find(Open62541_Logger::Client);
+    auto it = loggers.find(LoggerType::Client);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_USERLAND: {
-    auto it = loggers.find(Open62541_Logger::User);
+    auto it = loggers.find(LoggerType::User);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_SECURITYPOLICY: {
-    auto it = loggers.find(Open62541_Logger::Security);
+    auto it = loggers.find(LoggerType::Security);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_EVENTLOOP: {
-    auto it = loggers.find(Open62541_Logger::EventLoop);
+    auto it = loggers.find(LoggerType::EventLoop);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_DISCOVERY: {
-    auto it = loggers.find(Open62541_Logger::Discovery);
+    auto it = loggers.find(LoggerType::Discovery);
     if (it != loggers.end()) {
       it->second->log(getLoggingLevel(level), message);
     }
     break;
   }
   case UA_LogCategory::UA_LOGCATEGORY_PUBSUB: {
-    auto it = loggers.find(Open62541_Logger::Server);
+    auto it = loggers.find(LoggerType::Server);
     if (it != loggers.end()) {
       it->second->error("PubSub is not supported by the server");
     }
@@ -182,13 +182,14 @@ void destroyHaSLL(struct UA_Logger* logger) {
   removeLoggers();
   UA_free(logger);
 }
+} // namespace open62541
 
 UA_Logger* createHaSLL() {
-  registerLoggers();
+  open62541::registerLoggers();
   auto* logger = (UA_Logger*)UA_malloc(sizeof(UA_Logger));
   if (logger == nullptr) {
     return nullptr;
   }
-  *logger = {logToHaSLL, nullptr, destroyHaSLL};
+  *logger = {open62541::logToHaSLL, nullptr, open62541::destroyHaSLL};
   return logger;
 }
