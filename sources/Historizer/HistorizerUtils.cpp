@@ -90,6 +90,7 @@ void addNodeValue(params* values, UA_Variant variant) {
     values->append(value);
     break;
   }
+  // NOLINTNEXTLINE(bugprone-branch-clone)
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
     [[fallthrough]]; // pqxx does not allow signed char as a parameter
   }
