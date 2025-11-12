@@ -77,7 +77,7 @@ void dataChangedCallback(UA_Server*, UA_UInt32, void* monitored_item_context,
   try {
     auto* historizer = getHistorizer(monitored_item_context);
     historizer->dataChanged(node_id, attribute_id, value);
-  } catch (...) {
+  } catch (...) { // NOLINT(bugprone-empty-catch)
     // suppress any exceptions
   }
 }
@@ -97,7 +97,7 @@ void setValueCallback(UA_Server*, void* hdb_context, const UA_NodeId*, void*,
   try {
     auto* historizer = getHistorizer(hdb_context);
     historizer->write(node_id, historizing, value);
-  } catch (...) {
+  } catch (...) { // NOLINT(bugprone-empty-catch)
     // suppress any exceptions
   }
 }
