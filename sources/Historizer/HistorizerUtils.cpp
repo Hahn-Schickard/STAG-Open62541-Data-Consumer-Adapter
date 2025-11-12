@@ -244,17 +244,20 @@ UA_DateTime toUaDateTime(const string& data) {
   auto day_point = floor<days>(time_point);
   auto calender_date = year_month_day{day_point};
   // NOLINTNEXTLINE(bugprone-narrowing-conversions)
-  calendar_time.year = int{calender_date.year()};
-  calendar_time.month = unsigned{calender_date.month()};
-  calendar_time.day = unsigned{calender_date.day()};
+  calendar_time.year = static_cast<UA_Int16>(int{calender_date.year()});
+  calendar_time.month = static_cast<UA_UInt16>(unsigned{calender_date.month()});
+  calendar_time.day = static_cast<UA_UInt16>(unsigned{calender_date.day()});
 
   auto day_time = hh_mm_ss{time_point - day_point};
-  calendar_time.hour = day_time.hours().count();
-  calendar_time.min = day_time.minutes().count();
-  calendar_time.sec = day_time.seconds().count();
-  calendar_time.milliSec = floor<milliseconds>(day_time.seconds()).count();
-  calendar_time.microSec = floor<microseconds>(day_time.seconds()).count();
-  calendar_time.nanoSec = floor<nanoseconds>(day_time.seconds()).count();
+  calendar_time.hour = static_cast<UA_UInt16>(day_time.hours().count());
+  calendar_time.min = static_cast<UA_UInt16>(day_time.minutes().count());
+  calendar_time.sec = static_cast<UA_UInt16>(day_time.seconds().count());
+  calendar_time.milliSec =
+      static_cast<UA_UInt16>(floor<milliseconds>(day_time.seconds()).count());
+  calendar_time.microSec =
+      static_cast<UA_UInt16>(floor<microseconds>(day_time.seconds()).count());
+  calendar_time.nanoSec =
+      static_cast<UA_UInt16>(floor<nanoseconds>(day_time.seconds()).count());
 
   return UA_DateTime_fromStruct(calendar_time);
 }

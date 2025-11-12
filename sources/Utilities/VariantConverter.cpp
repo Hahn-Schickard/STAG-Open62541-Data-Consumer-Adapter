@@ -41,6 +41,8 @@ UA_NodeId toNodeId(DataType type) {
   }
 }
 
+// In this case, code is easier to understand WITH magic numbers
+// NOLINTBEGIN(readability-magic-numbers)
 UA_Variant toUAVariant(const DataVariant& variant) {
   UA_Variant result;
   Variant_Visitor::match(
@@ -59,7 +61,7 @@ UA_Variant toUAVariant(const DataVariant& variant) {
       },
       [&result](const Timestamp& value) {
         UA_DateTimeStruct date_time_struct;
-        date_time_struct.year = static_cast<UA_UInt16>(value.year),
+        date_time_struct.year = static_cast<UA_Int16>(value.year),
         date_time_struct.month = (UA_UInt16)value.month,
         date_time_struct.day = (UA_UInt16)value.day,
         date_time_struct.hour = (UA_UInt16)value.hours,
@@ -95,6 +97,7 @@ DataVariant toDataVariant(const UA_Variant& variant) {
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_SBYTE: {
+    // NOLINTNEXTLINE(bugprone-signed-char-misuse,cert-str34-c)
     intmax_t value = *((UA_SByte*)(variant.data)); // this is not a char
     return DataVariant(value);
   }
@@ -175,4 +178,5 @@ DataVariant toDataVariant(const UA_Variant& variant) {
   }
   }
 }
+// NOLINTEND(readability-magic-numbers)
 } // namespace open62541

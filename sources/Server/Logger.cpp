@@ -93,15 +93,17 @@ void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
   va_copy(args_copy, args); // make a copy for the buffer size calculation
   // NOLINTNEXTLINE(clang-analyzer-valist.*)
   auto len = vsnprintf(
-      0, 0, msg, args_copy); // get the amount of bytes needed to write
+      nullptr, 0, msg, args_copy); // get the amount of bytes needed to write
   // vsnprintf returns a negative value if an error occurred
   if (len > 0) {
-    message.resize(len + 1); // Add space for NULL terminator
+    auto padded_len = static_cast<size_t>(len) + 1;
+    message.resize(padded_len); // Add space for NULL terminator
     // clang-tidy bug for vsnprintf() @see
     // https://bugs.llvm.org/show_bug.cgi?id=41311
     // NOLINTNEXTLINE(clang-analyzer-valist.*, cert-err33-c, readability-*)
-    vsnprintf(&message[0], len + 1, msg, args); // write args into the message
-    message.resize(len); // Remove the NULL terminator
+    vsnprintf(
+        message.data(), padded_len, msg, args); // write args into the message
+    message.resize(static_cast<size_t>(len)); // Remove the NULL terminator
   } // else -> message will be empty
 
   switch (category) {

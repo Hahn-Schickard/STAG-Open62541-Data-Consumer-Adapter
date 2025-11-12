@@ -6,6 +6,14 @@
 namespace open62541 {
 using namespace std;
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push // suppres conversion warnings for this section
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 template <typename T> T multiply(const UA_Variant& lhs, const intmax_t& rhs) {
   auto lhs_value = *((T*)(lhs.data));
   if (lhs_value > 0 && rhs > 0) {
@@ -121,6 +129,9 @@ T numericSignedDiff(const UA_Variant& lhs, const UA_Variant& rhs) {
   T value = lhs_value - rhs_value;
   return value;
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 UA_Variant operator*(const UA_Variant& lhs, const intmax_t& rhs) {
   if (lhs.type->typeKind == UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN) {
