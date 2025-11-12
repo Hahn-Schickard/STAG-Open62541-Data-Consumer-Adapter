@@ -82,7 +82,7 @@ void removeLoggers() {
 
 void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
     const char* msg, va_list args) {
-  const std::lock_guard<std::mutex> lock(logger_mutex);
+  lock_guard lock(logger_mutex);
 
   /*
    * Kudos to Chris Dodd @stackoverflow
