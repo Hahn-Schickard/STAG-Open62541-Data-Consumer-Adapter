@@ -184,6 +184,7 @@ void destroyHaSLL(struct UA_Logger* logger) {
 }
 
 UA_Logger* createHaSLL() {
+  registerLoggers();
   auto* logger = (UA_Logger*)UA_malloc(sizeof(UA_Logger));
   if (logger == nullptr) {
     return nullptr;
