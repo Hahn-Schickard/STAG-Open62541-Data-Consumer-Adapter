@@ -324,12 +324,12 @@ void Historizer::readRaw(const UA_RequestHeader* request_header,
             &response->results[i].continuationPoint);
         response->results[i].statusCode =
             expandHistoryResult(history_data[i], history_values);
-      } catch (const BadContinuationPoint& ex) {
+      } catch (const BadContinuationPoint&) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-      } catch (const OutOfMemory& ex) {
+      } catch (const OutOfMemory&) {
         response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
-      } catch (const runtime_error& ex) {
+      } catch (const runtime_error&) {
         // handle unexpected read exceptions here
         response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
       }
@@ -408,23 +408,23 @@ void Historizer::readAtTime(const UA_RequestHeader* request_header,
                 request_header->timeoutHint, timestamps_to_return,
                 nodes_to_read[i].nodeId, &nodes_to_read[i].continuationPoint,
                 &response->results[i].continuationPoint, history_data[i]);
-      } catch (logic_error& ex) {
+      } catch (const logic_error&) {
         // Target Node Id values can not be interpolated due to mismatching
         // data types or non aggregable data types (text, opaque values,
         // etc...) OR resulting timestamps where malformed and could not be
         // decoded as UA_DateTime
         response->results[i].statusCode =
             UA_STATUSCODE_BADAGGREGATEINVALIDINPUTS;
-      } catch (const NoBoundData& ex) {
+      } catch (const NoBoundData&) {
         response->results[i].statusCode = UA_STATUSCODE_BADBOUNDNOTFOUND;
-      } catch (const NoData& ex) {
+      } catch (const NoData&) {
         response->results[i].statusCode = UA_STATUSCODE_BADNODATA;
-      } catch (const BadContinuationPoint& ex) {
+      } catch (const BadContinuationPoint&) {
         response->results[i].statusCode =
             UA_STATUSCODE_BADCONTINUATIONPOINTINVALID;
-      } catch (const OutOfMemory& ex) {
+      } catch (const OutOfMemory&) {
         response->responseHeader.serviceResult = UA_STATUSCODE_BADOUTOFMEMORY;
-      } catch (const runtime_error& ex) {
+      } catch (const runtime_error&) {
         // handle unexpected read exceptions here
         response->results[i].statusCode = UA_STATUSCODE_BADUNEXPECTEDERROR;
       }
