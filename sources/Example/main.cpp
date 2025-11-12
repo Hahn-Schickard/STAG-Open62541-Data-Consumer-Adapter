@@ -69,10 +69,12 @@ private:
 
 using EventSourcePtr = shared_ptr<EventSource>;
 
-void registerDevices(const EventSourcePtr& event_source);
-void deregisterDevices(const EventSourcePtr& event_source);
+void registerDevices(
+    const vector<string>& device_ids, const EventSourcePtr& event_source);
+void deregisterDevices(
+    const vector<string>& device_ids, const EventSourcePtr& event_source);
 
-int main(int argc, char* argv[]) {
+int main(int argc, char*[]) {
   auto status = EXIT_SUCCESS;
   try {
     LoggerManager::initialise(
@@ -89,19 +91,18 @@ int main(int argc, char* argv[]) {
           makeOpen62541Adapter(connector, "config/defaultConfig.json");
       logger->trace("OPC UA Adapter initialized!");
 
+      vector<string> device_ids{"base_id_1", "base_id_2"};
+
       adapter->start();
-      registerDevices(event_source);
+      registerDevices(device_ids, event_source);
       this_thread::sleep_for(10s);
       logger->trace("Sending device deregistered event");
-      deregisterDevices(event_source);
+      deregisterDevices(device_ids, event_source);
       this_thread::sleep_for(5s);
-      registerDevices(event_source);
+      registerDevices(device_ids, event_source);
 
       if (argc > 1) {
-        auto server_lifetime = stoi(argv[1]);
-        cout << "Open62541 server will automatically shut down in "
-             << server_lifetime << " seconds." << endl;
-        this_thread::sleep_for(chrono::seconds(server_lifetime));
+        this_thread::sleep_for(1s);
         adapter->stop();
       } else {
         string user_input;
@@ -130,79 +131,12 @@ int main(int argc, char* argv[]) {
   exit(status);
 }
 
-void print(const DevicePtr& device);
-void print(const ElementPtr& element, size_t offset);
-void print(const WritablePtr& element, size_t offset);
-void print(const ReadablePtr& element, size_t offset);
-void print(const GroupPtr& elements, size_t offset);
-
-static constexpr size_t BASE_OFFSET = 160;
-static constexpr size_t ELEMENT_OFFSET = 3;
-
-void print(const GroupPtr& elements, size_t offset) {
-  cout << string(offset, ' ') << "Group contains elements:" << endl;
-  for (const auto& element : elements->asVector()) {
-    print(element, offset + ELEMENT_OFFSET);
-  }
-}
-
-void print(const ReadablePtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Reads " << toString(element->dataType())
-       << " value: " << toString(element->read()) << endl;
-  cout << endl;
-}
-
-void print(const ObservablePtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Observably Reads "
-       << toString(element->dataType())
-       << " value: " << toString(element->read()) << endl;
-  cout << endl;
-}
-
-void print(const WritablePtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Reads " << toString(element->dataType())
-       << " value: " << toString(element->read()) << endl;
-  cout << string(offset, ' ') << "Writes " << toString(element->dataType())
-       << " value type" << endl;
-  cout << endl;
-}
-
-void print(const CallablePtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Executes " << toString(element->resultType())
-       << " (" << toString(element->parameterTypes()) << ")" << endl;
-}
-
-void print(const ElementPtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Element name: " << element->name() << endl;
-  cout << string(offset, ' ') << "Element id: " << element->id() << endl;
-  cout << string(offset, ' ') << "Described as: " << element->description()
-       << endl;
-
-  Variant_Visitor::match(
-      element->function(),
-      [offset](const GroupPtr& group) { print(group, offset); },
-      [offset](const ReadablePtr& readable) { print(readable, offset); },
-      [offset](const ObservablePtr& observable) { print(observable, offset); },
-      [offset](const WritablePtr& writable) { print(writable, offset); },
-      [offset](const CallablePtr& executable) { print(executable, offset); });
-}
-
-void print(const DevicePtr& device) {
-  cout << "Device name: " << device->name() << endl;
-  cout << "Device id: " << device->id() << endl;
-  cout << "Described as: " << device->description() << endl;
-  cout << endl;
-  print(device->group(), ELEMENT_OFFSET);
-}
-
-const static vector<string_view> device_ids{"base_id_1", "base_id_2"};
-
 // NOLINTBEGIN(readability-magic-numbers)
-DevicePtr buildDevice1() {
+DevicePtr buildVariantA(const string& id) {
   auto mock_builder = make_shared<Information_Model::testing::MockBuilder>();
 
-  mock_builder->setDeviceInfo(string{device_ids[0]},
-      {"Example 1", "This is an example temperature sensor system"});
+  mock_builder->setDeviceInfo(
+      id, {"Example 1", "This is an example temperature sensor system"});
   { // Power group
     auto subgroup_1_ref_id = mock_builder->addGroup(
         {"Power", "Groups information regarding the power supply"});
@@ -217,27 +151,26 @@ DevicePtr buildDevice1() {
     mock_builder->addWritable(subgroup_2_ref_id,
         {"Reset Power Supply",
             "Resets power supply and any related error messages"},
-        DataType::Boolean, [](const DataVariant&) {
-          cout << "Reseting power supply for " << string{device_ids[0]} << endl;
-        });
+        DataType::Boolean,
+        [](const DataVariant&) { cout << "Reseting power supply " << endl; });
   }
   mock_builder->addReadable(
       {"Temperature", "Current measured temperature value in °C"}, 20.1);
   mock_builder->addWritable(
       {"Label", "Device label"}, DataType::String,
-      [](const DataVariant&) {
-        cout << "Changed device label " << string{device_ids[0]} << endl;
+      [](const DataVariant& value) {
+        cout << "Changed device label to " << toString(value) << endl;
       },
       []() { return "Dummy label"; });
 
   return mock_builder->result();
 }
 
-DevicePtr buildDevice2() {
+DevicePtr buildVariantB(const string& id) {
   auto mock_builder = make_shared<Information_Model::testing::MockBuilder>();
 
-  mock_builder->setDeviceInfo(string{device_ids[1]},
-      {"Example 2", "This is an example power measurement sensor system"});
+  mock_builder->setDeviceInfo(
+      id, {"Example 2", "This is an example power measurement sensor system"});
   { // Phase 1 group
     auto subgroup_1_ref_id = mock_builder->addGroup(
         {"Phase 1", "Groups first phase's power measurements"});
@@ -262,6 +195,7 @@ DevicePtr buildDevice2() {
     mock_builder->addReadable(subgroup_1_ref_id,
         {"Current", "Current measured phase current in A"}, 8.8);
   }
+  // @todo: for some reason, calls to this method fail with internal error
   mock_builder->addCallable({"Recalculate", "Recalculates measured values"},
       Information_Model::DataType::Boolean);
 
@@ -271,21 +205,23 @@ DevicePtr buildDevice2() {
 }
 // NOLINTEND(readability-magic-numbers)
 
-void registerDevice(
-    const DevicePtr& device, const EventSourcePtr& event_source) {
-  // print(device);
-
-  event_source->registerDevice(device);
+void registerDevices(
+    const vector<string>& device_ids, const EventSourcePtr& event_source) {
+  for (size_t i = 0; i < device_ids.size(); ++i) {
+    DevicePtr device;
+    if (i % 2 == 0) {
+      device = buildVariantA(device_ids[i]);
+    } else {
+      device = buildVariantB(device_ids[i]);
+    }
+    event_source->registerDevice(device);
+  }
 }
 
-void registerDevices(const EventSourcePtr& event_source) {
-  registerDevice(buildDevice1(), event_source);
-  registerDevice(buildDevice2(), event_source);
-}
-
-void deregisterDevices(const EventSourcePtr& event_source) {
+void deregisterDevices(
+    const vector<string>& device_ids, const EventSourcePtr& event_source) {
   for (const auto& device_id : device_ids) {
-    cout << "Deregistrating device: " << device_id << endl;
+    cout << "Removing device: " << device_id << endl;
     event_source->deregisterDevice(string{device_id});
     this_thread::sleep_for(5s);
   }
