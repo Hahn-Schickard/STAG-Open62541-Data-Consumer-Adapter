@@ -19,7 +19,7 @@ using namespace std;
 using namespace HaSLL;
 
 Configuration::Configuration()
-    : logger_(LoggerManager::registerLogger("Open62541 Configuration")),
+    : logger_(LoggerManager::registerLogger("Open62541::Configuration")),
       configuration_(make_unique<UA_ServerConfig>()) {
   memset(configuration_.get(), 0, sizeof(UA_ServerConfig));
   configuration_->logging = createHaSLL();

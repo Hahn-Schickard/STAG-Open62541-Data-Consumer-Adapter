@@ -145,7 +145,7 @@ UA_StatusCode callNodeMethod(UA_Server* server, const UA_NodeId*, void*,
 }
 
 CallbackRepo::CallbackRepo()
-    : logger_(LoggerManager::registerLogger("OPC-UA_CallbackRepo")) {}
+    : logger_(LoggerManager::registerLogger("Open62541::CallbackRepo")) {}
 
 UA_StatusCode CallbackRepo::add(
     UA_NodeId node_id, const CallbackWrapper& wrapper) {

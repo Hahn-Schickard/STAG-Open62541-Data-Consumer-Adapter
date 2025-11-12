@@ -9,7 +9,7 @@ using namespace Information_Model;
 
 struct OpcuaAdapter : public DataConsumerAdapter {
   OpcuaAdapter(const DataConnector& connector, const filesystem::path& config)
-      : DataConsumerAdapter("Open62541_Adapter", connector) {
+      : DataConsumerAdapter("OPC_UA_Adapter", connector) {
     repo_ = make_shared<CallbackRepo>();
 
     auto server_config = make_unique<open62541::Configuration>(config);

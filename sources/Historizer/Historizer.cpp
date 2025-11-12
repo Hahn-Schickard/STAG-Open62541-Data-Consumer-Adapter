@@ -140,7 +140,8 @@ void readAtTimeCallback(UA_Server*, void* hdb_context, const UA_NodeId*, void*,
   }
 }
 
-Historizer::Historizer() : logger_(LoggerManager::registerTypedLogger(this)) {
+Historizer::Historizer()
+    : logger_(LoggerManager::registerLogger("Open62541::Historizer")) {
   auto session = connect();
   work transaction(session);
   transaction.exec("CREATE TABLE IF NOT EXISTS Historized_Nodes("

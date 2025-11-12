@@ -54,7 +54,8 @@ NodeBuilder::NodeBuilder(const CallbackRepoPtr& repo,
     const HistorizerPtr& historizer,
 #endif // ENABLE_UA_HISTORIZING
     UA_Server* server)
-    : logger_(LoggerManager::registerLogger("OPC-UA_NodeBuilder")), repo_(repo),
+    : logger_(LoggerManager::registerLogger("Open62541::NodeBuilder")),
+      repo_(repo),
 #ifdef ENABLE_UA_HISTORIZING
       historizer_(historizer),
 #endif // ENABLE_UA_HISTORIZING

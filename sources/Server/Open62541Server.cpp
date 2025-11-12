@@ -8,7 +8,7 @@ using namespace Information_Model;
 using namespace open62541;
 
 Open62541Server::Open62541Server(UA_ServerConfig* config)
-    : logger_(LoggerManager::registerTypedLogger(this)) {
+    : logger_(LoggerManager::registerLogger("Open62541::Runner")) {
   open62541_server_ = UA_Server_newWithConfig(config);
 }
 
