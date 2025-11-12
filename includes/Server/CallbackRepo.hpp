@@ -1,5 +1,5 @@
-#ifndef __DCAI_OPEN62541_NODE_MANAGER_HPP_
-#define __DCAI_OPEN62541_NODE_MANAGER_HPP_
+#ifndef __OPEN62541_CALLBACK_REPOSITORY_HPP
+#define __OPEN62541_CALLBACK_REPOSITORY_HPP
 
 #include "NodeId.hpp"
 
@@ -77,4 +77,4 @@ using CallbackRepoPtr = std::shared_ptr<CallbackRepo>;
 
 } // namespace open62541
 
-#endif //__DCAI_OPEN62541_NODE_MANAGER_HPP_
+#endif //__OPEN62541_CALLBACK_REPOSITORY_HPP

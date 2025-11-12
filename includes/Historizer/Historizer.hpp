@@ -1,5 +1,6 @@
 #ifndef __OPEN62541_HISTORIZER_HPP
 #define __OPEN62541_HISTORIZER_HPP
+
 #include "HistorianBits.hpp"
 #include "HistoryResult.hpp"
 
