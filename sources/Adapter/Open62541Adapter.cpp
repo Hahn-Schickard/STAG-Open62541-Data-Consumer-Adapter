@@ -1,6 +1,6 @@
 #include "Open62541Adapter.hpp"
 #include "NodeBuilder.hpp"
-#include "Open62541Server.hpp"
+#include "Runner.hpp"
 
 namespace Data_Consumer_Adapter {
 using namespace std;
@@ -12,29 +12,29 @@ struct OpcuaAdapter : public DataConsumerAdapter {
       : DataConsumerAdapter("OPC_UA_Adapter", connector) {
     repo_ = make_shared<CallbackRepo>();
 
-    auto server_config = make_unique<open62541::Configuration>(config);
+    auto runner_config = make_unique<open62541::Configuration>(config);
 #ifdef ENABLE_UA_HISTORIZING
-    historizer_ = server_config->getHistorizer();
+    historizer_ = runner_config->getHistorizer();
 #endif // ENABLE_UA_HISTORIZING
     /* Config is consumed, so no need to save it
-     * Inside UA_Server_newWithConfig assigns the config as follows
+     * Inside UA_runner_newWithConfig assigns the config as follows
      *      server->config = *config;
      * and afterwards sets it to 0 with:
      *      memset(config, 0, sizeof(UA_ServerConfig));
      * this mimics cpp std::move()
      */
-    server_ = make_shared<Open62541Server>(server_config->getConfig().get());
+    runner_ = make_shared<Runner>(runner_config->getConfig().get());
     builder_ = make_unique<NodeBuilder>(repo_,
 #ifdef ENABLE_UA_HISTORIZING
         historizer_,
 #endif // ENABLE_UA_HISTORIZING
-        server_->getServer());
+        runner_->getServer());
   }
 
   ~OpcuaAdapter() override = default;
 
   void start() override {
-    if (server_->start()) {
+    if (runner_->start()) {
       DataConsumerAdapter::start();
     } else {
       logger->error("Failed to start Open62541 server");
@@ -42,10 +42,10 @@ struct OpcuaAdapter : public DataConsumerAdapter {
   }
 
   void stop() override {
-    if (!server_->isRunning()) {
+    if (!runner_->isRunning()) {
       logger->info("Open62541 server is not running");
     }
-    if (!server_->stop()) {
+    if (!runner_->stop()) {
       logger->error("Failed to stop Open62541 server");
     }
     DataConsumerAdapter::stop();
@@ -72,7 +72,7 @@ private:
 #ifdef ENABLE_UA_HISTORIZING
   HistorizerPtr historizer_;
 #endif // ENABLE_UA_HISTORIZING
-  shared_ptr<Open62541Server> server_;
+  shared_ptr<Runner> runner_;
   unique_ptr<NodeBuilder> builder_;
 };
 

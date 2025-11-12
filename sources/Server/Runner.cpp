@@ -1,29 +1,29 @@
-#include "Open62541Server.hpp"
+#include "Runner.hpp"
 
 #include <HaSLL/LoggerManager.hpp>
 
+namespace open62541 {
 using namespace std;
 using namespace HaSLL;
 using namespace Information_Model;
-using namespace open62541;
 
-Open62541Server::Open62541Server(UA_ServerConfig* config)
+Runner::Runner(UA_ServerConfig* config)
     : logger_(LoggerManager::registerLogger("Open62541::Runner")) {
-  open62541_server_ = UA_Server_newWithConfig(config);
+  server_ = UA_Server_newWithConfig(config);
 }
 
-Open62541Server::~Open62541Server() { UA_Server_delete(open62541_server_); }
+Runner::~Runner() { UA_Server_delete(server_); }
 
-bool Open62541Server::start() {
+bool Runner::start() {
   try {
     logger_->info("Starting open62541 server!");
     if (isRunning()) {
       stop();
     }
-    is_running_ = true;
-    server_thread_ = thread(&Open62541Server::runnable, this);
+    running_ = true;
+    thread_ = thread(&Runner::runnable, this);
 
-    if (server_thread_.joinable()) {
+    if (thread_.joinable()) {
       logger_->trace("Open62541 server thread is running!");
       return true;
     } else {
@@ -37,21 +37,21 @@ bool Open62541Server::start() {
   }
 }
 
-bool Open62541Server::stop() {
+bool Runner::stop() {
   if (isRunning()) {
     logger_->info("Stopping open62541 server!");
-    is_running_ = false;
-    server_thread_.join();
+    running_ = false;
+    thread_.join();
     logger_->trace("Joined open62541 server thread!");
   }
   return true;
 }
 
-void Open62541Server::runnable() {
+void Runner::runnable() {
   do {
     try {
       logger_->info("Starting open62541 server thread");
-      UA_StatusCode status = UA_Server_run(open62541_server_, &is_running_);
+      auto status = UA_Server_run(server_, &running_);
       if (status != UA_STATUSCODE_GOOD) {
         logger_->error("ERROR:{} Failed to start open62541 server thread!",
             UA_StatusCode_name(status));
@@ -63,9 +63,7 @@ void Open62541Server::runnable() {
   } while (isRunning());
 }
 
-UA_Server* Open62541Server::getServer() { return open62541_server_; }
+UA_Server* Runner::getServer() { return server_; }
 
-bool Open62541Server::isRunning() {
-  lock_guard<mutex> lock(status_mutex_);
-  return is_running_;
-}
+bool Runner::isRunning() const { return running_; }
+} // namespace open62541

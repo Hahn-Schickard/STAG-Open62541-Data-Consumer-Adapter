@@ -2,7 +2,6 @@
 #define __DCAI_OPEN62541_NODE_MANAGER_HPP_
 
 #include "NodeId.hpp"
-#include "Open62541Server.hpp"
 
 #include <HaSLL/Logger.hpp>
 #include <Information_Model/Callable.hpp>
