@@ -291,9 +291,10 @@ UA_StatusCode NodeBuilder::addReadableNode(const MetaInfoPtr& meta_info,
     status = UA_Server_addDataSourceVariableNode(server_, node.id, node.parent,
         node.reference_type, node.name, type_definition, value_attributes,
         data_source, repo_.get(), nullptr);
-    checkStatusCode("While adding readable variable node to server", status);
     UA_NodeId_clear(&type_definition);
     UA_VariableAttributes_clear(&value_attributes);
+    checkStatusCode("While adding readable variable node to server", status);
+
     return status;
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
@@ -332,10 +333,10 @@ UA_StatusCode NodeBuilder::addObservableNode(
     status = UA_Server_addDataSourceVariableNode(server_, node.id, node.parent,
         node.reference_type, node.name, type_definition, value_attributes,
         data_source, repo_.get(), nullptr);
-    checkStatusCode("While adding readable variable node to server", status);
-
     UA_NodeId_clear(&type_definition);
     UA_VariableAttributes_clear(&value_attributes);
+    checkStatusCode("While adding readable variable node to server", status);
+
     return status;
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
@@ -376,9 +377,10 @@ UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
     status = UA_Server_addDataSourceVariableNode(server_, node.id, node.parent,
         node.reference_type, node.name, type_definition, value_attributes,
         data_source, repo_.get(), nullptr);
-    checkStatusCode("While adding writable variable node to server", status);
     UA_NodeId_clear(&type_definition);
     UA_VariableAttributes_clear(&value_attributes);
+    checkStatusCode("While adding writable variable node to server", status);
+
     return status;
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
