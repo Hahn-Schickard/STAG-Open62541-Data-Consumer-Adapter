@@ -102,9 +102,6 @@ int main(int argc, char*[]) {
       registerDevices(device_ids, event_source);
 
       if (argc > 1) {
-        this_thread::sleep_for(1s);
-        adapter->stop();
-      } else {
         string user_input;
         do {
           cout << "Press Q to stop the server" << endl;
@@ -112,6 +109,9 @@ int main(int argc, char*[]) {
           transform(user_input.begin(), user_input.end(), user_input.begin(),
               [](unsigned char letter) { return tolower(letter); });
         } while (user_input != "q");
+        adapter->stop();
+      } else {
+        this_thread::sleep_for(1s);
         adapter->stop();
       }
     } catch (const exception& ex) {
