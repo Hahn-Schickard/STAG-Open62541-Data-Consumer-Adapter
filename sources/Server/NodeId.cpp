@@ -7,22 +7,36 @@
 
 namespace open62541 {
 
-NodeId::NodeId(const UA_NodeId& source) {
-  if (UA_NodeId_copy(&source, &ua_node_id_) != UA_STATUSCODE_GOOD) {
-    // The status code can only be `UA_STATUSCODE_BADOUTOFMEMORY`
-    throw std::runtime_error(
-        "Out of memory while trying to copy" + toString(&source));
-  }
+NodeId::NodeId(const UA_NodeId& node_id) { UA_NodeId_copy(&node_id, &id_); }
+
+NodeId::NodeId(const NodeId& other) { UA_NodeId_copy(&(other.id_), &id_); }
+
+NodeId::NodeId(NodeId&& other) noexcept {
+  UA_NodeId_copy(&(other.id_), &id_);
+  UA_NodeId_clear(&other.id_);
 }
 
-NodeId::NodeId(const NodeId& source) : NodeId(source.ua_node_id_) {}
+NodeId::~NodeId() { UA_NodeId_clear(&id_); }
 
-NodeId::~NodeId() { UA_NodeId_clear(&ua_node_id_); }
+const UA_NodeId& NodeId::base() const { return id_; }
 
-const UA_NodeId& NodeId::base() const { return ua_node_id_; }
+NodeId& NodeId::operator=(const NodeId& other) {
+  if (this != &other) {
+    UA_NodeId_copy(&(other.id_), &id_);
+  }
+  return *this;
+}
+
+NodeId& NodeId::operator=(NodeId&& other) noexcept {
+  if (this != &other) {
+    UA_NodeId_copy(&(other.id_), &id_);
+    UA_NodeId_clear(&other.id_);
+  }
+  return *this;
+}
 
 bool NodeId::operator==(const NodeId& other) const {
-  return UA_NodeId_equal(&ua_node_id_, &other.ua_node_id_);
+  return UA_NodeId_equal(&id_, &other.id_);
 }
 
 } // namespace open62541

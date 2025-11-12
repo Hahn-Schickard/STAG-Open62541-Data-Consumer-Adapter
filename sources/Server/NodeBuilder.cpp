@@ -19,6 +19,25 @@ using namespace open62541;
 constexpr UA_UInt16 SERVER_NAMESPACE = 1;
 
 struct NodeMetaInfo {
+  NodeMetaInfo(const NodeMetaInfo& other) {
+    UA_NodeId_copy(&(other.id), &id);
+    UA_NodeId_copy(&(other.parent), &parent);
+    UA_NodeId_copy(&(other.reference_type), &reference_type);
+    UA_QualifiedName_copy(&(other.name), &name);
+  }
+
+  NodeMetaInfo(NodeMetaInfo&& other) noexcept {
+    UA_NodeId_copy(&(other.id), &id);
+    UA_NodeId_copy(&(other.parent), &parent);
+    UA_NodeId_copy(&(other.reference_type), &reference_type);
+    UA_QualifiedName_copy(&(other.name), &name);
+
+    UA_NodeId_clear(&other.id);
+    UA_NodeId_clear(&other.parent);
+    UA_NodeId_clear(&other.reference_type);
+    UA_QualifiedName_clear(&other.name);
+  }
+
   NodeMetaInfo(const MetaInfoPtr& element, optional<UA_NodeId> parent_node_id) {
     id = UA_NODEID_STRING_ALLOC(SERVER_NAMESPACE, element->id().c_str());
 
@@ -41,6 +60,31 @@ struct NodeMetaInfo {
     UA_NodeId_clear(&parent);
     UA_NodeId_clear(&reference_type);
     UA_QualifiedName_clear(&name);
+  }
+
+  NodeMetaInfo& operator=(const NodeMetaInfo& other) {
+    if (this != &other) {
+      UA_NodeId_copy(&(other.id), &id);
+      UA_NodeId_copy(&(other.parent), &parent);
+      UA_NodeId_copy(&(other.reference_type), &reference_type);
+      UA_QualifiedName_copy(&(other.name), &name);
+    }
+    return *this;
+  }
+
+  NodeMetaInfo& operator=(NodeMetaInfo&& other) noexcept {
+    if (this != &other) {
+      UA_NodeId_copy(&(other.id), &id);
+      UA_NodeId_copy(&(other.parent), &parent);
+      UA_NodeId_copy(&(other.reference_type), &reference_type);
+      UA_QualifiedName_copy(&(other.name), &name);
+
+      UA_NodeId_clear(&other.id);
+      UA_NodeId_clear(&other.parent);
+      UA_NodeId_clear(&other.reference_type);
+      UA_QualifiedName_clear(&other.name);
+    }
+    return *this;
   }
 
   UA_NodeId id;
