@@ -8,40 +8,28 @@ namespace open62541 {
 using namespace std;
 using namespace HaSLL;
 
-enum class LoggerType : uint8_t {
-  Network,
-  Channel,
-  Session,
-  Server,
-  Client,
-  User,
-  Security,
-  EventLoop,
-  Discovery
-};
-
-map<LoggerType, LoggerPtr> loggers;
+map<UA_LogCategory, LoggerPtr> loggers;
 std::mutex logger_mutex;
 
 void registerLoggers() {
   if (loggers.empty()) {
-    loggers.emplace(LoggerType::Network,
+    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_NETWORK,
         LoggerManager::registerLogger("Open62541::Network"));
-    loggers.emplace(LoggerType::Channel,
+    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_SECURECHANNEL,
         LoggerManager::registerLogger("Open62541::Channel"));
-    loggers.emplace(LoggerType::Session,
+    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_SESSION,
         LoggerManager::registerLogger("Open62541::Session"));
-    loggers.emplace(
-        LoggerType::Server, LoggerManager::registerLogger("Open62541::Server"));
-    loggers.emplace(
-        LoggerType::Client, LoggerManager::registerLogger("Open62541::Client"));
-    loggers.emplace(
-        LoggerType::User, LoggerManager::registerLogger("Open62541::User"));
-    loggers.emplace(LoggerType::Security,
+    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_SERVER,
+        LoggerManager::registerLogger("Open62541::Server"));
+    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_CLIENT,
+        LoggerManager::registerLogger("Open62541::Client"));
+    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_USERLAND,
+        LoggerManager::registerLogger("Open62541::User"));
+    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_SECURITYPOLICY,
         LoggerManager::registerLogger("Open62541::Security"));
-    loggers.emplace(LoggerType::EventLoop,
+    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_EVENTLOOP,
         LoggerManager::registerLogger("Open62541::EventLoop"));
-    loggers.emplace(LoggerType::Discovery,
+    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_DISCOVERY,
         LoggerManager::registerLogger("Open62541::Discovery"));
   }
 }
@@ -106,77 +94,8 @@ void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
     message.resize(static_cast<size_t>(len)); // Remove the NULL terminator
   } // else -> message will be empty
 
-  switch (category) {
-  case UA_LogCategory::UA_LOGCATEGORY_NETWORK: {
-    auto it = loggers.find(LoggerType::Network);
-    if (it != loggers.end()) {
-      it->second->log(getLoggingLevel(level), message);
-    }
-    break;
-  }
-  case UA_LogCategory::UA_LOGCATEGORY_SECURECHANNEL: {
-    auto it = loggers.find(LoggerType::Channel);
-    if (it != loggers.end()) {
-      it->second->log(getLoggingLevel(level), message);
-    }
-    break;
-  }
-  case UA_LogCategory::UA_LOGCATEGORY_SESSION: {
-    auto it = loggers.find(LoggerType::Session);
-    if (it != loggers.end()) {
-      it->second->log(getLoggingLevel(level), message);
-    }
-    break;
-  }
-  case UA_LogCategory::UA_LOGCATEGORY_SERVER: {
-    auto it = loggers.find(LoggerType::Server);
-    if (it != loggers.end()) {
-      it->second->log(getLoggingLevel(level), message);
-    }
-    break;
-  }
-  case UA_LogCategory::UA_LOGCATEGORY_CLIENT: {
-    auto it = loggers.find(LoggerType::Client);
-    if (it != loggers.end()) {
-      it->second->log(getLoggingLevel(level), message);
-    }
-    break;
-  }
-  case UA_LogCategory::UA_LOGCATEGORY_USERLAND: {
-    auto it = loggers.find(LoggerType::User);
-    if (it != loggers.end()) {
-      it->second->log(getLoggingLevel(level), message);
-    }
-    break;
-  }
-  case UA_LogCategory::UA_LOGCATEGORY_SECURITYPOLICY: {
-    auto it = loggers.find(LoggerType::Security);
-    if (it != loggers.end()) {
-      it->second->log(getLoggingLevel(level), message);
-    }
-    break;
-  }
-  case UA_LogCategory::UA_LOGCATEGORY_EVENTLOOP: {
-    auto it = loggers.find(LoggerType::EventLoop);
-    if (it != loggers.end()) {
-      it->second->log(getLoggingLevel(level), message);
-    }
-    break;
-  }
-  case UA_LogCategory::UA_LOGCATEGORY_DISCOVERY: {
-    auto it = loggers.find(LoggerType::Discovery);
-    if (it != loggers.end()) {
-      it->second->log(getLoggingLevel(level), message);
-    }
-    break;
-  }
-  case UA_LogCategory::UA_LOGCATEGORY_PUBSUB: {
-    auto it = loggers.find(LoggerType::Server);
-    if (it != loggers.end()) {
-      it->second->error("PubSub is not supported by the server");
-    }
-    break;
-  }
+  if (auto it = loggers.find(category); it != loggers.end()) {
+    it->second->log(getLoggingLevel(level), message);
   }
 }
 
