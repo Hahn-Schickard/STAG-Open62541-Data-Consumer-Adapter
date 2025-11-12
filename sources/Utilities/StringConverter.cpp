@@ -6,12 +6,12 @@ namespace open62541 {
 using namespace std;
 
 string toString(const UA_String* input) {
-  string result = string((char*)(input->data), input->length);
+  auto result = string((char*)(input->data), input->length);
   return result;
 }
 
 string toString(const UA_NodeId* node_id) {
-  UA_String ua_string = UA_STRING_NULL;
+  auto ua_string = UA_STRING_NULL;
   if (UA_NodeId_print(node_id, &ua_string) != UA_STATUSCODE_GOOD) {
     throw runtime_error("Failed to conver UA_NodeId to a string!");
   }
@@ -21,7 +21,7 @@ string toString(const UA_NodeId* node_id) {
 }
 
 string toString(const UA_QualifiedName* name) {
-  string result = to_string(name->namespaceIndex) + ":" + toString(&name->name);
+  auto result = to_string(name->namespaceIndex) + ":" + toString(&name->name);
   return result;
 }
 
@@ -33,7 +33,7 @@ string toString(const UA_ExpandedNodeId& id) {
 string toString(UA_DateTime timestamp) {
   auto calendar_time = UA_DateTime_toStruct(timestamp);
   /* Format UA_DateTime into a %Y-%m-%d %H:%M:%S.%ms%us*/
-  string result = to_string(calendar_time.year) + "-" +
+  auto result = to_string(calendar_time.year) + "-" +
       to_string(calendar_time.month) + "-" + to_string(calendar_time.day) +
       " " + to_string(calendar_time.hour) + ":" + to_string(calendar_time.min) +
       ":" + to_string(calendar_time.sec) + "." +
