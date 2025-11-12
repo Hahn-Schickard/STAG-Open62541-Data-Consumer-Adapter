@@ -61,14 +61,14 @@ UA_Variant toUAVariant(const DataVariant& variant) {
       },
       [&result](const Timestamp& value) {
         UA_DateTimeStruct date_time_struct;
-        date_time_struct.year = static_cast<UA_Int16>(value.year),
-        date_time_struct.month = (UA_UInt16)value.month,
-        date_time_struct.day = (UA_UInt16)value.day,
-        date_time_struct.hour = (UA_UInt16)value.hours,
-        date_time_struct.min = (UA_UInt16)value.minutes,
-        date_time_struct.sec = (UA_UInt16)value.seconds,
+        date_time_struct.year = static_cast<UA_Int16>(value.year);
+        date_time_struct.month = (UA_UInt16)value.month;
+        date_time_struct.day = (UA_UInt16)value.day;
+        date_time_struct.hour = (UA_UInt16)value.hours;
+        date_time_struct.min = (UA_UInt16)value.minutes;
+        date_time_struct.sec = (UA_UInt16)value.seconds;
         date_time_struct.milliSec =
-            (UA_UInt16)(floor(value.microseconds / 1000)),
+            (UA_UInt16)(floor(value.microseconds / 1000));
         date_time_struct.microSec = (UA_UInt16)(value.microseconds % 1000);
         date_time_struct.nanoSec = 0;
         auto date_time = UA_DateTime_fromStruct(date_time_struct);
