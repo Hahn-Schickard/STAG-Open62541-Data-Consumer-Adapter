@@ -28,10 +28,10 @@ struct Historizer {
       UA_Server* server, UA_NodeId node_id, const UA_DataType* type);
 
   void write(const UA_NodeId* node_id, UA_Boolean historizing,
-      const UA_DataValue* value);
+      const UA_DataValue* value) const;
 
   void dataChanged(const UA_NodeId* node_id, UA_UInt32 attribute_id,
-      const UA_DataValue* value);
+      const UA_DataValue* value) const;
 
   void readRaw(const UA_RequestHeader* request_header,
       const UA_ReadRawModifiedDetails* history_read_details,
@@ -39,7 +39,7 @@ struct Historizer {
       UA_Boolean release_continuation_points, size_t nodes_to_read_size,
       const UA_HistoryReadValueId* nodes_to_read,
       UA_HistoryReadResponse* response,
-      UA_HistoryData* const* const history_data);
+      UA_HistoryData* const* const history_data) const;
 
   void readAtTime(const UA_RequestHeader* request_header,
       const UA_ReadAtTimeDetails* history_read_details,
@@ -47,20 +47,20 @@ struct Historizer {
       UA_Boolean release_continuation_points, size_t nodes_to_read_size,
       const UA_HistoryReadValueId* nodes_to_read,
       UA_HistoryReadResponse* response,
-      UA_HistoryData* const* const history_data);
+      UA_HistoryData* const* const history_data) const;
 
 private:
   HistoryResults readHistory(
       const UA_ReadRawModifiedDetails* history_read_details,
       UA_UInt32 timeout_hint, UA_TimestampsToReturn timestamps_to_return,
       UA_NodeId node_id, const UA_ByteString* continuation_point_in,
-      UA_ByteString* continuation_point_out);
+      UA_ByteString* continuation_point_out) const;
 
   UA_StatusCode readAndAppendHistory(
       const UA_ReadAtTimeDetails* history_read_details, UA_UInt32 timeout_hint,
       UA_TimestampsToReturn timestamps_to_return, UA_NodeId node_id,
       const UA_ByteString* continuation_point_in,
-      UA_ByteString* continuation_point_out, UA_HistoryData*);
+      UA_ByteString* continuation_point_out, UA_HistoryData*) const;
 
   HaSLL::LoggerPtr logger_;
   std::unordered_map<int64_t, UA_DataTypeKind> type_map_;

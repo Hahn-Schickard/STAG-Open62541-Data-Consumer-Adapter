@@ -154,7 +154,7 @@ Historizer::Historizer()
 }
 
 void Historizer::dataChanged(const UA_NodeId* node_id, UA_UInt32 attribute_id,
-    const UA_DataValue* value) {
+    const UA_DataValue* value) const {
   UA_Boolean historize = false;
   if ((attribute_id & UA_ATTRIBUTEID_HISTORIZING) != 0) {
     historize = true;
@@ -209,7 +209,7 @@ UA_StatusCode Historizer::registerNodeId(
 }
 
 void Historizer::write(const UA_NodeId* node_id, UA_Boolean historizing,
-    const UA_DataValue* value) {
+    const UA_DataValue* value) const {
   auto target = toString(node_id);
   if (!historizing) {
     logger_->info("Node {} is not configured for historization ", target);
@@ -256,7 +256,7 @@ HistoryResults Historizer::readHistory(
     const UA_ReadRawModifiedDetails* history_read_details,
     UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestamps_to_return,
     UA_NodeId node_id, const UA_ByteString* continuation_point_in,
-    [[maybe_unused]] UA_ByteString* continuation_point_out) { // NOLINT
+    [[maybe_unused]] UA_ByteString* continuation_point_out) const { // NOLINT
 
   auto columns = setColumnNames(timestamps_to_return);
   auto filters = setColumnFilters(history_read_details->returnBounds,
@@ -313,7 +313,7 @@ void Historizer::readRaw(const UA_RequestHeader* request_header,
     UA_Boolean release_continuation_points, size_t nodes_to_read_size,
     const UA_HistoryReadValueId* nodes_to_read,
     UA_HistoryReadResponse* response,
-    UA_HistoryData* const* const history_data) {
+    UA_HistoryData* const* const history_data) const {
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
   if (!release_continuation_points) {
     for (size_t i = 0; i < nodes_to_read_size; ++i) {
@@ -345,7 +345,7 @@ UA_StatusCode Historizer::readAndAppendHistory(
     UA_UInt32 /*timeout_hint*/, UA_TimestampsToReturn timestamps_to_return,
     UA_NodeId node_id, const UA_ByteString* /*continuation_point_in*/,
     [[maybe_unused]] UA_ByteString* continuation_point_out,
-    UA_HistoryData* history_data) {
+    UA_HistoryData* history_data) const {
 
   auto columns = setColumnNames(timestamps_to_return);
   UA_StatusCode status = UA_STATUSCODE_GOOD;
@@ -397,8 +397,8 @@ void Historizer::readAtTime(const UA_RequestHeader* request_header,
     UA_Boolean release_continuation_points, size_t nodes_to_read_size,
     const UA_HistoryReadValueId* nodes_to_read,
     UA_HistoryReadResponse* response,
-    UA_HistoryData* const* const
-        history_data) { // NOLINT parameter name set by open62541
+    UA_HistoryData* const* const history_data)
+    const { // NOLINT parameter name set by open62541
   response->responseHeader.serviceResult = UA_STATUSCODE_GOOD;
   if (!release_continuation_points) {
     for (size_t i = 0; i < nodes_to_read_size; ++i) {

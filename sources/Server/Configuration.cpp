@@ -83,7 +83,7 @@ unique_ptr<UA_ServerConfig> Configuration::getConfig() {
 }
 
 #ifdef ENABLE_UA_HISTORIZING
-HistorizerPtr Configuration::getHistorizer() { return historizer_; }
+HistorizerPtr Configuration::getHistorizer() const { return historizer_; }
 #endif // ENABLE_UA_HISTORIZING
 
 } // namespace open62541

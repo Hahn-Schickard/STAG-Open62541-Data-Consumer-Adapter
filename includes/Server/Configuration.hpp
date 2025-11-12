@@ -20,7 +20,7 @@ struct Configuration {
 
   std::unique_ptr<UA_ServerConfig> getConfig();
 #ifdef ENABLE_UA_HISTORIZING
-  HistorizerPtr getHistorizer();
+  HistorizerPtr getHistorizer() const;
 #endif // ENABLE_UA_HISTORIZING
 
 private:
