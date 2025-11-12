@@ -13,7 +13,7 @@
 namespace open62541 {
 
 struct Runner {
-  Runner(UA_ServerConfig* config);
+  explicit Runner(UA_ServerConfig* config);
 
   ~Runner();
 

@@ -55,7 +55,7 @@ struct EventSource {
 
 private:
   struct Connection : DataConnection {
-    Connection(const DataNotifier& notifier) : notify_(notifier) {}
+    explicit Connection(const DataNotifier& notifier) : notify_(notifier) {}
 
     void call(const RegistryChangePtr& event) { notify_(event); }
 

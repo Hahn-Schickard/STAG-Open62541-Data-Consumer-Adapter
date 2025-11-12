@@ -11,8 +11,8 @@ namespace open62541 {
 class NodeId {
 public:
   NodeId() = delete;
-  NodeId(const NodeId&);
-  NodeId(const UA_NodeId&); /// @throws std::runtime_error if allocation fails
+  explicit NodeId(const NodeId&);
+  explicit NodeId(const UA_NodeId&);
 
   ~NodeId();
 

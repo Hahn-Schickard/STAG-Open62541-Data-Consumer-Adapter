@@ -15,7 +15,7 @@
 namespace open62541 {
 struct Configuration {
   Configuration();
-  Configuration(const std::filesystem::path& filepath);
+  explicit Configuration(const std::filesystem::path& filepath);
   ~Configuration() = default;
 
   std::unique_ptr<UA_ServerConfig> getConfig();
