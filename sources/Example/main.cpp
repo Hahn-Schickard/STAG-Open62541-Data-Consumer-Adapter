@@ -95,10 +95,10 @@ int main(int argc, char*[]) {
 
       adapter->start();
       registerDevices(device_ids, event_source);
-      this_thread::sleep_for(10s);
+      this_thread::sleep_for(2s);
       logger->trace("Sending device deregistered event");
       deregisterDevices(device_ids, event_source);
-      this_thread::sleep_for(5s);
+      this_thread::sleep_for(1s);
       registerDevices(device_ids, event_source);
 
       if (argc > 1) {
