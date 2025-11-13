@@ -43,20 +43,19 @@ bool checkTable(const string& name) {
   return !result.empty();
 }
 
-bool isHistorized(const UA_NodeId* node_id) {
+bool isHistorized(const string& node_id) {
   auto session = connect();
   work transaction(session);
-  auto result = transaction.exec(
-      "SELECT 1 FROM Historized_Nodes WHERE Node_Id = " + toString(node_id));
+  auto result = transaction.exec(fmt::format(
+      "SELECT 1 FROM Historized_Nodes WHERE Node_Id = '{}';", node_id));
   return !result.empty();
 }
 
 void updateHistorized(work* transaction, const string& target_node_id) {
-  auto timestamp = getCurrentTimestamp();
-  transaction->exec("UPDATE Historized_Nodes Last_Updated = $2 WHERE "
-                    "Node_ID = $1",
-      params{target_node_id, timestamp});
-  transaction->commit();
+  transaction->exec(
+      fmt::format("UPDATE Historized_Nodes SET Last_Updated = '{}' WHERE "
+                  "Node_ID = '{}';",
+          getCurrentTimestamp(), target_node_id));
 }
 
 Historizer* getHistorizer(void* context_ptr) {
@@ -148,9 +147,9 @@ Historizer::Historizer()
                    "Node_ID TEXT PRIMARY KEY NOT NULL, "
                    "Last_Updated TIMESTAMP(6) NOT NULL"
                    ");");
+  createDomainRestrictions(connect());
   transaction.commit();
-  createDomainRestrictions(&transaction);
-  type_map_ = queryTypeOIDs(&transaction);
+  type_map_ = queryTypeOIDs(connect());
 }
 
 void Historizer::dataChanged(const UA_NodeId* node_id, UA_UInt32 attribute_id,
@@ -165,29 +164,27 @@ void Historizer::dataChanged(const UA_NodeId* node_id, UA_UInt32 attribute_id,
 
 UA_StatusCode Historizer::registerNodeId(
     UA_Server* server, UA_NodeId node_id, const UA_DataType* type) {
-  auto target = toString(&node_id);
+  auto target = toSanitizedString(&node_id);
   try {
     auto session = connect();
     work transaction(session);
-    if (isHistorized(&node_id)) {
+    if (isHistorized(target)) {
       updateHistorized(&transaction, target);
     } else {
       auto timestamp = getCurrentTimestamp();
-      transaction.exec("INSERT INTO Historized_Nodes(Node_Id, Last_Updated)  "
-                       "VALUES($1, $2)",
-          params{target, timestamp});
+      transaction.exec(
+          fmt::format("INSERT INTO Historized_Nodes(Node_Id, Last_Updated)  "
+                      "VALUES('{}', '{}')",
+              target, timestamp));
     }
-    transaction.commit();
 
-    auto table_name = toSanitizedString(&node_id);
     auto value_type = toSqlType(type);
-    transaction.exec("CREATE TABLE IF NOT EXISTS $1("
+    transaction.exec(fmt::format("CREATE TABLE IF NOT EXISTS \"{}\"("
                      "Index BIGSERIAL PRIMARY KEY, "
                      "Server_Timestamp TIMESTAMP NOT NULL, "
                      "Source_Timestamp TIMESTAMP NOT NULL, "
-                     "Value $2 NOT NULL);",
-        params{
-            table_name, value_type}); // if table exists, check value data type
+                                 "Value {} NOT NULL);",
+        target, value_type)); // if table exists, check value data type
     transaction.commit();
 
     auto monitor_request = UA_MonitoredItemCreateRequest_default(node_id);
@@ -210,15 +207,16 @@ UA_StatusCode Historizer::registerNodeId(
 
 void Historizer::write(const UA_NodeId* node_id, UA_Boolean historizing,
     const UA_DataValue* value) const {
-  auto target = toString(node_id);
+  auto target = toSanitizedString(node_id);
   if (!historizing) {
-    logger_->info("Node {} is not configured for historization ", target);
+    logger_->info(
+        "Node {} is not configured for historization ", toString(node_id));
     return;
   }
 
   if (value == nullptr) {
-    logger_->error(
-        "Failed to historize Node {} value. No data provided.", target);
+    logger_->error("Failed to historize Node {} value. No data provided.",
+        toString(node_id));
     return;
   }
 
@@ -234,17 +232,18 @@ void Historizer::write(const UA_NodeId* node_id, UA_Boolean historizing,
     if (value->hasServerTimestamp) {
       server_time = toString(value->serverTimestamp);
     }
-    auto node_id_string = toSanitizedString(node_id);
-    params values{node_id_string, source_time, server_time};
-    addNodeValue(&values, value->value);
+    auto table = toSanitizedString(node_id);
+    params values{source_time, server_time};
+    addNodeValue(&values, &(value->value));
 
     transaction.exec(
-        "INSERT INTO $1(Source_Timestamp, Server_Timestamp, Value) "
-        "VALUES($2, $3, 4)",
+        fmt::format(
+            "INSERT INTO \"{}\"(Source_Timestamp, Server_Timestamp, Value) "
+            "VALUES($1, $2, $3)",
+            table),
         values);
-    transaction.commit();
-
     updateHistorized(&transaction, target);
+    transaction.commit();
   } catch (exception& ex) {
     logger_->error("Failed to historize Node {} value due to an exception. "
                    "Exception: {}",
@@ -356,18 +355,19 @@ UA_StatusCode Historizer::readAndAppendHistory(
     auto session = connect();
     work transaction(session);
     auto table = toSanitizedString(&node_id);
-    string query = "SELECT " + columns + " FROM " + table +
-        " WHERE Source_Timestamp =" + timestamp +
-        " ORDER BY Source_Timestamp ASC";
     /**
      * @todo: use an async select request or a batch read, and check if
      * timeout_hint elapsed, if it did set a continuation point
      */
-    auto rows = transaction.exec(query);
+    auto rows =
+        transaction.exec(fmt::format("SELECT {} FROM {} WHERE Source_Timestamp "
+                                     "= {} ORDER BY Source_Timestamp ASC",
+            columns, table, timestamp));
     if (rows.empty()) {
-      string nearest_query = "SELECT " + columns + " FROM " + table +
-          " WHERE Source_Timestamp $1 " + timestamp +
-          " ORDER BY Source_Timestamp ASC LIMIT 1;";
+      string nearest_query =
+          fmt::format("SELECT {} FROM {} WHERE Source_Timestamp $1 {} ORDER BY "
+                      "Source_Timestamp ASC LIMIT 1;",
+              columns, table, timestamp);
       auto nearest_before = makeHistoryResult(
           transaction.exec(nearest_query, params{"<"}).expect_rows(1).at(0),
           timestamps_to_return, type_map_);

@@ -14,11 +14,11 @@
 
 namespace open62541 {
 
-void createDomainRestrictions(pqxx::work* transaction);
+void createDomainRestrictions(pqxx::connection session);
 
 using TypeMap = std::unordered_map<int64_t, UA_DataTypeKind>;
 
-TypeMap queryTypeOIDs(pqxx::work* transaction);
+TypeMap queryTypeOIDs(pqxx::connection session);
 
 std::string getCurrentTimestamp();
 

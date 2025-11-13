@@ -12,7 +12,8 @@ namespace open62541 {
 using namespace std;
 using namespace pqxx;
 
-void createDomainRestrictions(work* transaction) {
+void createDomainRestrictions(connection session) {
+  work transaction(session);
   // NOLINTBEGIN(readability-magic-numbers)
   unordered_map<string, size_t> domains{
       // clang-format off
@@ -22,48 +23,49 @@ void createDomainRestrictions(work* transaction) {
       {"OPCUA_STATUSCODE", 4294967296} // status code uses 32 bit uint
   }; // clang-format on
   // NOLINTEND(readability-magic-numbers)
-  string create = "CREATE DOMAIN IF NOT EXISTS ";
-  for (const auto& [domain, limit] : domains) {
-    transaction->exec(
-        create + "$1 AS INTEGER CHECK (VALUE >= 0 AND VALUE < $2)",
-        {domain, limit});
-    transaction->commit();
+  string create = "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN "
+                  "pg_namespace n ON n.oid = t.typnamespace WHERE typname = "
+                  "LOWER('{}')) THEN CREATE DOMAIN {}; END IF; END $$;";
+  for (const auto& [type_name, limit] : domains) {
+    auto domain = fmt::format(
+        "{} AS INTEGER CHECK (VALUE >= 0 AND VALUE < {})", type_name, limit);
+    transaction.exec(fmt::format(create, type_name, domain));
   }
   // int8 requires different limits, hence we create it separately
-  transaction->exec(create +
-      "OPCUA_TINYINT AS INTEGER CHECK (VALUE >= -128 AND VALUE < 128)");
-  transaction->commit();
+  transaction.exec(fmt::format(create, "OPCUA_TINYINT",
+      "OPCUA_TINYINT AS INTEGER CHECK (VALUE >= -128 AND VALUE < 128)"));
 
   // uint64 does not fit into integer, hence we use numeric
-  transaction->exec(create +
+  transaction.exec(fmt::format(create, "OPCUA_BIGUINT",
       "OPCUA_BIGUINT AS NUMERIC CHECK (VALUE >= 0 AND VALUE "
-      "< 18446744073709551616)");
-  transaction->commit();
+      "< 18446744073709551616)"));
 }
 
-TypeMap queryTypeOIDs(work* transaction) {
+TypeMap queryTypeOIDs(connection session) {
   unordered_map<string, size_t> typenames{// clang-format off
-      {"BOOLEAN", UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN},
+      {"BOOL", UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN},
       {"OPCUA_TINYUINT", UA_DataTypeKind::UA_DATATYPEKIND_BYTE},
       {"OPCUA_TINYINT", UA_DataTypeKind::UA_DATATYPEKIND_SBYTE},
       {"OPCUA_SMALLUINT", UA_DataTypeKind::UA_DATATYPEKIND_UINT16},
-      {"SMALLINT", UA_DataTypeKind::UA_DATATYPEKIND_INT16},
+      {"INT2", UA_DataTypeKind::UA_DATATYPEKIND_INT16},
       {"OPCUA_UINT", UA_DataTypeKind::UA_DATATYPEKIND_UINT32},
-      {"INT", UA_DataTypeKind::UA_DATATYPEKIND_INT32},
+      {"INT4", UA_DataTypeKind::UA_DATATYPEKIND_INT32},
       {"OPCUA_BIGUINT", UA_DataTypeKind::UA_DATATYPEKIND_UINT64},
-      {"BIGINT", UA_DataTypeKind::UA_DATATYPEKIND_INT64},
+      {"INT8", UA_DataTypeKind::UA_DATATYPEKIND_INT64},
       {"OPCUA_STATUSCODE", UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE},
-      {"REAL", UA_DataTypeKind::UA_DATATYPEKIND_FLOAT},
-      {"DOUBLE PRECISION", UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE},
+      {"FLOAT4", UA_DataTypeKind::UA_DATATYPEKIND_FLOAT},
+      {"FLOAT8", UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE},
       {"TIMESTAMP", UA_DataTypeKind::UA_DATATYPEKIND_DATETIME},
       {"BYTEA", UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING},
       {"TEXT", UA_DataTypeKind::UA_DATATYPEKIND_STRING}
   }; // clang-format on
   TypeMap result;
+  work transaction(session);
   for (const auto& [type_name, type_code] : typenames) {
     auto oid = transaction
-                   ->exec("SELECT oid FROM pg_type WHERE typname = $1",
-                       params{type_name})
+                   .exec(fmt::format(
+                       "SELECT oid FROM pg_type WHERE typname = LOWER('{}');",
+                       type_name))
                    .expect_rows(1)
                    .expect_columns(1)
                    .at(0)
