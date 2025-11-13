@@ -38,8 +38,8 @@ pqxx::connection connect() {
 bool checkTable(const string& name) {
   auto session = connect();
   work transaction(session);
-  auto result = transaction.exec(
-      "SELECT 1 FROM information_schema.tables WHERE table_name = " + name);
+  auto result = transaction.exec(fmt::format(
+      "SELECT 1 FROM information_schema.tables WHERE table_name = {};", name));
   return !result.empty();
 }
 
@@ -189,9 +189,9 @@ UA_StatusCode Historizer::registerNodeId(
 
     auto value_type = toSqlType(type);
     transaction.exec(fmt::format("CREATE TABLE IF NOT EXISTS \"{}\"("
-                     "Index BIGSERIAL PRIMARY KEY, "
-                     "Server_Timestamp TIMESTAMP NOT NULL, "
-                     "Source_Timestamp TIMESTAMP NOT NULL, "
+                                 "Index BIGSERIAL PRIMARY KEY, "
+                                 "Server_Timestamp TIMESTAMP NOT NULL, "
+                                 "Source_Timestamp TIMESTAMP NOT NULL, "
                                  "Value {} NOT NULL);",
         target, value_type)); // if table exists, check value data type
     transaction.commit();
