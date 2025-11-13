@@ -198,7 +198,7 @@ UA_StatusCode Historizer::registerNodeId(
 
     auto monitor_request = UA_MonitoredItemCreateRequest_default(node_id);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    monitor_request.requestedParameters.samplingInterval = 1000000.0;
+    monitor_request.requestedParameters.samplingInterval = 10000.0;
     monitor_request.monitoringMode = UA_MONITORINGMODE_REPORTING;
     auto* monitored_item_context = static_cast<void*>(this);
     auto result = UA_Server_createDataChangeMonitoredItem(server,
