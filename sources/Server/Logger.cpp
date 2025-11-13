@@ -1,37 +1,35 @@
 #include "Logger.hpp"
 #include "HaSLL/LoggerManager.hpp"
 
-#include <map>
-#include <mutex>
+#include <unordered_map>
 
 namespace open62541 {
 using namespace std;
 using namespace HaSLL;
 
-map<UA_LogCategory, LoggerPtr> loggers;
-std::mutex logger_mutex;
+using LoggersMap = unordered_map<UA_LogCategory, LoggerPtr>;
 
-void registerLoggers() {
-  if (loggers.empty()) {
-    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_NETWORK,
-        LoggerManager::registerLogger("Open62541::Network"));
-    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_SECURECHANNEL,
-        LoggerManager::registerLogger("Open62541::Channel"));
-    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_SESSION,
-        LoggerManager::registerLogger("Open62541::Session"));
-    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_SERVER,
-        LoggerManager::registerLogger("Open62541::Server"));
-    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_CLIENT,
-        LoggerManager::registerLogger("Open62541::Client"));
-    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_USERLAND,
-        LoggerManager::registerLogger("Open62541::User"));
-    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_SECURITYPOLICY,
-        LoggerManager::registerLogger("Open62541::Security"));
-    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_EVENTLOOP,
-        LoggerManager::registerLogger("Open62541::EventLoop"));
-    loggers.emplace(UA_LogCategory::UA_LOGCATEGORY_DISCOVERY,
-        LoggerManager::registerLogger("Open62541::Discovery"));
-  }
+LoggersMap* registerLoggers() {
+  auto* result = new LoggersMap;
+  result->emplace(UA_LogCategory::UA_LOGCATEGORY_NETWORK,
+      LoggerManager::registerLogger("Open62541::Network"));
+  result->emplace(UA_LogCategory::UA_LOGCATEGORY_SECURECHANNEL,
+      LoggerManager::registerLogger("Open62541::Channel"));
+  result->emplace(UA_LogCategory::UA_LOGCATEGORY_SESSION,
+      LoggerManager::registerLogger("Open62541::Session"));
+  result->emplace(UA_LogCategory::UA_LOGCATEGORY_SERVER,
+      LoggerManager::registerLogger("Open62541::Server"));
+  result->emplace(UA_LogCategory::UA_LOGCATEGORY_CLIENT,
+      LoggerManager::registerLogger("Open62541::Client"));
+  result->emplace(UA_LogCategory::UA_LOGCATEGORY_USERLAND,
+      LoggerManager::registerLogger("Open62541::User"));
+  result->emplace(UA_LogCategory::UA_LOGCATEGORY_SECURITYPOLICY,
+      LoggerManager::registerLogger("Open62541::Security"));
+  result->emplace(UA_LogCategory::UA_LOGCATEGORY_EVENTLOOP,
+      LoggerManager::registerLogger("Open62541::EventLoop"));
+  result->emplace(UA_LogCategory::UA_LOGCATEGORY_DISCOVERY,
+      LoggerManager::registerLogger("Open62541::Discovery"));
+  return result;
 }
 
 SeverityLevel getLoggingLevel(UA_LogLevel level) {
@@ -60,18 +58,12 @@ SeverityLevel getLoggingLevel(UA_LogLevel level) {
   }
 }
 
-void removeLoggers() {
-  try {
-    loggers.clear();
-  } catch (...) { // NOLINT(bugprone-empty-catch)
-    // surpress any exceptions thrown from logger dtors
-  }
+LoggersMap* getLoggers(void* context_ptr) {
+  return static_cast<LoggersMap*>(context_ptr);
 }
 
-void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
+void logToHaSLL(void* context, UA_LogLevel level, UA_LogCategory category,
     const char* msg, va_list args) {
-  lock_guard lock(logger_mutex);
-
   /*
    * Kudos to Chris Dodd @stackoverflow
    * https://stackoverflow.com/a/70749935
@@ -94,23 +86,30 @@ void logToHaSLL(void*, UA_LogLevel level, UA_LogCategory category,
     message.resize(static_cast<size_t>(len)); // Remove the NULL terminator
   } // else -> message will be empty
 
-  if (auto it = loggers.find(category); it != loggers.end()) {
-    it->second->log(getLoggingLevel(level), message);
+  if (auto* loggers = getLoggers(context); loggers != nullptr) {
+    if (auto it = loggers->find(category); it != loggers->end()) {
+      it->second->log(getLoggingLevel(level), message);
+    }
   }
 }
 
 void destroyHaSLL(struct UA_Logger* logger) {
-  removeLoggers();
-  UA_free(logger);
+  if (logger != nullptr) {
+    if (auto* loggers = getLoggers(logger->context); loggers != nullptr) {
+      loggers->clear();
+      delete loggers;
+    }
+    UA_free(logger);
+  }
 }
 } // namespace open62541
 
 UA_Logger* createHaSLL() {
-  open62541::registerLoggers();
+  auto* loggers = open62541::registerLoggers();
   auto* logger = (UA_Logger*)UA_malloc(sizeof(UA_Logger));
   if (logger == nullptr) {
     return nullptr;
   }
-  *logger = {open62541::logToHaSLL, nullptr, open62541::destroyHaSLL};
+  *logger = {open62541::logToHaSLL, loggers, open62541::destroyHaSLL};
   return logger;
 }
