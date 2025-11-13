@@ -24,6 +24,7 @@ target_link_libraries(${TARGET}
         HaSLL::HaSLL
     PRIVATE
         date::date
+        fmt::fmt-header-only
         ${PROJECT_NAME}_Utilities
 )
 #@- =========================== END OF USER CONFIGURATION ===============================

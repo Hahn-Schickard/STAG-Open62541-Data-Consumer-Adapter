@@ -71,6 +71,7 @@ find_package(Threads REQUIRED)
 if(HISTORIZATION)
         find_package(libpqxx REQUIRED)
         find_package(date REQUIRED)
+        find_package(fmt REQUIRED)
 endif()
 #@- =========================== END OF USER CONFIGURATION ===============================
 

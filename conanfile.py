@@ -80,6 +80,9 @@ class PackageConan(ConanFile):
             self.requires("libpqxx/[~7.10]",
                           visible=False
                           )
+            self.requires("fmt/[~11.2]",
+                          visible=False
+                          )
         # @- END USER REQUIREMENTS
 
     def build_requirements(self):
@@ -100,6 +103,7 @@ class PackageConan(ConanFile):
         if self.options.historization:
             self.options["libpqxx"].shared = False
             self.options["date"].header_only = True
+            self.options["fmt"].header_only = True
             self.options["open62541"].historize = True
         # @- END USER REQUIREMENTS OPTION CONFIGURATION
 
