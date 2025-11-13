@@ -321,7 +321,6 @@ UA_StatusCode NodeBuilder::addReadableNode(const MetaInfoPtr& meta_info,
 #ifdef ENABLE_UA_HISTORIZING
     value_attributes.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     value_attributes.historizing = true;
-    historize(node.id, value_attributes.value.type);
 #endif // ENABLE_UA_HISTORIZING
     auto status = repo_->add(node.id, readable);
     checkStatusCode("While setting readable metric callbacks", status);
@@ -335,10 +334,12 @@ UA_StatusCode NodeBuilder::addReadableNode(const MetaInfoPtr& meta_info,
     status = UA_Server_addDataSourceVariableNode(server_, node.id, node.parent,
         node.reference_type, node.name, type_definition, value_attributes,
         data_source, repo_.get(), nullptr);
+#ifdef ENABLE_UA_HISTORIZING
+    historize(node.id, value_attributes.value.type);
+#endif // ENABLE_UA_HISTORIZING
     UA_NodeId_clear(&type_definition);
     UA_VariableAttributes_clear(&value_attributes);
     checkStatusCode("While adding readable variable node to server", status);
-
     return status;
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
@@ -366,7 +367,6 @@ UA_StatusCode NodeBuilder::addObservableNode(
 #ifdef ENABLE_UA_HISTORIZING
     value_attributes.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
     value_attributes.historizing = true;
-    historize(node.id, value_attributes.value.type);
 #endif // ENABLE_UA_HISTORIZING
     UA_DataSource data_source;
     data_source.read = &readNodeValue;
@@ -377,10 +377,12 @@ UA_StatusCode NodeBuilder::addObservableNode(
     status = UA_Server_addDataSourceVariableNode(server_, node.id, node.parent,
         node.reference_type, node.name, type_definition, value_attributes,
         data_source, repo_.get(), nullptr);
+#ifdef ENABLE_UA_HISTORIZING
+    historize(node.id, value_attributes.value.type);
+#endif // ENABLE_UA_HISTORIZING
     UA_NodeId_clear(&type_definition);
     UA_VariableAttributes_clear(&value_attributes);
     checkStatusCode("While adding readable variable node to server", status);
-
     return status;
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
@@ -410,7 +412,6 @@ UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
 #ifdef ENABLE_UA_HISTORIZING
       value_attributes.accessLevel |= UA_ACCESSLEVELMASK_HISTORYREAD;
       value_attributes.historizing = true;
-      historize(node.id, value_attributes.value.type);
 #endif // ENABLE_UA_HISTORIZING
     }
     data_source.read = &readNodeValue;
@@ -421,10 +422,12 @@ UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
     status = UA_Server_addDataSourceVariableNode(server_, node.id, node.parent,
         node.reference_type, node.name, type_definition, value_attributes,
         data_source, repo_.get(), nullptr);
+#ifdef ENABLE_UA_HISTORIZING
+    historize(node.id, value_attributes.value.type);
+#endif // ENABLE_UA_HISTORIZING
     UA_NodeId_clear(&type_definition);
     UA_VariableAttributes_clear(&value_attributes);
     checkStatusCode("While adding writable variable node to server", status);
-
     return status;
   } catch (const StatusCodeNotGood& ex) {
     logger_->error(
