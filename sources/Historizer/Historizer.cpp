@@ -159,6 +159,15 @@ void Historizer::dataChanged(const UA_NodeId* node_id, UA_UInt32 attribute_id,
     historize = true;
   }
 
+  if (value == nullptr) {
+    logger_->error("Can not historize {} nodes last value because it is empty",
+        toString(node_id));
+    return;
+  } else if (!value->hasValue) {
+    logger_->info("Not historizing {} nodes last value because it has none",
+        toString(node_id));
+    return;
+  }
   write(node_id, historize, value);
 }
 
