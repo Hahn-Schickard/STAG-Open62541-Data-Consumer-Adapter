@@ -24,7 +24,7 @@ std::string getCurrentTimestamp();
 
 std::string toSanitizedString(const UA_NodeId* node_id);
 
-void addNodeValue(pqxx::params* values, UA_Variant variant);
+void addNodeValue(pqxx::params* values, const UA_Variant* variant);
 
 std::string setColumnNames(UA_TimestampsToReturn timestamps_to_return);
 

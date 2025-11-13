@@ -4,6 +4,7 @@
 #include "UaVariantOperators.hpp"
 
 #include <date/date.h>
+#include <fmt/format.h>
 
 #include <chrono>
 #include <cmath>
@@ -82,13 +83,15 @@ string getCurrentTimestamp() {
 }
 
 string toSanitizedString(const UA_NodeId* node_id) {
-  return "\"" + toString(node_id) + "\"";
+  auto result = toString(node_id);
+  // strip "ns=1;s=" prefix, it's 7 chars long
+  return result.substr(7); // NOLINT(readability-magic-numbers)
 }
 
-void addNodeValue(params* values, UA_Variant variant) {
-  switch (variant.type->typeKind) {
+void addNodeValue(params* values, const UA_Variant* variant) {
+  switch (variant->type->typeKind) {
   case UA_DataTypeKind::UA_DATATYPEKIND_BOOLEAN: {
-    auto value = *((bool*)(variant.data));
+    auto value = *((bool*)(variant->data));
     values->append(value);
     break;
   }
@@ -100,69 +103,69 @@ void addNodeValue(params* values, UA_Variant variant) {
     [[fallthrough]]; // pqxx does not allow unsigned char as a parameter
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT16: {
-    auto value = *((UA_UInt16*)(variant.data));
+    auto value = *((UA_UInt16*)(variant->data));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT16: {
-    auto value = *((UA_Int16*)(variant.data));
+    auto value = *((UA_Int16*)(variant->data));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT32: {
-    auto value = *((UA_UInt32*)(variant.data));
+    auto value = *((UA_UInt32*)(variant->data));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT32: {
-    auto value = *((UA_Int32*)(variant.data));
+    auto value = *((UA_Int32*)(variant->data));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_UINT64: {
-    auto value = *((UA_UInt64*)(variant.data));
+    auto value = *((UA_UInt64*)(variant->data));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_INT64: {
-    auto value = *((UA_Int64*)(variant.data));
+    auto value = *((UA_Int64*)(variant->data));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STATUSCODE: {
-    auto value = *((UA_StatusCode*)(variant.data));
+    auto value = *((UA_StatusCode*)(variant->data));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_FLOAT: {
-    auto value = *((UA_Float*)(variant.data));
+    auto value = *((UA_Float*)(variant->data));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DOUBLE: {
-    auto value = *((UA_Double*)(variant.data));
+    auto value = *((UA_Double*)(variant->data));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    auto value = toString(*((UA_DateTime*)(variant.data)));
+    auto value = toString(*((UA_DateTime*)(variant->data)));
     values->append(value);
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTESTRING: {
-    auto* byte_string = (UA_ByteString*)(variant.data);
+    auto* byte_string = (UA_ByteString*)(variant->data);
     values->append(binary_cast(byte_string->data, byte_string->length));
     break;
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_STRING: {
-    auto* ua_string = (UA_String*)(variant.data);
+    auto* ua_string = (UA_String*)(variant->data);
     auto value = string((char*)ua_string->data, ua_string->length);
     values->append(value);
     break;
   }
   default: {
-    string error_msg =
-        "Unhandled UA_Variant type detected: " + string(variant.type->typeName);
+    string error_msg = "Unhandled UA_Variant type detected: " +
+        string(variant->type->typeName);
     throw logic_error(error_msg);
   }
   }
