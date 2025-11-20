@@ -3,11 +3,9 @@ set(THIS Unit_Tests_Runner)
 #@- =========================== END OF USER CONFIGURATION ===============================
 
 #@+ ======================== User TEST_SUITES configuration =============================
-file(GLOB Device_Test_Suite "${CMAKE_CURRENT_LIST_DIR}/Device/*")
-file(GLOB Shared_Resources "${CMAKE_CURRENT_LIST_DIR}/*.?pp")
+file(GLOB Test_Suite "${CMAKE_CURRENT_LIST_DIR}/Device/*")
 list(APPEND TEST_SUITES
-    ${Device_Test_Suite}
-    ${Shared_Resources}
+    ${Test_Suite}
 )
 #@- =========================== END OF USER CONFIGURATION ===============================
 add_executable(${THIS})
