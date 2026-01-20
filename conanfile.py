@@ -144,6 +144,8 @@ class PackageConan(ConanFile):
         self.cpp_info.requires = [
             "data_consumer_adapter_interface::data_consumer_adapter_interface"
         ]
+        if self.options.historization:
+            self.cpp_info.requires.append("fmt::fmt")
         # @- END USER DEFINES
         self.cpp_info.set_property("cmake_file_name", self.full_name)
         cmake_target_name = self.full_name + "::" + self.full_name
