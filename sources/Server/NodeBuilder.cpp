@@ -475,8 +475,8 @@ UA_StatusCode NodeBuilder::addCallableNode(const MetaInfoPtr& meta_info,
   logger_->trace("Adding Callable Node for element {}:{}", meta_info->id(),
       meta_info->name());
   auto status = UA_STATUSCODE_BADINTERNALERROR;
-  UA_Argument* input_args = makeInputArgs(callable->parameterTypes());
-  UA_Argument* output = makeOutputType(callable->resultType());
+  auto* input_args = makeInputArgs(callable->parameterTypes());
+  auto* output = makeOutputType(callable->resultType());
   auto node = NodeMetaInfo(meta_info, parent_id);
   try {
     status = repo_->add(node.id, callable);
