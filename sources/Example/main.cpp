@@ -199,9 +199,44 @@ DevicePtr buildVariantB(const string& id) {
     mock_builder->addReadable(subgroup_1_ref_id,
         {"Current", "Current measured phase current in A"}, 8.8);
   }
-  // @todo: for some reason, calls to this method fail with internal error
-  mock_builder->addCallable({"Recalculate", "Recalculates measured values"},
-      Information_Model::DataType::Boolean);
+
+  mock_builder->addCallable(
+      {"Recalculate", "Recalculates measured values"}, DataType::Boolean,
+      [](const Parameters&) { return true; },
+      [](const Parameters&) {
+        promise<DataVariant> promised;
+        auto promised_result =
+            ResultFuture(make_shared<uintmax_t>(0), promised.get_future());
+        promised.set_value(true);
+        return promised_result;
+      },
+      [](uintmax_t) {});
+
+  auto sum_doubles = [](const Parameters& args) -> DataVariant {
+    auto arg1_value = args.find(0)->second.value_or(0.0);
+    cout << "Summing " << toString(arg1_value);
+    if (auto arg2 = args.find(1); arg2 != args.end()) {
+      auto arg2_value = arg2->second.value_or(0.0);
+      cout << " with " << toString(arg2_value) << endl;
+      return get<double>(arg1_value) + get<double>(arg2_value);
+    } else {
+      cout << " with nothing" << endl;
+      return arg1_value;
+    }
+  };
+
+  mock_builder->addCallable(
+      {"Sum Doubles", "Sum the given double values"}, DataType::Double,
+      sum_doubles,
+      [&sum_doubles](const Parameters& args) {
+        promise<DataVariant> promised;
+        auto promised_result =
+            ResultFuture(make_shared<uintmax_t>(0), promised.get_future());
+        promised.set_value(sum_doubles(args));
+        return promised_result;
+      },
+      [](uintmax_t) {},
+      {{0, {DataType::Double, true}}, {1, {DataType::Double, false}}});
 
   mock_builder->addCallable({"Reset", "Resets the device"},
       [](const Parameters&) { cout << "Callback called" << endl; });
