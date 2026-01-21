@@ -135,8 +135,10 @@ int main(int argc, char*[]) {
 DevicePtr buildVariantA(const string& id) {
   auto mock_builder = make_shared<Information_Model::testing::MockBuilder>();
 
-  mock_builder->setDeviceInfo(
-      id, {"Example 1", "This is an example temperature sensor system"});
+  mock_builder->setDeviceInfo(id,
+      {"Short Example",
+          "This is an example temperature sensor system. It only uses Group, "
+          "Readable and Writable Elements"});
   { // Power group
     auto subgroup_1_ref_id = mock_builder->addGroup(
         {"Power", "Groups information regarding the power supply"});
@@ -169,8 +171,10 @@ DevicePtr buildVariantA(const string& id) {
 DevicePtr buildVariantB(const string& id) {
   auto mock_builder = make_shared<Information_Model::testing::MockBuilder>();
 
-  mock_builder->setDeviceInfo(
-      id, {"Example 2", "This is an example power measurement sensor system"});
+  mock_builder->setDeviceInfo(id,
+      {"Full Example",
+          "This is an example of a power measurement sensor system. It usess "
+          "all available Elements"});
   { // Phase 1 group
     auto subgroup_1_ref_id = mock_builder->addGroup(
         {"Phase 1", "Groups first phase's power measurements"});
