@@ -441,7 +441,8 @@ UA_StatusCode NodeBuilder::addWritableNode(const MetaInfoPtr& meta_info,
 UA_Argument* makeInputArgs(ParameterTypes params) {
   UA_Argument* result = nullptr;
   if (!params.empty()) {
-    result = (UA_Argument*)malloc(params.size() * sizeof(UA_Argument));
+    result =
+        (UA_Argument*)UA_Array_new(params.size(), &UA_TYPES[UA_TYPES_ARGUMENT]);
     for (size_t i = 0; i < params.size(); ++i) {
       UA_Argument_init(&result[i]);
       auto parameter = params.at(i);
@@ -505,9 +506,8 @@ UA_StatusCode NodeBuilder::addCallableNode(const MetaInfoPtr& meta_info,
   if (input_args != nullptr) {
     // input args are copied into method node or are not used in case of
     // failure
-    for (size_t i = 0; i < callable->parameterTypes().size(); ++i) {
-      UA_Argument_delete(&input_args[i]);
-    }
+    UA_Array_delete(input_args, callable->parameterTypes().size(),
+        &UA_TYPES[UA_TYPES_ARGUMENT]);
   }
   if (output != nullptr) {
     // output is copied into method node or not used in case of failure
