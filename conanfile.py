@@ -113,6 +113,7 @@ class PackageConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+            del self.options.historization
 
     def generate(self):
         tc = CMakeToolchain(self)
