@@ -54,7 +54,7 @@ string(CONCAT HISTORIZATION_DESC
     "Enable historization service, requires open62541 library to be compiled with "
     "UA_ENABLE_HISTORIZING set to ON and exported"    
 )
-option(HISTORIZATION ${HISTORIZATION_DESC} ON)
+option(HISTORIZATION ${HISTORIZATION_DESC} OFF)
 #@- =========================== END OF USER CONFIGURATION ===============================
 
 find_package(GTest REQUIRED)
