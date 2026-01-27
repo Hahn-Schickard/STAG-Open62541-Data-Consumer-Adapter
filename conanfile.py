@@ -73,16 +73,17 @@ class PackageConan(ConanFile):
         self.requires("boost/[~1.89]",
                       visible=False
                       )
-        if self.options.historization:
-            self.requires("date/[~3.0]",
-                          visible=False
-                          )
-            self.requires("libpqxx/[~7.10]",
-                          visible=False
-                          )
-            self.requires("fmt/[~11.2]",
-                          visible=False
-                          )
+        if self.settings.os != 'Windows':
+            if self.options.historization:
+                self.requires("date/[~3.0]",
+                              visible=False
+                              )
+                self.requires("libpqxx/[~7.10]",
+                              visible=False
+                              )
+                self.requires("fmt/[~11.2]",
+                              visible=False
+                              )
         # @- END USER REQUIREMENTS
 
     def build_requirements(self):
@@ -100,11 +101,12 @@ class PackageConan(ConanFile):
         self.options["open62541"].json_support = True
         self.options["open62541"].multithreading = "Threadsafe"
         self.options["boost"].header_only = True
-        if self.options.historization:
-            self.options["libpqxx"].shared = False
-            self.options["date"].header_only = True
-            self.options["fmt"].header_only = True
-            self.options["open62541"].historize = True
+        if self.settings.os != 'Windows':
+            if self.options.historization:
+                self.options["libpqxx"].shared = False
+                self.options["date"].header_only = True
+                self.options["fmt"].header_only = True
+                self.options["open62541"].historize = True
         # @- END USER REQUIREMENTS OPTION CONFIGURATION
 
     def layout(self):
@@ -123,7 +125,8 @@ class PackageConan(ConanFile):
         tc.variables['COVERAGE_TRACKING'] = False
         tc.variables['CMAKE_CONAN'] = False
         # @+ START USER CMAKE OPTIONS
-        tc.variables['HISTORIZATION'] = self.options.historization
+        if self.settings.os != 'Windows':
+            tc.variables['HISTORIZATION'] = self.options.historization
         # @- END USER CMAKE OPTIONS
         tc.generate()
 
@@ -145,8 +148,9 @@ class PackageConan(ConanFile):
         self.cpp_info.requires = [
             "data_consumer_adapter_interface::data_consumer_adapter_interface"
         ]
-        if self.options.historization:
-            self.cpp_info.requires.append("fmt::fmt")
+        if self.settings.os != 'Windows':
+            if self.options.historization:
+                self.cpp_info.requires.append("fmt::fmt")
         # @- END USER DEFINES
         self.cpp_info.set_property("cmake_file_name", self.full_name)
         cmake_target_name = self.full_name + "::" + self.full_name
