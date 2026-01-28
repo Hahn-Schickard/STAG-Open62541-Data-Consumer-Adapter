@@ -67,7 +67,7 @@ class PackageConan(ConanFile):
         self.requires("variant_visitor/[~0.2]@hahn-schickard/stable",
                       visible=False
                       )
-        self.requires("open62541/[~1.4]",
+        self.requires("open62541/[~1.4]@hahn-schickard/stable",
                       visible=False
                       )
         self.requires("boost/[~1.89]",
