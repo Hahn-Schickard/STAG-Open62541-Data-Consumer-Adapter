@@ -20,7 +20,7 @@ struct CallbackNotFound : runtime_error {
 };
 
 struct BadOperation : runtime_error {
-  explicit BadOperation(const string& msg) : runtime_error(msg) {}
+  using runtime_error::runtime_error;
 };
 
 struct ServerNotSet : runtime_error {
