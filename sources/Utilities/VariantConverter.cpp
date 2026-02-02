@@ -1,8 +1,6 @@
 #include "VariantConverter.hpp"
 #include "StringConverter.hpp"
 
-#include <Variant_Visitor/Visitor.hpp>
-
 #include <cmath>
 #include <stdexcept>
 
@@ -45,48 +43,50 @@ UA_NodeId toNodeId(DataType type) {
 // NOLINTBEGIN(readability-magic-numbers)
 UA_Variant toUAVariant(const DataVariant& variant) {
   UA_Variant result;
-  Variant_Visitor::match(
-      variant,
-      [&result](bool value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
-      },
-      [&result](uintmax_t value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
-      },
-      [&result](intmax_t value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
-      },
-      [&result](double value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
-      },
-      [&result](const Timestamp& value) {
-        UA_DateTimeStruct date_time_struct;
-        date_time_struct.year = static_cast<UA_Int16>(value.year);
-        date_time_struct.month = (UA_UInt16)value.month;
-        date_time_struct.day = (UA_UInt16)value.day;
-        date_time_struct.hour = (UA_UInt16)value.hours;
-        date_time_struct.min = (UA_UInt16)value.minutes;
-        date_time_struct.sec = (UA_UInt16)value.seconds;
-        date_time_struct.milliSec =
-            (UA_UInt16)(floor(value.microseconds / 1000));
-        date_time_struct.microSec = (UA_UInt16)(value.microseconds % 1000);
-        date_time_struct.nanoSec = 0;
-        auto date_time = UA_DateTime_fromStruct(date_time_struct);
-        UA_Variant_setScalarCopy(
-            &result, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
-      },
-      [&result](const string& value) {
-        auto ua_string = makeUAString(value);
-        UA_Variant_setScalarCopy(
-            &result, &ua_string, &UA_TYPES[UA_TYPES_STRING]);
-        UA_String_clear(&ua_string);
-      },
-      [&result](const vector<uint8_t>& value) {
-        auto ua_byte_string = makeUAByteString(value);
-        UA_Variant_setScalarCopy(
-            &result, &ua_byte_string, &UA_TYPES[UA_TYPES_BYTESTRING]);
-        UA_String_clear(&ua_byte_string);
-      });
+  UA_Variant_init(&result);
+  if (holds_alternative<bool>(variant)) {
+    auto value = get<bool>(variant);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
+  } else if (holds_alternative<uintmax_t>(variant)) {
+    auto value = get<uintmax_t>(variant);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
+  } else if (holds_alternative<intmax_t>(variant)) {
+    auto value = get<intmax_t>(variant);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
+  } else if (holds_alternative<double>(variant)) {
+    auto value = get<double>(variant);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
+  } else if (holds_alternative<Timestamp>(variant)) {
+    auto value = get<Timestamp>(variant);
+    UA_DateTimeStruct date_time_struct;
+    date_time_struct.year = static_cast<UA_Int16>(value.year);
+    date_time_struct.month = (UA_UInt16)value.month;
+    date_time_struct.day = (UA_UInt16)value.day;
+    date_time_struct.hour = (UA_UInt16)value.hours;
+    date_time_struct.min = (UA_UInt16)value.minutes;
+    date_time_struct.sec = (UA_UInt16)value.seconds;
+    date_time_struct.milliSec = (UA_UInt16)(floor(value.microseconds / 1000));
+    date_time_struct.microSec = (UA_UInt16)(value.microseconds % 1000);
+    date_time_struct.nanoSec = 0;
+    auto date_time = UA_DateTime_fromStruct(date_time_struct);
+    UA_Variant_setScalarCopy(&result, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
+  } else if (holds_alternative<string>(variant)) {
+    auto value = get<string>(variant);
+    auto ua_string = makeUAString(value);
+    UA_Variant_setScalarCopy(&result, &ua_string, &UA_TYPES[UA_TYPES_STRING]);
+    UA_String_clear(&ua_string);
+  } else if (holds_alternative<vector<uint8_t>>(variant)) {
+    auto value = get<vector<uint8_t>>(variant);
+    auto ua_byte_string = makeUAByteString(value);
+    UA_Variant_setScalarCopy(
+        &result, &ua_byte_string, &UA_TYPES[UA_TYPES_BYTESTRING]);
+    UA_String_clear(&ua_byte_string);
+  } else {
+    throw runtime_error("Could not convert Information_Model::DataVariant into "
+                        "open62541 UA_Variant due to an unhandled "
+                        "Information_Model::DataVariant value type");
+  }
+
   return result;
 }
 
