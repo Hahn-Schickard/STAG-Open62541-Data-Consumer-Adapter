@@ -1,38 +1,24 @@
-#include "Event_Model/EventSource.hpp"
-#include "HaSLL/LoggerManager.hpp"
-#include "Information_Model/mocks/DeviceMockBuilder.hpp"
-#include "Information_Model/mocks/Metric_MOCK.hpp"
+#include "Open62541Adapter.hpp"
 
-#include "OpcuaAdapter.hpp"
+#include <HaSLL/LoggerManager.hpp>
+#include <Information_Model_Mocks/MockBuilder.hpp>
+#include <Information_Model_Mocks/ReadableMock.hpp>
+#include <Variant_Visitor/Visitor.hpp>
 
 #include <chrono>
 #include <csignal>
 #include <exception>
+#include <filesystem>
 #include <functional>
-#include <gmock/gmock.h>
 #include <iostream>
 #include <thread>
 #include <unordered_map>
 
 using namespace std;
+using namespace filesystem;
 using namespace HaSLL;
 using namespace Information_Model;
 using namespace Data_Consumer_Adapter;
-
-using ::testing::NiceMock;
-
-unique_ptr<OpcuaAdapter> adapter;
-
-void stopServer() {
-  adapter->stop();
-  adapter.reset();
-}
-
-static void stopHandler(int /*sig*/) {
-  cout << "Received stop signal!" << endl;
-  stopServer();
-  exit(EXIT_SUCCESS);
-}
 
 void printException(
     const LoggerPtr& logger, const exception& e, int level = 0) {
@@ -42,142 +28,94 @@ void printException(
   } catch (const exception& nested_exception) {
     printException(logger, nested_exception, level + 1);
   } catch (...) {
+    logger->critical("Caught an unknown exception");
   }
 }
 
-class EventSourceFake : public Event_Model::EventSource<ModelRepositoryEvent> {
-  void handleException(exception_ptr eptr) { // NOLINT
-    if (eptr) {
-      rethrow_exception(eptr);
+struct EventSource {
+  DataConnectionPtr connect(const DataNotifier& notifier) {
+    auto connection = make_shared<Connection>(notifier);
+    connection_ = connection;
+    return connection;
+  }
+
+  void notify(const RegistryChangePtr& event) {
+    if (auto locked = connection_.lock()) {
+      locked->call(event);
     }
   }
 
-public:
-  EventSourceFake()
-      : EventSource(
-            bind(&EventSourceFake::handleException, this, placeholders::_1)) {}
-
-  void sendEvent(const ModelRepositoryEventPtr& event) { notify(event); }
-};
-
-struct Executor {
-  using Callback = function<void(void)>;
-  Executor(Callback&& callback) : callback_(move(callback)) {}
-
-  pair<uintmax_t, future<DataVariant>> execute(const Function::Parameters&) {
-    auto execute_lock = lock_guard(execute_mx_);
-    auto id = calls_.size();
-    auto promise = std::promise<DataVariant>();
-    auto future = make_pair(id, promise.get_future());
-    calls_.emplace(id, move(promise));
-    auto responder = bind(&Executor::respond, this, id);
-    thread(
-        [](function<void(void)>&& responder) {
-          this_thread::sleep_for(1s);
-          if (responder) {
-            responder();
-          }
-        },
-        move(responder))
-        .detach();
-
-    return future;
+  void registerDevice(const DevicePtr& device) {
+    auto event = std::make_shared<RegistryChange>(device);
+    notify(event);
   }
 
-  void cancel(uintmax_t id) {
-    auto iter = calls_.find(id);
-    if (iter != calls_.end()) {
-      iter->second.set_exception(
-          make_exception_ptr(CallCanceled(id, "ExternalExecutor")));
-      auto clear_lock = lock_guard(erase_mx_);
-      iter = calls_.erase(iter);
-    } else {
-      throw CallerNotFound(id, "ExternalExecutor");
-    }
+  void deregisterDevice(const string& identifier) {
+    auto event = std::make_shared<RegistryChange>(identifier);
+    notify(event);
   }
 
 private:
-  void respond(uintmax_t id) {
-    auto erase_lock = lock_guard(erase_mx_);
-    auto it = calls_.find(id);
-    if (it != calls_.end()) {
-      if (callback_) {
-        callback_();
-        it->second.set_value(DataVariant());
-      } else {
-        it->second.set_exception(
-            make_exception_ptr(runtime_error("Callback dos not exist")));
-      }
-      it = calls_.erase(it);
-    }
-  }
+  struct Connection : DataConnection {
+    explicit Connection(const DataNotifier& notifier) : notify_(notifier) {}
 
-  Callback callback_;
-  mutex execute_mx_;
-  mutex erase_mx_;
-  unordered_map<uintmax_t, promise<DataVariant>> calls_;
+    void call(const RegistryChangePtr& event) { notify_(event); }
+
+  private:
+    DataNotifier notify_;
+  };
+
+  using WeakConnectionPtr = weak_ptr<Connection>;
+  WeakConnectionPtr connection_;
 };
 
-using ExecutorPtr = shared_ptr<Executor>;
+using EventSourcePtr = shared_ptr<EventSource>;
 
-ExecutorPtr executor = nullptr;
-
-void print(const NonemptyDevicePtr& device);
-void print(const NonemptyDeviceElementPtr& element, size_t offset);
-void print(const NonemptyWritableMetricPtr& element, size_t offset);
-void print(const NonemptyMetricPtr& element, size_t offset);
-void print(const NonemptyDeviceElementGroupPtr& elements, size_t offset);
-
-void registerDevices(const shared_ptr<EventSourceFake>& event_source);
-void deregisterDevices(const shared_ptr<EventSourceFake>& event_source);
+void registerDevices(
+    const vector<string>& device_ids, const EventSourcePtr& event_source);
+void deregisterDevices(
+    const vector<string>& device_ids, const EventSourcePtr& event_source);
 
 int main(int argc, char* argv[]) {
   auto status = EXIT_SUCCESS;
   try {
-    LoggerManager::initialise(
-        makeDefaultRepository("config/loggerConfig.json"));
+    auto exe_path = weakly_canonical(path(argv[0])).parent_path();
+    auto logger_cfg_path = exe_path / path("config/loggerConfig.json");
+    LoggerManager::initialise(makeDefaultRepository(logger_cfg_path.string()));
     auto logger = LoggerManager::registerLogger("Main");
     try {
       logger->trace("Logging completed initialization!");
-      logger->info(
-          "Current Sever time, in number of 100 nanosecond intervals since "
-          "January 1, 1601 (UTC): {}",
-          UA_DateTime_now());
 
-      signal(SIGINT, stopHandler); // NOLINT(cert-err33-c)
-      signal(SIGTERM, stopHandler); // NOLINT(cert-err33-c)
-
-      logger->trace(
-          "Termination and Interruption signals assigned to stop handler!");
-
-      auto event_source = make_shared<EventSourceFake>();
+      auto event_source = make_shared<EventSource>();
       logger->trace("Fake event source initialized!");
-
-      adapter =
-          make_unique<OpcuaAdapter>(event_source, "config/defaultConfig.json");
+      auto connector =
+          bind(&EventSource::connect, event_source, placeholders::_1);
+      auto adapter =
+          makeOpen62541Adapter(connector, "config/defaultConfig.json");
       logger->trace("OPC UA Adapter initialized!");
 
-      executor =
-          make_shared<Executor>([]() { cout << "Callback called" << endl; });
+      vector<string> device_ids{"base_id_1", "base_id_2"};
 
       adapter->start();
-      registerDevices(event_source);
-      this_thread::sleep_for(10s);
+      registerDevices(device_ids, event_source);
+      this_thread::sleep_for(2s);
       logger->trace("Sending device deregistered event");
-      deregisterDevices(event_source);
-      this_thread::sleep_for(5s);
-      registerDevices(event_source);
+      deregisterDevices(device_ids, event_source);
+      this_thread::sleep_for(1s);
+      registerDevices(device_ids, event_source);
 
       if (argc > 1) {
-        auto server_lifetime = stoi(argv[1]);
-        cout << "Open62541 server will automatically shut down in "
-             << server_lifetime << " seconds." << endl;
-        this_thread::sleep_for(chrono::seconds(server_lifetime));
-        stopServer();
+        string user_input;
+        do {
+          cout << "Press Q to stop the server" << endl;
+          cin >> user_input;
+          transform(user_input.begin(), user_input.end(), user_input.begin(),
+              [](unsigned char letter) { return tolower(letter); });
+        } while (user_input != "q");
+        adapter->stop();
       } else {
-        while (true) {
-          this_thread::sleep_for(1s);
-        }
+        this_thread::sleep_for(1s);
+        adapter->stop();
       }
     } catch (const exception& ex) {
       printException(logger, ex);
@@ -196,196 +134,137 @@ int main(int argc, char* argv[]) {
   exit(status);
 }
 
-static constexpr size_t BASE_OFFSET = 160;
-static constexpr size_t ELEMENT_OFFSET = 3;
+// NOLINTBEGIN(readability-magic-numbers)
+DevicePtr buildVariantA(const string& id) {
+  auto mock_builder = make_shared<Information_Model::testing::MockBuilder>();
 
-void print(const NonemptyDeviceElementGroupPtr& elements, size_t offset) {
-  cout << string(offset, ' ') << "Group contains elements:" << endl;
-  for (const auto& element : elements->getSubelements()) {
-    print(element, offset + ELEMENT_OFFSET);
-  }
-}
-
-void print(const NonemptyMetricPtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Reads " << toString(element->getDataType())
-       << " value: " << toString(element->getMetricValue()) << endl;
-  cout << endl;
-}
-
-void print(const NonemptyObservableMetricPtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Observably Reads "
-       << toString(element->getDataType())
-       << " value: " << toString(element->getMetricValue()) << endl;
-  cout << endl;
-}
-
-void print(const NonemptyWritableMetricPtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Reads " << toString(element->getDataType())
-       << " value: " << toString(element->getMetricValue()) << endl;
-  cout << string(offset, ' ') << "Writes " << toString(element->getDataType())
-       << " value type" << endl;
-  cout << endl;
-}
-
-void print(const NonemptyFunctionPtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Executes " << toString(element->resultType())
-       << " (" << toString(element->parameterTypes()) << ")" << endl;
-}
-
-void print(const NonemptyDeviceElementPtr& element, size_t offset) {
-  cout << string(offset, ' ') << "Element name: " << element->getElementName()
-       << endl;
-  cout << string(offset, ' ') << "Element id: " << element->getElementId()
-       << endl;
-  cout << string(offset, ' ')
-       << "Described as: " << element->getElementDescription() << endl;
-
-  match(
-      element->functionality,
-      [offset](
-          const NonemptyDeviceElementGroupPtr& group) { print(group, offset); },
-      [offset](const NonemptyMetricPtr& readable) { print(readable, offset); },
-      [offset](const NonemptyObservableMetricPtr& observable) {
-        print(observable, offset);
-      },
-      [offset](const NonemptyWritableMetricPtr& writable) {
-        print(writable, offset);
-      },
-      [offset](const NonemptyFunctionPtr& executable) {
-        print(executable, offset);
-      });
-}
-
-void print(const NonemptyDevicePtr& device) {
-  cout << "Device name: " << device->getElementName() << endl;
-  cout << "Device id: " << device->getElementId() << endl;
-  cout << "Described as: " << device->getElementDescription() << endl;
-  cout << endl;
-  print(device->getDeviceElementGroup(), ELEMENT_OFFSET);
-}
-
-// NOLINTNEXTLINE(cert-err58-cpp)
-const static vector<string> device_ids{"base_id_1", "base_id_2"};
-
-Information_Model::NonemptyDevicePtr buildDevice1() {
-  auto mock_builder =
-      make_shared<Information_Model::testing::DeviceMockBuilder>();
-
-  mock_builder->buildDeviceBase(device_ids[0], "Example 1",
-      "This is an example temperature sensor system");
+  mock_builder->setDeviceInfo(id,
+      {"Short Example",
+          "This is an example temperature sensor system. It only uses Group, "
+          "Readable and Writable Elements"});
   { // Power group
-    auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
-        "Power", "Groups information regarding the power supply");
-    mock_builder->addReadableMetric(subgroup_1_ref_id, "Power",
-        "Indicates if system is running on batter power",
-        Information_Model::DataType::Boolean,
-        []() -> DataVariant { return true; });
-    auto subgroup_2_ref_id =
-        mock_builder->addDeviceElementGroup(subgroup_1_ref_id, "State",
-            "Groups information regarding the power supply");
-    mock_builder->addReadableMetric(subgroup_2_ref_id, "Error",
-        "Indicates the current error message, regarding power supply",
-        Information_Model::DataType::String, []() -> DataVariant {
-          return string("Main Power Supply Interrupted");
-        });
-    mock_builder->addWritableMetric(
-        subgroup_2_ref_id, "Reset Power Supply",
-        "Resets power supply and any related error messages",
-        Information_Model::DataType::Boolean,
-        [](const DataVariant&) { /*There is nothing to do*/ },
-        []() -> DataVariant { return false; });
+    auto subgroup_1_ref_id = mock_builder->addGroup(
+        {"Power", "Groups information regarding the power supply"});
+    mock_builder->addReadable(subgroup_1_ref_id,
+        {"Power", "Indicates if system is running on batter power"}, true);
+    auto subgroup_2_ref_id = mock_builder->addGroup(subgroup_1_ref_id,
+        {"State", "Groups information regarding the power supply"});
+    mock_builder->addReadable(subgroup_2_ref_id,
+        {"Error",
+            "Indicates the current error message, regarding power supply"},
+        "Main Power Supply Interrupted");
+    mock_builder->addWritable(subgroup_2_ref_id,
+        {"Reset Power Supply",
+            "Resets power supply and any related error messages"},
+        DataType::Boolean,
+        [](const DataVariant&) { cout << "Reseting power supply " << endl; });
   }
-  mock_builder->addReadableMetric("Temperature",
-      "Current measured temperature value in °C",
-      Information_Model::DataType::Double,
-      []() -> DataVariant { return (double)20.1; }); // NOLINT
+  mock_builder->addReadable(
+      {"Temperature", "Current measured temperature value in °C"}, 20.1);
+  mock_builder->addWritable(
+      {"Label", "Device label"}, DataType::String,
+      [](const DataVariant& value) {
+        cout << "Changed device label to " << toString(value) << endl;
+      },
+      []() { return "Dummy label"; });
 
-  return Information_Model::NonemptyDevicePtr(mock_builder->getResult());
+  return mock_builder->result();
 }
 
-Information_Model::NonemptyDevicePtr buildDevice2() {
-  auto mock_builder =
-      make_shared<Information_Model::testing::DeviceMockBuilder>();
+DevicePtr buildVariantB(const string& id) {
+  auto mock_builder = make_shared<Information_Model::testing::MockBuilder>();
 
-  mock_builder->buildDeviceBase(device_ids[1], "Example 2",
-      "This is an example power measurement sensor system");
+  mock_builder->setDeviceInfo(id,
+      {"Full Example",
+          "This is an example of a power measurement sensor system. It usess "
+          "all available Elements"});
   { // Phase 1 group
-    auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
-        "Phase 1", "Groups first phase's power measurements");
-    mock_builder->addReadableMetric(subgroup_1_ref_id, "Voltage",
-        "Current measured phase voltage in V",
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)239.1;
-        });
-    mock_builder->addReadableMetric(subgroup_1_ref_id, "Current",
-        "Current measured phase current in A",
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)8.8;
-        });
+    auto subgroup_1_ref_id = mock_builder->addGroup(
+        {"Phase 1", "Groups first phase's power measurements"});
+    mock_builder->addReadable(subgroup_1_ref_id,
+        {"Voltage", "Current measured phase voltage in V"}, 241.1);
+    mock_builder->addReadable(subgroup_1_ref_id,
+        {"Current", "Current measured phase current in A"}, 3.4);
   }
   { // Phase 2 group
-    auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
-        "Phase 2", "Groups second phase's power measurements");
-    mock_builder->addReadableMetric(subgroup_1_ref_id, "Voltage",
-        "Current measured phase voltage in V",
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)239.1;
-        });
-    mock_builder->addReadableMetric(subgroup_1_ref_id, "Current",
-        "Current measured phase current in A",
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)8.8;
-        });
+    auto subgroup_1_ref_id = mock_builder->addGroup(
+        {"Phase 2", "Groups second phase's power measurements"});
+    mock_builder->addReadable(subgroup_1_ref_id,
+        {"Voltage", "Current measured phase voltage in V"}, 222.1);
+    mock_builder->addReadable(subgroup_1_ref_id,
+        {"Current", "Current measured phase current in A"}, 6.6);
   }
   { // Phase 3 group
-    auto subgroup_1_ref_id = mock_builder->addDeviceElementGroup(
-        "Phase 3", "Groups third phase's power measurements");
-    mock_builder->addReadableMetric(subgroup_1_ref_id, "Voltage",
-        "Current measured phase voltage in V",
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)239.1;
-        });
-    mock_builder->addReadableMetric(subgroup_1_ref_id, "Current",
-        "Current measured phase current in A",
-        Information_Model::DataType::Double, []() -> DataVariant {
-          // NOLINTNEXTLINE(readability-magic-numbers)
-          return (double)8.8;
-        });
+    auto subgroup_1_ref_id = mock_builder->addGroup(
+        {"Phase 3", "Groups third phase's power measurements"});
+    mock_builder->addReadable(subgroup_1_ref_id,
+        {"Voltage", "Current measured phase voltage in V"}, 239.1);
+    mock_builder->addReadable(subgroup_1_ref_id,
+        {"Current", "Current measured phase current in A"}, 8.8);
   }
-  mock_builder->addFunction("Recalculate", "Recalculates measured values",
-      Information_Model::DataType::Boolean);
 
-  if (executor) {
-    mock_builder->addFunction("Reset", "Resets the device",
-        Information_Model::DataType::None,
-        bind(&Executor::execute, executor, placeholders::_1),
-        bind(&Executor::cancel, executor, placeholders::_1));
+  mock_builder->addCallable(
+      {"Recalculate", "Recalculates measured values"}, DataType::Boolean,
+      [](const Parameters&) { return true; },
+      [](const Parameters&) {
+        promise<DataVariant> promised;
+        auto promised_result =
+            ResultFuture(make_shared<uintmax_t>(0), promised.get_future());
+        promised.set_value(true);
+        return promised_result;
+      },
+      [](uintmax_t) {});
+
+  auto sum_doubles = [](const Parameters& args) -> DataVariant {
+    auto arg1_value = args.find(0)->second.value_or(0.0);
+    cout << "Summing " << toString(arg1_value);
+    if (auto arg2 = args.find(1); arg2 != args.end()) {
+      auto arg2_value = arg2->second.value_or(0.0);
+      cout << " with " << toString(arg2_value) << endl;
+      return get<double>(arg1_value) + get<double>(arg2_value);
+    } else {
+      cout << " with nothing" << endl;
+      return arg1_value;
+    }
+  };
+
+  mock_builder->addCallable(
+      {"Sum Doubles", "Sum the given double values"}, DataType::Double,
+      sum_doubles,
+      [&sum_doubles](const Parameters& args) {
+        promise<DataVariant> promised;
+        auto promised_result =
+            ResultFuture(make_shared<uintmax_t>(0), promised.get_future());
+        promised.set_value(sum_doubles(args));
+        return promised_result;
+      },
+      [](uintmax_t) {},
+      {{0, {DataType::Double, true}}, {1, {DataType::Double, false}}});
+
+  mock_builder->addCallable({"Reset", "Resets the device"},
+      [](const Parameters&) { cout << "Callback called" << endl; });
+  return mock_builder->result();
+}
+// NOLINTEND(readability-magic-numbers)
+
+void registerDevices(
+    const vector<string>& device_ids, const EventSourcePtr& event_source) {
+  for (size_t i = 0; i < device_ids.size(); ++i) {
+    DevicePtr device;
+    if (i % 2 == 0) {
+      device = buildVariantA(device_ids[i]);
+    } else {
+      device = buildVariantB(device_ids[i]);
+    }
+    event_source->registerDevice(device);
   }
-  return Information_Model::NonemptyDevicePtr(mock_builder->getResult());
 }
 
-void registerDevice(const Information_Model::NonemptyDevicePtr& device,
-    const shared_ptr<EventSourceFake>& event_source) {
-  print(device);
-
-  event_source->sendEvent(std::make_shared<ModelRepositoryEvent>(device));
-}
-
-void registerDevices(const shared_ptr<EventSourceFake>& event_source) {
-  registerDevice(buildDevice1(), event_source);
-  registerDevice(buildDevice2(), event_source);
-}
-
-void deregisterDevices(const shared_ptr<EventSourceFake>& event_source) {
+void deregisterDevices(
+    const vector<string>& device_ids, const EventSourcePtr& event_source) {
   for (const auto& device_id : device_ids) {
-    cout << "Deregistrating device: " << device_id << endl;
-    event_source->sendEvent( // deregistrade first device
-        std::make_shared<ModelRepositoryEvent>(device_id));
+    cout << "Removing device: " << device_id << endl;
+    event_source->deregisterDevice(string{device_id});
     this_thread::sleep_for(5s);
   }
 }

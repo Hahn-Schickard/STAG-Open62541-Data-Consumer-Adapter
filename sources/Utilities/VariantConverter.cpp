@@ -1,13 +1,12 @@
-#include "Utility.hpp"
+#include "VariantConverter.hpp"
+#include "StringConverter.hpp"
 
-#include <open62541/types.h>
-#include <open62541/types_generated.h>
+#include <cmath>
 #include <stdexcept>
 
+namespace open62541 {
 using namespace std;
 using namespace Information_Model;
-
-namespace open62541 {
 
 UA_NodeId toNodeId(DataType type) {
   switch (type) {
@@ -29,7 +28,7 @@ UA_NodeId toNodeId(DataType type) {
   case DataType::String: {
     return UA_TYPES[UA_TYPES_STRING].typeId;
   }
-  case DataType::Time: {
+  case DataType::Timestamp: {
     return UA_TYPES[UA_TYPES_DATETIME].typeId;
   }
   case DataType::Unknown:
@@ -40,98 +39,56 @@ UA_NodeId toNodeId(DataType type) {
   }
 }
 
-string toString(const UA_String* input) {
-  string result = string((char*)(input->data), input->length);
-  return result;
-}
-
-string toString(const UA_NodeId* node_id) {
-  UA_String ua_string = UA_STRING_NULL;
-  if (UA_NodeId_print(node_id, &ua_string) != UA_STATUSCODE_GOOD) {
-    throw runtime_error("Failed to conver UA_NodeId to a string!");
-  }
-  auto ret = toString(&ua_string);
-  UA_String_clear(&ua_string);
-  return ret;
-}
-
-string toString(const UA_QualifiedName* name) {
-  string result = to_string(name->namespaceIndex) + ":" + toString(&name->name);
-  return result;
-}
-
-string toString(const UA_ExpandedNodeId& id) {
-  return to_string(id.serverIndex) + ":" + toString(&id.namespaceUri) + ":" +
-      toString(&id.nodeId);
-}
-
-UA_String makeUAString(const string& input) {
-  UA_String result;
-  result.length = strlen(input.c_str());
-  result.data = (UA_Byte*)malloc(result.length);
-  memcpy(result.data, input.c_str(), result.length);
-  return result;
-}
-
-UA_ByteString makeUAByteString(const vector<uint8_t>& input) {
-  UA_ByteString result;
-  result.length = input.size();
-  result.data = (UA_Byte*)malloc(result.length);
-  memcpy(result.data, input.data(), result.length);
-  return result;
-}
-
-StatusCodeNotGood::StatusCodeNotGood(
-    const string& msg, const UA_StatusCode& code)
-    : runtime_error("Received status code: " +
-          string(UA_StatusCode_name(code)) + (msg.empty() ? "" : " " + msg)),
-      status(code) {}
-
-void checkStatusCode(
-    const string& msg, const UA_StatusCode& status, bool uncertain_is_bad) {
-  if (UA_StatusCode_isBad(status) ||
-      (UA_StatusCode_isUncertain(status) && uncertain_is_bad)) {
-    throw StatusCodeNotGood(msg, status);
-  }
-}
-
-void checkStatusCode(const UA_StatusCode& status, bool uncertain_is_bad) {
-  checkStatusCode(string(), status, uncertain_is_bad);
-}
-
+// In this case, code is easier to understand WITH magic numbers
+// NOLINTBEGIN(readability-magic-numbers)
 UA_Variant toUAVariant(const DataVariant& variant) {
+  // @todo: refactor into to avoid callers having to create another copy:
+  // void toUAVariant(const DataVariant& variant, UA_Variant*)
   UA_Variant result;
-  match(
-      variant,
-      [&result](bool value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
-      },
-      [&result](uintmax_t value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_uintmax]);
-      },
-      [&result](intmax_t value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_intmax]);
-      },
-      [&result](double value) {
-        UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
-      },
-      [&result](const DateTime& value) {
-        UA_DateTime date_time = UA_DateTime_fromUnixTime(value.getValue());
-        UA_Variant_setScalarCopy(
-            &result, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
-      },
-      [&result](const string& value) {
-        auto ua_string = makeUAString(value);
-        UA_Variant_setScalarCopy(
-            &result, &ua_string, &UA_TYPES[UA_TYPES_STRING]);
-        UA_String_clear(&ua_string);
-      },
-      [&result](const vector<uint8_t>& value) {
-        auto ua_byte_string = makeUAByteString(value);
-        UA_Variant_setScalarCopy(
-            &result, &ua_byte_string, &UA_TYPES[UA_TYPES_BYTESTRING]);
-        UA_String_clear(&ua_byte_string);
-      });
+  UA_Variant_init(&result);
+  if (holds_alternative<bool>(variant)) {
+    auto value = get<bool>(variant);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_BOOLEAN]);
+  } else if (holds_alternative<uintmax_t>(variant)) {
+    auto value = get<uintmax_t>(variant);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_UINT64]);
+  } else if (holds_alternative<intmax_t>(variant)) {
+    auto value = get<intmax_t>(variant);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_INT64]);
+  } else if (holds_alternative<double>(variant)) {
+    auto value = get<double>(variant);
+    UA_Variant_setScalarCopy(&result, &value, &UA_TYPES[UA_TYPES_DOUBLE]);
+  } else if (holds_alternative<Timestamp>(variant)) {
+    auto value = get<Timestamp>(variant);
+    UA_DateTimeStruct date_time_struct;
+    date_time_struct.year = static_cast<UA_Int16>(value.year);
+    date_time_struct.month = (UA_UInt16)value.month;
+    date_time_struct.day = (UA_UInt16)value.day;
+    date_time_struct.hour = (UA_UInt16)value.hours;
+    date_time_struct.min = (UA_UInt16)value.minutes;
+    date_time_struct.sec = (UA_UInt16)value.seconds;
+    date_time_struct.milliSec = (UA_UInt16)(floor(value.microseconds / 1000));
+    date_time_struct.microSec = (UA_UInt16)(value.microseconds % 1000);
+    date_time_struct.nanoSec = 0;
+    auto date_time = UA_DateTime_fromStruct(date_time_struct);
+    UA_Variant_setScalarCopy(&result, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
+  } else if (holds_alternative<string>(variant)) {
+    auto value = get<string>(variant);
+    auto ua_string = makeUAString(value);
+    UA_Variant_setScalarCopy(&result, &ua_string, &UA_TYPES[UA_TYPES_STRING]);
+    UA_String_clear(&ua_string);
+  } else if (holds_alternative<vector<uint8_t>>(variant)) {
+    auto value = get<vector<uint8_t>>(variant);
+    auto ua_byte_string = makeUAByteString(value);
+    UA_Variant_setScalarCopy(
+        &result, &ua_byte_string, &UA_TYPES[UA_TYPES_BYTESTRING]);
+    UA_String_clear(&ua_byte_string);
+  } else {
+    throw runtime_error("Could not convert Information_Model::DataVariant into "
+                        "open62541 UA_Variant due to an unhandled "
+                        "Information_Model::DataVariant value type");
+  }
+
   return result;
 }
 
@@ -159,8 +116,16 @@ DataVariant toDataVariant(const UA_Variant& variant) {
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_DATETIME: {
-    UA_DateTime time_value = *((UA_DateTime*)(variant.data));
-    DateTime value(UA_DateTime_toUnixTime(time_value));
+    UA_DateTimeStruct time_value =
+        UA_DateTime_toStruct(*(UA_DateTime*)(variant.data));
+    Timestamp value{.year = static_cast<uint16_t>(time_value.year),
+        .month = static_cast<uint8_t>(time_value.month),
+        .day = static_cast<uint8_t>(time_value.day),
+        .hours = static_cast<uint8_t>(time_value.hour),
+        .minutes = static_cast<uint8_t>(time_value.min),
+        .seconds = static_cast<uint8_t>(time_value.sec),
+        .microseconds = static_cast<uint32_t>(
+            (time_value.milliSec * 1000) + time_value.microSec)};
     return DataVariant(value);
   }
   case UA_DataTypeKind::UA_DATATYPEKIND_BYTE: {
@@ -215,4 +180,5 @@ DataVariant toDataVariant(const UA_Variant& variant) {
   }
   }
 }
+// NOLINTEND(readability-magic-numbers)
 } // namespace open62541

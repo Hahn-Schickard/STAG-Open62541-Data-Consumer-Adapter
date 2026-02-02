@@ -1,51 +1,33 @@
-
-#@+ ======================== User MODULE NAME configuration ============================
+#@+ ======================== User TARGET NAME configuration ============================
 set(THIS Example)
 #@- =========================== END OF USER CONFIGURATION ===============================
 
-set(MODULE ${PROJECT_NAME}_${THIS})
+set(TARGET ${PROJECT_NAME}_${THIS})
 
-file(GLOB sources_list "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+#@+ =========================== User TARGET configuration ===============================
+file(GLOB SOURCEFILES "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 
-add_executable(${MODULE})              
+add_executable(${TARGET})
 
-target_sources(${MODULE} PRIVATE 
-                       ${sources_list}
+target_sources(${TARGET}
+    PRIVATE
+        ${SOURCEFILES}
 )
 
-target_link_libraries(${MODULE} PRIVATE
-                              ${PROJECT_NAME}
-                              GTest::GTest
+target_link_libraries(${TARGET}
+    PUBLIC 
+        ${PROJECT_NAME}
+        Information_Model_Mocks::Information_Model_Mocks
+        Variant_Visitor::Variant_Visitor
 )
 
-target_compile_features(${MODULE} PUBLIC cxx_std_17)
-
-add_custom_command(TARGET ${MODULE} POST_BUILD 
+add_custom_command(TARGET ${TARGET} POST_BUILD 
                     COMMAND ${CMAKE_COMMAND} -E copy_directory
                         ${PROJECT_SOURCE_DIR}/config
-                        $<TARGET_FILE_DIR:${MODULE}>/config 
+                        $<TARGET_FILE_DIR:${TARGET}>/config 
                     COMMENT "Copying configuration files."
                         VERBATIM
 )
+#@- =========================== END OF USER CONFIGURATION ===============================
 
-if(WIN32)
-    add_custom_command(TARGET ${MODULE_NAME} POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy 
-                        -t $<TARGET_FILE_DIR:${MODULE_NAME}> 
-                        $<TARGET_RUNTIME_DLLS:${MODULE_NAME}>
-                        COMMAND_EXPAND_LISTS
-    )
-    # Workaround to get conan .dll files into build
-    foreach(directory ${CONAN_RUNTIME_LIB_DIRS})
-        file(GLOB dir_dependencies "${directory}/*.dll")
-        if(dir_dependencies)
-            list(APPEND dependencies "${dir_dependencies}")
-        endif()
-    endforeach()
-    add_custom_command(TARGET ${MODULE_NAME} POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy 
-                        -t $<TARGET_FILE_DIR:${MODULE_NAME}> 
-                        ${dependencies}
-                        COMMAND_EXPAND_LISTS
-    )
-endif()
+IMPORT_TARGET_DLLS(${TARGET})

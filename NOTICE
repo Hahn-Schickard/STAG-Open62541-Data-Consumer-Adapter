@@ -13,6 +13,9 @@ of this project.
   limitations under the License.
 
 This product includes software developed at
-Copyright © 2013-2020 Niels Lohmann, MIT License (https://github.com/nlohmann/json/blob/v3.7.3/LICENSE.MIT)
 Copyright © 2008, Google Inc., BSD 2-Clause License (https://github.com/google/googletest/blob/release-1.8.1/LICENSE)
 Copyright © 2022, open62541 MPL-2.0 (https://github.com/open62541/open62541/blob/master/LICENSE)
+Copyright © 2016, Howard Hinnant, MIT License (https://github.com/HowardHinnant/date/blob/master/LICENSE.txt)
+Copyright © 2000-2025 Jeroen T. Vermeulen, BSD-3-Clause License (https://github.com/jtv/libpqxx/blob/master/COPYING)
+Copyright © 2003, Daniel James and contributors,  BSL-1.0 License (https://github.com/boostorg/unordered/blob/boost-1.89.0/LICENSE)
+Copyright © 2012 Victor Zverovich, MIT License (https://github.com/fmtlib/fmt/blob/master/LICENSE)

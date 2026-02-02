@@ -1,4 +1,56 @@
 # Changelog
+## [0.5.0] -2026.02.02
+### Added
+ - example Historizer config
+ - public `Open62541Adapter.hpp` header with factory function
+ - private `Historizer.hpp` header
+ - private `HistorianBits.hpp` header
+ - private `HistorizerUtils.hpp` header
+ - private `HistoryResult.hpp` header
+ - private `VariantConverter.hpp` header
+ - private `StringConverter.hpp` header
+ - private `UAVariantOperators.hpp` header
+ - private `Exceptions.hpp` header
+ - private `CheckStatus.hpp` header
+ - private `Logger.hpp` header
+ - `libpqxx` v7.10 internal statically linked dependency
+ - `boost` v1.89 internal header only dependency
+ - `fmt` v11.2 internal header only dependency
+ - `information_model_mocks` v0.1 test dependency
+
+### Changed
+ - `Open62541` to v1.4.14 internal Hahn-Schickard recipe
+ - `Open62541` to be linked statically 
+ - `Data_Consumer_Adapter_Interface` to v0.4
+ - `Utility.hpp`
+ - `HaSLL_Logger.hpp`
+ - `NodeCallbackHandler.hpp` into `CallbackRepo.hpp`
+ - `NOTICE` file to include new attributions
+ - `NodeBuilder` to use new Information Model
+ - `Historizer` to use PostrgeSQL directly
+ - Example runner to showcase new adapter creation and event source
+ registration mechanism
+ - Example runner devices to showcase more features 
+ - Utility target to be compiled as an object library
+ - Historizer target to be compiled as an object library
+ - Server target to be compiled as a static library
+
+### Removed
+ - `OODD` dependency
+ - `nlohmann_json` dependency
+ - `date` dependency
+ - `OpcuaAdapter.hpp`
+ - `Open62541Server.hpp`
+ - Historization option for Windows
+ - `Config.hpp`
+ - `Config_Serializer.hpp`
+ - outdated unit tests
+
+### Fixed
+ - memory leak in `UA_Variant toUAVariant(const DataVariant&)` calls
+ - memory leak in `UA_StatusCode NodeBuilder::addCallableNode()` implementation
+ - double free in `UA_StatusCode NodeBuilder::addCallableNode()` temporary variable destruction
+
 ## [0.4.0] - 2025.03.11
 ### Added
  - Windows support

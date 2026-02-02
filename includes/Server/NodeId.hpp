@@ -6,22 +6,30 @@
 namespace open62541 {
 
 /**
- * @brief A C++-style wrapper around `UA_NodeId`
+ * @brief A C++ style wrapper around `UA_NodeId`
  */
 class NodeId {
 public:
   NodeId() = delete;
-  NodeId(const NodeId&);
-  NodeId(const UA_NodeId&); /// @throws std::runtime_error if allocation fails
+
+  NodeId(const NodeId& other);
+
+  NodeId(const UA_NodeId& node_id);
+
+  NodeId(NodeId&& other) noexcept;
 
   ~NodeId();
 
   const UA_NodeId& base() const;
 
+  NodeId& operator=(const NodeId& other);
+
+  NodeId& operator=(NodeId&& other) noexcept;
+
   bool operator==(const NodeId& other) const;
 
 private:
-  UA_NodeId ua_node_id_;
+  UA_NodeId id_;
 };
 
 } // namespace open62541

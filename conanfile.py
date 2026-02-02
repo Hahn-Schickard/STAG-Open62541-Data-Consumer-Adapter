@@ -6,11 +6,6 @@ import re
 import os
 
 
-def to_camel_case(input: str):
-    words = input.replace("_", " ").split()
-    return '_'.join(word.capitalize() for word in words)
-
-
 class PackageConan(ConanFile):
     # @+ START USER META CONFIG
     license = "Apache 2.0"
@@ -25,6 +20,10 @@ class PackageConan(ConanFile):
                        "historization": True}
     default_user = "Hahn-Schickard"
     # @- END USER META CONFIG
+    exports = [
+        "CMakeLists.txt",
+        "conanfile.py"
+    ]
     exports_sources = [
         "cmake*",
         "includes*",
@@ -36,16 +35,21 @@ class PackageConan(ConanFile):
         # @- END USER EXPORTS
     ]
     generators = "CMakeDeps"
+    package_type = "library"
     short_paths = True
 
     @property
     def cwd(self):
         return os.path.dirname(os.path.realpath(__file__))
 
+    @property
+    def full_name(self):
+        content = load(self, path=os.path.join(
+            self.recipe_folder, 'CMakeLists.txt'))
+        return re.search('set\(THIS (.*)\)', content).group(1).strip()
+
     def set_name(self):
-        content = load(self, path=os.path.join(self.cwd, 'CMakeLists.txt'))
-        name = re.search('set\(THIS (.*)\)', content).group(1)
-        self.name = name.strip().lower()
+        self.name = self.full_name.lower()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -53,36 +57,56 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         # @+ START USER REQUIREMENTS
-        self.requires("nlohmann_json/3.11.1")
-        self.requires("open62541/1.3.15@hahn-schickard/stable",
-                      headers=True,
-                      transitive_headers=True
+        self.requires(
+            "data_consumer_adapter_interface/[~0.4]@hahn-schickard/stable",
+            headers=True,
+            libs=True,
+            transitive_headers=True,
+            transitive_libs=True
         )
-        self.requires("data_consumer_adapter_interface/[~0.3]@hahn-schickard/stable",
-                      headers=True,
-                      libs=True,
-                      transitive_headers=True,
-                      transitive_libs=True
-        )
-        if self.options.historization:
-            self.requires("date/3.0.1")
-            self.requires("oodd/[~0.3]@hahn-schickard/stable",
-                          headers=True,
-                          transitive_headers=True
-            )
+        self.requires("variant_visitor/[~0.2]@hahn-schickard/stable",
+                      visible=False
+                      )
+        self.requires("open62541/[~1.4]@hahn-schickard/stable",
+                      visible=False
+                      )
+        self.requires("boost/[~1.89]",
+                      visible=False
+                      )
+        if self.settings.os != 'Windows':
+            if self.options.historization:
+                self.requires("date/[~3.0]",
+                              visible=False
+                              )
+                self.requires("libpqxx/[~7.10]",
+                              visible=False
+                              )
+                self.requires("fmt/[~11.2]",
+                              visible=False
+                              )
         # @- END USER REQUIREMENTS
 
     def build_requirements(self):
-        self.test_requires("gtest/[~1.16]")
+        self.test_requires(
+            "information_model_mocks/[~0.1]@hahn-schickard/stable")
+        # @+ START USER BUILD REQUIREMENTS
+        # @- END USER BUILD REQUIREMENTS
 
     def configure(self):
         # @+ START USER REQUIREMENTS OPTION CONFIGURATION
-        self.options["gtest"].shared = True
-        self.options["open62541"].shared = True
+        self.options["gtest/*"].shared = True
+        self.options["open62541"].shared = False
         self.options["open62541"].cpp_compatible = True
+        self.options["open62541"].parsing = True
+        self.options["open62541"].json_support = True
         self.options["open62541"].multithreading = "Threadsafe"
-        if self.options.historization:
-            self.options["open62541"].historize = True
+        self.options["boost"].header_only = True
+        if self.settings.os != 'Windows':
+            if self.options.historization:
+                self.options["libpqxx"].shared = False
+                self.options["date"].header_only = True
+                self.options["fmt"].header_only = True
+                self.options["open62541"].historize = True
         # @- END USER REQUIREMENTS OPTION CONFIGURATION
 
     def layout(self):
@@ -91,15 +115,19 @@ class PackageConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+            del self.options.historization
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.user_presets_path = False
         tc.variables['STATIC_CODE_ANALYSIS'] = False
         tc.variables['RUN_TESTS'] = False
         tc.variables['COVERAGE_TRACKING'] = False
         tc.variables['CMAKE_CONAN'] = False
-        tc.variables['HISTORIZATION'] = self.options.historization
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        # @+ START USER CMAKE OPTIONS
+        if self.settings.os != 'Windows':
+            tc.variables['HISTORIZATION'] = self.options.historization
+        # @- END USER CMAKE OPTIONS
         tc.generate()
 
     def build(self):
@@ -115,11 +143,15 @@ class PackageConan(ConanFile):
         copy(self, pattern='AUTHORS', dst='licenses', src=self.cwd)
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["Open62541_Data_Consumer_Adapter"]
         self.cpp_info.set_property("cmake_find_mode", "both")
-        # @+ START USER DEFINES
-        project_name = to_camel_case(self.name)
+        self.cpp_info.requires = [
+            "data_consumer_adapter_interface::data_consumer_adapter_interface"
+        ]
+        if self.settings.os != 'Windows':
+            if self.options.historization:
+                self.cpp_info.requires.append("fmt::fmt")
         # @- END USER DEFINES
-        self.cpp_info.set_property("cmake_file_name", project_name)
-        cmake_target_name = project_name + "::" + project_name
+        self.cpp_info.set_property("cmake_file_name", self.full_name)
+        cmake_target_name = self.full_name + "::" + self.full_name
         self.cpp_info.set_property("cmake_target_name", cmake_target_name)

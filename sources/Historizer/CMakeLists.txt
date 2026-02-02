@@ -1,11 +1,15 @@
-set(TARGET ${PROJECT_NAME})
+#@+ ======================== User TARGET NAME configuration =============================
+set(THIS Historizer)
+#@- =========================== END OF USER CONFIGURATION ===============================
+
+set(TARGET ${PROJECT_NAME}_${THIS})
 
 #@+ =========================== User TARGET configuration ===============================
-set(THIS_INCLUDES_DIR ${INCLUDES_DIR}/Adapter)
+set(THIS_INCLUDES_DIR ${INCLUDES_DIR}/Historizer)
 file(GLOB THIS_INCLUDES ${THIS_INCLUDES_DIR}/*.hpp)
 file(GLOB SOURCEFILES "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 
-add_library(${TARGET})
+add_library(${TARGET} OBJECT)
 target_sources(${TARGET}
     PUBLIC
         ${THIS_INCLUDES}
@@ -15,11 +19,13 @@ target_sources(${TARGET}
 
 target_link_libraries(${TARGET} 
     PUBLIC
-        Data_Consumer_Adapter_Interface::Data_Consumer_Adapter_Interface
+        libpqxx::pqxx
+        open62541::open62541
         HaSLL::HaSLL
     PRIVATE
-        Variant_Visitor::Variant_Visitor
-        ${PROJECT_NAME}_Server
+        date::date
+        fmt::fmt-header-only
+        ${PROJECT_NAME}_Utilities
 )
 #@- =========================== END OF USER CONFIGURATION ===============================
 
@@ -31,6 +37,3 @@ target_include_directories(${TARGET}
 )
 
 PRINT_TARGET_PROPERTIES(${TARGET})
-
-INSTALL_TARGET(${TARGET})
-INSTALL_HEADERS(HEADERS "${THIS_INCLUDES}")
