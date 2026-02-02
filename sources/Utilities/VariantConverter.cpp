@@ -42,6 +42,8 @@ UA_NodeId toNodeId(DataType type) {
 // In this case, code is easier to understand WITH magic numbers
 // NOLINTBEGIN(readability-magic-numbers)
 UA_Variant toUAVariant(const DataVariant& variant) {
+  // @todo: refactor into to avoid callers having to create another copy:
+  // void toUAVariant(const DataVariant& variant, UA_Variant*)
   UA_Variant result;
   UA_Variant_init(&result);
   if (holds_alternative<bool>(variant)) {
