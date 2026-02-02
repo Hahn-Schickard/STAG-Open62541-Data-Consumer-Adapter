@@ -8,12 +8,14 @@
 #include <chrono>
 #include <csignal>
 #include <exception>
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <thread>
 #include <unordered_map>
 
 using namespace std;
+using namespace filesystem;
 using namespace HaSLL;
 using namespace Information_Model;
 using namespace Data_Consumer_Adapter;
@@ -74,11 +76,12 @@ void registerDevices(
 void deregisterDevices(
     const vector<string>& device_ids, const EventSourcePtr& event_source);
 
-int main(int argc, char*[]) {
+int main(int argc, char* argv[]) {
   auto status = EXIT_SUCCESS;
   try {
-    LoggerManager::initialise(
-        makeDefaultRepository("config/loggerConfig.json"));
+    auto exe_path = weakly_canonical(path(argv[0])).parent_path();
+    auto logger_cfg_path = exe_path / path("config/loggerConfig.json");
+    LoggerManager::initialise(makeDefaultRepository(logger_cfg_path.string()));
     auto logger = LoggerManager::registerLogger("Main");
     try {
       logger->trace("Logging completed initialization!");
