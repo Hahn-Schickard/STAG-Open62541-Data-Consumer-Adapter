@@ -63,6 +63,7 @@ Configuration::Configuration(const filesystem::path& filepath)
       UA_ServerConfig_updateFromFile(configuration_.get(), json_config);
   checkStatusCode(
       "While reading configuration file " + filepath.string(), status, true);
+  UA_String_clear(&json_config);
 
 #ifdef ENABLE_UA_HISTORIZING
   if (configuration_->historizingEnabled) {

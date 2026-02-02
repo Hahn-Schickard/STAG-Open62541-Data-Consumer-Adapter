@@ -282,8 +282,8 @@ UA_StatusCode NodeBuilder::addGroupNode(const MetaInfoPtr& meta_info,
   }
 }
 
-UA_VariableAttributes setValueAttributes(
-    const MetaInfoPtr& meta_info, DataType type) {
+UA_VariableAttributes setValueAttributes(const MetaInfoPtr& meta_info,
+    DataType type, const optional<DataVariant>& value = nullopt) {
   UA_VariableAttributes value_attributes = UA_VariableAttributes_default;
   value_attributes.description =
       UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->description().c_str());
@@ -291,21 +291,24 @@ UA_VariableAttributes setValueAttributes(
       UA_LOCALIZEDTEXT_ALLOC("EN_US", meta_info->name().c_str());
   value_attributes.dataType = toNodeId(type);
 
-  // open62541 seems to require some default value set, even if the node is
-  // write-only
-  auto default_value = setVariant(type);
   // this will always have a value, since toNodeId() throws if type is not
   // supported
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-  value_attributes.value = toUAVariant(default_value.value());
+  auto default_value = value.value_or(setVariant(type).value());
 
+  // open62541 seems to require some default value set, even if the node is
+  // write-only
+  auto ua_variant = toUAVariant(default_value);
+  // Copy the value into the attributes, to avoid memory leaks
+  UA_Variant_setScalarCopy(
+      &value_attributes.value, &ua_variant, ua_variant.type);
+  UA_Variant_clear(&ua_variant);
   return value_attributes;
 }
 
 UA_VariableAttributes setValueAttributes(
     const MetaInfoPtr& meta_info, const DataVariant& value, DataType type) {
-  auto value_attributes = setValueAttributes(meta_info, type);
-  value_attributes.value = toUAVariant(value);
+  auto value_attributes = setValueAttributes(meta_info, type, value);
   return value_attributes;
 }
 
@@ -478,11 +481,11 @@ UA_StatusCode NodeBuilder::addCallableNode(const MetaInfoPtr& meta_info,
   auto* input_args = makeInputArgs(callable->parameterTypes());
   auto* output = makeOutputType(callable->resultType());
   auto node = NodeMetaInfo(meta_info, parent_id);
+  auto method_attributes = UA_MethodAttributes_default;
   try {
     status = repo_->add(node.id, callable);
     checkStatusCode("While setting executable callbacks", status);
 
-    auto method_attributes = UA_MethodAttributes_default;
     method_attributes.description =
         UA_LOCALIZEDTEXT_ALLOC("en-US", meta_info->description().c_str());
     method_attributes.displayName =
@@ -513,5 +516,7 @@ UA_StatusCode NodeBuilder::addCallableNode(const MetaInfoPtr& meta_info,
     // output is copied into method node or not used in case of failure
     UA_Argument_delete(output);
   }
+
+  UA_MethodAttributes_clear(&method_attributes);
   return status;
 }
