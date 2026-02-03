@@ -73,13 +73,11 @@ UA_Variant toUAVariant(const DataVariant& variant) {
     auto date_time = UA_DateTime_fromStruct(date_time_struct);
     UA_Variant_setScalarCopy(&result, &date_time, &UA_TYPES[UA_TYPES_DATETIME]);
   } else if (holds_alternative<string>(variant)) {
-    auto value = get<string>(variant);
-    auto ua_string = makeUAString(value);
+    auto ua_string = makeUAString(get<string>(variant));
     UA_Variant_setScalarCopy(&result, &ua_string, &UA_TYPES[UA_TYPES_STRING]);
     UA_String_clear(&ua_string);
   } else if (holds_alternative<vector<uint8_t>>(variant)) {
-    auto value = get<vector<uint8_t>>(variant);
-    auto ua_byte_string = makeUAByteString(value);
+    auto ua_byte_string = makeUAByteString(get<vector<uint8_t>>(variant));
     UA_Variant_setScalarCopy(
         &result, &ua_byte_string, &UA_TYPES[UA_TYPES_BYTESTRING]);
     UA_String_clear(&ua_byte_string);
